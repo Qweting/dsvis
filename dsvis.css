@@ -1,0 +1,213 @@
+@charset "utf-8";
+
+/* A mixture of the following two CSS resets:
+   - Josh Comeau: https://www.joshwcomeau.com/css/custom-css-reset/
+   - Andy Bell: https://piccalil.li/blog/a-more-modern-css-reset/
+*/
+
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+input, button, textarea, select {
+	font: inherit;
+}
+body {
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, button, input, label {
+  	line-height: 1.1;
+}
+p, h1, h2, h3, h4, h5, h6 {
+	overflow-wrap: break-word;
+}
+img, picture, video, canvas, svg {
+	display: block;
+	max-width: 100%;
+}
+
+/* End CSS reset */
+
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 100%;
+	background-color: maroon;
+}
+
+#content {
+	background-color: lemonchiffon;
+}
+
+section, p, h1, h2, h3, h4, h5, h6, ul, ol, dl {
+	padding-bottom: 1rem;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.1rem; }
+
+body > * {
+	padding-top: 1rem;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+header, footer {
+	color: lemonchiffon;
+	background-color: maroon;
+}
+
+a {
+	color: inherit;
+}
+
+h1 a {
+	text-decoration: none;
+}
+
+
+#selectorWrapper > select {
+	appearance: none;
+	padding: 6px 12px;
+	background-color: inherit;
+}
+
+svg, #selectorWrapper > select {
+	border: solid 1px maroon;
+	border-radius: 5px;
+	width: 100%;
+}
+
+#selectorWrapper {
+	position: relative;
+	max-width: 1000px;
+}
+
+#selectorWrapper::after {
+	content: "▼";
+	color: maroon;
+	font-size: 1rem;
+	top: 10px;
+	right: 10px;
+	position: absolute;
+}
+
+/*-----------------------------------------------------------------*/
+
+svg {
+    background-color: white;
+    border: 2px solid maroon; 
+    width: 100%;
+	max-width: 1000px;
+}
+
+fieldset, form {
+    border: none;
+	display: inline-block;
+}
+
+select, input, button {
+	margin: 3px 6px 3px 0;
+	padding: 3px 6px;
+	background-color: white;
+	border: solid 1px maroon;
+	border-radius: 5px;
+}
+
+select:hover:not(:disabled), input:hover:not(:disabled), button:hover:not(:disabled) {
+	cursor: pointer;
+}
+
+input:active, button:active, button.selected {
+	background-color: maroon;
+	color: white;
+}
+
+*:disabled, *:disabled * {
+	background: transparent;
+	color: maroon;
+}
+
+
+/*-----------------------------------------------------------------*/
+
+text {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+text.status-report {
+	fill: grey;
+	font-size: 16px;
+}
+text.status-report.paused {
+	fill: brown;
+}
+text.status-report.running {
+	fill: green;
+}
+
+text.title, text.message {
+	fill: brown;
+	font-size: 20px;
+	text-anchor: start;
+}
+text.title {
+	font-weight: bold;
+}
+
+circle, rect, polygon {
+    stroke: blue;
+    fill: white;
+}
+
+path, line, polyline {
+    stroke: blue;
+    fill: none;
+}
+
+.filled {
+	stroke: none;
+	fill: blue;
+}
+
+.highlight, .highlight > * {
+    stroke: red;
+}
+
+.highlight.filled, .highlight > .filled, .highlight > text {
+	stroke: none;
+	fill: red;
+}
+
+.nofill {
+	fill: none;
+}
+
+.highlight-circle {
+	stroke: red;
+	fill: none;
+}
+
+g text {
+    font-size: 20px;
+	stroke: none;
+    fill: blue;
+    text-anchor: middle;
+}
+
+g text.small {
+	font-size: 14px;
+}
+
+g text.large {
+	font-size: 26px;
+}
+
+line.gridline {
+    stroke: lightgray; 
+    stroke-width: 1;
+}

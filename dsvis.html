@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="dsvis.css">
+<script type="text/javascript" src="lib/svg.min.js"></script>
+<script type="text/javascript" src="src/main.js"></script>
+<script type="text/javascript" src="src/objects.js"></script>
+<script type="text/javascript" src="src/BST.js"></script>
+</head>
+
+<body onload="DS.init('#canvas')">
+
+
+<header>
+  <h1><a href="index.html">Data Structure Visualizations</a></h1>
+</header>
+
+<div id="content">
+<section>
+
+<label for="algorithmSelector">Choose a data structure/algorithm:</label>
+<h2 id="selectorWrapper">
+  <select name="algorithmSelector" id="algorithmSelector" onchange="selectAlgorithm()">
+    <option disabled value="">&mdash; Please choose an algorithm or data structure &mdash;</option>
+    <hr/>
+    <option value="BST">BST: Binary search tree</option>
+    <option value="AVL">AVL tree</option>
+  </select>
+</h2>
+
+<fieldset id="algorithmControls">
+  <select id="insertSelect">
+    <option value="" selected>Insert many values</option>
+    <option value="A B C D E F G">A B C D E F G</option>
+    <option value="A L G O R I T H M">A L G O R I T H M</option>
+    <option value="C O M P L E X">C O M P L E X</option>
+    <option value="R E C U R S I O N">R E C U R S I O N</option>
+  </select>
+  <input id="insertField" type="text" size="20" maxlength="10"/>
+  <input id="insertSubmit" type="submit" value="Insert"/>
+  <input id="findField" type="text" size="4" maxlength="4"/>
+  <input id="findSubmit" type="submit" value="Find"/>
+  <input id="deleteField" type="text" size="4" maxlength="4"/>
+  <input id="deleteSubmit" type="submit" value="Delete"/>
+  <input id="printTree" type="submit" value="Print"/>
+</fieldset>
+
+<div>
+  <svg id="canvas"></svg>
+</div>
+
+<fieldset id="generalControls">
+  <button id="fastBackward">&lt;&lt;</button>
+  <button id="stepBackward">&lt;</button>
+  <button id="toggleRunner">Run</button>
+  <button id="stepForward">&gt;</button>
+  <button id="fastForward">&gt;&gt;</button>
+  <label>Speed:
+    <select id="animationSpeed">
+      <option value="2000">Slowest</option>
+      <option value="1000" selected>Slow</option>
+      <option value="500">Fast</option>
+      <option value="250">Fastest</option>
+    </select>
+  </label>
+  <label>Node size:
+    <select id="nodeSize">
+      <option value="small">Small</option>
+      <option value="medium" selected>Medium</option>
+      <option value="large">Large</option>
+    </select>
+  </label>
+</fieldset>
+
+</section>
+</div>
+
+<footer>
+  <p>&copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a></p>
+</footer>
+
+</body>
+</html>
