@@ -62,8 +62,6 @@ DS.initToolbar = function () {
     DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => DS.submit("delete", tools.deleteField));
     tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
     tools.printTree.addEventListener("click", () => DS.submit("print"));
-
-    tools.testRotate.addEventListener("click", () => DS.submit("testRotate"));
 };
 
 
