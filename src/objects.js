@@ -20,8 +20,8 @@ SVG.extend(SVG.Element, {
     setCenter: function (x, y, animate = false) {
         return DS.animate(this, animate).center(x, y);
     },
-    moveCenter: function (dx, dy, animate = false) {
-        return DS.animate(this, animate).dmove(dx, dy);
+    dmoveCenter: function (dx, dy, animate = false) {
+        return this.setCenter(this.cx() + dx, this.cy() + dy, animate);
     },
 });
 
@@ -143,7 +143,6 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
 
     setSuccessor(outKey, inKey, successor) {
         const outEdge = this.$outgoing[outKey];
-        const inEdge = successor.$incoming[inKey];
         if (outEdge) {
             const oldSuccessor = outEdge.getEnd();
             const oldIncoming = oldSuccessor.$incoming;
@@ -152,18 +151,22 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
             }
             outEdge.remove();
         }
-        if (inEdge) {
-            const oldPredecessor = inEdge.getStart();
-            const oldOutgoing = oldPredecessor.$outgoing;
-            for (const k in oldOutgoing) {
-                if (oldOutgoing[k] === inEdge) delete oldOutgoing[k];
+        if (successor) {
+            const inEdge = successor.$incoming[inKey];
+            if (inEdge) {
+                const oldPredecessor = inEdge.getStart();
+                const oldOutgoing = oldPredecessor.$outgoing;
+                for (const k in oldOutgoing) {
+                    if (oldOutgoing[k] === inEdge) delete oldOutgoing[k];
+                }
+                inEdge.remove();
             }
-            inEdge.remove();
+            const edge = DS.SVG().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
+            this.$outgoing[outKey] = edge;
+            successor.$incoming[inKey] = edge;
+        } else {
+            this.$outgoing[outKey] = null;
         }
-
-        const edge = DS.SVG().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
-        this.$outgoing[outKey] = edge;
-        successor.$incoming[inKey] = edge;
         return this;
     }
 

@@ -56,6 +56,10 @@ body > * {
 	padding-right: 5%;
 }
 
+ul, ol {
+	padding-left: 2em;
+}
+
 header, footer {
 	color: lemonchiffon;
 	background-color: maroon;
@@ -122,7 +126,7 @@ select:hover:not(:disabled), input:hover:not(:disabled), button:hover:not(:disab
 	cursor: pointer;
 }
 
-input:active, button:active, button.selected {
+input:active:not(:disabled), button:active:not(:disabled), button.selected:not(:disabled) {
 	background-color: maroon;
 	color: white;
 }
@@ -161,7 +165,7 @@ text.title {
 
 circle, rect, polygon {
     stroke: blue;
-    fill: white;
+    fill: lemonchiffon;
 }
 
 path, line, polyline {

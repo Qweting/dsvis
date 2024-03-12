@@ -42,86 +42,49 @@ DS.$EventListeners = {
 DS.$Toolbar = {};
 
 
-///////////////////////////////////////////////////////////////////////////////
-// Settings that can be changed by the user
-
-DS.$Defaults = {
-    animationSpeed: 1000, // milliseconds per step
-    sizeClass: "medium",
-};
-
-DS.$NodeSize = {small: 30, medium: 40, large: 60};
+DS.$Defaults = {};
+DS.$Defaults.animationSpeed = 1000; // milliseconds per step
 
 DS.getAnimationSpeed = () => parseInt(DS.$Toolbar.animationSpeed?.value) || DS.$Defaults.animationSpeed;
-DS.getSizeClass = () => DS.$Toolbar.nodeSize?.value.toLowerCase() || DS.$Defaults.sizeClass;
-DS.getNodeSize = () => DS.$NodeSize[DS.getSizeClass()];
-DS.getStrokeWidth = () => DS.getNodeSize() / 12;
-DS.getStartX = () => DS.$Info.x + DS.getNodeSize() / 2;
-DS.getStartY = () => DS.$Info.y * 4;
-DS.getRootX = () => DS.$SvgWidth / 2;
-DS.getRootY = () => DS.$Info.y + DS.getNodeSize() / 2;
-DS.getSpacingX = () => DS.getNodeSize();
-DS.getSpacingY = () => DS.getNodeSize();
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Inititalisation
 
-DS.init = function (svgID) {
+DS.initEngine = function (svgID) {
     DS.$DEBUG = new URL(window.location).searchParams.get("debug");
     DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
-    DS.$Current = new DS.BST(svgID);
     DS.$Actions = [];
-    DS.initToolbar();
+};
+
+DS.initAlgorithm = function() { 
+    const algoClass = new URL(window.location).searchParams.get("algorithm");
+    const algoSelect = document.getElementById("algorithmSelector");
+    if (algoClass && /^[\w.]+$/.test(algoClass) && DS[algoClass]) {
+        algoSelect.value = algoClass;
+        DS.$Current = new DS[algoClass]();
+    } else {
+        algoSelect.value = "";
+        DS.$Current = null;
+        window.history.replaceState("", "", window.location.pathname);
+    }
     DS.reset();
-};
+}
 
-
-DS.initToolbar = function () {
-    const tools = DS.$Toolbar;
-    // General toolbar
-    tools.stepForward = document.getElementById("stepForward");
-    tools.stepBackward = document.getElementById("stepBackward");
-    tools.toggleRunner = document.getElementById("toggleRunner");
-    tools.fastForward = document.getElementById("fastForward");
-    tools.fastBackward = document.getElementById("fastBackward");
-    tools.animationSpeed = document.getElementById("animationSpeed");
-    tools.nodeSize = document.getElementById("nodeSize");
-
-    // Algorithm toolbar
-    tools.algorithmControls = document.getElementById("algorithmControls");
-    tools.insertSelect = document.getElementById("insertSelect");
-    tools.insertField = document.getElementById("insertField");
-    tools.insertSubmit = document.getElementById("insertSubmit");
-    tools.findField = document.getElementById("findField");
-    tools.findSubmit = document.getElementById("findSubmit");
-    tools.deleteField = document.getElementById("deleteField");
-    tools.deleteSubmit = document.getElementById("deleteSubmit");
-    tools.printTree = document.getElementById("printTree");
-
-    tools.insertSelect.addEventListener("change", () => {
-        tools.insertField.value = tools.insertSelect.value;
-        tools.insertSelect.value = "";
-    });
-    DS.addReturnSubmit(tools.insertField, "ALPHANUM+", () => DS.submit("insert", tools.insertField));
-    tools.insertSubmit.addEventListener("click", () => DS.submit("insert", tools.insertField));
-    DS.addReturnSubmit(tools.findField, "ALPHANUM", () => DS.submit("find", tools.findField));
-    tools.findSubmit.addEventListener("click", () => DS.submit("find", tools.findField));
-    DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => DS.submit("delete", tools.deleteField));
-    tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
-    tools.printTree.addEventListener("click", () => DS.submit("print"));
-};
+DS.selectAlgorithm = function() {
+    const algoClass = document.getElementById("algorithmSelector").value;
+    if (algoClass) {
+        let params = {algorithm: algoClass};
+        if (DS.$DEBUG) params.debug = DS.$DEBUG;
+        const url = window.location.pathname + "?" + new URLSearchParams(params);
+        window.history.replaceState("", "", url);
+    }
+    DS.initAlgorithm();
+}
 
 
 DS.SVG = function (id) {
     return id ? SVG(`#${id}`) : DS.$Svg;
-};
-
-
-DS.reset = function () {
-    DS.clearCanvas();
-    DS.$Current.reset();
-    DS.resetListeners();
 };
 
 
@@ -146,7 +109,7 @@ DS.setStatus = function (status, timeout = 10) {
         } else if (status === "paused") {
             DS.$Info.status.text("Paused").addClass("paused").removeClass("running");
         } else {
-            DS.$Info.status.text("Inactive").removeClass("paused").removeClass("running");
+            DS.$Info.status.text("Idle").removeClass("paused").removeClass("running");
         }
     },
     timeout,
@@ -154,8 +117,80 @@ DS.setStatus = function (status, timeout = 10) {
 };
 
 
+///////////////////////////////////////////////////////////////////////////////
+// The default listeners
+
+DS.$IdleListeners = {
+    stepBackward: {
+        type: "click",
+        condition: () => DS.$Actions.length > 0,
+        handler: () => {
+            DS.setRunning(false);
+            const action = DS.$Actions.pop();
+            DS.execute(action.oper, action.args, action.nsteps - 1);
+        },
+    },
+    fastBackward: {
+        type: "click",
+        condition: () => DS.$Actions.length > 0,
+        handler: () => {
+            DS.setRunning(false);
+            DS.$Actions.pop();
+            if (DS.$Actions.length > 0) {
+                const action = DS.$Actions.pop();
+                DS.execute(action.oper, action.args, action.nsteps);
+            } else {
+                DS.reset();
+            }
+        },
+    },
+};
+
+
+DS.$AsyncListeners = {
+    stepForward: {
+        type: "click",
+        handler: (resolve, reject) => {
+            DS.setRunning(false);
+            DS.stepForward(resolve, reject);
+        },
+    },
+    fastForward: {
+        type: "click",
+        handler: (resolve, reject) => {
+            DS.setRunning(false);
+            DS.$Actions[DS.$CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
+            DS.fastForward(resolve, reject);
+        },
+    },
+    toggleRunner: {
+        type: "click",
+        handler: (resolve, reject) => {
+            DS.toggleRunner();
+            if (DS.isRunning()) DS.stepForward(resolve, reject);
+            else resolve();
+        },
+    },
+    stepBackward: {
+        type: "click",
+        handler: (resolve, reject) => reject({until: DS.$CurrentStep - 1}),
+    },
+    fastBackward: {
+        type: "click",
+        handler: (resolve, reject) => reject({until: 0}),
+    },
+};
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Updating listeners
+
 DS.resetListeners = function (isAsync) {
     DS.removeAllListeners();
+    if (!DS.$Current) {
+        DS.$Toolbar.algorithmControls.disabled = true;
+        return;
+    }
     DS.addListener("toggleRunner", "click", () => DS.toggleRunner());
     if (isAsync) {
         DS.$Toolbar.algorithmControls.disabled = true;
@@ -167,38 +202,15 @@ DS.resetListeners = function (isAsync) {
     DS.$Info.title.text("Select an action from the menu above");
     DS.$Info.body.text("");
     DS.setStatus("inactive");
-    if (DS.$Actions.length > 0) {
-        DS.addListener("stepBackward", "click", () => {
-            if (DS.$DEBUG) console.log(`BACK: ${JSON.stringify(DS.$Actions)}`);
-            DS.setRunning(false);
-            if (DS.$Actions.length > 0) {
-                const action = DS.$Actions.pop();
-                DS.execute(action.oper, action.args, action.nsteps - 1);
-            } else {
-                DS.reset();
-            }
-        });
-        DS.addListener("fastBackward", "click", () => {
-            if (DS.$DEBUG) console.log(`FASTBACK: ${JSON.stringify(DS.$Actions)}`);
-            DS.setRunning(false);
-            DS.$Actions.pop();
-            if (DS.$Actions.length > 0) {
-                const action = DS.$Actions.pop();
-                DS.execute(action.oper, action.args, action.nsteps);
-            } else {
-                DS.reset();
-            }
-        });
-        DS.addListener("nodeSize", "change", () => {
-            if (DS.$DEBUG) console.log(`SIZE CHANGE: ${JSON.stringify(DS.$Actions)}`);
-            DS.setRunning(false);
-            if (DS.$Actions.length > 0) {
-                const action = DS.$Actions.pop();
-                DS.execute(action.oper, action.args, action.nsteps);
-            } else {
-                DS.reset();
-            }
-        });
+    for (const id in DS.$IdleListeners) {
+        const listener = DS.$IdleListeners[id];
+        if (listener.condition()) {
+            if (DS.$DEBUG) DS.addListener(id, listener.type, () => {
+                console.log(`${id} ${listener.type}: ${JSON.stringify(DS.$Actions)}`);
+                listener.handler();
+            });
+            else DS.addListener(id, listener.type, listener.handler);
+        }
     }
 };
 
@@ -259,7 +271,8 @@ DS.execute = function (operation, args, until = 0) {
     }).catch((reason) => {
         if (typeof reason !== "object" || reason.until == null) {
             console.error(reason);
-            throw reason;
+            DS.reset();
+            return;
         }
         DS.setRunning(false);
         DS.$Actions.pop();
@@ -307,35 +320,13 @@ DS.pause = function (title) {
                 DS.setStatus("running");
                 runnerTimer = setTimeout(() => DS.stepForward(resolve, reject), DS.getAnimationSpeed() * 1.1);
             }
-            DS.addListener("stepForward", "click", () => {
-                clearTimeout(runnerTimer);
-                DS.setRunning(false);
-                DS.stepForward(resolve, reject);
-            });
-            DS.addListener("fastForward", "click", () => {
-                clearTimeout(runnerTimer);
-                DS.setRunning(false);
-                action.nsteps = Number.MAX_SAFE_INTEGER;
-                DS.fastForward(resolve, reject);
-            });
-            DS.addListener("stepBackward", "click", () => {
-                clearTimeout(runnerTimer);
-                reject({until: DS.$CurrentStep - 1});
-            });
-            DS.addListener("fastBackward", "click", () => {
-                clearTimeout(runnerTimer);
-                reject({until: 0});
-            });
-            DS.addListener("nodeSize", "change", () => {
-                clearTimeout(runnerTimer);
-                reject({until: DS.$CurrentStep});
-            });
-            DS.addListener("toggleRunner", "click", () => {
-                clearTimeout(runnerTimer);
-                DS.toggleRunner();
-                if (DS.isRunning()) DS.stepForward(resolve, reject);
-                else resolve();
-            });
+            for (const id in DS.$AsyncListeners) {
+                const listener = DS.$AsyncListeners[id];
+                DS.addListener(id, listener.type, () => {
+                    clearTimeout(runnerTimer);
+                    listener.handler(resolve, reject);
+                });
+            }
         }
     });
 };

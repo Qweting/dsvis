@@ -126,8 +126,8 @@ DS.BST = class BST {
             const parent = node.getParent();
             if (parent && child) {
                 node.setHighlight(false);
-                if (child === parent.getLeft()?.getLeft()) node.moveCenter(-node.getSize(), -node.getSize() / 2, true);
-                if (child === parent.getRight()?.getRight()) node.moveCenter(node.getSize(), -node.getSize() / 2, true);
+                if (child === parent.getLeft()?.getLeft()) node.dmoveCenter(-node.getSize(), -node.getSize() / 2, true);
+                if (child === parent.getRight()?.getRight()) node.dmoveCenter(node.getSize(), -node.getSize() / 2, true);
                 const direction = parent.getLeft() === node ? "left" : "right";
                 parent.setChild(direction, child);
                 child.setHighlight(true);

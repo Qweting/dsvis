@@ -4,24 +4,24 @@
 <meta charset="utf-8"/>
 <link rel="stylesheet" href="dsvis.css">
 <script type="text/javascript" src="lib/svg.min.js"></script>
-<script type="text/javascript" src="src/main.js"></script>
+<script type="text/javascript" src="src/engine.js"></script>
 <script type="text/javascript" src="src/objects.js"></script>
+<script type="text/javascript" src="src/collections.js"></script>
 <script type="text/javascript" src="src/BST.js"></script>
 </head>
 
-<body onload="DS.init('#canvas')">
-
+<body onload="DS.initialise('#canvas')">
 
 <header>
-  <h1><a href="index.html">Data Structure Visualizations</a></h1>
+  <h1><a href="index.html">Visualizations of collection data structures</a></h1>
 </header>
 
 <div id="content">
 <section>
 
-<label for="algorithmSelector">Choose a data structure/algorithm:</label>
+<label for="algorithmSelector">Choose a collection data structure/algorithm:</label>
 <h2 id="selectorWrapper">
-  <select name="algorithmSelector" id="algorithmSelector" onchange="selectAlgorithm()">
+  <select name="algorithmSelector" id="algorithmSelector" onchange="DS.selectAlgorithm()">
     <option disabled value="">&mdash; Please choose an algorithm or data structure &mdash;</option>
     <hr/>
     <option value="BST">BST: Binary search tree</option>
@@ -32,10 +32,11 @@
 <fieldset id="algorithmControls">
   <select id="insertSelect">
     <option value="" selected>Insert many values</option>
-    <option value="A B C D E F G">A B C D E F G</option>
     <option value="A L G O R I T H M">A L G O R I T H M</option>
-    <option value="C O M P L E X">C O M P L E X</option>
+    <option value="C O M P L E X I T Y">C O M P L E X I T Y</option>
     <option value="R E C U R S I O N">R E C U R S I O N</option>
+    <option value="A B C D E F G H J K">A B C D E F G H J K</option>
+    <option value="Z Y X V T S P O M L">Z Y X V T S P O M L</option>
   </select>
   <input id="insertField" type="text" size="20" maxlength="10"/>
   <input id="insertSubmit" type="submit" value="Insert"/>
