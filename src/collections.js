@@ -51,8 +51,6 @@ DS.initToolbar = function () {
     tools.deleteSubmit = document.getElementById("deleteSubmit");
     tools.printTree = document.getElementById("printTree");
 
-    tools.testRotate = document.getElementById("testRotate");
-
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
