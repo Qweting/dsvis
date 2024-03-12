@@ -40,6 +40,8 @@ DS.$EventListeners = {
 };
 
 DS.$Toolbar = {};
+DS.$Cookies = {};
+DS.$CookieExpireDays = 30;
 
 
 DS.$Defaults = {};
@@ -47,15 +49,36 @@ DS.$Defaults.animationSpeed = 1000; // milliseconds per step
 
 DS.getAnimationSpeed = () => parseInt(DS.$Toolbar.animationSpeed?.value) || DS.$Defaults.animationSpeed;
 
+DS.$Cookies.animationSpeed = {
+    getCookie: (value) => DS.$Toolbar.animationSpeed.value = value,
+    setCookie: () => DS.getAnimationSpeed(),
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Inititalisation
+
+DS.initialise = function(svgID) {
+    DS.initEngine(svgID);
+    DS.initToolbar();
+    DS.loadCookies();
+    DS.initAlgorithm();
+};
+
 
 DS.initEngine = function (svgID) {
     DS.$DEBUG = new URL(window.location).searchParams.get("debug");
     DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
     DS.$Actions = [];
 };
+
+
+DS.reset = function () {
+    DS.clearCanvas();
+    if (DS.$Current) DS.$Current.reset();
+    DS.resetListeners();
+};
+
 
 DS.initAlgorithm = function() { 
     const algoClass = new URL(window.location).searchParams.get("algorithm");
@@ -70,6 +93,7 @@ DS.initAlgorithm = function() {
     }
     DS.reset();
 }
+
 
 DS.selectAlgorithm = function() {
     const algoClass = document.getElementById("algorithmSelector").value;
@@ -186,6 +210,7 @@ DS.$AsyncListeners = {
 // Updating listeners
 
 DS.resetListeners = function (isAsync) {
+    DS.saveCookies();
     DS.removeAllListeners();
     if (!DS.$Current) {
         DS.$Toolbar.algorithmControls.disabled = true;
@@ -271,14 +296,14 @@ DS.execute = function (operation, args, until = 0) {
     }).catch((reason) => {
         if (typeof reason !== "object" || reason.until == null) {
             console.error(reason);
-            DS.reset();
+            DS.resetListeners();
             return;
         }
         DS.setRunning(false);
         DS.$Actions.pop();
         until = reason.until;
         if (DS.$DEBUG) console.log(`BACK ${until} / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
-        if (until === 0 && DS.$Actions.length > 0) {
+        if (until <= 0 && DS.$Actions.length > 0) {
             const action = DS.$Actions.pop();
             operation = action.oper, args = action.args, until = action.nsteps;
         }
@@ -366,6 +391,42 @@ DS.setRunning = function (running) {
 DS.toggleRunner = function () {
     DS.$Toolbar.toggleRunner.classList.toggle("selected");
 };
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Cookies
+
+
+DS.loadCookies = function() {
+    const allCookies = document.cookie.split(";");
+    if (DS.$DEBUG) console.log("Document cookies", ...allCookies);
+    for (const cookieName in DS.$Cookies) {
+        for (const cookie of allCookies) {
+            const [cookieName0, value0] = cookie.split("=", 2);
+            if (cookieName0.trim() === cookieName) {
+                const value = decodeURIComponent(value0);
+                DS.$Cookies[cookieName].getCookie(value);
+                break;
+            }
+        }
+    }
+}
+
+
+DS.saveCookies = function() {
+    let cookies = [];
+    for (const cookieName in DS.$Cookies) {
+        const value = encodeURIComponent(DS.$Cookies[cookieName].setCookie());
+        cookies.push(`${cookieName}=${value}`);
+    }
+    if (DS.$CookieExpireDays > 0) {
+        const exdate = new Date();
+        exdate.setDate(exdate.getDate() + DS.$CookieExpireDays);
+        cookies.push(`expires=${exdate.toUTCString()}`);
+    }
+    document.cookie = cookies.join("; ");
+    if (DS.$DEBUG) console.log("Setting cookies", ...cookies);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

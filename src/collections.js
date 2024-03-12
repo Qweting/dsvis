@@ -22,13 +22,6 @@ DS.getSpacingY = () => DS.getNodeSize();
 ///////////////////////////////////////////////////////////////////////////////
 // Inititalisation
 
-DS.initialise = function(svgID) {
-    DS.initEngine(svgID);
-    DS.initToolbar();
-    DS.initAlgorithm();
-};
-
-
 DS.initToolbar = function () {
     const tools = DS.$Toolbar;
     // General toolbar
@@ -65,13 +58,6 @@ DS.initToolbar = function () {
 };
 
 
-DS.reset = function () {
-    DS.clearCanvas();
-    if (DS.$Current) DS.$Current.reset();
-    DS.resetListeners();
-};
-
-
 DS.$IdleListeners.nodeSize = {
     type: "change",
     condition: () => true,
@@ -91,3 +77,7 @@ DS.$AsyncListeners.nodeSize = {
     handler: (resolve, reject) => reject({until: DS.$CurrentStep}),
 };
 
+DS.$Cookies.nodeSize = {
+    getCookie: (value) => DS.$Toolbar.nodeSize.value = value,
+    setCookie: () => DS.getSizeClass(),
+};
