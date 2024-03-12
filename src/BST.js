@@ -218,5 +218,62 @@ DS.BST = class BST {
             await DS.pause();
         }
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Rotate the tree
+    // These are not used by BST, but by self-balancing subclasses
+    // The following rotations are implemented:
+    //  - Single Rotate Left/Right (also known as Zig)
+    //  - Double Rotate Left/Right (also known as Zig-Zag)
+    //  - Zig-Zig Left/Right
+
+    async resetHeights(nodes) {
+        // BSTs do not store the height in the nodes, so do nothing
+    }
+
+    async doubleRotate(left, node) {
+        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+        const right = left === "left" ? "right" : "left";
+        const child = node.getChild(right);
+        await DS.pause(`Rotate ${child} ${right}, then rotate ${node} ${left}`);
+        await this.singleRotate(right, child);
+        return await this.singleRotate(left, node);
+    }
+
+    async singleRotate(left, node) {
+        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+        // So, if left==="right", then we rotate right.
+        const right = left === "left" ? "right" : "left";
+        const A = node;
+        const B = A.getChild(right);
+        const C = B.getChild(left);
+
+        A.setChildHighlight(right, true);
+        B.setHighlight(true);
+        await DS.pause(`Rotate ${A} ${left}`);
+
+        const parent = A.getParent();
+        if (parent) {
+            const direction = parent.getLeft() === A ? "left" : "right";
+            B.setParent(direction, parent);
+        } else {
+            this.treeRoot = B;
+        }
+        A.setChild(right, C);
+        B.setChild(left, A);
+
+        B.setChildHighlight(left, true);
+        A.setHighlight(true);
+        await DS.pause();
+        this.resizeTree();
+        await DS.pause();
+
+        B.setChildHighlight(left, false);
+        A.setHighlight(false);
+        await this.resetHeights([A, B]);
+        return B;
+    }
+
 };
 
