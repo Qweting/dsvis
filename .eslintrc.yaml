@@ -34,6 +34,7 @@ rules:
     "@stylistic/no-trailing-spaces": [warn]
     "@stylistic/no-multi-spaces": [warn, {ignoreEOLComments: false}]
     "@stylistic/space-infix-ops": [warn]
+    "@stylistic/space-before-function-paren": [warn, {anonymous: never, named: never, asyncArrow: always}]
     "@stylistic/multiline-ternary": off
     "@stylistic/operator-linebreak": off
 

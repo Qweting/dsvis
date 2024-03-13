@@ -114,12 +114,23 @@ fieldset, form {
 	display: inline-block;
 }
 
+label {
+	white-space: nowrap;
+}
+
 select, input, button {
 	margin: 3px 6px 3px 0;
 	padding: 3px 6px;
 	background-color: white;
 	border: solid 1px maroon;
 	border-radius: 5px;
+}
+
+input[type="checkbox"], input[type="radio"] {
+	width: 18px;
+	height: 18px;
+	margin-right: 0;
+	vertical-align: middle;
 }
 
 select:hover:not(:disabled), input:hover:not(:disabled), button:hover:not(:disabled) {
@@ -173,25 +184,25 @@ path, line, polyline {
     fill: none;
 }
 
-.filled {
+svg .filled {
 	stroke: none;
 	fill: blue;
 }
 
-.highlight, .highlight > * {
+svg .highlight, svg .highlight > * {
     stroke: red;
 }
 
-.highlight.filled, .highlight > .filled, .highlight > text {
+svg .highlight.filled, svg text.highlight, svg .highlight > .filled, svg .highlight > text {
 	stroke: none;
 	fill: red;
 }
 
-.nofill {
+svg .nofill {
 	fill: none;
 }
 
-.highlight-circle {
+svg .highlight-circle {
 	stroke: red;
 	fill: none;
 }
@@ -211,7 +222,21 @@ g text.large {
 	font-size: 26px;
 }
 
-line.gridline {
-    stroke: lightgray; 
-    stroke-width: 1;
+svg.shownullnodes .nullnode:not(.invisible) {
+	fill: blue;
+	stroke: blue;
 }
+
+line.gridline, svg .invisible, svg .nullnode {
+	fill: none;
+	stroke: none;
+}
+
+line.gridline {
+	stroke-width: 1;
+}
+
+svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
+    stroke: lightgray; 
+}
+

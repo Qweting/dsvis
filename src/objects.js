@@ -5,41 +5,41 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 SVG.extend(SVG.Element, {
-    getHighlight: function () {
+    getHighlight: function() {
         return this.hasClass("highlight");
     },
-    setHighlight: function (high) {
+    setHighlight: function(high) {
         if (high == null) this.toggleClass("highlight");
         else if (high) this.addClass("highlight");
         else this.removeClass("highlight");
         return this;
     },
-    getCenter: function () {
+    getCenter: function() {
         return [this.cx(), this.cy()];
     },
-    setCenter: function (x, y, animate = false) {
+    setCenter: function(x, y, animate = false) {
         return DS.animate(this, animate).center(x, y);
     },
-    dmoveCenter: function (dx, dy, animate = false) {
+    dmoveCenter: function(dx, dy, animate = false) {
         return this.setCenter(this.cx() + dx, this.cy() + dy, animate);
     },
 });
 
 
 SVG.extend(SVG.Container, {
-    highlightCircle: function (x, y) {
+    highlightCircle: function(x, y) {
         return this.put(new SVG.HighlightCircle()).init(x, y);
     },
-    textCircle: function (text, x, y) {
+    textCircle: function(text, x, y) {
         return this.put(new SVG.TextCircle()).init(text, x, y);
     },
-    graphNode: function (text, x, y) {
+    graphNode: function(text, x, y) {
         return this.put(new SVG.GraphNode()).init(text, x, y);
     },
-    binaryNode: function (text, x, y) {
+    binaryNode: function(text, x, y) {
         return this.put(new SVG.BinaryNode()).init(text, x, y);
     },
-    connection: function (start, end, bend = 0, directed = false) {
+    connection: function(start, end, bend = 0, directed = false) {
         return this.put(new SVG.Connection()).init(start, end, bend, directed);
     },
 });
@@ -96,6 +96,13 @@ SVG.TextCircle = class TextCircle extends SVG.G {
 SVG.GraphNode = class GraphNode extends SVG.TextCircle {
     $incoming = {};
     $outgoing = {};
+    $nullary = {};
+
+    init(text, x, y) {
+        const bgSize = 3 * DS.getNodeSize();
+        this.rect(bgSize, bgSize).center(0, 0).addClass("invisible");
+        return super.init(text, x, y);
+    }
 
     getBend(key) {
         return 0;
@@ -165,9 +172,22 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
             this.$outgoing[outKey] = edge;
             successor.$incoming[inKey] = edge;
         } else {
-            this.$outgoing[outKey] = null;
+            delete this.$outgoing[outKey];
         }
+        this._updateNullary();
         return this;
+    }
+
+    _updateNullary() {
+        for (const node of SVG.find("g")) {
+            if (node instanceof GraphNode) {
+                for (const c in node.$nullary) {
+                    const show = !node.$outgoing[c];
+                    if (show) node.$nullary[c].removeClass("invisible");
+                    else node.$nullary[c].addClass("invisible");
+                }
+            }
+        }
     }
 
     setIncomingHighlight(inKey, high) {
@@ -206,6 +226,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
             }
         }
         super.remove();
+        this._updateNullary();
     }
 
     setCenter(x, y, animate = false) {
@@ -232,7 +253,17 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
 SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
     $incoming = {parent: null};
     $outgoing = {left: null, right: null};
+    $nullary = {left: null, right: null};
     $edgebends = {left: 0.1, right: -0.1};
+
+    init(text, x, y) {
+        const d = DS.getNodeSize();
+        const nX = 0.5 * d, nY = 0.8 * d, nR = 2 * DS.getStrokeWidth();
+        const nullpath = (s) => `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${-2 * nR},0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
+        this.$nullary.left = this.path(nullpath(-1)).stroke({width: DS.getStrokeWidth()}).addClass("nullnode");
+        this.$nullary.right = this.path(nullpath(1)).stroke({width: DS.getStrokeWidth()}).addClass("nullnode");
+        return super.init(text, x, y);
+    }
 
     getBend(c) {
         return this.$edgebends[c];
@@ -342,7 +373,7 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
         if (left) width += left._resizeWidths();
         const right = this.getRight();
         if (right) width += right._resizeWidths();
-        width = Math.max(this.width(), width);
+        width = Math.max(this.getSize(), width);
         const leftWidth = left?.$leftWidth || 0;
         const rightWidth = right?.$rightWidth || 0;
         const mid = width - leftWidth - rightWidth;
@@ -423,7 +454,7 @@ SVG.Connection = class Connection extends SVG.Path {
     }
 
     _createArrow() {
-        this.marker("end", 5, 4, function (add) {
+        this.marker("end", 5, 4, function(add) {
             add.polygon([0, 0, 5, 2, 0, 4]).addClass("filled");
         });
     }

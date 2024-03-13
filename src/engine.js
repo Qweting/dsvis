@@ -66,21 +66,22 @@ DS.initialise = function(svgID) {
 };
 
 
-DS.initEngine = function (svgID) {
+DS.initEngine = function(svgID) {
     DS.$DEBUG = new URL(window.location).searchParams.get("debug");
     DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
+    if (DS.$DEBUG) DS.$Svg.addClass("debug");
     DS.$Actions = [];
 };
 
 
-DS.reset = function () {
+DS.reset = function() {
     DS.clearCanvas();
     if (DS.$Current) DS.$Current.reset();
     DS.resetListeners();
 };
 
 
-DS.initAlgorithm = function() { 
+DS.initAlgorithm = function() {
     const algoClass = new URL(window.location).searchParams.get("algorithm");
     const algoSelect = document.getElementById("algorithmSelector");
     if (algoClass && /^[\w.]+$/.test(algoClass) && DS[algoClass]) {
@@ -92,27 +93,27 @@ DS.initAlgorithm = function() {
         window.history.replaceState("", "", window.location.pathname);
     }
     DS.reset();
-}
+};
 
 
 DS.selectAlgorithm = function() {
     const algoClass = document.getElementById("algorithmSelector").value;
     if (algoClass) {
-        let params = {algorithm: algoClass};
+        const params = {algorithm: algoClass};
         if (DS.$DEBUG) params.debug = DS.$DEBUG;
-        const url = window.location.pathname + "?" + new URLSearchParams(params);
+        const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
         window.history.replaceState("", "", url);
     }
     DS.initAlgorithm();
-}
+};
 
 
-DS.SVG = function (id) {
+DS.SVG = function(id) {
     return id ? SVG(`#${id}`) : DS.$Svg;
 };
 
 
-DS.clearCanvas = function () {
+DS.clearCanvas = function() {
     DS.$Svg.clear();
     const w = DS.$SvgWidth;
     const h = DS.$SvgHeight;
@@ -126,7 +127,7 @@ DS.clearCanvas = function () {
 };
 
 
-DS.setStatus = function (status, timeout = 10) {
+DS.setStatus = function(status, timeout = 10) {
     setTimeout(() => {
         if (status === "running") {
             DS.$Info.status.text("Animating").removeClass("paused").addClass("running");
@@ -209,21 +210,26 @@ DS.$AsyncListeners = {
 ///////////////////////////////////////////////////////////////////////////////
 // Updating listeners
 
-DS.resetListeners = function (isAsync) {
+DS.disableWhenRunning = function(disable) {
+    SVG.find(".disableWhenRunning").forEach((elem) => elem.node.disabled = disable);
+};
+
+
+DS.resetListeners = function(isAsync) {
     DS.saveCookies();
     DS.removeAllListeners();
     if (!DS.$Current) {
-        DS.$Toolbar.algorithmControls.disabled = true;
+        DS.disableWhenRunning(true);
         return;
     }
     DS.addListener("toggleRunner", "click", () => DS.toggleRunner());
     if (isAsync) {
-        DS.$Toolbar.algorithmControls.disabled = true;
+        DS.disableWhenRunning(true);
         DS.setStatus("paused");
         return;
     }
 
-    DS.$Toolbar.algorithmControls.disabled = false;
+    DS.disableWhenRunning(false);
     DS.$Info.title.text("Select an action from the menu above");
     DS.$Info.body.text("");
     DS.setStatus("inactive");
@@ -240,7 +246,7 @@ DS.resetListeners = function (isAsync) {
 };
 
 
-DS.addListener = function (id, type, handler) {
+DS.addListener = function(id, type, handler) {
     const listeners = DS.$EventListeners;
     if (!listeners[id]) listeners[id] = {};
     const elem = DS.$Toolbar[id];
@@ -252,7 +258,7 @@ DS.addListener = function (id, type, handler) {
 };
 
 
-DS.removeAllListeners = function () {
+DS.removeAllListeners = function() {
     const listeners = DS.$EventListeners;
     for (const id in listeners) {
         const elem = DS.$Toolbar[id];
@@ -266,7 +272,7 @@ DS.removeAllListeners = function () {
 ///////////////////////////////////////////////////////////////////////////////
 // Executing the actions
 
-DS.submit = function (method, field) {
+DS.submit = function(method, field) {
     try {
         let values = [];
         if (field != null) {
@@ -283,7 +289,7 @@ DS.submit = function (method, field) {
 };
 
 
-DS.execute = function (operation, args, until = 0) {
+DS.execute = function(operation, args, until = 0) {
     if (!args) args = [];
     DS.reset();
     DS.$Actions.push({oper: operation, args: args, nsteps: until});
@@ -316,7 +322,7 @@ DS.execute = function (operation, args, until = 0) {
 };
 
 
-DS.callAsync = async function (nAction, until) {
+DS.callAsync = async function(nAction, until) {
     DS.resetListeners(true);
     const action = DS.$Actions[nAction];
     DS.$CurrentAction = nAction;
@@ -332,7 +338,7 @@ DS.callAsync = async function (nAction, until) {
 };
 
 
-DS.pause = function (title) {
+DS.pause = function(title) {
     if (title != null) DS.$Info.body.text(title);
     return new Promise((resolve, reject) => {
         if (DS.$DEBUG) console.log(`${DS.$CurrentStep}. Doing: ${title} (running: ${DS.isRunning()}), ${JSON.stringify(DS.$Actions)}`);
@@ -357,14 +363,14 @@ DS.pause = function (title) {
 };
 
 
-DS.stepForward = function (resolve, reject) {
+DS.stepForward = function(resolve, reject) {
     DS.$CurrentStep++;
     DS.$animating = true;
     resolve();
 };
 
 
-DS.fastForward = function (resolve, reject) {
+DS.fastForward = function(resolve, reject) {
     const action = DS.$Actions[DS.$CurrentAction];
     if (DS.$CurrentStep >= action.nsteps) {
         action.nsteps = DS.$CurrentStep;
@@ -376,19 +382,19 @@ DS.fastForward = function (resolve, reject) {
 };
 
 
-DS.isRunning = function () {
+DS.isRunning = function() {
     return DS.$Toolbar.toggleRunner.classList.contains("selected");
 };
 
 
-DS.setRunning = function (running) {
+DS.setRunning = function(running) {
     const classes = DS.$Toolbar.toggleRunner.classList;
     if (running) classes.add("selected");
     else classes.remove("selected");
 };
 
 
-DS.toggleRunner = function () {
+DS.toggleRunner = function() {
     DS.$Toolbar.toggleRunner.classList.toggle("selected");
 };
 
@@ -410,11 +416,11 @@ DS.loadCookies = function() {
             }
         }
     }
-}
+};
 
 
 DS.saveCookies = function() {
-    let cookies = [];
+    const cookies = [];
     for (const cookieName in DS.$Cookies) {
         const value = encodeURIComponent(DS.$Cookies[cookieName].setCookie());
         cookies.push(`${cookieName}=${value}`);
@@ -426,13 +432,13 @@ DS.saveCookies = function() {
     }
     document.cookie = cookies.join("; ");
     if (DS.$DEBUG) console.log("Setting cookies", ...cookies);
-}
+};
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-DS.animate = function (elem, animate = true) {
+DS.animate = function(elem, animate = true) {
     if (DS.$animating && animate) {
         DS.setStatus("running");
         DS.setStatus("paused", DS.getAnimationSpeed());
@@ -443,13 +449,13 @@ DS.animate = function (elem, animate = true) {
 };
 
 
-DS.normalizeNumber = function (input) {
+DS.normalizeNumber = function(input) {
     input = input.trim();
     return input === "" || isNaN(input) ? input : Number(input);
 };
 
 
-DS.compare = function (a, b) {
+DS.compare = function(a, b) {
     if (isNaN(a) === isNaN(b)) {
         // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(a)) {
@@ -466,7 +472,7 @@ DS.compare = function (a, b) {
 };
 
 
-DS.addReturnSubmit = function (field, allowed, action) {
+DS.addReturnSubmit = function(field, allowed, action) {
     allowed = (
         allowed === "int" ? "0-9" :
         allowed === "int+" ? "0-9 " :
