@@ -1,0 +1,110 @@
+
+///////////////////////////////////////////////////////////////////////////////
+// Import and export information used by the Javascript linter ESLint:
+/* globals DS, SVG */
+///////////////////////////////////////////////////////////////////////////////
+
+DS.AVL = class AVL extends DS.BST {
+
+    newNode(text) {
+        return DS.SVG().avlNode(text, DS.getStartX(), DS.getStartY());
+    }
+
+    getHeight(node) {
+        return node ? node.getHeight() : 0;
+    }
+
+    async insertOne(value) {
+        const node = await super.insertOne(value);
+        if (node) await this.updateHeights(node);
+    }
+
+    async delete(value) {
+        const node = await super.delete(value);
+        if (node) await this.updateHeights(node);
+    }
+
+    async updateHeights(node) {
+        this.pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
+        await DS.pause("Update node heights");
+        while (node) {
+            this.pointer.setCenter(node.cx(), node.cy(), true);
+            await DS.pause();
+            const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
+            const height = 1 + Math.max(leftHeight, rightHeight);
+            if (height !== this.getHeight(node)) {
+                node.setHeightHighlight(true);
+                node.setHeight(height);
+                await DS.pause();
+                node.setHeightHighlight(false);
+            }
+            node = await this.rebalance(node);
+            node = node.getParent();
+        }
+        this.pointer.remove();
+    }
+
+    async rebalance(node) {
+        const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
+        if (Math.abs(leftHeight - rightHeight) <= 1) return node;
+        await DS.pause("Node is unbalanced!");
+        const left = leftHeight < rightHeight ? "left" : "right";
+        const right = left === "left" ? "right" : "left";
+        const child = node.getChild(right);
+        const childLeft = this.getHeight(child.getChild(left)), childRight = this.getHeight(child.getChild(right));
+        this.pointer.hide();
+        if (childLeft <= childRight) {
+            node = await this.singleRotate(left, node);
+        } else {
+            node = await this.doubleRotate(left, node);
+        }
+        this.pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
+        await DS.pause("Node is now balanced");
+        return node;
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Rotate the tree
+
+    async resetHeight(node) {
+        const height = 1 + Math.max(this.getHeight(node.getLeft()), this.getHeight(node.getRight()));
+        if (height !== this.getHeight(node)) {
+            node.setHeight(height);
+        }
+    }
+};
+
+
+SVG.AVLNode = class AVLNode extends SVG.BinaryNode {
+    init(text, x, y) {
+        const dist = 0.6 * DS.getNodeSize();
+        this.$height = this.text(1).center(-dist, -dist).addClass("avlheight").addClass(DS.getSizeClass());
+        return super.init(text, x, y);
+    }
+
+    getHeight() {
+        return parseInt(this.$height.text());
+    }
+
+    setHeight(height) {
+        this.$height.text(height);
+        return this;
+    }
+
+    getHeightHighlight() {
+        return this.$height.getHighlight();
+    }
+
+    setHeightHighlight(high) {
+        this.$height.setHighlight(high);
+        return this;
+    }
+};
+
+
+SVG.extend(SVG.Container, {
+    avlNode: function(text, x, y) {
+        return this.put(new SVG.AVLNode()).init(text, x, y);
+    },
+});

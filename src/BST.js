@@ -66,13 +66,13 @@ DS.BST = class BST {
 
     async insertOne(value) {
         value = value.trim().toUpperCase();
-        if (!value) return;
+        if (!value) return null;
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
             await DS.pause(`Create a new tree root ${value}`);
             this.resizeTree();
             await DS.pause();
-            return;
+            return this.treeRoot;
         }
 
         await DS.pause(`Searching for node to insert ${value}`);
@@ -81,7 +81,7 @@ DS.BST = class BST {
             found.node.setHighlight(true);
             await DS.pause(`There is already a node ${found.node}`);
             found.node.setHighlight(false);
-            return;
+            return null;
         }
 
         const child = this.newNode(value);
@@ -95,15 +95,16 @@ DS.BST = class BST {
         child.setHighlight(false);
         this.resizeTree();
         await DS.pause();
+        return child;
     }
 
 
     async delete(value) {
         value = value.trim().toUpperCase();
-        if (!value) return;
+        if (!value) return null;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
-            return;
+            return null;
         }
 
         await DS.pause(`Searching for node to delete ${value}`);
@@ -112,12 +113,12 @@ DS.BST = class BST {
             found.node.setHighlight(true);
             await DS.pause(`There is no node ${value}`);
             found.node.setHighlight(false);
-            return;
+            return null;
         }
 
         found.node.setHighlight(true);
         await DS.pause(`Found node ${value} to delete`);
-        await this.deleteHelper(found.node);
+        return await this.deleteHelper(found.node);
     }
 
     async deleteHelper(node) {
@@ -149,7 +150,7 @@ DS.BST = class BST {
             node.remove();
             this.resizeTree();
             await DS.pause();
-            return;
+            return child || parent;
         }
 
         const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
@@ -180,7 +181,7 @@ DS.BST = class BST {
         moving.remove();
         node.setHighlight(false);
         await DS.pause(`Now delete the predecessor ${predecessor}`);
-        await this.deleteHelper(predecessor);
+        return await this.deleteHelper(predecessor);
     }
 
     async print() {
@@ -224,12 +225,12 @@ DS.BST = class BST {
     // Rotate the tree
     // These are not used by BST, but by self-balancing subclasses
     // The following rotations are implemented:
-    //  - Single Rotate Left/Right (also known as Zig)
-    //  - Double Rotate Left/Right (also known as Zig-Zag)
-    //  - Zig-Zig Left/Right
+    //  - Single Rotate: Left and Right (also known as Zig)
+    //  - Double Rotate: Left-Right and Right-Left (also known as Zig-Zag)
 
-    async resetHeights(nodes) {
+    async resetHeight(node) {
         // BSTs do not store the height in the nodes, so do nothing
+        // This is implemented by, e.g., AVL trees
     }
 
     async doubleRotate(left, node) {
@@ -271,7 +272,8 @@ DS.BST = class BST {
 
         B.setChildHighlight(left, false);
         A.setHighlight(false);
-        await this.resetHeights([A, B]);
+        await this.resetHeight(A);
+        await this.resetHeight(B);
         return B;
     }
 

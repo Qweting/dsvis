@@ -222,6 +222,18 @@ g text.large {
 	font-size: 26px;
 }
 
+g text.avlheight {
+	font-size: 14px;
+}
+
+g text.avlheight.small {
+	font-size: 10px;
+}
+
+g text.avlheight.large {
+	font-size: 18px;
+}
+
 svg.shownullnodes .nullnode:not(.invisible) {
 	fill: blue;
 	stroke: blue;
