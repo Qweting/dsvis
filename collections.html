@@ -30,7 +30,6 @@
   </select>
 </h2>
 
-<div>
 <fieldset id="algorithmControls">
   <select id="insertSelect" class="disableWhenRunning">
     <option value="" selected>Insert many values</option>
@@ -47,12 +46,7 @@
   <input id="deleteField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
   <input id="deleteSubmit" type="submit" value="Delete" class="disableWhenRunning"/>
   <input id="printTree" type="submit" value="Print" class="disableWhenRunning"/>
-  <label>
-    <input id="showNullNodes" type="checkbox"/>
-    Show null nodes
-  </label>
 </fieldset>
-</div>
 
 <div>
   <svg id="canvas"></svg>
@@ -79,6 +73,7 @@
       <option value="large">Large</option>
     </select>
   </label>
+  <label><input id="showNullNodes" type="checkbox"/> Show null nodes</label>
 </fieldset>
 
 </section>

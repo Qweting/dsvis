@@ -85,10 +85,10 @@ DS.initAlgorithm = function() {
     const algoClass = new URL(window.location).searchParams.get("algorithm");
     const algoSelect = document.getElementById("algorithmSelector");
     if (algoClass && /^[\w.]+$/.test(algoClass) && DS[algoClass]) {
-        algoSelect.value = algoClass;
+        if (algoSelect) algoSelect.value = algoClass;
         DS.$Current = new DS[algoClass]();
     } else {
-        algoSelect.value = "";
+        if (algoSelect) algoSelect.value = "";
         DS.$Current = null;
         window.history.replaceState("", "", window.location.pathname);
     }
@@ -159,7 +159,6 @@ DS.$IdleListeners = {
         type: "click",
         condition: () => DS.$Actions.length > 0,
         handler: () => {
-            DS.setRunning(false);
             DS.$Actions.pop();
             if (DS.$Actions.length > 0) {
                 const action = DS.$Actions.pop();
@@ -183,7 +182,6 @@ DS.$AsyncListeners = {
     fastForward: {
         type: "click",
         handler: (resolve, reject) => {
-            DS.setRunning(false);
             DS.$Actions[DS.$CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
             DS.fastForward(resolve, reject);
         },
@@ -230,8 +228,7 @@ DS.resetListeners = function(isAsync) {
     }
 
     DS.disableWhenRunning(false);
-    DS.$Info.title.text("Select an action from the menu above");
-    DS.$Info.body.text("");
+    DS.setIdleTitle();
     DS.setStatus("inactive");
     for (const id in DS.$IdleListeners) {
         const listener = DS.$IdleListeners[id];
@@ -305,10 +302,12 @@ DS.execute = function(operation, args, until = 0) {
             DS.resetListeners();
             return;
         }
-        DS.setRunning(false);
         DS.$Actions.pop();
         until = reason.until;
         if (DS.$DEBUG) console.log(`BACK ${until} / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
+        if (until > 0) {
+            DS.setRunning(false);
+        }
         if (until <= 0 && DS.$Actions.length > 0) {
             const action = DS.$Actions.pop();
             operation = action.oper, args = action.args, until = action.nsteps;

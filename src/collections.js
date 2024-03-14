@@ -57,6 +57,8 @@ DS.initToolbar = function() {
     tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
     tools.printTree.addEventListener("click", () => DS.submit("print"));
     tools.showNullNodes.addEventListener("change", () => DS.toggleNullNodes());
+
+    DS.setRunning(true);
 };
 
 
@@ -65,6 +67,12 @@ DS.toggleNullNodes = function() {
     if (show) DS.SVG().addClass("shownullnodes");
     else DS.SVG().removeClass("shownullnodes");
 };
+
+
+DS.setIdleTitle = function() {
+    DS.$Info.title.text("Select an action from the menu above");
+    DS.$Info.body.text("");
+}
 
 
 DS.$IdleListeners.nodeSize = {

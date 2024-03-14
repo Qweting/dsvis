@@ -17,8 +17,8 @@ DS.BST = class BST {
         return DS.SVG().binaryNode(text, DS.getStartX(), DS.getStartY());
     }
 
-    resizeTree() {
-        this.treeRoot?.resize(DS.getRootX(), DS.getRootY());
+    resizeTree(animate = true) {
+        this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
     }
 
     async insert(...values) {
