@@ -85,11 +85,11 @@ DS.toggleNullNodes = function() {
 
 
 DS.setIdleTitle = function() {
-    const notBST = DS.$Current.isNotBST();
+    const isBST = DS.$Current.isBST();
     const unbalanced = DS.$Current.isUnbalanced();
     const message = (
-        notBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
-        notBST ? "Tree is not a BST!" :
+        !isBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
+        !isBST ? "Tree is not a BST!" :
         unbalanced ? "Tree is unbalanced!" :
         "Tree is a correct AVL tree"
     );
@@ -138,16 +138,25 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         return node ? node.getHeight() : 0;
     }
 
-    isNotBST() {
-        for (const node of SVG.find("g")) {
-            if (node instanceof SVG.AVLNode) {
-                const left = node.getLeft();
-                if (left && DS.compare(left.getText(), node.getText()) >= 0) return true;
-                const right = node.getRight();
-                if (right && DS.compare(node.getText(), right.getText()) >= 0) return true;
-            }
+    isBST() {
+        try {
+            this._validateBST(this.treeRoot, Number.MIN_SAFE_INTEGER);
+        } catch (error) {
+            return false;
         }
-        return false;
+        return true;
+    }
+
+    _validateBST(node, min) {
+        const left = node.getLeft();
+        if (left) min = this._validateBST(left, min);
+        if (DS.compare(min, node.getText()) >= 0) {
+            throw new Error("Order mismatch");
+        }
+        min = node.getText();
+        const right = node.getRight();
+        if (right) min = this._validateBST(right, min);
+        return min;
     }
 
     isUnbalanced() {
