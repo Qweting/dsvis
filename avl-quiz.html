@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<link rel="stylesheet" href="dsvis.css">
+<script type="text/javascript" src="lib/svg.min.js"></script>
+<script type="text/javascript" src="src/engine.js"></script>
+<script type="text/javascript" src="src/objects.js"></script>
+<script type="text/javascript" src="src/BST.js"></script>
+<script type="text/javascript" src="src/AVL.js"></script>
+<script type="text/javascript" src="src/AVL-quiz.js"></script>
+</head>
+
+<body onload="DS.initialise('#canvas')">
+
+<header>
+  <h1><a href="index.html">Visualizations of collection data structures</a></h1>
+</header>
+
+<div id="content">
+<section>
+
+<h2>Playground for AVL trees</h2>
+
+<fieldset id="algorithmControls">
+  <label>Create:
+    <input id="insertField" type="text" size="1" maxlength="4" class="disableWhenRunning"/>
+    <input id="createLeft" type="submit" value="Left child" class="disableWhenRunning"/>
+    <input id="createRight" type="submit" value="Right child" class="disableWhenRunning"/>
+  </label>
+  &nbsp;
+  <label>Move to:
+    <input id="moveParent" type="submit" value="Parent" class="disableWhenRunning"/>
+    <input id="moveLeft" type="submit" value="Left child" class="disableWhenRunning"/>
+    <input id="moveRight" type="submit" value="Right child" class="disableWhenRunning"/>
+  </label>
+  &nbsp;
+  <label>Rotate:
+  <input id="rotateLeft" type="submit" value="Left" class="disableWhenRunning"/>
+  <input id="rotateRight" type="submit" value="Right" class="disableWhenRunning"/>
+  </label>
+  &nbsp;
+  <label>Action:
+  <input id="markNode" type="submit" value="Mark node" class="disableWhenRunning"/>
+  <input id="copyToMark" type="submit" value="Copy to mark" class="disableWhenRunning"/>
+  <input id="deleteNode" type="submit" value="Delete leaf" class="disableWhenRunning"/>
+  </label>
+</fieldset>
+
+<div>
+  <svg id="canvas"></svg>
+</div>
+
+<fieldset id="generalControls">
+  <input id="restartQuiz" type="submit" value="Restart" class="disableWhenRunning"/>
+  <button id="fastBackward">&lt;&lt;</button>
+  <button id="stepBackward">&lt;</button>
+  <button id="toggleRunner">Run</button>
+  <button id="stepForward">&gt;</button>
+  <button id="fastForward">&gt;&gt;</button>
+  <label>Speed:
+    <select id="animationSpeed">
+      <option value="2000">Slowest</option>
+      <option value="1000" selected>Slow</option>
+      <option value="500">Fast</option>
+      <option value="250">Fastest</option>
+    </select>
+  </label>
+  <label>Node size:
+    <select id="nodeSize">
+      <option value="small">Small</option>
+      <option value="medium" selected>Medium</option>
+      <option value="large">Large</option>
+    </select>
+  </label>
+  <label>
+    <input id="showNullNodes" type="checkbox"/>
+    Show null nodes
+  </label>
+</fieldset>
+
+</section>
+</div>
+
+<footer>
+  <p>&copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a></p>
+</footer>
+
+</body>
+</html>

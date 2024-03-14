@@ -234,6 +234,10 @@ g text.avlheight.large {
 	font-size: 18px;
 }
 
+g.marked circle {
+	fill: palegreen;
+}
+
 svg.shownullnodes .nullnode:not(.invisible) {
 	fill: blue;
 	stroke: blue;
