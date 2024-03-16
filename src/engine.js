@@ -63,6 +63,7 @@ DS.initialise = function(svgID) {
     DS.initToolbar();
     DS.loadCookies();
     DS.initAlgorithm();
+    DS.reset();
 };
 
 
@@ -92,7 +93,6 @@ DS.initAlgorithm = function() {
         DS.$Current = null;
         window.history.replaceState("", "", window.location.pathname);
     }
-    DS.reset();
 };
 
 
@@ -104,7 +104,7 @@ DS.selectAlgorithm = function() {
         const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
         window.history.replaceState("", "", url);
     }
-    DS.initAlgorithm();
+    window.location.reload();
 };
 
 
