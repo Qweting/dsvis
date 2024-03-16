@@ -23,7 +23,7 @@ DS.AVL = class AVL extends DS.BST {
 
     async delete(value) {
         const result = await super.delete(value);
-        if (result && result.parent) await this.updateHeights(result.parent);
+        if (result && result.parent) await this.updateHeights(result.parent, result.direction);
         await this.updateHeightPositions()
     }
 
@@ -33,8 +33,9 @@ DS.AVL = class AVL extends DS.BST {
         });
     }
 
-    async updateHeights(node) {
-        this.pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
+    async updateHeights(node, fromchild) {
+        const child = node.getChild(fromchild) || node;
+        this.pointer = DS.SVG().highlightCircle(child.cx(), child.cy());
         while (node) {
             this.pointer.setCenter(node.cx(), node.cy(), true);
             await DS.pause("Update node heights");

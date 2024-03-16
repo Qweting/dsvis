@@ -189,6 +189,15 @@ svg .filled {
 	fill: black;
 }
 
+svg .marked, svg .marked > * {
+    stroke: green;
+}
+
+svg .marked.filled, svg text.marked, svg .marked > .filled, svg .marked > text {
+	stroke: none;
+	fill: green;
+}
+
 svg .highlight, svg .highlight > * {
     stroke: #C00;
 }
@@ -246,10 +255,6 @@ g.red.black circle {
 	fill: lightgrey;
 }
 
-
-g.marked circle {
-	fill: palegreen;
-}
 
 svg.shownullnodes .nullnode:not(.invisible) {
 	fill: black;

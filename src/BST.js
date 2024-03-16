@@ -121,7 +121,8 @@ DS.BST = class BST {
             return await this.deleteNode(node);
         }
         const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
-        node.setHighlight(true);
+        node.setHighlight(false);
+        node.addClass("marked");
         await DS.pause(`Finding the predecessor node of ${node}`);
 
         let predecessor = node.getLeft();
@@ -149,7 +150,7 @@ DS.BST = class BST {
         await DS.pause();
         node.setText(newText);
         moving.remove();
-        node.setHighlight(false);
+        node.removeClass("marked");
         await DS.pause(`Now delete the predecessor ${predecessor}`);
         return await this.deleteNode(predecessor);
     }
