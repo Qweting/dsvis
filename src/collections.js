@@ -74,7 +74,7 @@ DS.toggleNullNodes = function(show) {
 DS.setIdleTitle = function() {
     DS.$Info.title.text("Select an action from the menu above");
     DS.$Info.body.text("");
-}
+};
 
 
 DS.$IdleListeners.nodeSize = {

@@ -18,13 +18,13 @@ DS.AVL = class AVL extends DS.BST {
         const node = await super.insertOne(value);
         node.updateHeightPosition();
         if (node) await this.updateHeights(node);
-        await this.updateHeightPositions()
+        await this.updateHeightPositions();
     }
 
     async delete(value) {
         const result = await super.delete(value);
         if (result && result.parent) await this.updateHeights(result.parent, result.direction);
-        await this.updateHeightPositions()
+        await this.updateHeightPositions();
     }
 
     async updateHeightPositions() {

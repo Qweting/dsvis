@@ -1,7 +1,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS, SVG */
+/* globals DS */
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.RedBlack = class RedBlack extends DS.BST {
@@ -25,7 +25,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (!parent) return;
         if (!this.isRed(parent)) return;
 
-        let grandparent = parent.getParent()
+        let grandparent = parent.getParent();
         if (!grandparent) return;
 
         const pibling = parent.getSibling();
@@ -34,7 +34,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setHighlight(true);
             pibling.setHighlight(true);
             await DS.pause([
-                `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`, 
+                `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`,
                 "Push blackness down from grandparent",
             ]);
             node.setHighlight(false);
@@ -55,7 +55,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setHighlight(true);
             grandparent.setHighlight(true);
             await DS.pause([
-                `Node ${node} is a red ${side} child of a red ${rotate} child`, 
+                `Node ${node} is a red ${side} child of a red ${rotate} child`,
                 `Rotate parent ${parent} ${rotate}`,
             ]);
             node.setHighlight(false);
@@ -72,7 +72,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         parent.setHighlight(true);
         grandparent.setHighlight(true);
         await DS.pause([
-            `Node ${node} is a red ${side} child of a red ${side} child`, 
+            `Node ${node} is a red ${side} child of a red ${side} child`,
             `Switch colors and rotate grandparent ${grandparent} ${rotate}`,
         ]);
         node.setHighlight(false);
@@ -80,7 +80,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         grandparent.setHighlight(false);
         this.colorBlack(parent);
         this.colorRed(grandparent);
-        await this.singleRotate(rotate, grandparent)
+        await this.singleRotate(rotate, grandparent);
     }
 
 
@@ -122,7 +122,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
             await DS.pause([
-                `Parent ${parent} is black, and ${right} child ${rightChild} is red:`, 
+                `Parent ${parent} is black, and ${right} child ${rightChild} is red:`,
                 `Switch colors and rotate ${left}`,
             ]);
             parent.setChildHighlight(right, false);
@@ -141,7 +141,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             rightChild.setChildHighlight(right, true);
             rightGrandchild.setHighlight(true);
             await DS.pause([
-                `${right} child ${rightChild} is black, its ${right} child is red:`, 
+                `${right} child ${rightChild} is black, its ${right} child is red:`,
                 `Switch colors and rotate ${left}`,
             ]);
             parent.setChildHighlight(right, false);
@@ -162,7 +162,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             rightChild.setChildHighlight(left, true);
             leftGrandchild.setHighlight(true);
             await DS.pause([
-                `${right} child ${rightChild} is black, its ${left} child is red:`, 
+                `${right} child ${rightChild} is black, its ${left} child is red:`,
                 `Switch colors and rotate child ${right}`,
             ]);
             parent.setChildHighlight(right, false);
@@ -181,9 +181,9 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
             await DS.pause([
-                `Parent ${parent} is red,`, 
-                `${right} child ${rightChild} and its children are black:`, 
-                `Switch colors`,
+                `Parent ${parent} is red,`,
+                `${right} child ${rightChild} and its children are black:`,
+                "Switch colors",
             ]);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
@@ -197,7 +197,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         parent.setChildHighlight(right, true);
         rightChild.setHighlight(true);
         await DS.pause([
-            `Parent ${parent}, ${right} child ${rightChild} and its children are black:`, 
+            `Parent ${parent}, ${right} child ${rightChild} and its children are black:`,
             `Color ${right} child red`,
         ]);
         parent.setChildHighlight(right, false);

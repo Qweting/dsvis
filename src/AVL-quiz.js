@@ -75,7 +75,7 @@ DS.initToolbar = function() {
 DS.restartQuiz = function() {
     DS.reset();
     DS.$Actions = [];
-}
+};
 
 DS.toggleNullNodes = function() {
     const show = DS.$Toolbar.showNullNodes.checked;
@@ -95,7 +95,7 @@ DS.setIdleTitle = function() {
     );
     DS.$Info.title.text(message);
     DS.$Info.body.text("");
-}
+};
 
 DS.$IdleListeners.nodeSize = {
     type: "change",
@@ -120,7 +120,6 @@ DS.$Cookies.nodeSize = {
     getCookie: (value) => DS.$Toolbar.nodeSize.value = value,
     setCookie: () => DS.getSizeClass(),
 };
-
 
 
 DS.AVLQuiz = class AVLQuiz extends DS.BST {
@@ -187,7 +186,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     async moveParent() {
         const parent = this.current.getParent();
         if (!parent) {
-            await DS.pause(`The root node doesn't have a parent!`);
+            await DS.pause("The root node doesn't have a parent!");
             return;
         }
         await this.setCurrent(parent, true);
