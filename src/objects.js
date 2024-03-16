@@ -285,6 +285,12 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
         return this.$outgoing[c]?.getEnd();
     }
 
+    getSibling() {
+        const parent = this.getParent();
+        if (!parent) return null;
+        return this === parent.getLeft() ? parent.getRight() : parent.getLeft();
+    }
+
     getParentEdge() {
         return this.$incoming.parent;
     }
@@ -301,16 +307,20 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
         return this.$outgoing[c];
     }
 
+    isLeaf() {
+        return !(this.getLeft() || this.getRight());
+    }
+
     isLeftChild() {
-        return this === this.getParent().getLeft();
+        return this === this.getParent()?.getLeft();
     }
 
     isRightChild() {
-        return this === this.getParent().getRight();
+        return this === this.getParent()?.getRight();
     }
 
     isChild(c) {
-        return this === this.getParent().getChild(c);
+        return this === this.getParent()?.getChild(c);
     }
 
     setLeft(child) {
