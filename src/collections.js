@@ -59,11 +59,13 @@ DS.initToolbar = function() {
     tools.showNullNodes.addEventListener("change", () => DS.toggleNullNodes());
 
     DS.setRunning(true);
+    DS.toggleNullNodes(true);
 };
 
 
-DS.toggleNullNodes = function() {
-    const show = DS.$Toolbar.showNullNodes.checked;
+DS.toggleNullNodes = function(show) {
+    if (show == null) show = DS.$Toolbar.showNullNodes.checked;
+    DS.$Toolbar.showNullNodes.checked = show;
     if (show) DS.SVG().addClass("shownullnodes");
     else DS.SVG().removeClass("shownullnodes");
 };
@@ -79,7 +81,6 @@ DS.$IdleListeners.nodeSize = {
     type: "change",
     condition: () => true,
     handler: () => {
-        DS.setRunning(false);
         if (DS.$Actions.length > 0) {
             const action = DS.$Actions.pop();
             DS.execute(action.oper, action.args, action.nsteps);
