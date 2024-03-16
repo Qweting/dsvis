@@ -16,12 +16,21 @@ DS.AVL = class AVL extends DS.BST {
 
     async insertOne(value) {
         const node = await super.insertOne(value);
+        node.updateHeightPosition();
         if (node) await this.updateHeights(node);
+        await this.updateHeightPositions()
     }
 
     async delete(value) {
         const result = await super.delete(value);
         if (result && result.parent) await this.updateHeights(result.parent);
+        await this.updateHeightPositions()
+    }
+
+    async updateHeightPositions() {
+        SVG.find("g").forEach((node) => {
+            if (node instanceof SVG.AVLNode) node.updateHeightPosition();
+        });
     }
 
     async updateHeights(node) {
@@ -77,8 +86,8 @@ DS.AVL = class AVL extends DS.BST {
 
 SVG.AVLNode = class AVLNode extends SVG.BinaryNode {
     init(text, x, y) {
-        const dist = 0.6 * DS.getNodeSize();
-        this.$height = this.text(1).center(-dist, -dist).addClass("avlheight").addClass(DS.getSizeClass());
+        const d = DS.getNodeSize();
+        this.$height = this.text(1).center(-0.6 * d, -0.5 * d).addClass("avlheight").addClass(DS.getSizeClass());
         return super.init(text, x, y);
     }
 
@@ -89,6 +98,12 @@ SVG.AVLNode = class AVLNode extends SVG.BinaryNode {
     setHeight(height) {
         this.$height.text(height);
         return this;
+    }
+
+    updateHeightPosition(side) {
+        const hx = this.$height.cx(), cx = this.cx();
+        if (this.isRightChild() && hx - cx < 0) this.$height.cx(2 * cx - hx);
+        if (this.isLeftChild() && hx - cx > 0) this.$height.cx(2 * cx - hx);
     }
 
     getHeightHighlight() {
