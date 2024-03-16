@@ -175,27 +175,27 @@ text.title {
 }
 
 circle, rect, polygon {
-    stroke: blue;
+    stroke: black;
     fill: lemonchiffon;
 }
 
 path, line, polyline {
-    stroke: blue;
+    stroke: black;
     fill: none;
 }
 
 svg .filled {
 	stroke: none;
-	fill: blue;
+	fill: black;
 }
 
 svg .highlight, svg .highlight > * {
-    stroke: red;
+    stroke: #C00;
 }
 
 svg .highlight.filled, svg text.highlight, svg .highlight > .filled, svg .highlight > text {
 	stroke: none;
-	fill: red;
+	fill: #C00;
 }
 
 svg .nofill {
@@ -203,14 +203,14 @@ svg .nofill {
 }
 
 svg .highlight-circle {
-	stroke: red;
+	stroke: #C00;
 	fill: none;
 }
 
 g text {
     font-size: 20px;
 	stroke: none;
-    fill: blue;
+    fill: black;
     text-anchor: middle;
 }
 
@@ -234,13 +234,22 @@ g text.avlheight.large {
 	font-size: 18px;
 }
 
+g.red circle {
+	fill: pink;
+}
+
+g.red.black circle {
+	fill: lightgrey;
+}
+
+
 g.marked circle {
 	fill: palegreen;
 }
 
 svg.shownullnodes .nullnode:not(.invisible) {
-	fill: blue;
-	stroke: blue;
+	fill: black;
+	stroke: black;
 }
 
 line.gridline, svg .invisible, svg .nullnode {
