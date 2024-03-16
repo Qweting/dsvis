@@ -338,7 +338,10 @@ DS.callAsync = async function(nAction, until) {
 
 
 DS.pause = function(title) {
-    if (title != null) DS.$Info.body.text(title);
+    if (title != null) {
+        if (title instanceof Array) title = title.join("\n");
+        DS.$Info.body.text(title);
+    }
     return new Promise((resolve, reject) => {
         if (DS.$DEBUG) console.log(`${DS.$CurrentStep}. Doing: ${title} (running: ${DS.isRunning()}), ${JSON.stringify(DS.$Actions)}`);
         const action = DS.$Actions[DS.$CurrentAction];
