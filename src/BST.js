@@ -138,13 +138,16 @@ DS.BST = class BST {
         predecessor.setParentHighlight(false);
         predecessor.setHighlight(true);
         pointer.remove();
-        const moving = DS.SVG().textCircle(predecessor.getText(), predecessor.cx(), predecessor.cy());
+        const newText = predecessor.getText();
+        const moving = DS.SVG().textCircle(newText, predecessor.cx(), predecessor.cy());
+        moving.addClass("unfilled");
         moving.setHighlight(true);
         await DS.pause(`Replace the value of ${node} with ${predecessor}`);
         pointer.setCenter(node.cx(), node.cy(), true);
         moving.setCenter(node.cx(), node.cy(), true);
+        node.setText("");
         await DS.pause();
-        node.setText(predecessor.getText());
+        node.setText(newText);
         moving.remove();
         node.setHighlight(false);
         await DS.pause(`Now delete the predecessor ${predecessor}`);

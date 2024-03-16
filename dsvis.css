@@ -234,6 +234,10 @@ g text.avlheight.large {
 	font-size: 18px;
 }
 
+g.unfilled circle {
+	fill: none;
+}
+
 g.red circle {
 	fill: pink;
 }
