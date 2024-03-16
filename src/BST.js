@@ -74,7 +74,6 @@ DS.BST = class BST {
             await DS.pause();
             return this.treeRoot;
         }
-
         await DS.pause(`Searching for node to insert ${value}`);
         const found = await this.findHelper(value);
         if (found.success) {
@@ -83,7 +82,6 @@ DS.BST = class BST {
             found.node.setHighlight(false);
             return null;
         }
-
         const child = this.newNode(value);
         const cmp = DS.compare(value, found.node.getText());
         const direction = cmp < 0 ? "left" : "right";
@@ -98,7 +96,6 @@ DS.BST = class BST {
         return child;
     }
 
-
     async delete(value) {
         value = value.trim().toUpperCase();
         if (!value) return null;
@@ -106,7 +103,6 @@ DS.BST = class BST {
             await DS.pause("Tree is empty");
             return null;
         }
-
         await DS.pause(`Searching for node to delete ${value}`);
         const found = await this.findHelper(value);
         if (!found.success) {
@@ -115,7 +111,6 @@ DS.BST = class BST {
             found.node.setHighlight(false);
             return null;
         }
-
         found.node.setHighlight(true);
         await DS.pause(`Found node ${value} to delete`);
         return await this.deleteHelper(found.node);
@@ -123,36 +118,8 @@ DS.BST = class BST {
 
     async deleteHelper(node) {
         if (!(node.getLeft() && node.getRight())) {
-            const child = node.getLeft() || node.getRight();
-            const parent = node.getParent();
-            if (parent && child) {
-                node.setHighlight(false);
-                if (child === parent.getLeft()?.getLeft()) node.dmoveCenter(-node.getSize(), -node.getSize() / 2, true);
-                if (child === parent.getRight()?.getRight()) node.dmoveCenter(node.getSize(), -node.getSize() / 2, true);
-                const direction = parent.getLeft() === node ? "left" : "right";
-                parent.setChild(direction, child);
-                child.setHighlight(true);
-                parent.setChildHighlight(direction, true);
-                await DS.pause(`Redirect parent ${parent} to child ${child}`);
-                parent.setChildHighlight(direction, false);
-                child.setHighlight(false);
-                node.setHighlight(true);
-                await DS.pause(`Remove node ${node}`);
-            } else if (parent && !child) {
-                await DS.pause(`Remove leaf node ${node}`);
-            } else if (!child) {
-                this.treeRoot = null;
-                await DS.pause(`Remove the root node ${node}`);
-            } else {
-                this.treeRoot = child;
-                await DS.pause(`Make the child ${child} the new root,\nand remove node ${node}`);
-            }
-            node.remove();
-            this.resizeTree();
-            await DS.pause();
-            return child || parent;
+            return await this.deleteNode(node);
         }
-
         const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
         node.setHighlight(true);
         await DS.pause(`Finding the predecessor node of ${node}`);
@@ -181,7 +148,47 @@ DS.BST = class BST {
         moving.remove();
         node.setHighlight(false);
         await DS.pause(`Now delete the predecessor ${predecessor}`);
-        return await this.deleteHelper(predecessor);
+        return await this.deleteNode(predecessor);
+    }
+
+    async deleteNode(node) {
+        // The node will NOT have two children - this has been taken care of by deleteHelper
+        const child = node.getLeft() || node.getRight();
+        const parent = node.getParent();
+        if (!parent) {
+            if (!child) {
+                this.treeRoot = null;
+                await DS.pause(`Remove the root node ${node}`);
+            } else {
+                this.treeRoot = child;
+                await DS.pause(`Make the child ${child} the new root,\nand remove node ${node}`);
+            }
+            node.remove();
+            this.resizeTree();
+            await DS.pause();
+            return {direction: null, parent: null};
+        }
+
+        const direction = parent.getLeft() === node ? "left" : "right";
+        if (child) {
+            node.setHighlight(false);
+            if (child === parent.getLeft()?.getLeft()) node.dmoveCenter(-node.getSize(), -node.getSize() / 2, true);
+            if (child === parent.getRight()?.getRight()) node.dmoveCenter(node.getSize(), -node.getSize() / 2, true);
+            parent.setChild(direction, child);
+            child.setHighlight(true);
+            parent.setChildHighlight(direction, true);
+            await DS.pause(`Redirect parent ${parent} to child ${child}`);
+            parent.setChildHighlight(direction, false);
+            child.setHighlight(false);
+            node.setHighlight(true);
+            await DS.pause(`Remove node ${node}`);
+        } else {
+            await DS.pause(`Remove leaf node ${node}`);
+        }
+        node.remove();
+        this.resizeTree();
+        await DS.pause();
+        return {direction: direction, parent: parent};
     }
 
     async print() {

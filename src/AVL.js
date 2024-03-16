@@ -20,16 +20,15 @@ DS.AVL = class AVL extends DS.BST {
     }
 
     async delete(value) {
-        const node = await super.delete(value);
-        if (node) await this.updateHeights(node);
+        const result = await super.delete(value);
+        if (result && result.parent) await this.updateHeights(result.parent);
     }
 
     async updateHeights(node) {
         this.pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
-        await DS.pause("Update node heights");
         while (node) {
             this.pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause();
+            await DS.pause("Update node heights");
             const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
             const height = 1 + Math.max(leftHeight, rightHeight);
             if (height !== this.getHeight(node)) {
