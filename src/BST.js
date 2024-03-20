@@ -26,7 +26,6 @@ DS.BST = class BST {
     }
 
     async find(value) {
-        value = value.trim().toUpperCase();
         if (!value) return;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
@@ -65,7 +64,6 @@ DS.BST = class BST {
     }
 
     async insertOne(value) {
-        value = value.trim().toUpperCase();
         if (!value) return null;
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
@@ -97,7 +95,6 @@ DS.BST = class BST {
     }
 
     async delete(value) {
-        value = value.trim().toUpperCase();
         if (!value) return null;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
