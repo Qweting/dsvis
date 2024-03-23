@@ -190,8 +190,12 @@ DS.$AsyncListeners = {
         type: "click",
         handler: (resolve, reject) => {
             DS.toggleRunner();
-            if (DS.isRunning()) DS.stepForward(resolve, reject);
-            else resolve();
+            if (DS.isRunning()) {
+                DS.stepForward(resolve, reject);
+            } else {
+                DS.$CurrentStep++;
+                resolve();
+            }
         },
     },
     stepBackward: {
