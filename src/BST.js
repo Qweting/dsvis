@@ -13,6 +13,20 @@ DS.BST = class BST {
         this.treeRoot = null;
     }
 
+    initToolbar() {
+        DS.$Toolbar.generalControls.insertAdjacentHTML("beforeend", '<label><input id="showNullNodes" type="checkbox"/> Show null nodes</label>');
+        DS.$Toolbar.showNullNodes = document.getElementById("showNullNodes");
+        DS.$Toolbar.showNullNodes.addEventListener("change", () => this.toggleNullNodes());
+        this.toggleNullNodes(true);
+    }
+
+    toggleNullNodes = function(show) {
+        if (show == null) show = DS.$Toolbar.showNullNodes.checked;
+        DS.$Toolbar.showNullNodes.checked = show;
+        if (show) DS.SVG().addClass("shownullnodes");
+        else DS.SVG().removeClass("shownullnodes");
+    };
+
     newNode(text) {
         return DS.SVG().binaryNode(text, DS.getStartX(), DS.getStartY());
     }

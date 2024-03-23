@@ -25,6 +25,7 @@ DS.getSpacingY = () => DS.getNodeSize();
 DS.initToolbar = function() {
     const tools = DS.$Toolbar;
     // General toolbar
+    tools.generalControls = document.getElementById("generalControls");
     tools.stepForward = document.getElementById("stepForward");
     tools.stepBackward = document.getElementById("stepBackward");
     tools.toggleRunner = document.getElementById("toggleRunner");
@@ -56,18 +57,9 @@ DS.initToolbar = function() {
     DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => DS.submit("delete", tools.deleteField));
     tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
     tools.printTree.addEventListener("click", () => DS.submit("print"));
-    tools.showNullNodes.addEventListener("change", () => DS.toggleNullNodes());
 
     DS.setRunning(true);
-    DS.toggleNullNodes(true);
-};
-
-
-DS.toggleNullNodes = function(show) {
-    if (show == null) show = DS.$Toolbar.showNullNodes.checked;
-    DS.$Toolbar.showNullNodes.checked = show;
-    if (show) DS.SVG().addClass("shownullnodes");
-    else DS.SVG().removeClass("shownullnodes");
+    DS.$Current.initToolbar?.();
 };
 
 

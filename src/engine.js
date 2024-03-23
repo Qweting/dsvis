@@ -60,9 +60,9 @@ DS.$Cookies.animationSpeed = {
 
 DS.initialise = function(svgID) {
     DS.initEngine(svgID);
+    DS.initAlgorithm();
     DS.initToolbar();
     DS.loadCookies();
-    DS.initAlgorithm();
     DS.reset();
 };
 

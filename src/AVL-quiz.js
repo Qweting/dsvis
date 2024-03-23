@@ -24,13 +24,13 @@ DS.getSpacingY = () => DS.getNodeSize();
 // Override:
 DS.initAlgorithm = function() {
     DS.$Current = new DS.AVLQuiz();
-    DS.reset();
 };
 
 
 DS.initToolbar = function() {
     const tools = DS.$Toolbar;
     // General toolbar
+    tools.generalControls = document.getElementById("generalControls");
     tools.stepForward = document.getElementById("stepForward");
     tools.stepBackward = document.getElementById("stepBackward");
     tools.toggleRunner = document.getElementById("toggleRunner");
@@ -38,7 +38,6 @@ DS.initToolbar = function() {
     tools.fastBackward = document.getElementById("fastBackward");
     tools.animationSpeed = document.getElementById("animationSpeed");
     tools.nodeSize = document.getElementById("nodeSize");
-    tools.showNullNodes = document.getElementById("showNullNodes");
 
     // Algorithm toolbar
     tools.insertField = document.getElementById("insertField");
@@ -54,7 +53,6 @@ DS.initToolbar = function() {
     tools.deleteNode = document.getElementById("deleteNode");
     tools.restartQuiz = document.getElementById("restartQuiz");
 
-    tools.showNullNodes.addEventListener("change", () => DS.toggleNullNodes());
     DS.addReturnSubmit(tools.insertField, "ALPHANUM");
     tools.createLeft.addEventListener("click", () => DS.submit("insertLeft", tools.insertField));
     tools.createRight.addEventListener("click", () => DS.submit("insertRight", tools.insertField));
@@ -69,6 +67,7 @@ DS.initToolbar = function() {
     tools.restartQuiz.addEventListener("click", () => DS.restartQuiz());
 
     DS.setRunning(true);
+    DS.$Current.initToolbar?.();
 };
 
 
