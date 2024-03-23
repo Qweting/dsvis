@@ -231,14 +231,57 @@ DS.BTree = class BTree {
     }
 
 
+    async print() {
+        if (!this.treeRoot) {
+            await DS.pause("Tree is empty");
+            return;
+        }
+        const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
+        const printed = [];
+        printed.push(DS.SVG().text("Printed nodes: ").x(DS.$Info.x).cy(DS.$SvgHeight - 80));
+        await this.printHelper(this.treeRoot, pointer, printed);
+        pointer.remove();
+        await DS.pause();
+        for (const lbl of printed) lbl.remove();
+    }
+
+    async printHelper(node, pointer, printed) {
+        if (node.isLeaf()) {
+            for (let i = 0; i < node.numValues(); i++) {
+                pointer.setCenter(node.getCX(i), node.cy(), true);
+                await this.printOneLabel(node, i, printed);
+            }
+        } else {
+            for (let i = 0; i < node.numChildren(); i++) {
+                pointer.setCenter(node.getCX(i-0.5), node.y()+node.height(), true);
+                await DS.pause();
+                await this.printHelper(node.getChild(i), pointer, printed);
+                if (i < node.numValues()) {
+                    pointer.setCenter(node.getCX(i), node.cy(), true);
+                    await this.printOneLabel(node, i, printed);
+                } else {
+                    pointer.setCenter(node.getCX(i-0.5), node.cy(), true);
+                    await DS.pause();
+                }
+            }
+        }
+    }
+
+    async printOneLabel(node, i, printed) {
+        const lbl = DS.SVG().text(node.getText(i)).center(node.getCX(i), node.cy());
+        await DS.pause();
+        const last = printed[printed.length - 1];
+        DS.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
+        printed.push(lbl);
+        await DS.pause();
+    }
+
+
     async delete(value) {
         await DS.pause("B-tree deletion is not implemented yet!");
         return null;
     }
 
-    async print() {
-        await DS.pause("B-tree printing is not implemented yet!");
-    }
 
 };
 

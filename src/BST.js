@@ -218,7 +218,6 @@ DS.BST = class BST {
         pointer.remove();
         await DS.pause();
         for (const lbl of printed) lbl.remove();
-        await DS.pause();
     }
 
     async printHelper(node, pointer, printed) {
