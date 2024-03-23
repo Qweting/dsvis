@@ -1,0 +1,277 @@
+
+///////////////////////////////////////////////////////////////////////////////
+// Import and export information used by the Javascript linter ESLint:
+/* globals SVG, DS */
+///////////////////////////////////////////////////////////////////////////////
+
+SVG.extend(SVG.Container, {
+    bTreeNode: function(leaf, nvalues, x, y) {
+        return this.put(new SVG.BTreeNode()).init(leaf, nvalues, x, y);
+    },
+});
+
+
+SVG.BTreeNode = class BTreeNode extends SVG.G {
+    $parent = null;
+    $children = null;
+
+    $rect = null;
+    $values = [];
+    $lines = [];
+
+    init(leaf, nvalues, x, y) {
+        if (nvalues < 1) throw new Error(`BTreeNode: must have at least one value`);
+        this.$children = leaf ? null : Array(nvalues + 1);
+        this.setNumValues(nvalues);
+        if (x && y) this.center(x, y);
+        return this;
+    }
+
+    toString() {
+        return "[" + this.getTexts().join(" | ") + "]";
+    }
+
+    numValues() {
+        return this.$values.length;
+    }
+
+    numChildren() {
+        return this.$children.length;
+    }
+
+    isLeaf() {
+        return this.$children == null;
+    }
+
+    setLeaf(leaf) {
+        if (leaf && this.$children) {
+            for (let i = 0; i < this.$children.length; i++) {
+                this.setChild(i, null);
+            }
+            this.$children = null;
+        } else {
+            this.$children = Array(this.numValues() + 1);
+        }
+    }
+
+    insertValue(i, text) {
+        const dx = (i / this.numValues() - 1) * DS.getNodeSize();
+        this.dmoveCenter(dx, 0);
+        this.$values.splice(i, 0, null);
+        this.$lines.splice(i, 0, null);
+        if (!this.isLeaf()) this.$children.splice(i + 1, 0, null);
+        this.setNumValues(this.numValues());
+        this.setText(i, text);
+    }
+
+    setNumValues(nvalues) {
+        if (nvalues < 1) throw new Error(`BTreeNode: must have at least one value`);
+        while (nvalues < this.numValues()) {
+            if (!this.isLeaf()) {
+                this.setChild(this.$children.length - 1, null);
+                this.$children.pop();
+            }
+            this.$values.pop().remove();
+            this.$lines.pop().remove();
+        }
+
+        const w0 = DS.getNodeSize(), h = DS.getNodeSize(), stroke = DS.getStrokeWidth();
+        if (!this.$rect) this.$rect = this.rect(w0 * nvalues, h).stroke({width: stroke}).center(0, 0);
+        this.$rect.width(w0 * nvalues).radius(h / 4);
+        const cx = this.$rect.cx(), cy = this.$rect.cy();
+        for (let i = 0; i < nvalues; i++) {
+            if (!this.$values[i]) this.$values[i] = this.text("#").addClass(DS.getSizeClass());
+            this.$values[i].center(cx + w0 * (i - nvalues/2 + 1/2), cy);
+            if (i > 0) {
+                const dx = w0 * (i - nvalues/2), dy = h / 2;
+                if (!this.$lines[i]) this.$lines[i] = this.line(0, cy-dy, 0, cy+dy).stroke({width: stroke});
+                this.$lines[i].cx(cx + dx);
+            }
+        }
+        return this;
+    }
+
+    getBend(i) {return 0}
+    getDirected(i) {return true}
+
+    getCX(i) {
+        return this.cx() + DS.getNodeSize() * (i - (this.numValues()-1) / 2);
+    }
+
+    getWidth() {
+        return this.$rect.width();
+    }
+
+    getHeight() {
+        return this.$rect.height();
+    }
+
+    getSize() {return this.getHeight()}
+
+    getTexts() {
+        return this.$values.map((t) => t.text());
+    }
+
+    setTexts(texts) {
+        if (texts.length !== this.numValues()) throw new Error(`Wrong number of texts: ${texts.length} != ${this.numValues()}`);
+        for (let i = 0; i < texts.length; i++) {
+            this.setText(i, texts[i]);
+        }
+    }
+
+    getText(c) {
+        return this.$values[c].text();
+    }
+
+    setText(i, text) {
+        this.$values[i].text(text);
+    }
+
+    getParent() {
+        return this.$parent?.getStart();
+    }
+
+    getChildren() {
+        return this.$children.map((e) => e?.getEnd());
+    }
+
+    getChild(i) {
+        return this.$children[i]?.getEnd();
+    }
+
+    getLeft() {
+        return this.getChild(0);
+    }
+
+    getRight() {
+        return this.getChild(this.numChildren() - 1);
+    }
+
+    isChild(c) {
+        return this === this.getParent()?.getChild(c);
+    }
+
+    getParentIndex() {
+        const parent = this.getParent();
+        if (!parent) return null;
+        for (let i = 0; i < parent.numChildren(); i++) {
+            if (this === parent.getChild(i)) return i;
+        }
+        return null;
+    }
+
+    getParentEdge() {
+        return this.$parent;
+    }
+
+    getChildEdge(i) {
+        return this.$children[i];
+    }
+
+    setChild(i, child) {
+        if (this.$children[i]) {
+            const oldChild = this.$children[i].getEnd();
+            oldChild.$parent = null;
+            this.$children[i].remove();
+        }
+        if (!child) {
+            this.$children[i] = null;
+        } else {
+            if (child.$parent) {
+                const oldParent = child.$parent.getStart();
+                for (let i = 0; i < oldParent.$children.length; i++) {
+                    if (child.$parent === oldParent.$children[i]) {
+                        oldParent.$children[i] = null;
+                    }
+                }
+                child.$parent.remove();
+            }
+            const edge = DS.SVG().connection(this, child, this.getBend(i), this.getDirected(i));
+            this.$children[i] = edge;
+            child.$parent = edge;
+        }
+        return this;
+    }
+
+
+    setParent(c, parent) {
+        parent.setChild(c, this);
+        return this;
+    }
+
+    setParentHighlight(high) {
+        this.setHighlight(high);
+        this.getParent()?.setHighlight(high);
+    }
+
+    setChildHighlight(i, high) {
+        this.setHighlight(high);
+        this.getChild(i)?.setHighlight(high);
+    }
+
+    remove() {
+        if (!this.isLeaf()) {
+            for (let i = 0; i < this.numChildren(); i++) {
+                if (!this.$children[i]) continue;
+                this.$children[i].getEnd().$parent = null;
+                this.$children[i].remove();
+                this.$children[i] = null;
+            }
+        }
+        if (this.$parent) {
+            const i = this.getParentIndex();
+            this.$parent.getStart().$children[i] = null;
+            this.$parent.remove();
+            this.$parent = null;
+        }
+        super.remove();
+    }
+
+    setCenter(x, y, animate = false) {
+        super.setCenter(x, y, animate);
+        for (const i in this.$children) {
+            this.$children[i]?.update({x1: x, y1: y}, animate);
+        }
+        this.$parent?.update({x2: x, y2: y}, animate);
+        return this;
+    }
+
+
+    resize(startX, startY, animate = true) {
+        this._resizeWidths();
+        this._setNewPositions(startX, startY, animate);
+    }
+
+    _resizeWidths() {
+        let left = 0, right = 0;
+        this.$childWidths = 0;
+        this.$width = this.getWidth();
+        if (!this.isLeaf()) {
+            for (const child of this.getChildren()) {
+                this.$childWidths += child._resizeWidths();
+            }
+            this.$width = Math.max(this.$width, this.$childWidths + this.numValues() * DS.getSpacingX());
+            left = this.getLeft().$leftWidth || 0;
+            right = this.getRight().$rightWidth || 0;
+        }
+        const mid = this.$width - left - right;
+        this.$leftWidth = mid / 2 + left;
+        this.$rightWidth = mid / 2 + right;
+        return this.$width;
+    }
+
+    _setNewPositions(x, y, animate) {
+        this.setCenter(x, y, animate);
+        if (this.isLeaf()) return;
+        x -= this.$leftWidth;
+        const spacing = (this.$width - this.$childWidths) / this.numValues();
+        const nextY = y + this.getHeight() + DS.getSpacingY();
+        for (const child of this.getChildren()) {
+            child._setNewPositions(x + child.$leftWidth, nextY, animate);
+            x += child.$width + spacing;
+        }
+    }
+
+};
+
+
