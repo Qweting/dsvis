@@ -232,10 +232,10 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
     setCenter(x, y, animate = false) {
         super.setCenter(x, y, animate);
         for (const edge of this.getOutgoingEdges()) {
-            edge.doRedraw({x1: x, y1: y}, animate);
+            edge.update({x1: x, y1: y}, animate);
         }
         for (const edge of this.getIncomingEdges()) {
-            edge.doRedraw({x2: x, y2: y}, animate);
+            edge.update({x2: x, y2: y}, animate);
         }
         return this;
     }
@@ -243,7 +243,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
     setSize(diameter, animate = false) {
         super.setSize(diameter, animate);
         for (const edge of this.getIncomingEdges()) {
-            edge.doRedraw({r2: diameter / 2}, animate);
+            edge.update({r2: diameter / 2}, animate);
         }
         return this;
     }
@@ -441,7 +441,7 @@ SVG.Connection = class Connection extends SVG.Path {
         this.back();
         this.setBend(bend);
         if (directed) this._createArrow();
-        this.doRedraw();
+        this.update();
         return this;
     }
 
@@ -457,7 +457,7 @@ SVG.Connection = class Connection extends SVG.Path {
         return Boolean(this.reference("marker-end"));
     }
 
-    doRedraw(newCoords, animate = false) {
+    update(newCoords = null, animate = false) {
         Object.assign(this.$coords, newCoords);
         DS.animate(this, animate).plot(this._getPath());
         if (this.isDirected()) this._redrawArrow(animate);
@@ -488,16 +488,16 @@ SVG.Connection = class Connection extends SVG.Path {
         return this.$end;
     }
 
-    setStart(start) {
+    setStart(start, animate = false) {
         if (start === this.$start) return;
         this.$start = start;
-        if (start) this.doRedraw({x1: start.cx(), y1: start.cy()});
+        if (start) this.update({x1: start.cx(), y1: start.cy()}, animate);
     }
 
-    setEnd(end) {
+    setEnd(end, animate = false) {
         if (end === this.$end) return;
         this.$end = end;
-        if (end) this.doRedraw({x2: end.cx(), y2: end.cy()});
+        if (end) this.update({x2: end.cx(), y2: end.cy()}, animate);
     }
 
     setHighlight(high) {
