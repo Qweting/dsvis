@@ -63,7 +63,7 @@ DS.initialise = function(svgID) {
     DS.initAlgorithm();
     DS.initToolbar();
     DS.loadCookies();
-    DS.reset();
+    DS.resetAll();
 };
 
 
@@ -71,7 +71,12 @@ DS.initEngine = function(svgID) {
     DS.$DEBUG = new URL(window.location).searchParams.get("debug");
     DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
     if (DS.$DEBUG) DS.$Svg.addClass("debug");
+};
+
+
+DS.resetAll = function() {
     DS.$Actions = [];
+    DS.reset();
 };
 
 

@@ -44,6 +44,7 @@ DS.initToolbar = function() {
     tools.deleteField = document.getElementById("deleteField");
     tools.deleteSubmit = document.getElementById("deleteSubmit");
     tools.printTree = document.getElementById("printTree");
+    tools.clearTree = document.getElementById("clearTree");
     tools.showNullNodes = document.getElementById("showNullNodes");
 
     tools.insertSelect.addEventListener("change", () => {
@@ -57,10 +58,16 @@ DS.initToolbar = function() {
     DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => DS.submit("delete", tools.deleteField));
     tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
     tools.printTree.addEventListener("click", () => DS.submit("print"));
+    tools.clearTree.addEventListener("click", () => DS.clearTree());
 
     DS.setRunning(true);
     DS.$Current.initToolbar?.();
 };
+
+
+DS.clearTree = function() {
+    if (confirm("This clear the canvas and your history!")) DS.resetAll();
+}
 
 
 DS.setIdleTitle = function() {
