@@ -24,17 +24,6 @@ DS.getSpacingY = () => DS.getNodeSize();
 
 DS.initToolbar = function() {
     const tools = DS.$Toolbar;
-    // General toolbar
-    tools.generalControls = document.getElementById("generalControls");
-    tools.stepForward = document.getElementById("stepForward");
-    tools.stepBackward = document.getElementById("stepBackward");
-    tools.toggleRunner = document.getElementById("toggleRunner");
-    tools.fastForward = document.getElementById("fastForward");
-    tools.fastBackward = document.getElementById("fastBackward");
-    tools.animationSpeed = document.getElementById("animationSpeed");
-    tools.nodeSize = document.getElementById("nodeSize");
-
-    // Algorithm toolbar
     tools.algorithmControls = document.getElementById("algorithmControls");
     tools.insertSelect = document.getElementById("insertSelect");
     tools.insertField = document.getElementById("insertField");
@@ -46,6 +35,7 @@ DS.initToolbar = function() {
     tools.printTree = document.getElementById("printTree");
     tools.clearTree = document.getElementById("clearTree");
     tools.showNullNodes = document.getElementById("showNullNodes");
+    tools.nodeSize = document.getElementById("nodeSize");
 
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;

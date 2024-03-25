@@ -29,17 +29,6 @@ DS.initAlgorithm = function() {
 
 DS.initToolbar = function() {
     const tools = DS.$Toolbar;
-    // General toolbar
-    tools.generalControls = document.getElementById("generalControls");
-    tools.stepForward = document.getElementById("stepForward");
-    tools.stepBackward = document.getElementById("stepBackward");
-    tools.toggleRunner = document.getElementById("toggleRunner");
-    tools.fastForward = document.getElementById("fastForward");
-    tools.fastBackward = document.getElementById("fastBackward");
-    tools.animationSpeed = document.getElementById("animationSpeed");
-    tools.nodeSize = document.getElementById("nodeSize");
-
-    // Algorithm toolbar
     tools.insertField = document.getElementById("insertField");
     tools.createLeft = document.getElementById("createLeft");
     tools.createRight = document.getElementById("createRight");
@@ -52,6 +41,7 @@ DS.initToolbar = function() {
     tools.copyToMark = document.getElementById("copyToMark");
     tools.deleteNode = document.getElementById("deleteNode");
     tools.restartQuiz = document.getElementById("restartQuiz");
+    tools.nodeSize = document.getElementById("nodeSize");
 
     DS.addReturnSubmit(tools.insertField, "ALPHANUM");
     tools.createLeft.addEventListener("click", () => DS.submit("insertLeft", tools.insertField));

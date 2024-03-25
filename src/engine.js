@@ -61,6 +61,7 @@ DS.$Cookies.animationSpeed = {
 DS.initialise = function(svgID) {
     DS.initEngine(svgID);
     DS.initAlgorithm();
+    DS.initGeneralToolbar();
     DS.initToolbar();
     DS.loadCookies();
     DS.resetAll();
@@ -72,6 +73,20 @@ DS.initEngine = function(svgID) {
     DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
     if (DS.$DEBUG) DS.$Svg.addClass("debug");
 };
+
+
+DS.initGeneralToolbar = function() {
+    const tools = DS.$Toolbar;
+    tools.generalControls = document.getElementById("generalControls");
+    tools.stepForward = document.getElementById("stepForward");
+    tools.stepBackward = document.getElementById("stepBackward");
+    tools.toggleRunner = document.getElementById("toggleRunner");
+    tools.fastForward = document.getElementById("fastForward");
+    tools.fastBackward = document.getElementById("fastBackward");
+
+    tools.animationSpeed = document.getElementById("animationSpeed");
+    tools.animationSpeed.addEventListener("change", () => DS.saveCookies());
+}
 
 
 DS.resetAll = function() {
