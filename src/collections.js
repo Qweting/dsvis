@@ -61,7 +61,7 @@ DS.initToolbar = function() {
     tools.clearTree.addEventListener("click", () => DS.clearTree());
 
     DS.setRunning(true);
-    DS.$Current.initToolbar?.();
+    DS.$Current?.initToolbar?.();
 };
 
 

@@ -137,17 +137,14 @@ DS.BST = class BST {
         await DS.pause(`Finding the predecessor node of ${node}`);
 
         let predecessor = node.getLeft();
-        predecessor.setParentHighlight(true);
-        pointer.setCenter(predecessor.cx(), predecessor.cy(), true);
-        await DS.pause();
-        while (predecessor.getRight()) {
-            predecessor.setParentHighlight(false);
-            predecessor = predecessor.getRight();
+        while (true) {
             predecessor.setParentHighlight(true);
             pointer.setCenter(predecessor.cx(), predecessor.cy(), true);
             await DS.pause();
+            predecessor.setParentHighlight(false);
+            if (!predecessor.getRight()) break;
+            predecessor = predecessor.getRight();
         }
-        predecessor.setParentHighlight(false);
         predecessor.setHighlight(true);
         pointer.remove();
         const newText = predecessor.getText();
@@ -155,7 +152,6 @@ DS.BST = class BST {
         moving.addClass("unfilled");
         moving.setHighlight(true);
         await DS.pause(`Replace the value of ${node} with ${predecessor}`);
-        pointer.setCenter(node.cx(), node.cy(), true);
         moving.setCenter(node.cx(), node.cy(), true);
         node.setText("");
         await DS.pause();
