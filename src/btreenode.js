@@ -54,33 +54,51 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         }
     }
 
-    insertValue(i, text) {
-        const dx = (i / this.numValues() - 1) * DS.getNodeSize();
-        this.dmoveCenter(dx, 0);
+    insertValue(i, text, leftChildInsert = false) {
+        if (i < this.numValues()) {
+            const dx = (i / Math.max(1, this.numValues()) - 1) * DS.getNodeSize();
+            this.dmoveCenter(dx, 0);
+        }
         this.$values.splice(i, 0, null);
         this.$lines.splice(i, 0, null);
-        if (!this.isLeaf()) this.$children.splice(i + 1, 0, null);
+        if (!this.isLeaf()) {
+            const j = leftChildInsert ? i : i + 1;
+            this.$children.splice(j, 0, null);
+        }
         this.setNumValues(this.numValues());
         this.setText(i, text);
     }
 
+    deleteValue(i, leftChildDelete = true) {
+        this.$values[i].remove();
+        this.$values.splice(i, 1);
+        const l = Math.max(i, 1);
+        this.$lines[l]?.remove();
+        this.$lines.splice(l, 1);
+        if (!this.isLeaf()) {
+            const j = leftChildDelete ? i : i + 1;
+            this.setChild(j, null);
+            this.$children.splice(j, 1);
+        }
+        this.setNumValues(this.numValues());
+    }
+
     setNumValues(nvalues) {
-        if (nvalues < 1) throw new Error(`BTreeNode: must have at least one value`);
         while (nvalues < this.numValues()) {
             if (!this.isLeaf()) {
                 this.setChild(this.$children.length - 1, null);
                 this.$children.pop();
             }
-            this.$values.pop().remove();
-            this.$lines.pop().remove();
+            this.$values.pop()?.remove();
+            this.$lines.pop()?.remove();
         }
 
         const w0 = DS.getNodeSize(), h = DS.getNodeSize(), stroke = DS.getStrokeWidth();
         if (!this.$rect) this.$rect = this.rect(w0 * nvalues, h).stroke({width: stroke}).center(0, 0);
-        this.$rect.width(w0 * nvalues).radius(h / 4);
+        this.$rect.width(w0 * Math.max(1/2, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
-            if (!this.$values[i]) this.$values[i] = this.text("#").addClass(DS.getSizeClass());
+            if (!this.$values[i]) this.$values[i] = this.text(" ").addClass(DS.getSizeClass());
             this.$values[i].center(cx + w0 * (i - nvalues/2 + 1/2), cy);
             if (i > 0) {
                 const dx = w0 * (i - nvalues/2), dy = h / 2;
@@ -128,7 +146,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
         if (text === "") text = " ";
-        this.$values[i].text(text);
+        this.$values[i].text(text); 
         return this;
     }
 
