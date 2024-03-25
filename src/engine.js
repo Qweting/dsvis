@@ -415,8 +415,8 @@ DS.toggleRunner = function() {
 
 
 DS.loadCookies = function() {
+    if (DS.$DEBUG) console.log("Loading cookies", document.cookie);
     const allCookies = document.cookie.split(";");
-    if (DS.$DEBUG) console.log("Document cookies", ...allCookies);
     for (const cookieName in DS.$Cookies) {
         for (const cookie of allCookies) {
             const [cookieName0, value0] = cookie.split("=", 2);
@@ -431,18 +431,17 @@ DS.loadCookies = function() {
 
 
 DS.saveCookies = function() {
-    const cookies = [];
-    for (const cookieName in DS.$Cookies) {
-        const value = encodeURIComponent(DS.$Cookies[cookieName].setCookie());
-        cookies.push(`${cookieName}=${value}`);
-    }
+    let expires = "";
     if (DS.$CookieExpireDays > 0) {
         const exdate = new Date();
         exdate.setDate(exdate.getDate() + DS.$CookieExpireDays);
-        cookies.push(`expires=${exdate.toUTCString()}`);
+        expires = `;expires=${exdate.toUTCString()}`;
     }
-    document.cookie = cookies.join("; ");
-    if (DS.$DEBUG) console.log("Setting cookies", ...cookies);
+    for (const cookieName in DS.$Cookies) {
+        const value = encodeURIComponent(DS.$Cookies[cookieName].setCookie());
+        document.cookie = `${cookieName}=${value}${expires}`;
+    }
+    if (DS.$DEBUG) console.log("Setting cookies", document.cookie);
 };
 
 
