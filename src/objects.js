@@ -437,10 +437,12 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
 
 SVG.Connection = class Connection extends SVG.Path {
+    $coords = {}
+
     init(start, end, bend = 0, directed = false) {
         this.$start = start;
         this.$end = end;
-        this.$coords = {x1: start.cx(), y1: start.cy(), x2: end.cx(), y2: end.cy(), r2: end.getSize() / 2};
+        Object.assign(this.$coords, {x1: start.cx(), y1: start.cy(), x2: end.cx(), y2: end.cy(), r2: end.getSize() / 2});
         this.stroke({width: DS.getStrokeWidth()});
         this.back();
         this.setBend(bend);
@@ -512,8 +514,8 @@ SVG.Connection = class Connection extends SVG.Path {
 
     _getPath() {
         const C = this.$coords;
-        const xControl = (C.x1 + C.x2) / 2 + (C.y1 - C.y2) * this.$bend;
-        const yControl = (C.y1 + C.y2) / 2 + (C.x2 - C.x1) * this.$bend;
+        const xControl = (C.x1 + C.x2) / 2 + (C.y1 - C.y2) * this.getBend();
+        const yControl = (C.y1 + C.y2) / 2 + (C.x2 - C.x1) * this.getBend();
         return `M ${C.x1} ${C.y1} Q ${xControl} ${yControl} ${C.x2} ${C.y2}`;
     }
 };

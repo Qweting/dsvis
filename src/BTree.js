@@ -350,6 +350,7 @@ DS.BTree = class BTree {
         node.setText(i, maxValue);
         risingNode.remove();
         node.removeClass("marked");
+        maxNode.setHighlight(true);
         await DS.pause(`Now delete ${maxValue} in the leaf node ${maxNode}`);
         await this.deleteLeaf(maxNode, j);
     }
