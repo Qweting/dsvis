@@ -74,6 +74,10 @@ SVG.TextCircle = class TextCircle extends SVG.G {
     }
 
     setText(text) {
+        if (text == null) text = "";
+        text = `${text}`;
+        // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
+        if (text === "") text = " ";
         this.$text.text(text);
         return this;
     }

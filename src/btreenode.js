@@ -124,7 +124,12 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     }
 
     setText(i, text) {
+        if (text == null) text = "";
+        text = `${text}`;
+        // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
+        if (text === "") text = " ";
         this.$values[i].text(text);
+        return this;
     }
 
     getParent() {
