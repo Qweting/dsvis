@@ -40,10 +40,9 @@ DS.BST = class BST {
     }
 
     async find(value) {
-        if (!value) return;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
-            return;
+            return null;
         }
         await DS.pause(`Searching for ${value}`);
         const found = await this.findHelper(value);
@@ -51,6 +50,7 @@ DS.BST = class BST {
         const response = found.success ? `Found ${value}` : `Did not find ${value}`;
         await DS.pause(response);
         found.node.setHighlight(false);
+        return found;
     }
 
     async findHelper(value) {
@@ -78,13 +78,12 @@ DS.BST = class BST {
     }
 
     async insertOne(value) {
-        if (!value) return null;
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
             await DS.pause(`Create a new tree root ${value}`);
             this.resizeTree();
             await DS.pause();
-            return this.treeRoot;
+            return {success: true, node: this.treeRoot};
         }
         await DS.pause(`Searching for node to insert ${value}`);
         const found = await this.findHelper(value);
@@ -92,7 +91,7 @@ DS.BST = class BST {
             found.node.setHighlight(true);
             await DS.pause(`There is already a node ${found.node}`);
             found.node.setHighlight(false);
-            return null;
+            return {success: false, node: found.node};
         }
         const child = this.newNode(value);
         const cmp = DS.compare(value, found.node.getText());
@@ -105,11 +104,10 @@ DS.BST = class BST {
         child.setHighlight(false);
         this.resizeTree();
         await DS.pause();
-        return child;
+        return {success: true, node: child};
     }
 
     async delete(value) {
-        if (!value) return null;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
             return null;
@@ -120,7 +118,8 @@ DS.BST = class BST {
             found.node.setHighlight(true);
             await DS.pause(`There is no node ${value}`);
             found.node.setHighlight(false);
-            return null;
+            const direction = DS.compare(value, found.node.getText()) < 0 ? "left" : "right";
+            return {success: false, direction: direction, parent: found.node};
         }
         found.node.setHighlight(true);
         await DS.pause(`Found node ${value} to delete`);
@@ -177,7 +176,7 @@ DS.BST = class BST {
             node.remove();
             this.resizeTree();
             await DS.pause();
-            return {direction: null, parent: null};
+            return {success: true, direction: null, parent: null};
         }
 
         const direction = parent.getLeft() === node ? "left" : "right";
@@ -199,7 +198,7 @@ DS.BST = class BST {
         node.remove();
         this.resizeTree();
         await DS.pause();
-        return {direction: direction, parent: parent};
+        return {success: true, direction: direction, parent: parent};
     }
 
     async print() {
@@ -254,7 +253,7 @@ DS.BST = class BST {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
-        await DS.pause(`Rotate ${child} ${right}, then rotate ${node} ${left}`);
+        await DS.pause(`Zig-zag: Rotate ${child} ${right}, then rotate ${node} ${left}`);
         await this.singleRotate(right, child);
         return await this.singleRotate(left, node);
     }

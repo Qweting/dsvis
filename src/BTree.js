@@ -55,7 +55,6 @@ DS.BTree = class BTree {
     // Find a value
 
     async find(value) {
-        if (!value) return;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
             return;
@@ -115,7 +114,6 @@ DS.BTree = class BTree {
     // Insert a value
 
     async insertOne(value) {
-        if (!value) return null;
         if (!this.treeRoot) {
             this.treeRoot = DS.SVG().bTreeNode(true, 1, DS.getStartX(), DS.getStartY());
             this.treeRoot.setText(0, value);
@@ -285,7 +283,6 @@ DS.BTree = class BTree {
     // Delete a value
 
     async delete(value) {
-        if (!value) return null;
         if (!this.treeRoot) {
             await DS.pause("Tree is empty");
             return null;

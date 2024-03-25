@@ -11,12 +11,13 @@ DS.RedBlack = class RedBlack extends DS.BST {
     }
 
     async insertOne(value) {
-        const node = await super.insertOne(value);
-        if (!node) return;
-        await this.fixDoubleRed(node);
-        if (this.isRed(this.treeRoot)) {
-            await DS.pause("Tree root is red: Color it black");
-            this.colorBlack(this.treeRoot);
+        const result = await super.insertOne(value);
+        if (result?.success) {
+            await this.fixDoubleRed(result.node);
+            if (this.isRed(this.treeRoot)) {
+                await DS.pause("Tree root is red: Color it black");
+                this.colorBlack(this.treeRoot);
+            }
         }
     }
 
@@ -86,13 +87,14 @@ DS.RedBlack = class RedBlack extends DS.BST {
 
     async delete(value) {
         const result = await super.delete(value);
-        if (!result) return;
-        if (result.parent) {
-            await this.fixDeleteImbalance(result.parent, result.direction);
-        }
-        if (this.isRed(this.treeRoot)) {
-            this.treeRoot.setBlackLevel(1);
-            await DS.pause("Color the root black");
+        if (result?.success) {
+            if (result.parent) {
+                await this.fixDeleteImbalance(result.parent, result.direction);
+            }
+            if (this.isRed(this.treeRoot)) {
+                this.treeRoot.colorBlack();
+                await DS.pause("Color the root black");
+            }
         }
     }
 
