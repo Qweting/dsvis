@@ -1,7 +1,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS, SVG */
+/* globals DS */
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.SplayTree = class SplayTree extends DS.BST {
@@ -79,13 +79,10 @@ DS.SplayTree = class SplayTree extends DS.BST {
         node.setHighlight(true);
         await DS.pause(`Now splaying ${node} up to the root`);
         node.setHighlight(false);
-        let i = 0
         while (node?.getParent()) {
-            if (i++ > 100) break;
             const parent = node.getParent();
             const left = node.isLeftChild() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
-            console.log(`${node} <${left}- ${parent} <- ${parent?.getParent()}`)
             if (!parent?.getParent()) {
                 node = await this.singleRotate(right, parent);
             } else if (parent.isChild(right)) {

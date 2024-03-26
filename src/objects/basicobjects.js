@@ -437,7 +437,7 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
 
 SVG.Connection = class Connection extends SVG.Path {
-    $coords = {}
+    $coords = {};
 
     init(start, end, bend = 0, directed = false) {
         this.$start = start;

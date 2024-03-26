@@ -24,7 +24,7 @@ env:
 rules:
     "@stylistic/semi": [error, always]
     "@stylistic/indent": [error, 4, {flatTernaryExpressions: true}]
-    "@stylistic/quotes": [warn, double]
+    "@stylistic/quotes": [warn, double, {avoidEscape: true}]
     "@stylistic/no-multiple-empty-lines": [warn, {max: 2}]
     "@stylistic/array-bracket-spacing": [warn, never]
     "@stylistic/object-curly-spacing": [warn, never]

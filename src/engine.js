@@ -86,7 +86,7 @@ DS.initGeneralToolbar = function() {
 
     tools.animationSpeed = document.getElementById("animationSpeed");
     tools.animationSpeed.addEventListener("change", () => DS.saveCookies());
-}
+};
 
 
 DS.resetAll = function() {

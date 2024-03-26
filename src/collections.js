@@ -57,7 +57,7 @@ DS.initToolbar = function() {
 
 DS.clearTree = function() {
     if (confirm("This clear the canvas and your history!")) DS.resetAll();
-}
+};
 
 
 DS.setIdleTitle = function() {

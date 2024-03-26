@@ -23,7 +23,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     $lines = [];
 
     init(leaf, nvalues, x, y) {
-        if (nvalues < 1) throw new Error(`BTreeNode: must have at least one value`);
+        if (nvalues < 1) throw new Error("BTreeNode: must have at least one value");
         this.$children = leaf ? null : Array(nvalues + 1);
         this.setNumValues(nvalues);
         if (x && y) this.center(x, y);
@@ -31,7 +31,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     }
 
     toString() {
-        return "[" + this.getTexts().join(" | ") + "]";
+        return `[${this.getTexts().join(" | ")}]`;
     }
 
     numValues() {
@@ -98,14 +98,14 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
 
         const w0 = DS.getNodeSize(), h = DS.getNodeSize(), stroke = DS.getStrokeWidth();
         if (!this.$rect) this.$rect = this.rect(w0 * nvalues, h).stroke({width: stroke}).center(0, 0);
-        this.$rect.width(w0 * Math.max(1/2, nvalues)).radius(h / 4);
+        this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
             if (!this.$values[i]) this.$values[i] = this.text(" ").addClass(DS.getSizeClass());
-            this.$values[i].center(cx + w0 * (i - nvalues/2 + 1/2), cy);
+            this.$values[i].center(cx + w0 * (i - nvalues / 2 + 0.5), cy);
             if (i > 0) {
-                const dx = w0 * (i - nvalues/2), dy = h / 2;
-                if (!this.$lines[i]) this.$lines[i] = this.line(0, cy-dy, 0, cy+dy).stroke({width: stroke});
+                const dx = w0 * (i - nvalues / 2), dy = h / 2;
+                if (!this.$lines[i]) this.$lines[i] = this.line(0, cy - dy, 0, cy + dy).stroke({width: stroke});
                 this.$lines[i].cx(cx + dx);
             }
         }
@@ -119,7 +119,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     }
 
     getCX(i) {
-        return this.cx() + DS.getNodeSize() * (i - (this.numValues()-1) / 2);
+        return this.cx() + DS.getNodeSize() * (i - this.numValues() / 2 + 0.5);
     }
 
     getWidth() {
@@ -130,7 +130,9 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         return this.$rect.height();
     }
 
-    getSize() {return this.getHeight()}
+    getSize() {
+        return this.getHeight();
+    }
 
     getTexts() {
         return this.$values.map((t) => t.text());
@@ -152,7 +154,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
         if (text === "") text = " ";
-        this.$values[i].text(text); 
+        this.$values[i].text(text);
         return this;
     }
 
@@ -208,9 +210,9 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         } else {
             if (child.$parent) {
                 const oldParent = child.$parent.getStart();
-                for (let i = 0; i < oldParent.$children.length; i++) {
-                    if (child.$parent === oldParent.$children[i]) {
-                        oldParent.$children[i] = null;
+                for (let j = 0; j < oldParent.$children.length; j++) {
+                    if (child.$parent === oldParent.$children[j]) {
+                        oldParent.$children[j] = null;
                     }
                 }
                 child.$parent.remove();
@@ -313,13 +315,13 @@ SVG.BTreeConnection = class BTreeConnection extends SVG.Connection {
 
     getBend() {
         if (this.$coords.n <= 1) return 0;
-        return this.$maxBend * (1 - 2 * this.$coords.i / (this.$coords.n-1));
+        return this.$maxBend * (1 - 2 * this.$coords.i / (this.$coords.n - 1));
     }
 
     _getPath() {
         const C = this.$coords;
         let x1 = C.x1 + (2 * C.i - C.n + 1) * C.r2;
-        let y1 = C.y1 + C.r2;
+        const y1 = C.y1 + C.r2;
         // To compensate for the rounded corners:
         if (C.i === 0) x1 += C.r2 / 4;
         if (C.i === C.n - 1) x1 -= C.r2 / 4;
@@ -327,4 +329,4 @@ SVG.BTreeConnection = class BTreeConnection extends SVG.Connection {
         const yControl = (y1 + C.y2) / 2 + (C.x2 - x1) * this.getBend();
         return `M ${x1} ${y1} Q ${xControl} ${yControl} ${C.x2} ${C.y2}`;
     }
-}
+};
