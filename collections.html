@@ -5,14 +5,14 @@
 <link rel="stylesheet" href="dsvis.css">
 <script type="text/javascript" src="lib/svg.min.js"></script>
 <script type="text/javascript" src="src/engine.js"></script>
-<script type="text/javascript" src="src/objects.js"></script>
-<script type="text/javascript" src="src/btreenode.js"></script>
+<script type="text/javascript" src="src/objects/basicobjects.js"></script>
+<script type="text/javascript" src="src/objects/btreenode.js"></script>
 <script type="text/javascript" src="src/collections.js"></script>
-<script type="text/javascript" src="src/BST.js"></script>
-<script type="text/javascript" src="src/AVL.js"></script>
-<script type="text/javascript" src="src/RedBlack.js"></script>
-<script type="text/javascript" src="src/SplayTree.js"></script>
-<script type="text/javascript" src="src/BTree.js"></script>
+<script type="text/javascript" src="src/trees/BST.js"></script>
+<script type="text/javascript" src="src/trees/AVL.js"></script>
+<script type="text/javascript" src="src/trees/RedBlack.js"></script>
+<script type="text/javascript" src="src/trees/SplayTree.js"></script>
+<script type="text/javascript" src="src/trees/BTree.js"></script>
 </head>
 
 <body onload="DS.initialise('#canvas')">
@@ -69,10 +69,10 @@
   <button id="fastForward">&gt;&gt;</button>
   <label>Speed:
     <select id="animationSpeed">
-      <option value="2000">Slowest</option>
-      <option value="1000" selected>Slow</option>
-      <option value="500">Fast</option>
-      <option value="250">Fastest</option>
+      <option value="1200">Slowest</option>
+      <option value="700" selected>Slow</option>
+      <option value="300">Fast</option>
+      <option value="100">Fastest</option>
     </select>
   </label>
   <label>Node size:
