@@ -101,7 +101,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
-            if (!this.$values[i]) this.$values[i] = this.text(" ").addClass(DS.getSizeClass());
+            if (!this.$values[i]) this.$values[i] = this.text(DS.$nbsp).addClass(DS.getSizeClass());
             this.$values[i].center(cx + w0 * (i - nvalues / 2 + 0.5), cy);
             if (i > 0) {
                 const dx = w0 * (i - nvalues / 2), dy = h / 2;
@@ -153,7 +153,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         if (text == null) text = "";
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = " ";
+        if (text === "") text = DS.$nbsp;
         this.$values[i].text(text);
         return this;
     }

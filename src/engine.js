@@ -480,7 +480,14 @@ DS.normalizeNumber = function(input) {
 };
 
 
+// Non-breaking space:
+DS.$nbsp = " ";
+
 DS.compare = function(a, b) {
+    // We use non-breaking space as a proxy for the empty string,
+    // because SVG text objects reset coordinates to (0, 0) for the empty string.
+    if (a === DS.$nbsp) a = "";
+    if (b === DS.$nbsp) b = "";
     if (isNaN(a) === isNaN(b)) {
         // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(a)) {
