@@ -378,6 +378,8 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
     resize(startX, startY, animate = true) {
         this._resizeWidths();
+        if (startX + this.$rightWidth > DS.$SvgWidth - DS.$Info.x) startX = DS.$SvgWidth - this.$rightWidth - DS.$Info.x;
+        if (startX - this.$leftWidth < DS.$Info.x) startX = this.$leftWidth + DS.$Info.x;
         this._setNewPositions(startX, startY, animate);
     }
 
