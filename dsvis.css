@@ -247,6 +247,13 @@ g.red.black circle {
 	fill: lightgrey;
 }
 
+text.arrayindex > tspan {
+	font-size: 70%;
+}
+
+rect.background.disabled {
+	fill: lightgray;
+}
 
 svg.shownullnodes .nullnode:not(.invisible) {
 	fill: black;
