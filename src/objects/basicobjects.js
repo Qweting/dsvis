@@ -47,7 +47,7 @@ SVG.extend(SVG.Container, {
 
 SVG.HighlightCircle = class HighlightCircle extends SVG.Circle {
     init(x, y) {
-        return this.size(DS.getNodeSize()).stroke({width: DS.getStrokeWidth()}).center(x, y).addClass("highlight-circle");
+        return this.size(DS.getObjectSize()).stroke({width: DS.getStrokeWidth()}).center(x, y).addClass("highlight-circle");
     }
 
     getSize() {
@@ -63,8 +63,8 @@ SVG.HighlightCircle = class HighlightCircle extends SVG.Circle {
 
 SVG.TextCircle = class TextCircle extends SVG.G {
     init(text, x, y) {
-        this.$circle = this.circle(DS.getNodeSize()).stroke({width: DS.getStrokeWidth()}).center(0, 0);
-        this.$text = this.text(text).center(0, 0).addClass(DS.getSizeClass());
+        this.$circle = this.circle(DS.getObjectSize()).stroke({width: DS.getStrokeWidth()}).center(0, 0);
+        this.$text = this.text(text).center(0, 0);
         if (x && y) this.center(x, y);
         return this;
     }
@@ -103,7 +103,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
     $nullary = {};
 
     init(text, x, y) {
-        const bgSize = 3 * DS.getNodeSize();
+        const bgSize = 3 * DS.getObjectSize();
         this.rect(bgSize, bgSize).center(0, 0).addClass("invisible");
         return super.init(text, x, y);
     }
@@ -261,7 +261,7 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
     $edgebends = {left: 0.1, right: -0.1};
 
     init(text, x, y) {
-        const d = DS.getNodeSize();
+        const d = DS.getObjectSize();
         const nX = 0.5 * d, nY = 0.8 * d, nR = 2 * DS.getStrokeWidth();
         const nullpath = (s) => `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${-2 * nR},0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
         this.$nullary.left = this.path(nullpath(-1)).stroke({width: DS.getStrokeWidth()}).addClass("nullnode");

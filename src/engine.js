@@ -40,19 +40,52 @@ DS.$EventListeners = {
 };
 
 DS.$Toolbar = {};
+DS.$Defaults = {};
 DS.$Cookies = {};
 DS.$CookieExpireDays = 30;
 
 
-DS.$Defaults = {};
-DS.$Defaults.animationSpeed = 1000; // milliseconds per step
+///////////////////////////////////////////////////////////////////////////////
+// Animation speed
 
+DS.$Defaults.animationSpeed = 1000; // milliseconds per step
 DS.getAnimationSpeed = () => parseInt(DS.$Toolbar.animationSpeed?.value) || DS.$Defaults.animationSpeed;
 
 DS.$Cookies.animationSpeed = {
     getCookie: (value) => DS.$Toolbar.animationSpeed.value = value,
     setCookie: () => DS.getAnimationSpeed(),
 };
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Relative size of objects (nodes, texts, etc)
+
+DS.$Defaults.sizeClass = "medium";
+DS.$Defaults.objectSize = 40;
+DS.$ObjectSize = {
+    tiny: 0.70,
+    small: 0.85,
+    medium: 1.00,
+    large: 1.15,
+    huge: 1.30,
+};
+
+DS.getObjectSize = () => DS.$Defaults.objectSize * DS.$ObjectSize[DS.getSizeClass()];
+DS.getSizeClass = () => DS.$Toolbar.objectSize?.value.toLowerCase() || DS.$Defaults.sizeClass;
+DS.getStrokeWidth = () => DS.getObjectSize() / 12;
+
+DS.$Cookies.objectSize = {
+    getCookie: (value) => DS.$Toolbar.objectSize.value = value,
+    setCookie: () => DS.getSizeClass(),
+};
+
+DS.setDefaultObjectSize = function() {
+    const sizeClass = DS.getSizeClass();
+    for (const cls in DS.$ObjectSize) {
+        if (cls === sizeClass) DS.$Svg.addClass(cls);
+        else DS.$Svg.removeClass(cls);
+    }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,6 +116,7 @@ DS.initGeneralToolbar = function() {
     tools.toggleRunner = document.getElementById("toggleRunner");
     tools.fastForward = document.getElementById("fastForward");
     tools.fastBackward = document.getElementById("fastBackward");
+    tools.objectSize = document.getElementById("objectSize");
 
     tools.animationSpeed = document.getElementById("animationSpeed");
     tools.animationSpeed.addEventListener("change", () => DS.saveCookies());
@@ -94,9 +128,13 @@ DS.resetAll = function() {
     DS.reset();
 };
 
+DS.confirmResetAll = function() {
+    if (confirm("This clears the canvas and your history!")) DS.resetAll();
+};
+
 
 DS.reset = function() {
-    DS.clearCanvas();
+    DS.clearCanvas()
     if (DS.$Current) DS.$Current.reset();
     DS.resetListeners();
 };
@@ -141,6 +179,7 @@ DS.clearCanvas = function() {
         for (let x = 1; x < w / 100; x++) DS.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
         for (let y = 1; y < h / 100; y++) DS.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
     }
+    DS.setDefaultObjectSize();
     DS.$Info.title = DS.$Svg.text("").addClass("title").x(DS.$Info.x).cy(DS.$Info.y);
     DS.$Info.body = DS.$Svg.text("").addClass("message").x(DS.$Info.x).cy(DS.$Info.ybody);
     DS.$Info.status = DS.$Svg.text("").addClass("status-report").x(DS.$Info.x).cy(DS.$Info.ystatus);
@@ -188,6 +227,18 @@ DS.$IdleListeners = {
             }
         },
     },
+    objectSize: {
+        type: "change",
+        condition: () => true,
+        handler: () => {
+            if (DS.$Actions.length > 0) {
+                const action = DS.$Actions.pop();
+                DS.execute(action.oper, action.args, action.nsteps);
+            } else {
+                DS.reset();
+            }
+        },
+    },
 };
 
 
@@ -225,6 +276,10 @@ DS.$AsyncListeners = {
     fastBackward: {
         type: "click",
         handler: (resolve, reject) => reject({until: 0}),
+    },
+    objectSize: {
+        type: "change",
+        handler: (resolve, reject) => reject({until: DS.$CurrentStep}),
     },
 };
 

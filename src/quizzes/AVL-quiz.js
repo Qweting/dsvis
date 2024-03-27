@@ -4,18 +4,12 @@
 /* globals DS, SVG */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.$Defaults.sizeClass = "medium";
-DS.$NodeSize = {small: 30, medium: 40, large: 60};
-
-DS.getSizeClass = () => DS.$Toolbar.nodeSize?.value.toLowerCase() || DS.$Defaults.sizeClass;
-DS.getNodeSize = () => DS.$NodeSize[DS.getSizeClass()];
-DS.getStrokeWidth = () => DS.getNodeSize() / 12;
-DS.getStartX = () => DS.$Info.x + DS.getNodeSize() / 2;
+DS.getStartX = () => DS.$Info.x + DS.getObjectSize() / 2;
 DS.getStartY = () => DS.$Info.y * 4;
 DS.getRootX = () => DS.$SvgWidth / 2;
-DS.getRootY = () => DS.$Info.y + DS.getNodeSize() / 2;
-DS.getSpacingX = () => DS.getNodeSize();
-DS.getSpacingY = () => DS.getNodeSize();
+DS.getRootY = () => DS.$Info.y + DS.getObjectSize() / 2;
+DS.getSpacingX = () => DS.getObjectSize();
+DS.getSpacingY = () => DS.getObjectSize();
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,7 +35,6 @@ DS.initToolbar = function() {
     tools.copyToMark = document.getElementById("copyToMark");
     tools.deleteNode = document.getElementById("deleteNode");
     tools.restartQuiz = document.getElementById("restartQuiz");
-    tools.nodeSize = document.getElementById("nodeSize");
 
     DS.addReturnSubmit(tools.insertField, "ALPHANUM");
     tools.createLeft.addEventListener("click", () => DS.submit("insertLeft", tools.insertField));
@@ -84,30 +77,6 @@ DS.setIdleTitle = function() {
     );
     DS.$Info.title.text(message);
     DS.$Info.body.text("");
-};
-
-DS.$IdleListeners.nodeSize = {
-    type: "change",
-    condition: () => true,
-    handler: () => {
-        DS.setRunning(false);
-        if (DS.$Actions.length > 0) {
-            const action = DS.$Actions.pop();
-            DS.execute(action.oper, action.args, action.nsteps);
-        } else {
-            DS.reset();
-        }
-    },
-};
-
-DS.$AsyncListeners.nodeSize = {
-    type: "change",
-    handler: (resolve, reject) => reject({until: DS.$CurrentStep}),
-};
-
-DS.$Cookies.nodeSize = {
-    getCookie: (value) => DS.$Toolbar.nodeSize.value = value,
-    setCookie: () => DS.getSizeClass(),
 };
 
 

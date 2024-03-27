@@ -24,10 +24,10 @@
 <div id="content">
 <section>
 
-<label for="algorithmSelector">Choose a collection data structure/algorithm:</label>
+<label for="algorithmSelector">Choose a collection data structure:</label>
 <h2 id="selectorWrapper">
   <select name="algorithmSelector" id="algorithmSelector" onchange="DS.selectAlgorithm()">
-    <option disabled value="">&mdash; Please choose an algorithm or data structure &mdash;</option>
+    <option disabled value="">&mdash; Please choose a data structure &mdash;</option>
     <hr/>
     <option value="BST">BST: Binary search tree</option>
     <option value="AVL">AVL tree</option>
@@ -38,23 +38,33 @@
 </h2>
 
 <fieldset id="algorithmControls">
-  <select id="insertSelect" class="disableWhenRunning">
-    <option value="" selected>Insert many values</option>
-    <option value="A L G O R I T H M">A L G O R I T H M</option>
-    <option value="C O M P L E X I T Y">C O M P L E X I T Y</option>
-    <option value="R E C U R S I O N">R E C U R S I O N</option>
-    <option value="A B C D E F G H J K">A B C D E F G H J K</option>
-    <option value="Z Y X V T S P O M L">Z Y X V T S P O M L</option>
-    <option value="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z">A B C D E &hellip; X Y Z</option>
-  </select>
-  <input id="insertField" type="text" size="10" maxlength="20" class="disableWhenRunning"/>
-  <input id="insertSubmit" type="submit" value="Insert" class="disableWhenRunning"/>
-  <input id="findField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
-  <input id="findSubmit" type="submit" value="Find" class="disableWhenRunning"/>
-  <input id="deleteField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
-  <input id="deleteSubmit" type="submit" value="Delete" class="disableWhenRunning"/>
-  <input id="printTree" type="submit" value="Print" class="disableWhenRunning"/>
-  <input id="clearTree" type="submit" value="Clear" class="disableWhenRunning"/>
+  <label>
+    <select id="insertSelect" class="disableWhenRunning">
+      <option value="" selected>Insert many values</option>
+      <option value="A L G O R I T H M">A L G O R I T H M</option>
+      <option value="C O M P L E X I T Y">C O M P L E X I T Y</option>
+      <option value="R E C U R S I O N">R E C U R S I O N</option>
+      <option value="A B C D E F G H J K">A B C D E F G H J K</option>
+      <option value="Z Y X V T S P O M L">Z Y X V T S P O M L</option>
+      <option value="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z">A B C D E &hellip; X Y Z</option>
+    </select>
+    <input id="insertField" type="text" size="10" maxlength="20" class="disableWhenRunning"/>
+    <input id="insertSubmit" type="submit" value="Insert" class="disableWhenRunning"/>
+  </label>
+  <label>
+    <input id="findField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
+    <input id="findSubmit" type="submit" value="Find" class="disableWhenRunning"/>
+  </label>
+  <label>
+    <input id="deleteField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
+    <input id="deleteSubmit" type="submit" value="Delete" class="disableWhenRunning"/>
+  </label>
+  <label>
+    <input id="printSubmit" type="submit" value="Print" class="disableWhenRunning"/>
+  </label>
+  <label>
+    <input id="clearSubmit" type="submit" value="Clear" class="disableWhenRunning"/>
+  </label>
 </fieldset>
 
 <div>
@@ -62,11 +72,13 @@
 </div>
 
 <fieldset id="generalControls">
-  <button id="fastBackward">&lt;&lt;</button>
-  <button id="stepBackward">&lt;</button>
-  <button id="toggleRunner">Run</button>
-  <button id="stepForward">&gt;</button>
-  <button id="fastForward">&gt;&gt;</button>
+  <label>
+    <button id="fastBackward">&lt;&lt;</button>
+    <button id="stepBackward">&lt;</button>
+    <button id="toggleRunner">Run</button>
+    <button id="stepForward">&gt;</button>
+    <button id="fastForward">&gt;&gt;</button>
+  </label>
   <label>Speed:
     <select id="animationSpeed">
       <option value="1200">Slowest</option>
@@ -76,10 +88,12 @@
     </select>
   </label>
   <label>Node size:
-    <select id="nodeSize">
+    <select id="objectSize">
+      <option value="tiny">Tiny</option>
       <option value="small">Small</option>
       <option value="medium" selected>Medium</option>
       <option value="large">Large</option>
+      <option value="huge">Huge</option>
     </select>
   </label>
 </fieldset>

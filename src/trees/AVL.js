@@ -93,7 +93,7 @@ DS.AVL = class AVL extends DS.BST {
 
 SVG.AVLNode = class AVLNode extends SVG.BinaryNode {
     init(text, x, y) {
-        const d = DS.getNodeSize();
+        const d = DS.getObjectSize();
         this.$height = this.text(1).center(-0.6 * d, -0.5 * d).addClass("avlheight").addClass(DS.getSizeClass());
         return super.init(text, x, y);
     }

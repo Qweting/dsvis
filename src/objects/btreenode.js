@@ -59,7 +59,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
 
     insertValue(i, text, leftChildInsert = false) {
         if (i < this.numValues()) {
-            const dx = (i / Math.max(1, this.numValues()) - 1) * DS.getNodeSize();
+            const dx = (i / Math.max(1, this.numValues()) - 1) * DS.getObjectSize();
             this.dmoveCenter(dx, 0);
         }
         this.$values.splice(i, 0, null);
@@ -96,12 +96,12 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
             this.$lines.pop()?.remove();
         }
 
-        const w0 = DS.getNodeSize(), h = DS.getNodeSize(), stroke = DS.getStrokeWidth();
+        const w0 = DS.getObjectSize(), h = DS.getObjectSize(), stroke = DS.getStrokeWidth();
         if (!this.$rect) this.$rect = this.rect(w0 * nvalues, h).stroke({width: stroke}).center(0, 0);
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
-            if (!this.$values[i]) this.$values[i] = this.text(DS.$nbsp).addClass(DS.getSizeClass());
+            if (!this.$values[i]) this.$values[i] = this.text(DS.$nbsp);
             this.$values[i].center(cx + w0 * (i - nvalues / 2 + 0.5), cy);
             if (i > 0) {
                 const dx = w0 * (i - nvalues / 2), dy = h / 2;
@@ -119,7 +119,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     }
 
     getCX(i) {
-        return this.cx() + DS.getNodeSize() * (i - this.numValues() / 2 + 0.5);
+        return this.cx() + DS.getObjectSize() * (i - this.numValues() / 2 + 0.5);
     }
 
     getWidth() {

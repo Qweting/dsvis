@@ -116,10 +116,11 @@ fieldset, form {
 
 label {
 	white-space: nowrap;
+	margin-right: 12px;
 }
 
 select, input, button {
-	margin: 3px 6px 3px 0;
+	margin: 3px 0;
 	padding: 3px 6px;
 	background-color: white;
 	border: solid 1px maroon;
@@ -150,13 +151,22 @@ input:active:not(:disabled), button:active:not(:disabled), button.selected:not(:
 
 /*-----------------------------------------------------------------*/
 
+svg {
+	font-size: 20px;
+}
+
+svg.tiny g {font-size: 70%}
+svg.small g {font-size: 85%}
+svg.large g {font-size: 115%}
+svg.huge g {font-size: 130%}
+
 text {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 text.status-report {
 	fill: grey;
-	font-size: 16px;
+	font-size: 80%;
 }
 text.status-report.paused {
 	fill: brown;
@@ -167,7 +177,6 @@ text.status-report.running {
 
 text.title, text.message {
 	fill: brown;
-	font-size: 20px;
 	text-anchor: start;
 }
 text.title {
@@ -217,30 +226,13 @@ svg .highlight-circle {
 }
 
 g text {
-    font-size: 20px;
 	stroke: none;
     fill: black;
     text-anchor: middle;
 }
 
-g text.small {
-	font-size: 14px;
-}
-
-g text.large {
-	font-size: 26px;
-}
-
 g text.avlheight {
-	font-size: 14px;
-}
-
-g text.avlheight.small {
-	font-size: 10px;
-}
-
-g text.avlheight.large {
-	font-size: 18px;
+	font-size: 70%;
 }
 
 g.unfilled circle {

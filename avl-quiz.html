@@ -28,22 +28,19 @@
     <input id="createLeft" type="submit" value="Left child" class="disableWhenRunning"/>
     <input id="createRight" type="submit" value="Right child" class="disableWhenRunning"/>
   </label>
-  &nbsp;
   <label>Move to:
     <input id="moveParent" type="submit" value="Parent" class="disableWhenRunning"/>
     <input id="moveLeft" type="submit" value="Left child" class="disableWhenRunning"/>
     <input id="moveRight" type="submit" value="Right child" class="disableWhenRunning"/>
   </label>
-  &nbsp;
   <label>Rotate:
-  <input id="rotateLeft" type="submit" value="Left" class="disableWhenRunning"/>
-  <input id="rotateRight" type="submit" value="Right" class="disableWhenRunning"/>
+    <input id="rotateLeft" type="submit" value="Left" class="disableWhenRunning"/>
+    <input id="rotateRight" type="submit" value="Right" class="disableWhenRunning"/>
   </label>
-  &nbsp;
   <label>Action:
-  <input id="markNode" type="submit" value="Mark node" class="disableWhenRunning"/>
-  <input id="copyToMark" type="submit" value="Copy to mark" class="disableWhenRunning"/>
-  <input id="deleteNode" type="submit" value="Delete leaf" class="disableWhenRunning"/>
+    <input id="markNode" type="submit" value="Mark node" class="disableWhenRunning"/>
+    <input id="copyToMark" type="submit" value="Copy to mark" class="disableWhenRunning"/>
+    <input id="deleteNode" type="submit" value="Delete leaf" class="disableWhenRunning"/>
   </label>
 </fieldset>
 
@@ -52,12 +49,16 @@
 </div>
 
 <fieldset id="generalControls">
-  <input id="restartQuiz" type="submit" value="Restart" class="disableWhenRunning"/>
-  <button id="fastBackward">&lt;&lt;</button>
-  <button id="stepBackward">&lt;</button>
-  <button id="toggleRunner">Run</button>
-  <button id="stepForward">&gt;</button>
-  <button id="fastForward">&gt;&gt;</button>
+  <label>
+    <input id="restartQuiz" type="submit" value="Restart" class="disableWhenRunning"/>
+  </label>
+  <label>
+    <button id="fastBackward">&lt;&lt;</button>
+    <button id="stepBackward">&lt;</button>
+    <button id="toggleRunner">Run</button>
+    <button id="stepForward">&gt;</button>
+    <button id="fastForward">&gt;&gt;</button>
+  </label>
   <label>Speed:
     <select id="animationSpeed">
       <option value="1200">Slowest</option>
@@ -67,15 +68,13 @@
     </select>
   </label>
   <label>Node size:
-    <select id="nodeSize">
+    <select id="objectSize">
+      <option value="tiny">Tiny</option>
       <option value="small">Small</option>
       <option value="medium" selected>Medium</option>
       <option value="large">Large</option>
+      <option value="huge">Huge</option>
     </select>
-  </label>
-  <label>
-    <input id="showNullNodes" type="checkbox"/>
-    Show null nodes
   </label>
 </fieldset>
 

@@ -4,19 +4,12 @@
 /* globals DS */
 ///////////////////////////////////////////////////////////////////////////////
 
-
-DS.$Defaults.sizeClass = "medium";
-DS.$NodeSize = {small: 30, medium: 40, large: 60};
-
-DS.getSizeClass = () => DS.$Toolbar.nodeSize?.value.toLowerCase() || DS.$Defaults.sizeClass;
-DS.getNodeSize = () => DS.$NodeSize[DS.getSizeClass()];
-DS.getStrokeWidth = () => DS.getNodeSize() / 12;
-DS.getStartX = () => DS.$Info.x + DS.getNodeSize() / 2;
+DS.getStartX = () => DS.$Info.x + DS.getObjectSize() / 2;
 DS.getStartY = () => DS.$Info.y * 4;
 DS.getRootX = () => DS.$SvgWidth / 2;
-DS.getRootY = () => DS.$Info.y + DS.getNodeSize() / 2;
-DS.getSpacingX = () => DS.getNodeSize();
-DS.getSpacingY = () => DS.getNodeSize();
+DS.getRootY = () => 2 * DS.$Info.y + DS.getObjectSize() / 2;
+DS.getSpacingX = () => DS.getObjectSize();
+DS.getSpacingY = () => DS.getObjectSize();
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,10 +25,9 @@ DS.initToolbar = function() {
     tools.findSubmit = document.getElementById("findSubmit");
     tools.deleteField = document.getElementById("deleteField");
     tools.deleteSubmit = document.getElementById("deleteSubmit");
-    tools.printTree = document.getElementById("printTree");
-    tools.clearTree = document.getElementById("clearTree");
+    tools.printSubmit = document.getElementById("printSubmit");
+    tools.clearSubmit = document.getElementById("clearSubmit");
     tools.showNullNodes = document.getElementById("showNullNodes");
-    tools.nodeSize = document.getElementById("nodeSize");
 
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
@@ -47,16 +39,11 @@ DS.initToolbar = function() {
     tools.findSubmit.addEventListener("click", () => DS.submit("find", tools.findField));
     DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => DS.submit("delete", tools.deleteField));
     tools.deleteSubmit.addEventListener("click", () => DS.submit("delete", tools.deleteField));
-    tools.printTree.addEventListener("click", () => DS.submit("print"));
-    tools.clearTree.addEventListener("click", () => DS.clearTree());
+    tools.printSubmit.addEventListener("click", () => DS.submit("print"));
+    tools.clearSubmit.addEventListener("click", () => DS.confirmResetAll());
 
     DS.setRunning(true);
     DS.$Current?.initToolbar?.();
-};
-
-
-DS.clearTree = function() {
-    if (confirm("This clear the canvas and your history!")) DS.resetAll();
 };
 
 
@@ -65,26 +52,3 @@ DS.setIdleTitle = function() {
     DS.$Info.body.text("");
 };
 
-
-DS.$IdleListeners.nodeSize = {
-    type: "change",
-    condition: () => true,
-    handler: () => {
-        if (DS.$Actions.length > 0) {
-            const action = DS.$Actions.pop();
-            DS.execute(action.oper, action.args, action.nsteps);
-        } else {
-            DS.reset();
-        }
-    },
-};
-
-DS.$AsyncListeners.nodeSize = {
-    type: "change",
-    handler: (resolve, reject) => reject({until: DS.$CurrentStep}),
-};
-
-DS.$Cookies.nodeSize = {
-    getCookie: (value) => DS.$Toolbar.nodeSize.value = value,
-    setCookie: () => DS.getSizeClass(),
-};

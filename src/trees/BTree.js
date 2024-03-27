@@ -18,7 +18,7 @@ DS.BTree = class BTree {
                 <option value="6">Max degree 6</option>
             </select></label>`);
         DS.$Toolbar.maxDegree = document.getElementById("maxDegree");
-        DS.$Toolbar.maxDegree.addEventListener("change", () => DS.clearTree());
+        DS.$Toolbar.maxDegree.addEventListener("change", () => DS.confirmResetAll());
     }
 
     getMaxDegree() {
@@ -392,8 +392,8 @@ DS.BTree = class BTree {
         parent.setText(parentIndex, "");
         const sinkingX = (node.x() + node.width() + rightSib.x()) / 2;
         sinkingNode.setCenter(sinkingX, node.cy(), true);
-        node.setCenter(sinkingX - (DS.getNodeSize() + node.width()) / 2, node.cy(), true);
-        rightSib.setCenter(sinkingX + (DS.getNodeSize() + rightSib.width()) / 2, node.cy(), true);
+        node.setCenter(sinkingX - (DS.getObjectSize() + node.width()) / 2, node.cy(), true);
+        rightSib.setCenter(sinkingX + (DS.getObjectSize() + rightSib.width()) / 2, node.cy(), true);
         await DS.pause();
 
         const nodeSize = node.numValues();
