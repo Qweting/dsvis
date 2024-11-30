@@ -371,7 +371,7 @@ DS.execute = function(operation, args, until = 0) {
     DS.$Actions.push({oper: operation, args: args, nsteps: until});
     if (DS.$DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(DS.$Actions)}`);
 
-    DS.callAsync(0, until).then(() => {
+    DS.callAsync().then(() => {
         DS.$Actions[DS.$Actions.length - 1].nsteps = DS.$CurrentStep;
         if (DS.$DEBUG) console.log(`DONE / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
         DS.resetListeners();
@@ -400,19 +400,20 @@ DS.execute = function(operation, args, until = 0) {
 };
 
 
-DS.callAsync = async function(nAction, until) {
-    DS.resetListeners(true);
-    const action = DS.$Actions[nAction];
-    DS.$CurrentAction = nAction;
-    DS.$CurrentStep = 0;
-    // Make camelCase separate words: https://stackoverflow.com/a/21148630
-    let message = action.oper.match(/[A-Za-z][a-z]*/g).join(" ");
-    message = `${message.charAt(0).toUpperCase() + message.substring(1)} ${action.args.join(", ")}`;
-    if (DS.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(DS.$Actions)}`);
-    DS.$Info.title.text(message);
-    await DS.pause("");
-    await DS.$Current[action.oper](...action.args);
-    if (nAction < DS.$Actions.length - 1) await DS.callAsync(nAction + 1, until);
+DS.callAsync = async function() {
+    for (let nAction = 0; nAction < DS.$Actions.length; nAction++) {
+        DS.resetListeners(true);
+        const action = DS.$Actions[nAction];
+        DS.$CurrentAction = nAction;
+        DS.$CurrentStep = 0;
+        // Make camelCase separate words: https://stackoverflow.com/a/21148630
+        let message = action.oper.match(/[A-Za-z][a-z]*/g).join(" ");
+        message = `${message.charAt(0).toUpperCase() + message.substring(1)} ${action.args.join(", ")}`;
+        if (DS.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(DS.$Actions)}`);
+        DS.$Info.title.text(message);
+        await DS.pause("");
+        await DS.$Current[action.oper](...action.args);
+    }
 };
 
 
