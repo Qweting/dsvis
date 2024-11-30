@@ -41,14 +41,14 @@ DS.BST = class BST {
 
     async find(value) {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return null;
         }
-        await DS.pause(`Searching for ${value}`);
+        await DS.pause('find.start', value);
         const found = await this.findHelper(value);
         found.node.setHighlight(true);
-        const response = found.success ? `Found ${value}` : `Did not find ${value}`;
-        await DS.pause(response);
+        const path = found.success ? 'find.found' : 'find.notfound';
+        await DS.pause(path, value);
         found.node.setHighlight(false);
         return found;
     }
@@ -70,7 +70,7 @@ DS.BST = class BST {
             parent = node;
             node = parent.getChild(direction);
             if (node) pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause(`Look into ${direction} child`);
+            await DS.pause('find.look', direction);
             parent.setChildHighlight(direction, false);
         }
         pointer.remove();
@@ -80,16 +80,16 @@ DS.BST = class BST {
     async insertOne(value) {
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
-            await DS.pause(`Create a new tree root ${value}`);
+            await DS.pause('insert.newroot', value);
             this.resizeTree();
             await DS.pause();
             return {success: true, node: this.treeRoot};
         }
-        await DS.pause(`Searching for node to insert ${value}`);
+        await DS.pause('insert.search', value);
         const found = await this.findHelper(value);
         if (found.success) {
             found.node.setHighlight(true);
-            await DS.pause(`There is already a node ${found.node}`);
+            await DS.pause('insert.exists', found.node);
             found.node.setHighlight(false);
             return {success: false, node: found.node};
         }
@@ -99,7 +99,7 @@ DS.BST = class BST {
         found.node.setChild(direction, child);
         child.setHighlight(true);
         found.node.setChildHighlight(direction, true);
-        await DS.pause(`Insert ${value} as ${direction} child`);
+        await DS.pause('insert.child', value, direction);
         found.node.setChildHighlight(direction, false);
         child.setHighlight(false);
         this.resizeTree();
@@ -109,20 +109,20 @@ DS.BST = class BST {
 
     async delete(value) {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return null;
         }
-        await DS.pause(`Searching for node to delete ${value}`);
+        await DS.pause('delete.search', value);
         const found = await this.findHelper(value);
         if (!found.success) {
             found.node.setHighlight(true);
-            await DS.pause(`There is no node ${value}`);
+            await DS.pause('delete.notexists', value);
             found.node.setHighlight(false);
             const direction = DS.compare(value, found.node.getText()) < 0 ? "left" : "right";
             return {success: false, direction: direction, parent: found.node};
         }
         found.node.setHighlight(true);
-        await DS.pause(`Found node ${value} to delete`);
+        await DS.pause('delete.found', value);
         return await this.deleteHelper(found.node);
     }
 
@@ -133,7 +133,7 @@ DS.BST = class BST {
         const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
         node.setHighlight(false);
         node.addClass("marked");
-        await DS.pause(`Finding the predecessor node of ${node}`);
+        await DS.pause('delete.predecessor.search', node);
 
         let predecessor = node.getLeft();
         while (true) {
@@ -150,14 +150,14 @@ DS.BST = class BST {
         const moving = DS.SVG().textCircle(newText, predecessor.cx(), predecessor.cy());
         moving.addClass("unfilled");
         moving.setHighlight(true);
-        await DS.pause(`Replace the value of ${node} with ${predecessor}`);
+        await DS.pause('delete.predecessor.replace', node, predecessor);
         moving.setCenter(node.cx(), node.cy(), true);
         node.setText("");
         await DS.pause();
         node.setText(newText);
         moving.remove();
         node.removeClass("marked");
-        await DS.pause(`Now delete the predecessor ${predecessor}`);
+        await DS.pause('delete.predecessor.delete', predecessor);
         return await this.deleteNode(predecessor);
     }
 
@@ -168,10 +168,10 @@ DS.BST = class BST {
         if (!parent) {
             if (!child) {
                 this.treeRoot = null;
-                await DS.pause(`Remove the root node ${node}`);
+                await DS.pause('delete.root.singleton', node);
             } else {
                 this.treeRoot = child;
-                await DS.pause(`Make the child ${child} the new root,\nand remove node ${node}`);
+                await DS.pause('delete.root.onechild', child, node);
             }
             node.remove();
             this.resizeTree();
@@ -187,13 +187,13 @@ DS.BST = class BST {
             parent.setChild(direction, child);
             child.setHighlight(true);
             parent.setChildHighlight(direction, true);
-            await DS.pause(`Redirect parent ${parent} to child ${child}`);
+            await DS.pause('delete.redirect', parent, child);
             parent.setChildHighlight(direction, false);
             child.setHighlight(false);
             node.setHighlight(true);
-            await DS.pause(`Remove node ${node}`);
+            await DS.pause('delete.node', node);
         } else {
-            await DS.pause(`Remove leaf node ${node}`);
+            await DS.pause('delete.leaf', node);
         }
         node.remove();
         this.resizeTree();
@@ -203,7 +203,7 @@ DS.BST = class BST {
 
     async print() {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return;
         }
         const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
@@ -293,5 +293,41 @@ DS.BST = class BST {
         return B;
     }
 
+};
+
+
+DS.BST.messages = {
+    general: {
+        empty: "Tree is empty",
+    },
+    find: {
+        start: (value) => `Searching for ${value}`,
+        found: (value) => `Found ${value}`,
+        notfound: (value) => `Did not find ${value}`,
+        look: (direction) => `Look into ${direction} child`,
+    },
+    insert: {
+        newroot: (value) => `Create a new tree root ${value}`,
+        search: (value) => `Searching for node to insert ${value}`,
+        exists: (node) => `There is already a node ${node}`,
+        child: (value, direction) => `Insert ${value} as ${direction} child`,
+    },
+    delete: {
+        search: (value) => `Searching for node to delete ${value}`,
+        notexists: (value) => `There is no node ${value}`,
+        found: (value) => `Found node ${value} to delete`,
+        predecessor: {
+            search: (node) => `Finding the predecessor node of ${node}`,
+            replace: (node, predecessor) => `Replace the value of ${node} with ${predecessor}`,
+            delete: (predecessor) => `Now delete the predecessor ${predecessor}`,
+        },
+        redirect: (parent, child) => `Redirect parent ${parent} to child ${child}`,
+        root: {
+            singleton: (root) => `Remove the root node ${root}`,
+            onechild: (child, root) => `Make the child ${child} the new root,\nand remove node ${root}`,
+        },
+        node: (node) => `Remove node ${node}`,
+        leaf: (node) => `Remove leaf node ${node}`,
+    },
 };
 

@@ -416,9 +416,9 @@ DS.callAsync = async function(nAction, until) {
 };
 
 
-DS.pause = function(title) {
+DS.pause = function(message, ...args) {
+    const title = DS.getMessage(message, ...args);
     if (title != null) {
-        if (title instanceof Array) title = title.join("\n");
         DS.$Info.body.text(title);
     }
     return new Promise((resolve, reject) => {
@@ -442,6 +442,32 @@ DS.pause = function(title) {
         }
     });
 };
+
+
+DS.getMessage = function(message, ...args) {
+    if (Array.isArray(message)) [message, ...args] = [...message, ...args];
+    if (typeof message !== 'string') {
+        if (args.length > 0) console.error("Unknown message:", message, ...args);
+        return message;
+    }
+    if (!message) return args.join("\n");
+    let title = DS.$Current.messages || DS.$Current.constructor.messages || {};
+    const keys = message.split(".");
+    if (!(keys[0] in title)) return [message, ...args].join("\n");
+    for (const key of keys) {
+        if (!(typeof title === 'object' && key in title)) {
+            console.error("Unknown message:", message, ...args);
+            return [message, ...args].join("\n");
+        }
+        title = title[key];
+    }
+    if (typeof title === 'object') {
+        console.error("Unknown message:", message, ...args);
+        return [message, ...args].join("\n");
+    }
+    if (typeof title === 'function') title = title(...args);
+    return title;
+}
 
 
 DS.stepForward = function(resolve, reject) {
