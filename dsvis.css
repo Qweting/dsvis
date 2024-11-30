@@ -38,7 +38,7 @@ body {
 	background-color: maroon;
 }
 
-#content {
+main {
 	background-color: lemonchiffon;
 }
 
@@ -104,7 +104,7 @@ svg, #selectorWrapper > select {
 
 svg {
     background-color: white;
-    border: 2px solid maroon; 
+    border: 2px solid maroon;
     width: 100%;
 	max-width: 1000px;
 }
@@ -114,7 +114,7 @@ fieldset, form {
 	display: inline-block;
 }
 
-label {
+.formgroup {
 	white-space: nowrap;
 	margin-right: 12px;
 }
@@ -270,6 +270,6 @@ line.gridline {
 }
 
 svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
-    stroke: lightgray; 
+    stroke: lightgray;
 }
 

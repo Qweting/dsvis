@@ -21,7 +21,7 @@
   <h1><a href="index.html">Visualizations of data structures and algorithms</a></h1>
 </header>
 
-<div id="content">
+<main>
 <section>
 
 <label for="algorithmSelector">Choose a collection data structure:</label>
@@ -38,7 +38,7 @@
 </h2>
 
 <fieldset id="algorithmControls">
-  <label>
+  <span class="formgroup">
     <select id="insertSelect" class="disableWhenRunning">
       <option value="" selected>Insert many values</option>
       <option value="A L G O R I T H M">A L G O R I T H M</option>
@@ -50,21 +50,21 @@
     </select>
     <input id="insertField" type="text" size="10" maxlength="20" class="disableWhenRunning"/>
     <input id="insertSubmit" type="submit" value="Insert" class="disableWhenRunning"/>
-  </label>
-  <label>
+  </span>
+  <span class="formgroup">
     <input id="findField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
     <input id="findSubmit" type="submit" value="Find" class="disableWhenRunning"/>
-  </label>
-  <label>
+  </span>
+  <span class="formgroup">
     <input id="deleteField" type="text" size="4" maxlength="4" class="disableWhenRunning"/>
     <input id="deleteSubmit" type="submit" value="Delete" class="disableWhenRunning"/>
-  </label>
-  <label>
+  </span>
+  <span class="formgroup">
     <input id="printSubmit" type="submit" value="Print" class="disableWhenRunning"/>
-  </label>
-  <label>
+  </span>
+  <span class="formgroup">
     <input id="clearSubmit" type="submit" value="Clear" class="disableWhenRunning"/>
-  </label>
+  </span>
 </fieldset>
 
 <div>
@@ -72,37 +72,41 @@
 </div>
 
 <fieldset id="generalControls">
-  <label>
+  <span class="formgroup">
     <button id="fastBackward">&lt;&lt;</button>
     <button id="stepBackward">&lt;</button>
     <button id="toggleRunner">Run</button>
     <button id="stepForward">&gt;</button>
     <button id="fastForward">&gt;&gt;</button>
-  </label>
-  <label>Speed:
-    <select id="animationSpeed">
-      <option value="1200">Slowest</option>
-      <option value="700" selected>Slow</option>
-      <option value="300">Fast</option>
-      <option value="100">Fastest</option>
-    </select>
-  </label>
-  <label>Node size:
-    <select id="objectSize">
-      <option value="tiny">Tiny</option>
-      <option value="small">Small</option>
-      <option value="medium" selected>Medium</option>
-      <option value="large">Large</option>
-      <option value="huge">Huge</option>
-    </select>
-  </label>
+  </span>
+  <span class="formgroup">
+    <label>Speed:
+      <select id="animationSpeed">
+        <option value="1200">Slowest</option>
+        <option value="700" selected>Slow</option>
+        <option value="300">Fast</option>
+        <option value="100">Fastest</option>
+      </select>
+    </label>
+  </span>
+  <span class="formgroup">
+    <label>Node size:
+      <select id="objectSize">
+        <option value="tiny">Tiny</option>
+        <option value="small">Small</option>
+        <option value="medium" selected>Medium</option>
+        <option value="large">Large</option>
+        <option value="huge">Huge</option>
+      </select>
+    </label>
+  </span>
 </fieldset>
 
 </section>
-</div>
+</main>
 
 <footer>
-  <p>&copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a>, 
+  <p>&copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a>,
     open source code <a href="https://github.com/ChalmersGU-data-structure-courses/dsvis">on GitHub</a></p>
 </footer>
 
