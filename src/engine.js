@@ -133,9 +133,9 @@ DS.confirmResetAll = function() {
 };
 
 
-DS.reset = function() {
+DS.reset = async function() {
     DS.clearCanvas()
-    if (DS.$Current) DS.$Current.reset();
+    if (DS.$Current) await DS.$Current.reset();
     DS.resetListeners();
 };
 
@@ -365,17 +365,17 @@ DS.submit = function(method, field) {
 };
 
 
-DS.execute = function(operation, args, until = 0) {
-    if (!args) args = [];
-    DS.reset();
+DS.execute = async function(operation, args = [], until = 0) {
+    await DS.reset();
     DS.$Actions.push({oper: operation, args: args, nsteps: until});
     if (DS.$DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(DS.$Actions)}`);
 
-    DS.callAsync().then(() => {
+    try {
+        await DS.runActionsLoop()
         DS.$Actions[DS.$Actions.length - 1].nsteps = DS.$CurrentStep;
         if (DS.$DEBUG) console.log(`DONE / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
         DS.resetListeners();
-    }).catch((reason) => {
+    } catch (reason) {
         if (typeof reason !== "object" || reason.until == null) {
             console.error(reason);
             DS.resetListeners();
@@ -396,11 +396,11 @@ DS.execute = function(operation, args, until = 0) {
         } else {
             DS.reset();
         }
-    });
+    }
 };
 
 
-DS.callAsync = async function() {
+DS.runActionsLoop = async function() {
     for (let nAction = 0; nAction < DS.$Actions.length; nAction++) {
         DS.resetListeners(true);
         const action = DS.$Actions[nAction];
@@ -419,26 +419,27 @@ DS.callAsync = async function() {
 
 DS.pause = function(message, ...args) {
     const title = DS.getMessage(message, ...args);
+    if (DS.$DEBUG) console.log(`${DS.$CurrentStep}. Doing: ${title} (running: ${DS.isRunning()}), ${JSON.stringify(DS.$Actions)}`);
+    if (DS.$resetting) return;
     if (title != null) {
         DS.$Info.body.text(title);
     }
     return new Promise((resolve, reject) => {
-        if (DS.$DEBUG) console.log(`${DS.$CurrentStep}. Doing: ${title} (running: ${DS.isRunning()}), ${JSON.stringify(DS.$Actions)}`);
         const action = DS.$Actions[DS.$CurrentAction];
         if (action.nsteps != null && DS.$CurrentStep < action.nsteps) {
             DS.fastForward(resolve, reject);
         } else {
             let runnerTimer = null;
-            if (DS.isRunning()) {
-                DS.setStatus("running");
-                runnerTimer = setTimeout(() => DS.stepForward(resolve, reject), DS.getAnimationSpeed() * 1.1);
-            }
             for (const id in DS.$AsyncListeners) {
                 const listener = DS.$AsyncListeners[id];
                 DS.addListener(id, listener.type, () => {
                     clearTimeout(runnerTimer);
                     listener.handler(resolve, reject);
                 });
+            }
+            if (DS.isRunning()) {
+                DS.setStatus("running");
+                runnerTimer = setTimeout(() => DS.stepForward(resolve, reject), DS.getAnimationSpeed() * 1.1);
             }
         }
     });

@@ -5,12 +5,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BST = class BST {
-    constructor() {
-        this.reset();
+    constructor(initialValues = null) {
+        this._initialValues = initialValues;
     }
 
-    reset() {
+    async reset() {
         this.treeRoot = null;
+        if (this._initialValues) {
+            DS.$resetting = true;
+            await this.insert(...this._initialValues);
+            DS.$resetting = false;
+        }
     }
 
     initToolbar() {
@@ -31,7 +36,8 @@ DS.BST = class BST {
         return DS.SVG().binaryNode(text, DS.getStartX(), DS.getStartY());
     }
 
-    resizeTree(animate = true) {
+    resizeTree() {
+        const animate = !DS.$resetting;
         this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
     }
 
