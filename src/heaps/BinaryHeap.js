@@ -7,19 +7,25 @@
 DS.BinaryHeap = class BinaryHeap {
     $arraySize = 28;
 
-    constructor() {
-        this.reset();
+    constructor(initialValues = null) {
+        this._initialValues = initialValues;
     }
 
-    reset() {
+    async reset() {
         this.treeRoot = null;
         this.treeNodes = new Array(this.$arraySize);
         this.heapArray = DS.SVG().dsArray(this.$arraySize, DS.getRootX(), DS.$SvgHeight - DS.getRootY());
         if (this.heapArray.x() < DS.$Info.x) this.heapArray.x(DS.$Info.x);
         this.heapSize = 0;
+        if (this._initialValues) {
+            DS.$resetting = true;
+            await this.insert(...this._initialValues);
+            DS.$resetting = false;
+        }
     }
 
-    resizeTree(animate = true) {
+    resizeTree() {
+        const animate = !DS.$resetting;
         this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
     }
 

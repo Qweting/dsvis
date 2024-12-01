@@ -5,8 +5,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BTree = class BTree {
-    constructor() {
-        this.reset();
+    constructor(initialValues = null) {
+        this._initialValues = initialValues;
+    }
+
+    async reset() {
+        this.treeRoot = null;
+        if (this._initialValues) {
+            DS.$resetting = true;
+            await this.insert(...this._initialValues);
+            DS.$resetting = false;
+        }
     }
 
     initToolbar() {
@@ -37,12 +46,8 @@ DS.BTree = class BTree {
         return Math.floor((this.getMaxDegree() - 1) / 2);
     }
 
-
-    reset() {
-        this.treeRoot = null;
-    }
-
-    resizeTree(animate = true) {
+    resizeTree() {
+        const animate = !DS.$resetting;
         this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
     }
 
