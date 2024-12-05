@@ -15,7 +15,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (result?.success) {
             await this.fixDoubleRed(result.node);
             if (this.isRed(this.treeRoot)) {
-                await DS.pause("Tree root is red: Color it black");
+                await DS.pause('color.redRootBlack');
                 this.colorBlack(this.treeRoot);
             }
         }
@@ -34,10 +34,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             node.setHighlight(true);
             parent.setHighlight(true);
             pibling.setHighlight(true);
-            await DS.pause([
-                `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`,
-                "Push blackness down from grandparent",
-            ]);
+            await DS.pause('color.pushDownBlack', node, parent, pibling);
             node.setHighlight(false);
             parent.setHighlight(false);
             pibling.setHighlight(false);
@@ -55,10 +52,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             node.setHighlight(true);
             parent.setHighlight(true);
             grandparent.setHighlight(true);
-            await DS.pause([
-                `Node ${node} is a red ${side} child of a red ${rotate} child`,
-                `Rotate parent ${parent} ${rotate}`,
-            ]);
+            await DS.pause('rotate.parent', node, side, rotate, parent),
             node.setHighlight(false);
             parent.setHighlight(false);
             grandparent.setHighlight(false);
@@ -72,10 +66,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         node.setHighlight(true);
         parent.setHighlight(true);
         grandparent.setHighlight(true);
-        await DS.pause([
-            `Node ${node} is a red ${side} child of a red ${side} child`,
-            `Switch colors and rotate grandparent ${grandparent} ${rotate}`,
-        ]);
+        await DS.pause('rotate.grandparent', node, side, grandparent, rotate);
         node.setHighlight(false);
         parent.setHighlight(false);
         grandparent.setHighlight(false);
@@ -93,7 +84,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             }
             if (this.isRed(this.treeRoot)) {
                 this.treeRoot.colorBlack();
-                await DS.pause("Color the root black");
+                await DS.pause('color.rootBlack');
             }
         }
     }
@@ -103,7 +94,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (this.isRed(child)) {
             this.colorBlack(child);
             child.setHighlight(true);
-            await DS.pause(`Color node ${child} black`);
+            await DS.pause('color.nodeBlack', child);
             child.setHighlight(false);
         } else if (!parent.isLeaf()) {
             await this.fixDoubleBlack(parent, left);
@@ -117,16 +108,13 @@ DS.RedBlack = class RedBlack extends DS.BST {
         const rightGrandchild = rightChild?.getChild(right);
         const leftGrandchild = rightChild?.getChild(left);
         parent.setHighlight(true);
-        await DS.pause(`Parent ${parent} is imbalanced`);
+        await DS.pause('balancing.parentImbalanced', parent);
 
         // Sibling is red
         if (this.isRed(rightChild)) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
-            await DS.pause([
-                `Parent ${parent} is black, and ${right} child ${rightChild} is red:`,
-                `Switch colors and rotate ${left}`,
-            ]);
+            await DS.pause('rotate.redSibling', parent, right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
@@ -142,10 +130,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(right, true);
             rightGrandchild.setHighlight(true);
-            await DS.pause([
-                `${right} child ${rightChild} is black, its ${right} child is red:`,
-                `Switch colors and rotate ${left}`,
-            ]);
+            await DS.pause('rotate.redDistantChild', right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setChildHighlight(right, false);
             rightGrandchild.setHighlight(false);
@@ -163,10 +148,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(left, true);
             leftGrandchild.setHighlight(true);
-            await DS.pause([
-                `${right} child ${rightChild} is black, its ${left} child is red:`,
-                `Switch colors and rotate child ${right}`,
-            ]);
+            await DS.pause('rotate.redCloseChild', right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setChildHighlight(left, false);
             leftGrandchild.setHighlight(false);
@@ -182,11 +164,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (this.isRed(parent)) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
-            await DS.pause([
-                `Parent ${parent} is red,`,
-                `${right} child ${rightChild} and its children are black:`,
-                "Switch colors",
-            ]);
+            await DS.pause('color.switch', parent, right, rightChild);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
@@ -198,10 +176,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         // All are black
         parent.setChildHighlight(right, true);
         rightChild.setHighlight(true);
-        await DS.pause([
-            `Parent ${parent}, ${right} child ${rightChild} and its children are black:`,
-            `Color ${right} child red`,
-        ]);
+        await DS.pause('color.childRed', parent, right, rightChild);
         parent.setChildHighlight(right, false);
         rightChild.setHighlight(false);
 
@@ -233,4 +208,52 @@ DS.RedBlack = class RedBlack extends DS.BST {
     }
 
 };
+
+
+DS.RedBlack.messages = {
+    color: {
+        redRootBlack: "Tree root is red: Color it black",
+        rootBlack: "Color the root black",
+        nodeBlack: (n) => `Color node ${n} black`,
+        pushDownBlack: (node, parent, pibling) => [
+            `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`,
+            "Push blackness down from grandparent",
+        ],
+        switch: (parent, right, rightChild) => [
+            `Parent ${parent} is red,`,
+            `${right} child ${rightChild} and its children are black:`,
+            "Switch colors",
+        ],
+        childRed: (parent, right, rightChild) => [
+            `Parent ${parent}, ${right} child ${rightChild} and its children are black:`,
+            `Color ${right} child red`,
+        ],
+    },
+    balancing: {
+        parentImbalanced: (parent) => `Parent ${parent} is imbalanced`,
+    },
+    rotate: {
+        parent: (node, side, rotate, parent) => [
+            `Node ${node} is a red ${side} child of a red ${rotate} child`,
+            `Rotate parent ${parent} ${rotate}`,
+        ],
+        grandparent: (node, side, grandparent, rotate) => [
+            `Node ${node} is a red ${side} child of a red ${side} child`,
+            `Switch colors and rotate grandparent ${grandparent} ${rotate}`,
+        ],
+        redSibling: (parent, right, rightChild, left) => [
+            `Parent ${parent} is black, and its ${right} child ${rightChild} is red:`,
+            `Switch colors and rotate ${left}`,
+        ],
+        redDistantChild: (right, rightChild, left) => [
+            `${right} child ${rightChild} is black, its ${right} child is red:`,
+            `Switch colors and rotate ${left}`,
+        ],
+        redCloseChild: (right, rightChild, left) => [
+            `${right} child ${rightChild} is black, its ${left} child is red:`,
+            `Switch colors and rotate child ${right}`,
+        ],
+    },
+};
+DS.updateDefault(DS.RedBlack.messages, DS.BST.messages);
 

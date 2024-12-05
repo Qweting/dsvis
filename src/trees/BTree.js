@@ -61,14 +61,14 @@ DS.BTree = class BTree {
 
     async find(value) {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return;
         }
-        await DS.pause(`Searching for ${value}`);
+        await DS.pause('find.start', value);
         const found = await this.findHelper(value);
         found.node.setHighlight(true);
-        const response = found.success ? `Found ${value}` : `Did not find ${value}`;
-        await DS.pause(response);
+        const path = found.success ? 'find.found' : 'find.notfound';
+        await DS.pause(path, value);
         found.node.setHighlight(false);
     }
 
@@ -106,7 +106,7 @@ DS.BTree = class BTree {
             }
 
             if (found) i++;
-            await DS.pause(`${cmpStr}: Look into ${this.getOrdinal(i, node.numChildren())} child`);
+            await DS.pause(`${cmpStr}: ${DS.getMessage('node.lookNthChild', this.getOrdinal(i, node.numChildren()))}`);
             node.setHighlight(false);
             parent = node;
             node = parent.getChild(i);
@@ -124,24 +124,24 @@ DS.BTree = class BTree {
         } else {
             this.treeRoot = DS.SVG().bTreeNode(true, 1, DS.getStartX(), DS.getStartY());
             this.treeRoot.setText(0, value);
-            await DS.pause(`Create a new tree root ${value}`);
+            await DS.pause('insert.newroot', value);
             this.resizeTree();
             await DS.pause();
         }
     }
 
     async insertBottomup(value) {
-        await DS.pause(`Searching for node to insert ${value}`);
+        await DS.pause('insert.search', value);
         const found = await this.findHelper(value);
         const node = found.node;
         node.setHighlight(true);
         if (found.success) {
-            await DS.pause(`There is already a node ${found.node}`);
+            await DS.pause('insert.exists', found.node);
             node.setHighlight(false);
         } else {
             node.insertValue(found.i, value);
             this.resizeTree();
-            await DS.pause(`Insert ${value} as ${this.getOrdinal(found.i, node.numValues())} value in the node`);
+            await DS.pause('insert.nth', value, this.getOrdinal(found.i, node.numValues()));
             node.setHighlight(false);
             await this.insertRepair(node);
             await DS.pause();
@@ -161,7 +161,7 @@ DS.BTree = class BTree {
 
     async split(node) {
         node.setHighlight(true);
-        await DS.pause(`Splitting node ${node}`);
+        await DS.pause('node.split', node);
         const parent = node.getParent();
         const parentIndex = node.getParentIndex();
 
@@ -238,7 +238,7 @@ DS.BTree = class BTree {
 
     async print() {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return;
         }
         const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
@@ -287,19 +287,19 @@ DS.BTree = class BTree {
 
     async delete(value) {
         if (!this.treeRoot) {
-            await DS.pause("Tree is empty");
+            await DS.pause('general.empty');
             return;
         }
-        await DS.pause(`Searching for node to delete ${value}`);
+        await DS.pause('delete.search', value);
         const found = await this.findHelper(value);
         if (!found.success) {
             found.node.setHighlight(true);
-            await DS.pause(`There is no node ${value}`);
+            await DS.pause('delete.notexists', value);
             found.node.setHighlight(false);
             return;
         }
         found.node.setHighlight(true);
-        await DS.pause(`Found node ${value} to delete`);
+        await DS.pause('delete.found', value);
         found.node.setHighlight(false);
         if (found.node.isLeaf()) {
             await this.deleteLeaf(found.node, found.i);
@@ -308,7 +308,7 @@ DS.BTree = class BTree {
         }
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
-            await DS.pause("Remove empty tree root");
+            await DS.pause('delete.root.empty');
             const newRoot = this.treeRoot.isLeaf() ? null : this.treeRoot.getLeft();
             this.treeRoot.remove();
             this.treeRoot = newRoot;
@@ -318,7 +318,7 @@ DS.BTree = class BTree {
 
     async deleteLeaf(node, i) {
         node.setHighlight(true);
-        await DS.pause(`Delete the ${this.getOrdinal(i, node.numValues())} value in leaf ${node}`);
+        await DS.pause('delete.leaf.nth', node, this.getOrdinal(i, node.numValues()));
         node.deleteValue(i);
         this.resizeTree();
         node.setHighlight(false);
@@ -328,7 +328,7 @@ DS.BTree = class BTree {
     async deleteNonleaf(node, i) {
         node.addClass("marked");
         const pointer = DS.SVG().highlightCircle(node.getCX(i), node.cy());
-        await DS.pause(`Find the predecessor value of ${node.getText(i)}`);
+        await DS.pause('find.predecessor', node.getText(i));
         let maxNode = node.getChild(i);
         let j;
         while (true) {
@@ -342,7 +342,7 @@ DS.BTree = class BTree {
         const risingNode = DS.SVG().bTreeNode(false, 1, maxNode.getCX(j), maxNode.cy());
         risingNode.setHighlight(true);
         risingNode.setText(0, maxValue);
-        await DS.pause(`Replace the value ${node.getText(i)} with ${maxValue}`);
+        await DS.pause('delete.replace', node.getText(i), maxValue);
         pointer.remove();
         risingNode.setCenter(node.getCX(i), node.cy(), true);
         node.setText(i, "");
@@ -351,7 +351,7 @@ DS.BTree = class BTree {
         risingNode.remove();
         node.removeClass("marked");
         maxNode.setHighlight(true);
-        await DS.pause(`Now delete ${maxValue} in the leaf node ${maxNode}`);
+        await DS.pause('delete.leaf.value', maxValue, maxNode);
         await this.deleteLeaf(maxNode, j);
     }
 
@@ -362,7 +362,7 @@ DS.BTree = class BTree {
         if (!parent) return;
 
         node.setHighlight(true);
-        await DS.pause(`Node ${node} has too few values`);
+        await DS.pause('node.tooFew', node);
         const i = node.getParentIndex();
         if (i > 0 && parent.getChild(i - 1).numValues() > this.getMinKeys()) {
             // Steal from left sibling
@@ -389,7 +389,7 @@ DS.BTree = class BTree {
         node.setHighlight(true);
         parent.setHighlight(true);
         rightSib.setHighlight(true);
-        await DS.pause(["Merging nodes:", `${node} + [${parentValue}] + ${rightSib}`]);
+        await DS.pause('node.mergeRight', node, parentValue, rightSib);
 
         const sinkingNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         sinkingNode.setHighlight(true);
@@ -429,10 +429,7 @@ DS.BTree = class BTree {
 
         const leftValue = parent.getText(parentIndex);
         const rightValue = rightSib.getText(0);
-        await DS.pause([
-            "Stealing from right sibling:",
-            `${node} ← [${leftValue}] ← [${rightValue}]`,
-        ]);
+        await DS.pause('node.steal.right', node, leftValue, rightValue);
 
         const leftNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         leftNode.setText(0, leftValue);
@@ -474,10 +471,7 @@ DS.BTree = class BTree {
 
         const rightValue = parent.getText(parentIndex);
         const leftValue = leftSib.getText(leftSib.numValues() - 1);
-        await DS.pause([
-            "Stealing from left sibling:",
-            `[${leftValue}] → [${rightValue}] → ${node}`,
-        ]);
+        await DS.pause('node.steal.left', node, leftValue, rightValue);
 
         const rightNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         rightNode.setText(0, rightValue);
@@ -510,3 +504,42 @@ DS.BTree = class BTree {
 
 };
 
+
+DS.BTree.messages = {
+    find: {
+        predecessor: (val) => `Find the predecessor value of ${val}`,
+    },
+    insert: {
+        nth: (val, nth) => `Insert ${val} as ${nth} value in the node`,
+    },
+    delete: {
+        root: {
+            empty: "Remove empty tree root",
+        },
+        leaf: {
+            nth: (leaf, nth) => `Delete the ${nth} value in leaf ${leaf}`,
+            value: (val, leaf) => `Now delete ${val} in the leaf node ${leaf}`,
+        },
+        replace: (val, newVal) => `Replace the value ${val} with ${newVal}`,
+    },
+    node: {
+        lookNthChild: (nth) => `Look into ${nth} child`,
+        split: (node) => `Splitting node ${node}`,
+        tooFew: (node) => `Node ${node} has too few values`,
+        mergeRight: (node, parent, rightSib) => [
+            "Merging nodes:",
+            `${node} + [${parent}] + ${rightSib}`,
+        ],
+        steal: {
+            right: (node, left, right) => [
+                "Stealing from right sibling:",
+                `${node} ← [${left}] ← [${right}]`,
+            ],
+            left: (node, left, right) => [
+                "Stealing from left sibling:",
+                `[${left}] → [${right}] → ${node}`,
+            ],
+        }
+    },
+};
+DS.updateDefault(DS.BTree.messages, DS.BST.messages);

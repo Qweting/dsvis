@@ -44,7 +44,7 @@ DS.AVL = class AVL extends DS.BST {
         this.pointer = DS.SVG().highlightCircle(child.cx(), child.cy());
         while (node) {
             this.pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause("Update node heights");
+            await DS.pause('node.updateHeight');
             const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
             const height = 1 + Math.max(leftHeight, rightHeight);
             if (height !== this.getHeight(node)) {
@@ -62,7 +62,7 @@ DS.AVL = class AVL extends DS.BST {
     async rebalance(node) {
         const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
         if (Math.abs(leftHeight - rightHeight) <= 1) return node;
-        await DS.pause("Node is unbalanced!");
+        await DS.pause('node.unbalanced');
         const left = leftHeight < rightHeight ? "left" : "right";
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
@@ -74,7 +74,7 @@ DS.AVL = class AVL extends DS.BST {
             node = await this.doubleRotate(left, node);
         }
         this.pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
-        await DS.pause("Node is now balanced");
+        await DS.pause('node.balanced');
         return node;
     }
 
@@ -129,3 +129,14 @@ SVG.extend(SVG.Container, {
         return this.put(new SVG.AVLNode()).init(text, x, y);
     },
 });
+
+
+DS.AVL.messages = {
+    node: {
+        updateHeight: "Update node heights",
+        unbalanced: "Node is unbalanced!",
+        balanced: "Node is now balanced",
+    },
+};
+DS.updateDefault(DS.AVL.messages, DS.BST.messages);
+

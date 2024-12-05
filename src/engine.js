@@ -446,6 +446,17 @@ DS.pause = function(message, ...args) {
 };
 
 
+DS.updateDefault = function(obj, defaultObj) {
+    for (const key in defaultObj) {
+        if (!(key in obj)) {
+            obj[key] = defaultObj[key];
+        } else if (typeof obj[key] === 'object' && typeof defaultObj[key] === 'object') {
+            DS.updateDefault(obj[key], defaultObj[key]);
+        }
+    }
+}
+
+
 DS.getMessage = function(message, ...args) {
     if (Array.isArray(message)) [message, ...args] = [...message, ...args];
     if (typeof message !== 'string') {
@@ -463,6 +474,7 @@ DS.getMessage = function(message, ...args) {
         }
         title = title[key];
     }
+    if (Array.isArray(title)) title = title.join("\n");
     if (typeof title === 'object') {
         console.error("Unknown message:", message, ...args);
         return [message, ...args].join("\n");

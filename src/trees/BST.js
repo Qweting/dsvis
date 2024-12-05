@@ -259,7 +259,7 @@ DS.BST = class BST {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
-        await DS.pause(`Zig-zag: Rotate ${child} ${right}, then rotate ${node} ${left}`);
+        await DS.pause('rotate.zigzag', child, right, node, left);
         await this.singleRotate(right, child);
         return await this.singleRotate(left, node);
     }
@@ -274,7 +274,7 @@ DS.BST = class BST {
 
         A.setChildHighlight(right, true);
         B.setHighlight(true);
-        await DS.pause(`Rotate ${A} ${left}`);
+        await DS.pause('rotate.single', A, left);
 
         const parent = A.getParent();
         if (parent) {
@@ -330,10 +330,17 @@ DS.BST.messages = {
         redirect: (parent, child) => `Redirect parent ${parent} to child ${child}`,
         root: {
             singleton: (root) => `Remove the root node ${root}`,
-            onechild: (child, root) => `Make the child ${child} the new root,\nand remove node ${root}`,
+            onechild: (child, root) => [
+                `Make the child ${child} the new root,`,
+                `and remove node ${root}`,
+            ],
         },
         node: (node) => `Remove node ${node}`,
         leaf: (node) => `Remove leaf node ${node}`,
+    },
+    rotate: {
+        single: (A, left) => `Rotate ${A} ${left}`,
+        zigzag: (child, right, node, left) => `Zig-zag: Rotate ${child} ${right}, then rotate ${node} ${left}`,
     },
 };
 

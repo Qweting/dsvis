@@ -33,14 +33,14 @@ DS.BinaryHeap = class BinaryHeap {
         for (const val of values) await this.insertOne(val);
     }
 
-    async swap(j, k, message = "") {
+    async swap(j, k, message, ...args) {
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
         const jLabel = DS.SVG().textCircle(jNode.getText(), jNode.cx(), jNode.cy());
         const kLabel = DS.SVG().textCircle(kNode.getText(), kNode.cx(), kNode.cy());
         jLabel.setCenter(kLabel.cx(), kLabel.cy(), true);
         kLabel.setCenter(jLabel.cx(), jLabel.cy(), true);
         this.heapArray.swap(j, k, true);
-        await DS.pause(message);
+        await DS.pause(message, ...args);
         jNode.setText(kLabel.getText());
         kNode.setText(jLabel.getText());
         jLabel.remove();
@@ -50,7 +50,7 @@ DS.BinaryHeap = class BinaryHeap {
 
     async insertOne(value) {
         if (this.heapSize >= this.$arraySize) {
-            await DS.pause("Heap is full!");
+            await DS.pause('general.full');
             return;
         }
 
@@ -60,7 +60,7 @@ DS.BinaryHeap = class BinaryHeap {
         const arrayLabel = DS.SVG().textCircle(value, DS.getStartX(), DS.getStartY());
         let treeNode = DS.SVG().binaryNode(value, DS.getStartX(), DS.getStartY());
         this.treeNodes[currentIndex] = treeNode;
-        await DS.pause(`Insert value: ${value}`);
+        await DS.pause('insert.value', value);
 
         arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), true);
         if (currentIndex === 0) {
@@ -80,7 +80,7 @@ DS.BinaryHeap = class BinaryHeap {
 
         while (currentIndex > 0) {
             treeNode.setHighlight(true);
-            await DS.pause(`Shift the value upwards`);
+            await DS.pause('insert.shiftUp');
             parentIndex = Math.floor((currentIndex - 1) / 2);
             parentNode = this.treeNodes[parentIndex];
             const parentValue = this.heapArray.getValue(parentIndex);
@@ -89,15 +89,15 @@ DS.BinaryHeap = class BinaryHeap {
             parentNode.setChildHighlight(direction, true);
             const cmp = DS.compare(value, parentValue);
             if (cmp >= 0) {
-                await DS.pause(`The parent ${parentValue} is not larger: stop here`);
+                await DS.pause('insert.stopShift', parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(parentIndex, false);
                 treeNode.setHighlight(false);
                 parentNode.setChildHighlight(direction, false);
                 break;
             }
-            await DS.pause(`The parent ${parentValue} is larger`);
-            await this.swap(currentIndex, parentIndex, `Swap ${value} and ${parentValue}`);
+            await DS.pause('insert.shiftAgain', parentValue);
+            await this.swap(currentIndex, parentIndex, 'swap.swap', value, parentValue);
             this.heapArray.setIndexHighlight(currentIndex, false);
             treeNode.setHighlight(false);
             parentNode.setChildHighlight(direction, false);
@@ -111,7 +111,7 @@ DS.BinaryHeap = class BinaryHeap {
 
     async deleteMin() {
         if (this.heapSize === 0) {
-            await DS.pause("Heap is empty!");
+            await DS.pause('general.empty');
             return;
         }
         this.heapSize--;
@@ -119,7 +119,7 @@ DS.BinaryHeap = class BinaryHeap {
 
         const arrayLabel = DS.SVG().textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy());
         if (this.heapSize === 0) {
-            await DS.pause(`Remove the root: ${minValue}`);
+            await DS.pause('delete.root', minValue);
             this.heapArray.setValue(0);
             arrayLabel.setCenter(DS.getStartX(), DS.getStartY(), true);
             this.treeRoot.setCenter(DS.getStartX(), DS.getStartY(), true);
@@ -132,17 +132,17 @@ DS.BinaryHeap = class BinaryHeap {
         }
 
         const treeLabel = DS.SVG().textCircle(minValue, this.treeRoot.cx(), this.treeRoot.cy());
-        await DS.pause(`Remove the minimum value: ${minValue}`);
+        await DS.pause('remove.minValue', minValue);
         this.heapArray.setValue(0);
         this.treeRoot.setText();
         arrayLabel.setCenter(DS.getStartX(), DS.getStartY(), true);
         treeLabel.setCenter(DS.getStartX(), DS.getStartY(), true);
         let currentValue = this.heapArray.getValue(this.heapSize);
         await DS.pause();
-        await this.swap(0, this.heapSize, `Swap in the last heap value to the first position: ${currentValue}`);
+        await this.swap(0, this.heapSize, 'swap.lastToFirst', currentValue);
         this.treeNodes[this.heapSize].remove();
         this.heapArray.setDisabled(this.heapSize, true);
-        await DS.pause(`Remove the new last heap value`);
+        await DS.pause('delete.lastHeap');
 
         let currentIndex = 0;
         let currentNode = this.treeNodes[currentIndex];
@@ -151,13 +151,13 @@ DS.BinaryHeap = class BinaryHeap {
             this.heapArray.setIndexHighlight(currentIndex, true);
             let childIndex = currentIndex * 2 + 1;
             if (childIndex >= this.heapSize) {
-                await DS.pause("Finished");
+                await DS.pause('finished');
                 currentNode.setHighlight(false);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 break;
             }
 
-            await DS.pause(`Shift the value downwards`);
+            await DS.pause('delete.shiftDown');
             let direction = "left";
             let childValue = this.heapArray.getValue(childIndex);
             if (childIndex + 1 < this.heapSize && DS.compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
@@ -173,7 +173,7 @@ DS.BinaryHeap = class BinaryHeap {
 
             const cmp = DS.compare(currentValue, childValue);
             if (cmp <= 0) {
-                await DS.pause(`The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`);
+                await DS.pause('delete.stopShift', currentValue, childValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(childIndex, false);
                 currentNode.setChildHighlight(direction, false);
@@ -181,8 +181,8 @@ DS.BinaryHeap = class BinaryHeap {
                 break;
             }
 
-            await DS.pause(`The value ${currentValue} is larger than the smallest child ${childValue}`);
-            await this.swap(currentIndex, childIndex, `Swap ${currentValue} and ${childValue}`);
+            await DS.pause('delete.shiftAgain', currentValue, childValue);
+            await this.swap(currentIndex, childIndex, 'swap.swap', currentValue, childValue);
             this.heapArray.setIndexHighlight(currentIndex, false);
             this.heapArray.setIndexHighlight(childIndex, false);
             currentNode.setChildHighlight(direction, false);
@@ -198,3 +198,31 @@ DS.BinaryHeap = class BinaryHeap {
     }
 
 };
+
+
+DS.BinaryHeap.messages = {
+    general: {
+        empty: "Heap is empty!",
+        full: "Heap is full!",
+        finished: "Finished",
+    },
+    insert: {
+        value: (value) => `Insert value: ${value}`,
+        shiftUp: "Shift the value upwards",
+        stopShift: (parentValue) => `The parent ${parentValue} is not larger: stop here`,
+        shiftAgain: (parentValue) => `The parent ${parentValue} is larger`,
+    },
+    delete: {
+        root: (minValue) => `Remove the root: ${minValue}`,
+        minValue: (minValue) => `Remove the minimum value: ${minValue}`,
+        lastHeap: "Remove the new last heap value",
+        shiftDown: "Shift the value downwards",
+        stopShift: (currentValue, childValue) => `The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`,
+        shiftAgain: (currentValue, childValue) => `The value ${currentValue} is larger than the smallest child ${childValue}`,
+    },
+    swap: {
+        swap: (a, b) => `Swap ${a} and ${b}`,
+        lastToFirst: (val) => `Swap in the last heap value to the first position: ${val}`,
+    },
+};
+
