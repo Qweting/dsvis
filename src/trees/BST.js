@@ -50,12 +50,12 @@ DS.BST = class BST extends DS.Engine {
         this.toggleNullNodes(true);
     }
 
-    toggleNullNodes = function(show) {
+    toggleNullNodes(show) {
         if (show == null) show = this.$Toolbar.showNullNodes.checked;
         this.$Toolbar.showNullNodes.checked = show;
         if (show) this.SVG().addClass("shownullnodes");
         else this.SVG().removeClass("shownullnodes");
-    };
+    }
 
     newNode(text) {
         return this.SVG().binaryNode(text, this.getStartX(), this.getStartY());
