@@ -52,22 +52,13 @@ DS.Engine = class {
         },
         objectSize: {
             getCookie: (value) => this.$Toolbar.objectSize.value = value,
-            setCookie: () => this.getSizeClass(),
+            setCookie: () => this.getObjectSize(),
         },
     };
 
     $Defaults = {
         animationSpeed: 1000, // milliseconds per step
-        sizeClass: "medium",
-        objectSize: 40,
-    };
-
-    $ObjectSize = {
-        tiny: 0.70,
-        small: 0.85,
-        medium: 1.00,
-        large: 1.15,
-        huge: 1.30,
+        objectSize: 40, // compared to svg width (1000)
     };
 
 
@@ -76,11 +67,7 @@ DS.Engine = class {
     }
 
     getObjectSize() {
-        return this.$Defaults.objectSize * this.$ObjectSize[this.getSizeClass()];
-    }
-
-    getSizeClass() {
-        return this.$Toolbar.objectSize?.value.toLowerCase() || this.$Defaults.sizeClass;
+        return parseInt(this.$Toolbar.objectSize?.value) || this.$Defaults.objectSize;
     }
 
     getSpacingX() {
@@ -93,14 +80,6 @@ DS.Engine = class {
 
     getStrokeWidth() {
         return this.getObjectSize() / 12;
-    }
-
-    setDefaultObjectSize() {
-        const sizeClass = this.getSizeClass();
-        for (const cls in this.$ObjectSize) {
-            if (cls === sizeClass) this.$Svg.addClass(cls);
-            else this.$Svg.removeClass(cls);
-        }
     }
 
 
@@ -174,10 +153,16 @@ DS.Engine = class {
             for (let x = 1; x < w / 100; x++) this.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             for (let y = 1; y < h / 100; y++) this.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
         }
-        this.setDefaultObjectSize();
         this.$Info.title = this.$Svg.text("").addClass("title").x(this.$Info.x).cy(this.$Info.y);
         this.$Info.body = this.$Svg.text("").addClass("message").x(this.$Info.x).cy(this.$Info.ybody);
         this.$Info.status = this.$Svg.text("").addClass("status-report").x(this.$Info.x).cy(this.$Info.ystatus);
+        this.updateCSSVariables();
+    }
+
+
+    updateCSSVariables() {
+        const relativeSize = Math.round(100 * this.getObjectSize() / this.$Defaults.objectSize);
+        document.documentElement.style.setProperty('--node-font-size', `${relativeSize}%`);
     }
 
 

@@ -151,14 +151,17 @@ input:active:not(:disabled), button:active:not(:disabled), button.selected:not(:
 
 /*-----------------------------------------------------------------*/
 
+:root {
+	--node-font-size: 100%;
+}
+
 svg {
 	font-size: 20px;
 }
 
-svg.tiny g {font-size: 70%}
-svg.small g {font-size: 85%}
-svg.large g {font-size: 115%}
-svg.huge g {font-size: 130%}
+svg g {
+	font-size: var(--node-font-size);
+}
 
 text {
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
