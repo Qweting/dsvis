@@ -7,7 +7,7 @@
 DS.AVL = class AVL extends DS.BST {
 
     newNode(text) {
-        return this.$DS.SVG().avlNode(text, this.getStartX(), this.getStartY());
+        return this.SVG().avlNode(text, this.getStartX(), this.getStartY());
     }
 
     getHeight(node) {
@@ -41,16 +41,16 @@ DS.AVL = class AVL extends DS.BST {
 
     async updateHeights(node, fromchild) {
         const child = node.getChild(fromchild) || node;
-        this.pointer = this.$DS.SVG().highlightCircle(child.cx(), child.cy());
+        this.pointer = this.SVG().highlightCircle(child.cx(), child.cy());
         while (node) {
             this.pointer.setCenter(node.cx(), node.cy(), true);
-            await this.$DS.pause('node.updateHeight');
+            await this.pause('node.updateHeight');
             const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
             const height = 1 + Math.max(leftHeight, rightHeight);
             if (height !== this.getHeight(node)) {
                 node.setHeightHighlight(true);
                 node.setHeight(height);
-                await this.$DS.pause();
+                await this.pause();
                 node.setHeightHighlight(false);
             }
             node = await this.rebalance(node);
@@ -62,7 +62,7 @@ DS.AVL = class AVL extends DS.BST {
     async rebalance(node) {
         const leftHeight = this.getHeight(node.getLeft()), rightHeight = this.getHeight(node.getRight());
         if (Math.abs(leftHeight - rightHeight) <= 1) return node;
-        await this.$DS.pause('node.unbalanced');
+        await this.pause('node.unbalanced');
         const left = leftHeight < rightHeight ? "left" : "right";
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
@@ -73,8 +73,8 @@ DS.AVL = class AVL extends DS.BST {
         } else {
             node = await this.doubleRotate(left, node);
         }
-        this.pointer = this.$DS.SVG().highlightCircle(node.cx(), node.cy());
-        await this.$DS.pause('node.balanced');
+        this.pointer = this.SVG().highlightCircle(node.cx(), node.cy());
+        await this.pause('node.balanced');
         return node;
     }
 

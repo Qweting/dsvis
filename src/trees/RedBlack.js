@@ -15,7 +15,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (result?.success) {
             await this.fixDoubleRed(result.node);
             if (this.isRed(this.treeRoot)) {
-                await this.$DS.pause('color.redRootBlack');
+                await this.pause('color.redRootBlack');
                 this.colorBlack(this.treeRoot);
             }
         }
@@ -34,14 +34,14 @@ DS.RedBlack = class RedBlack extends DS.BST {
             node.setHighlight(true);
             parent.setHighlight(true);
             pibling.setHighlight(true);
-            await this.$DS.pause('color.pushDownBlack', node, parent, pibling);
+            await this.pause('color.pushDownBlack', node, parent, pibling);
             node.setHighlight(false);
             parent.setHighlight(false);
             pibling.setHighlight(false);
             this.colorBlack(pibling);
             this.colorBlack(parent);
             this.colorRed(grandparent);
-            await this.$DS.pause();
+            await this.pause();
             await this.fixDoubleRed(grandparent);
             return;
         }
@@ -52,7 +52,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             node.setHighlight(true);
             parent.setHighlight(true);
             grandparent.setHighlight(true);
-            await this.$DS.pause('rotate.parent', node, side, rotate, parent),
+            await this.pause('rotate.parent', node, side, rotate, parent),
             node.setHighlight(false);
             parent.setHighlight(false);
             grandparent.setHighlight(false);
@@ -66,7 +66,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         node.setHighlight(true);
         parent.setHighlight(true);
         grandparent.setHighlight(true);
-        await this.$DS.pause('rotate.grandparent', node, side, grandparent, rotate);
+        await this.pause('rotate.grandparent', node, side, grandparent, rotate);
         node.setHighlight(false);
         parent.setHighlight(false);
         grandparent.setHighlight(false);
@@ -84,7 +84,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             }
             if (this.isRed(this.treeRoot)) {
                 this.treeRoot.colorBlack();
-                await this.$DS.pause('color.rootBlack');
+                await this.pause('color.rootBlack');
             }
         }
     }
@@ -94,7 +94,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (this.isRed(child)) {
             this.colorBlack(child);
             child.setHighlight(true);
-            await this.$DS.pause('color.nodeBlack', child);
+            await this.pause('color.nodeBlack', child);
             child.setHighlight(false);
         } else if (!parent.isLeaf()) {
             await this.fixDoubleBlack(parent, left);
@@ -108,13 +108,13 @@ DS.RedBlack = class RedBlack extends DS.BST {
         const rightGrandchild = rightChild?.getChild(right);
         const leftGrandchild = rightChild?.getChild(left);
         parent.setHighlight(true);
-        await this.$DS.pause('balancing.parentImbalanced', parent);
+        await this.pause('balancing.parentImbalanced', parent);
 
         // Sibling is red
         if (this.isRed(rightChild)) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
-            await this.$DS.pause('rotate.redSibling', parent, right, rightChild, left);
+            await this.pause('rotate.redSibling', parent, right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
@@ -130,7 +130,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(right, true);
             rightGrandchild.setHighlight(true);
-            await this.$DS.pause('rotate.redDistantChild', right, rightChild, left);
+            await this.pause('rotate.redDistantChild', right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setChildHighlight(right, false);
             rightGrandchild.setHighlight(false);
@@ -148,7 +148,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(left, true);
             leftGrandchild.setHighlight(true);
-            await this.$DS.pause('rotate.redCloseChild', right, rightChild, left);
+            await this.pause('rotate.redCloseChild', right, rightChild, left);
             parent.setChildHighlight(right, false);
             rightChild.setChildHighlight(left, false);
             leftGrandchild.setHighlight(false);
@@ -164,7 +164,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         if (this.isRed(parent)) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
-            await this.$DS.pause('color.switch', parent, right, rightChild);
+            await this.pause('color.switch', parent, right, rightChild);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
@@ -176,7 +176,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
         // All are black
         parent.setChildHighlight(right, true);
         rightChild.setHighlight(true);
-        await this.$DS.pause('color.childRed', parent, right, rightChild);
+        await this.pause('color.childRed', parent, right, rightChild);
         parent.setChildHighlight(right, false);
         rightChild.setHighlight(false);
 

@@ -16,7 +16,7 @@ DS.SplayTree = class SplayTree extends DS.BST {
     async insertOne(value) {
         const result = await super.insertOne(value);
         if (result?.node) {
-            if (!result.success) await this.$DS.pause('insert.exists', result.node);
+            if (!result.success) await this.pause('insert.exists', result.node);
             await this.splayUp(result.node);
         }
     }
@@ -24,52 +24,51 @@ DS.SplayTree = class SplayTree extends DS.BST {
     async delete(value) {
         await this.find(value);
         if (DS.compare(value, this.treeRoot.getText()) !== 0) {
-            console.log(value, this.treeRoot.getText())
-            await this.$DS.pause('delete.notexists', value);
+            await this.pause('delete.notexists', value);
             return;
         }
 
         this.treeRoot.setHighlight(true);
-        await this.$DS.pause('delete.root');
+        await this.pause('delete.root');
         if (!(this.treeRoot.getLeft() && this.treeRoot.getRight())) {
             const left = this.treeRoot.getLeft() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
             const child = this.treeRoot.getLeft() || this.treeRoot.getRight();
             const newRoot = child.setHighlight(true);
-            await this.$DS.pause('delete.singleChild', right, left);
+            await this.pause('delete.singleChild', right, left);
             this.treeRoot.remove();
             this.treeRoot = newRoot;
             this.resizeTree();
-            await this.$DS.pause();
+            await this.pause();
             return;
         }
 
         const right = this.treeRoot.getRight();
         const left = this.treeRoot.getLeft();
         this.treeRoot.remove();
-        await this.$DS.pause('delete.splayLargest');
+        await this.pause('delete.splayLargest');
 
         let largestLeft = left;
         largestLeft.setHighlight(true);
-        await this.$DS.pause();
+        await this.pause();
         if (largestLeft.getRight()) {
             while (largestLeft.getRight()) {
                 largestLeft.setHighlight(false);
                 largestLeft = largestLeft.getRight();
                 largestLeft.setHighlight(true);
-                await this.$DS.pause();
+                await this.pause();
             }
         }
         largestLeft.setHighlight(false);
         await this.splayUp(largestLeft);
-        await this.$DS.pause('delete.connectLeftRight');
+        await this.pause('delete.connectLeftRight');
         largestLeft.setHighlight(true);
-        await this.$DS.pause();
+        await this.pause();
         largestLeft.setHighlight(false);
         largestLeft.setRight(right);
         this.treeRoot = largestLeft;
         this.resizeTree();
-        await this.$DS.pause();
+        await this.pause();
     }
 
 
@@ -79,7 +78,7 @@ DS.SplayTree = class SplayTree extends DS.BST {
     async splayUp(node) {
         if (node === this.treeRoot) return;
         node.setHighlight(true);
-        await this.$DS.pause('rotate.splayUp', node);
+        await this.pause('rotate.splayUp', node);
         node.setHighlight(false);
         while (node?.getParent()) {
             const parent = node.getParent();
@@ -118,7 +117,7 @@ DS.SplayTree = class SplayTree extends DS.BST {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
-        await this.$DS.pause('rotate.zigzig', node, left, child);
+        await this.pause('rotate.zigzig', node, left, child);
         await this.singleRotate(left, node);
         return await this.singleRotate(left, child);
     }

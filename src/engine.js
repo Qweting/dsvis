@@ -27,7 +27,6 @@ DS.Engine = class {
     };
 
 
-    $Current = null;
     $Actions = null;
     $CurrentAction = null;
     $CurrentStep = null;
@@ -108,29 +107,26 @@ DS.Engine = class {
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
-    initialise(container, algorithm) {
-        this.initEngine(container, algorithm);
-        this.initGeneralToolbar();
-        this.loadCookies();
-        this.resetAll();
-    }
-
-
-    initEngine(container, algorithm) {
+    constructor(container) {
         this.$Container = document.querySelector(container);
         this.$DEBUG = new URL(window.location).searchParams.get("debug");
         this.$Svg = SVG(this.$Container.querySelector("svg"));
         this.$Svg.viewbox(0, 0, this.$SvgWidth, this.$SvgHeight);
         this.$Svg.$Engine = this;
         if (this.$DEBUG) this.$Svg.addClass("debug");
-        this.$Current = algorithm;
     }
 
+    initialise() {
+        this.initToolbar();
+        this.resetAll();
+    }
 
-    initGeneralToolbar() {
+    initToolbar() {
         const container = this.$Container;
         const tools = this.$Toolbar;
         tools.generalControls = container.querySelector(".generalControls");
+        tools.algorithmControls = container.querySelector(".algorithmControls");
+
         tools.stepForward = container.querySelector(".stepForward");
         tools.stepBackward = container.querySelector(".stepBackward");
         tools.toggleRunner = container.querySelector(".toggleRunner");
@@ -145,6 +141,7 @@ DS.Engine = class {
 
     resetAll() {
         this.$Actions = [];
+        this.loadCookies();
         this.reset();
     }
 
@@ -155,8 +152,12 @@ DS.Engine = class {
 
     async reset() {
         this.clearCanvas();
-        if (this.$Current) await this.$Current.reset();
+        await this.resetAlgorithm();
         this.resetListeners();
+    }
+
+
+    async resetAlgorithm() {
     }
 
 
@@ -167,8 +168,8 @@ DS.Engine = class {
 
     clearCanvas() {
         this.$Svg.clear();
-        const w = this.$SvgWidth;
-        const h = this.$SvgHeight;
+        const w = this.$Svg.viewbox().width;
+        const h = this.$Svg.viewbox().height;
         if (this.$DEBUG) {
             for (let x = 1; x < w / 100; x++) this.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             for (let y = 1; y < h / 100; y++) this.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
@@ -296,7 +297,7 @@ DS.Engine = class {
     resetListeners(isAsync) {
         this.saveCookies();
         this.removeAllListeners();
-        if (!this.$Current) {
+        if (this.constructor === DS.Engine) {
             this.disableWhenRunning(true);
             return;
         }
@@ -413,7 +414,7 @@ DS.Engine = class {
             if (this.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(this.$Actions)}`);
             this.$Info.title.text(message);
             await this.pause("");
-            await this.$Current[action.oper](...action.args);
+            await this[action.oper](...action.args);
         }
     }
 
@@ -454,7 +455,7 @@ DS.Engine = class {
             return message;
         }
         if (!message) return args.join("\n");
-        let title = this.$Current.messages || this.$Current.constructor.messages || {};
+        let title = this.messages || this.constructor.messages || {};
         const keys = message.split(".");
         if (!(keys[0] in title)) return [message, ...args].join("\n");
         for (const key of keys) {

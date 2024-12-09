@@ -4,47 +4,47 @@
 /* globals DS */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.BinaryHeap = class BinaryHeap {
+DS.BinaryHeap = class BinaryHeap extends DS.Engine {
     $arraySize = 28;
-    $DS;
     $initialValues;
 
-    constructor(engine, initialValues = null) {
-        this.$DS = engine;
+    constructor(container, initialValues = null) {
+        super(container);
         this.$initialValues = initialValues;
     }
 
     async reset() {
+        await super.reset();
         this.treeRoot = null;
         this.treeNodes = new Array(this.$arraySize);
-        this.heapArray = this.$DS.SVG().dsArray(this.$arraySize, this.getRootX(), this.$DS.$SvgHeight - this.getRootY());
-        if (this.heapArray.x() < this.$DS.$Info.x) this.heapArray.x(this.$DS.$Info.x);
+        this.heapArray = this.SVG().dsArray(this.$arraySize, this.getRootX(), this.$SvgHeight - this.getRootY());
+        if (this.heapArray.x() < this.$Info.x) this.heapArray.x(this.$Info.x);
         this.heapSize = 0;
         if (this.$initialValues) {
-            this.$DS.$resetting = true;
+            this.$resetting = true;
             await this.insert(...this.$initialValues);
-            this.$DS.$resetting = false;
+            this.$resetting = false;
         }
     }
 
     getStartX() {
-        return this.$DS.$Info.x + this.$DS.getObjectSize() / 2;
+        return this.$Info.x + this.getObjectSize() / 2;
     }
 
     getStartY() {
-        return this.$DS.$Info.y * 4;
+        return this.$Info.y * 4;
     }
 
     getRootX() {
-        return this.$DS.$SvgWidth / 2;
+        return this.$SvgWidth / 2;
     }
 
     getRootY() {
-        return 2 * this.$DS.$Info.y + this.$DS.getObjectSize() / 2;
+        return 2 * this.$Info.y + this.getObjectSize() / 2;
     }
 
     resizeTree() {
-        const animate = !this.$DS.$resetting;
+        const animate = !this.$resetting;
         this.treeRoot?.resize(this.getRootX(), this.getRootY(), animate);
     }
 
@@ -54,12 +54,12 @@ DS.BinaryHeap = class BinaryHeap {
 
     async swap(j, k, message, ...args) {
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
-        const jLabel = this.$DS.SVG().textCircle(jNode.getText(), jNode.cx(), jNode.cy());
-        const kLabel = this.$DS.SVG().textCircle(kNode.getText(), kNode.cx(), kNode.cy());
+        const jLabel = this.SVG().textCircle(jNode.getText(), jNode.cx(), jNode.cy());
+        const kLabel = this.SVG().textCircle(kNode.getText(), kNode.cx(), kNode.cy());
         jLabel.setCenter(kLabel.cx(), kLabel.cy(), true);
         kLabel.setCenter(jLabel.cx(), jLabel.cy(), true);
         this.heapArray.swap(j, k, true);
-        await this.$DS.pause(message, ...args);
+        await this.pause(message, ...args);
         jNode.setText(kLabel.getText());
         kNode.setText(jLabel.getText());
         jLabel.remove();
@@ -69,17 +69,17 @@ DS.BinaryHeap = class BinaryHeap {
 
     async insertOne(value) {
         if (this.heapSize >= this.$arraySize) {
-            await this.$DS.pause('general.full');
+            await this.pause('general.full');
             return;
         }
 
         let currentIndex = this.heapSize;
         let parentIndex = Math.floor((currentIndex - 1) / 2);
         let parentNode = this.treeNodes[parentIndex];
-        const arrayLabel = this.$DS.SVG().textCircle(value, this.getStartX(), this.getStartY());
-        let treeNode = this.$DS.SVG().binaryNode(value, this.getStartX(), this.getStartY());
+        const arrayLabel = this.SVG().textCircle(value, this.getStartX(), this.getStartY());
+        let treeNode = this.SVG().binaryNode(value, this.getStartX(), this.getStartY());
         this.treeNodes[currentIndex] = treeNode;
-        await this.$DS.pause('insert.value', value);
+        await this.pause('insert.value', value);
 
         arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), true);
         if (currentIndex === 0) {
@@ -89,7 +89,7 @@ DS.BinaryHeap = class BinaryHeap {
             parentNode.setChild(direction, treeNode);
         }
         this.resizeTree();
-        await this.$DS.pause();
+        await this.pause();
 
         arrayLabel.remove();
         this.heapArray.setDisabled(currentIndex, false);
@@ -99,7 +99,7 @@ DS.BinaryHeap = class BinaryHeap {
 
         while (currentIndex > 0) {
             treeNode.setHighlight(true);
-            await this.$DS.pause('insert.shiftUp');
+            await this.pause('insert.shiftUp');
             parentIndex = Math.floor((currentIndex - 1) / 2);
             parentNode = this.treeNodes[parentIndex];
             const parentValue = this.heapArray.getValue(parentIndex);
@@ -108,14 +108,14 @@ DS.BinaryHeap = class BinaryHeap {
             parentNode.setChildHighlight(direction, true);
             const cmp = DS.compare(value, parentValue);
             if (cmp >= 0) {
-                await this.$DS.pause('insert.stopShift', parentValue);
+                await this.pause('insert.stopShift', parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(parentIndex, false);
                 treeNode.setHighlight(false);
                 parentNode.setChildHighlight(direction, false);
                 break;
             }
-            await this.$DS.pause('insert.shiftAgain', parentValue);
+            await this.pause('insert.shiftAgain', parentValue);
             await this.swap(currentIndex, parentIndex, 'swap.swap', value, parentValue);
             this.heapArray.setIndexHighlight(currentIndex, false);
             treeNode.setHighlight(false);
@@ -130,19 +130,19 @@ DS.BinaryHeap = class BinaryHeap {
 
     async deleteMin() {
         if (this.heapSize === 0) {
-            await this.$DS.pause('general.empty');
+            await this.pause('general.empty');
             return;
         }
         this.heapSize--;
         const minValue = this.heapArray.getValue(0);
 
-        const arrayLabel = this.$DS.SVG().textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy());
+        const arrayLabel = this.SVG().textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy());
         if (this.heapSize === 0) {
-            await this.$DS.pause('delete.root', minValue);
+            await this.pause('delete.root', minValue);
             this.heapArray.setValue(0);
             arrayLabel.setCenter(this.getStartX(), this.getStartY(), true);
             this.treeRoot.setCenter(this.getStartX(), this.getStartY(), true);
-            await this.$DS.pause();
+            await this.pause();
             arrayLabel.remove();
             this.heapArray.setDisabled(0, true);
             this.treeRoot.remove();
@@ -150,18 +150,18 @@ DS.BinaryHeap = class BinaryHeap {
             return;
         }
 
-        const treeLabel = this.$DS.SVG().textCircle(minValue, this.treeRoot.cx(), this.treeRoot.cy());
-        await this.$DS.pause('remove.minValue', minValue);
+        const treeLabel = this.SVG().textCircle(minValue, this.treeRoot.cx(), this.treeRoot.cy());
+        await this.pause('remove.minValue', minValue);
         this.heapArray.setValue(0);
         this.treeRoot.setText();
         arrayLabel.setCenter(this.getStartX(), this.getStartY(), true);
         treeLabel.setCenter(this.getStartX(), this.getStartY(), true);
-        let currentValue = this.heapArray.getValue(this.heapSize);
-        await this.$DS.pause();
+        const currentValue = this.heapArray.getValue(this.heapSize);
+        await this.pause();
         await this.swap(0, this.heapSize, 'swap.lastToFirst', currentValue);
         this.treeNodes[this.heapSize].remove();
         this.heapArray.setDisabled(this.heapSize, true);
-        await this.$DS.pause('delete.lastHeap');
+        await this.pause('delete.lastHeap');
 
         let currentIndex = 0;
         let currentNode = this.treeNodes[currentIndex];
@@ -170,13 +170,13 @@ DS.BinaryHeap = class BinaryHeap {
             this.heapArray.setIndexHighlight(currentIndex, true);
             let childIndex = currentIndex * 2 + 1;
             if (childIndex >= this.heapSize) {
-                await this.$DS.pause('finished');
+                await this.pause('finished');
                 currentNode.setHighlight(false);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 break;
             }
 
-            await this.$DS.pause('delete.shiftDown');
+            await this.pause('delete.shiftDown');
             let direction = "left";
             let childValue = this.heapArray.getValue(childIndex);
             if (childIndex + 1 < this.heapSize && DS.compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
@@ -192,7 +192,7 @@ DS.BinaryHeap = class BinaryHeap {
 
             const cmp = DS.compare(currentValue, childValue);
             if (cmp <= 0) {
-                await this.$DS.pause('delete.stopShift', currentValue, childValue);
+                await this.pause('delete.stopShift', currentValue, childValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(childIndex, false);
                 currentNode.setChildHighlight(direction, false);
@@ -200,7 +200,7 @@ DS.BinaryHeap = class BinaryHeap {
                 break;
             }
 
-            await this.$DS.pause('delete.shiftAgain', currentValue, childValue);
+            await this.pause('delete.shiftAgain', currentValue, childValue);
             await this.swap(currentIndex, childIndex, 'swap.swap', currentValue, childValue);
             this.heapArray.setIndexHighlight(currentIndex, false);
             this.heapArray.setIndexHighlight(childIndex, false);
@@ -210,7 +210,7 @@ DS.BinaryHeap = class BinaryHeap {
             currentNode = childNode;
         }
 
-        await this.$DS.pause();
+        await this.pause();
         arrayLabel.remove();
         treeLabel.remove();
         this.resizeTree();

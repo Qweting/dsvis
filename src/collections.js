@@ -2,38 +2,33 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
 /* globals DS */
+/* exported initialiseCollections, CollectionEngine */
 ///////////////////////////////////////////////////////////////////////////////
 
+let CollectionEngine = null;
+
 function initialiseCollections(containerID) {
-    const engine = new DS.Engine();
-
-    const algoSelector = document.querySelector(containerID + " .algorithmSelector");
-    const algoClass = new URL(window.location).searchParams.get("algorithm");
-    let algorithm = null;
-    if (algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DS) {
-        algoSelector.value = algoClass;
-        algorithm = new DS[algoClass](engine);
-    } else {
-        algoSelector.value = "";
-        window.history.replaceState("", "", window.location.pathname);
-    }
-
+    const algoSelector = document.querySelector(`${containerID} .algorithmSelector`);
     algoSelector.addEventListener("change", () => {
-        const algoClass = algoSelector.value;
-        if (algoClass) {
-            const params = {algorithm: algoClass};
-            if (engine.$DEBUG) params.debug = engine.$DEBUG;
+        if (algoSelector.value) {
+            const params = {algorithm: algoSelector.value};
+            if (CollectionEngine.$DEBUG) params.debug = CollectionEngine.$DEBUG;
             const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
             window.history.replaceState("", "", url);
         }
         window.location.reload();
     });
 
-    engine.initialise(containerID, algorithm);
+    let algoClass = new URL(window.location).searchParams.get("algorithm");
+    if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DS))
+        algoClass = "";
+    algoSelector.value = algoClass;
+    const Collection = algoClass ? DS[algoClass] : DS.Engine;
+    CollectionEngine = new Collection(containerID);
+    CollectionEngine.initialise();
 
-    const container = engine.$Container;
-    const tools = engine.$Toolbar;
-    tools.algorithmControls = container.querySelector(".algorithmControls");
+    const container = CollectionEngine.$Container;
+    const tools = CollectionEngine.$Toolbar;
     tools.insertSelect = container.querySelector(".insertSelect");
     tools.insertField = container.querySelector(".insertField");
     tools.insertSubmit = container.querySelector(".insertSubmit");
@@ -49,15 +44,15 @@ function initialiseCollections(containerID) {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
     });
-    DS.addReturnSubmit(tools.insertField, "ALPHANUM+", () => engine.submit("insert", tools.insertField));
-    tools.insertSubmit.addEventListener("click", () => engine.submit("insert", tools.insertField));
-    DS.addReturnSubmit(tools.findField, "ALPHANUM", () => engine.submit("find", tools.findField));
-    tools.findSubmit.addEventListener("click", () => engine.submit("find", tools.findField));
-    DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => engine.submit("delete", tools.deleteField));
-    tools.deleteSubmit.addEventListener("click", () => engine.submit("delete", tools.deleteField));
-    tools.printSubmit.addEventListener("click", () => engine.submit("print"));
-    tools.clearSubmit.addEventListener("click", () => engine.confirmResetAll());
+    DS.addReturnSubmit(tools.insertField, "ALPHANUM+", () => CollectionEngine.submit("insert", tools.insertField));
+    tools.insertSubmit.addEventListener("click", () => CollectionEngine.submit("insert", tools.insertField));
+    DS.addReturnSubmit(tools.findField, "ALPHANUM", () => CollectionEngine.submit("find", tools.findField));
+    tools.findSubmit.addEventListener("click", () => CollectionEngine.submit("find", tools.findField));
+    DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => CollectionEngine.submit("delete", tools.deleteField));
+    tools.deleteSubmit.addEventListener("click", () => CollectionEngine.submit("delete", tools.deleteField));
+    tools.printSubmit.addEventListener("click", () => CollectionEngine.submit("print"));
+    tools.clearSubmit.addEventListener("click", () => CollectionEngine.confirmResetAll());
 
-    engine.$Current?.initToolbar?.();
-    engine.setRunning(true);
+    CollectionEngine.$Current?.initToolbar?.();
+    CollectionEngine.setRunning(true);
 }

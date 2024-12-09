@@ -2,30 +2,17 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
 /* globals DS, SVG */
+/* exported initialiseAVLQuiz, AVLEngine */
 ///////////////////////////////////////////////////////////////////////////////
 
+let AVLEngine = null;
+
 function initialiseAVLQuiz(containerID) {
-    const engine = new DS.Engine();
-    const algorithm = new DS.AVLQuiz(this, ["K"]);
+    AVLEngine = new DS.AVLQuiz(containerID, ["K"]);
+    AVLEngine.initialise();
 
-    // Overrides
-    engine.setIdleTitle = function() {
-        const isBST = this.$Current.isBST();
-        const unbalanced = this.$Current.isUnbalanced();
-        const message = (
-            !isBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
-            !isBST ? "Tree is not a BST!" :
-            unbalanced ? "Tree is unbalanced!" :
-            "Tree is a correct AVL tree"
-        );
-        this.$Info.title.text(message);
-        this.$Info.body.text("");
-    };
-
-    engine.initialise(containerID, algorithm);
-
-    const container = engine.$Container;
-    const tools = engine.$Toolbar;
+    const container = AVLEngine.$Container;
+    const tools = AVLEngine.$Toolbar;
     tools.insertField = container.querySelector(".insertField");
     tools.createLeft = container.querySelector(".createLeft");
     tools.createRight = container.querySelector(".createRight");
@@ -40,30 +27,28 @@ function initialiseAVLQuiz(containerID) {
     tools.restartQuiz = container.querySelector(".restartQuiz");
 
     DS.addReturnSubmit(tools.insertField, "ALPHANUM");
-    tools.createLeft.addEventListener("click", () => engine.submit("insertLeft", tools.insertField));
-    tools.createRight.addEventListener("click", () => engine.submit("insertRight", tools.insertField));
-    tools.moveParent.addEventListener("click", () => engine.execute("moveParent"));
-    tools.moveLeft.addEventListener("click", () => engine.execute("moveChild", ["left"]));
-    tools.moveRight.addEventListener("click", () => engine.execute("moveChild", ["right"]));
-    tools.rotateLeft.addEventListener("click", () => engine.execute("rotateCurrent", ["left"]));
-    tools.rotateRight.addEventListener("click", () => engine.execute("rotateCurrent", ["right"]));
-    tools.markNode.addEventListener("click", () => engine.execute("markNode"));
-    tools.copyToMark.addEventListener("click", () => engine.execute("copyToMark"));
-    tools.deleteNode.addEventListener("click", () => engine.execute("deleteCurrent"));
-    tools.restartQuiz.addEventListener("click", () => engine.resetAll());
+    tools.createLeft.addEventListener("click", () => AVLEngine.submit("insertLeft", tools.insertField));
+    tools.createRight.addEventListener("click", () => AVLEngine.submit("insertRight", tools.insertField));
+    tools.moveParent.addEventListener("click", () => AVLEngine.execute("moveParent"));
+    tools.moveLeft.addEventListener("click", () => AVLEngine.execute("moveChild", ["left"]));
+    tools.moveRight.addEventListener("click", () => AVLEngine.execute("moveChild", ["right"]));
+    tools.rotateLeft.addEventListener("click", () => AVLEngine.execute("rotateCurrent", ["left"]));
+    tools.rotateRight.addEventListener("click", () => AVLEngine.execute("rotateCurrent", ["right"]));
+    tools.markNode.addEventListener("click", () => AVLEngine.execute("markNode"));
+    tools.copyToMark.addEventListener("click", () => AVLEngine.execute("copyToMark"));
+    tools.deleteNode.addEventListener("click", () => AVLEngine.execute("deleteCurrent"));
+    tools.restartQuiz.addEventListener("click", () => AVLEngine.resetAll());
 
-    engine.$Current?.initToolbar?.();
-    engine.setRunning(true);
-};
-
-
+    AVLEngine.$Current?.initToolbar?.();
+    AVLEngine.setRunning(true);
+}
 
 
 DS.AVLQuiz = class AVLQuiz extends DS.BST {
 
-    async reset() {
-        await super.reset();
-        this.setCurrent(this.treeRoot);
+    async resetAlgorithm() {
+        await super.resetAlgorithm();
+        await this.setCurrent(this.treeRoot);
         this.mark = null;
     }
 
@@ -75,6 +60,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         try {
             this._validateBST(this.treeRoot, Number.MIN_SAFE_INTEGER);
         } catch (error) {
+            console.warn(error.toString());
             return false;
         }
         return true;
@@ -84,7 +70,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         const left = node.getLeft();
         if (left) min = this._validateBST(left, min);
         if (DS.compare(min, node.getText()) >= 0) {
-            throw new Error("Order mismatch");
+            throw new Error(`Order mismatch: ${min} > ${node.getText()}`);
         }
         min = node.getText();
         const right = node.getRight();
@@ -101,16 +87,29 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         return false;
     }
 
+    setIdleTitle() {
+        const isBST = this.isBST();
+        const unbalanced = this.isUnbalanced();
+        const message = (
+            !isBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
+            !isBST ? "Tree is not a BST!" :
+            unbalanced ? "Tree is unbalanced!" :
+            "Tree is a correct AVL tree"
+        );
+        this.$Info.title.text(message);
+        this.$Info.body.text("");
+    }
+
     newNode(text) {
-        return this.$DS.SVG().avlNode(text, this.getStartX(), this.getStartY());
+        return this.SVG().avlNode(text, this.getStartX(), this.getStartY());
     }
 
     async setCurrent(node, animate) {
         this.current?.setHighlight(false);
         if (animate) {
-            const cursor = this.$DS.SVG().highlightCircle(this.current.cx(), this.current.cy());
+            const cursor = this.SVG().highlightCircle(this.current.cx(), this.current.cy());
             cursor.setCenter(node.cx(), node.cy(), animate);
-            await this.$DS.pause();
+            await this.pause();
             cursor.remove();
         }
         this.current = node;
@@ -120,7 +119,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     async moveParent() {
         const parent = this.current.getParent();
         if (!parent) {
-            await this.$DS.pause("The root node doesn't have a parent!");
+            await this.pause("The root node doesn't have a parent!");
             return;
         }
         await this.setCurrent(parent, true);
@@ -129,7 +128,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     async moveChild(direction) {
         const child = this.current.getChild(direction);
         if (!child) {
-            await this.$DS.pause(`There is no ${direction} child!`);
+            await this.pause(`There is no ${direction} child!`);
             return;
         }
         await this.setCurrent(child, true);
@@ -151,11 +150,11 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         if (!this.mark) return;
         if (this.mark === this.current) return;
 
-        const moving = this.$DS.SVG().textCircle(this.current.getText(), this.current.cx(), this.current.cy());
+        const moving = this.SVG().textCircle(this.current.getText(), this.current.cx(), this.current.cy());
         moving.setHighlight(true);
-        await this.$DS.pause(`Replace the value of ${this.mark} with ${this.current}`);
+        await this.pause(`Replace the value of ${this.mark} with ${this.current}`);
         moving.setCenter(this.mark.cx(), this.mark.cy(), true);
-        await this.$DS.pause();
+        await this.pause();
         this.mark.setText(this.current.getText());
         moving.remove();
     }
@@ -170,38 +169,38 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
 
     async insertBelow(direction, value) {
         if (this.current.getChild(direction)) {
-            await this.$DS.pause(`There is already a ${direction} child!`);
+            await this.pause(`There is already a ${direction} child!`);
             return;
         }
         const child = this.newNode(value);
         this.current.setChild(direction, child);
         child.setHighlight(true);
         this.current.setChildHighlight(direction, true);
-        await this.$DS.pause(`Insert ${value} as ${direction} child`);
+        await this.pause(`Insert ${value} as ${direction} child`);
         this.current.setChildHighlight(direction, false);
         // this.cursor.hide();
         this.resizeTree();
-        await this.$DS.pause();
+        await this.pause();
         child.setHighlight(false);
         await this.setCurrent(child);
-        await this.$DS.pause("Updating heights");
+        await this.pause("Updating heights");
         this.updateHeights();
     }
 
     async deleteCurrent() {
         if (this.current.getLeft() || this.current.getRight()) {
-            await this.$DS.pause("Not a leaf node!");
+            await this.pause("Not a leaf node!");
             return;
         }
         const parent = this.current.getParent();
         if (!parent) {
-            await this.$DS.pause("Cannot remove the root!");
+            await this.pause("Cannot remove the root!");
             return;
         }
         this.current.remove();
         await this.setCurrent(parent, true);
         this.resizeTree();
-        await this.$DS.pause("Updating heights");
+        await this.pause("Updating heights");
         this.updateHeights();
     }
 
@@ -209,12 +208,12 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         const right = left === "left" ? "right" : "left";
         const child = this.current.getChild(right);
         if (!child) {
-            await this.$DS.pause(`Cannot rotate ${left}\nNode doesn't have a ${right} child!`);
+            await this.pause(`Cannot rotate ${left}\nNode doesn't have a ${right} child!`);
             return;
         }
         const node = await this.singleRotate(left, this.current);
         await this.setCurrent(node);
-        await this.$DS.pause("Updating heights");
+        await this.pause("Updating heights");
         this.updateHeights();
     }
 
