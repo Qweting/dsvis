@@ -74,24 +74,24 @@ h1 a {
 }
 
 
-#selectorWrapper > select {
+.selectorWrapper > select {
 	appearance: none;
 	padding: 6px 12px;
 	background-color: inherit;
 }
 
-svg, #selectorWrapper > select {
+svg, .selectorWrapper > select {
 	border: solid 1px maroon;
 	border-radius: 5px;
 	width: 100%;
 }
 
-#selectorWrapper {
+.selectorWrapper {
 	position: relative;
 	max-width: 1000px;
 }
 
-#selectorWrapper::after {
+.selectorWrapper::after {
 	content: "▼";
 	color: maroon;
 	font-size: 1rem;

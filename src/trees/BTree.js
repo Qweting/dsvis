@@ -5,33 +5,56 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BTree = class BTree {
-    constructor(initialValues = null) {
-        this._initialValues = initialValues;
+    $DS;
+    $initialValues;
+
+    constructor(engine, initialValues = null) {
+        this.$DS = engine;
+        this.$initialValues = initialValues;
     }
 
     async reset() {
         this.treeRoot = null;
-        if (this._initialValues) {
-            DS.$resetting = true;
-            await this.insert(...this._initialValues);
-            DS.$resetting = false;
+        if (this.$initialValues) {
+            this.$DS.$resetting = true;
+            await this.insert(...this.$initialValues);
+            this.$DS.$resetting = false;
         }
     }
 
     initToolbar() {
-        DS.$Toolbar.algorithmControls.insertAdjacentHTML("beforeend", `
-            <label>Max degree: <select id="maxDegree" class="disableWhenRunning">
-                <option value="3">2/3-tree</option>
-                <option value="4">2/3/4-tree</option>
-                <option value="5">Max degree 5</option>
-                <option value="6">Max degree 6</option>
-            </select></label>`);
-        DS.$Toolbar.maxDegree = document.getElementById("maxDegree");
-        DS.$Toolbar.maxDegree.addEventListener("change", () => DS.confirmResetAll());
+        this.$DS.$Toolbar.algorithmControls.insertAdjacentHTML("beforeend", `
+            <span class="formgroup"><label>
+                Max degree: <select class="maxDegree disableWhenRunning">
+                    <option value="3">2/3-tree</option>
+                    <option value="4">2/3/4-tree</option>
+                    <option value="5">Max degree 5</option>
+                    <option value="6">Max degree 6</option>
+                </select>
+            </label></span>`,
+        );
+        this.$DS.$Toolbar.maxDegree = this.$DS.$Container.querySelector(".maxDegree");
+        this.$DS.$Toolbar.maxDegree.addEventListener("change", () => this.$DS.confirmResetAll());
+    }
+
+    getStartX() {
+        return this.$DS.$Info.x + this.$DS.getObjectSize() / 2;
+    }
+
+    getStartY() {
+        return this.$DS.$Info.y * 4;
+    }
+
+    getRootX() {
+        return this.$DS.$SvgWidth / 2;
+    }
+
+    getRootY() {
+        return 2 * this.$DS.$Info.y + this.$DS.getObjectSize() / 2;
     }
 
     getMaxDegree() {
-        return parseInt(DS.$Toolbar.maxDegree.value);
+        return parseInt(this.$DS.$Toolbar.maxDegree.value);
     }
 
     getMaxKeys() {
@@ -47,8 +70,8 @@ DS.BTree = class BTree {
     }
 
     resizeTree() {
-        const animate = !DS.$resetting;
-        this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
+        const animate = !this.$DS.$resetting;
+        this.treeRoot?.resize(this.getRootX(), this.getRootY(), animate);
     }
 
     async insert(...values) {
@@ -61,25 +84,25 @@ DS.BTree = class BTree {
 
     async find(value) {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return;
         }
-        await DS.pause('find.start', value);
+        await this.$DS.pause('find.start', value);
         const found = await this.findHelper(value);
         found.node.setHighlight(true);
         const path = found.success ? 'find.found' : 'find.notfound';
-        await DS.pause(path, value);
+        await this.$DS.pause(path, value);
         found.node.setHighlight(false);
     }
 
     async findHelper(value, findLeaf = false) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
+        const pointer = this.$DS.SVG().highlightCircle(this.getStartX(), this.getStartY());
         while (node) {
             pointer.setCenter(node.getCX(0), node.cy(), true);
             node.setHighlight(true);
-            await DS.pause();
+            await this.$DS.pause();
             let i = 0;
             let cmpStr = value;
             while (i < node.numValues()) {
@@ -99,14 +122,14 @@ DS.BTree = class BTree {
             pointer.setCenter(node.getCX(i - (found ? 0 : 0.5)), node.cy(), true);
 
             if (node.isLeaf() || (found && !findLeaf)) {
-                await DS.pause(cmpStr);
+                await this.$DS.pause(cmpStr);
                 pointer.remove();
                 node.setHighlight(false);
                 return {success: found, node: node, i: i};
             }
 
             if (found) i++;
-            await DS.pause(`${cmpStr}: ${DS.getMessage('node.lookNthChild', this.getOrdinal(i, node.numChildren()))}`);
+            await this.$DS.pause(`${cmpStr}: ${this.$DS.getMessage('node.lookNthChild', this.getOrdinal(i, node.numChildren()))}`);
             node.setHighlight(false);
             parent = node;
             node = parent.getChild(i);
@@ -122,29 +145,29 @@ DS.BTree = class BTree {
         if (this.treeRoot) {
             await this.insertBottomup(value);
         } else {
-            this.treeRoot = DS.SVG().bTreeNode(true, 1, DS.getStartX(), DS.getStartY());
+            this.treeRoot = this.$DS.SVG().bTreeNode(true, 1, this.getStartX(), this.getStartY());
             this.treeRoot.setText(0, value);
-            await DS.pause('insert.newroot', value);
+            await this.$DS.pause('insert.newroot', value);
             this.resizeTree();
-            await DS.pause();
+            await this.$DS.pause();
         }
     }
 
     async insertBottomup(value) {
-        await DS.pause('insert.search', value);
+        await this.$DS.pause('insert.search', value);
         const found = await this.findHelper(value);
         const node = found.node;
         node.setHighlight(true);
         if (found.success) {
-            await DS.pause('insert.exists', found.node);
+            await this.$DS.pause('insert.exists', found.node);
             node.setHighlight(false);
         } else {
             node.insertValue(found.i, value);
             this.resizeTree();
-            await DS.pause('insert.nth', value, this.getOrdinal(found.i, node.numValues()));
+            await this.$DS.pause('insert.nth', value, this.getOrdinal(found.i, node.numValues()));
             node.setHighlight(false);
             await this.insertRepair(node);
-            await DS.pause();
+            await this.$DS.pause();
         }
     }
 
@@ -161,20 +184,20 @@ DS.BTree = class BTree {
 
     async split(node) {
         node.setHighlight(true);
-        await DS.pause('node.split', node);
+        await this.$DS.pause('node.split', node);
         const parent = node.getParent();
         const parentIndex = node.getParentIndex();
 
         const risingValue = node.getText(this.getSplitIndex());
         const rightSplit = this.getSplitIndex() + 1;
         const risingX = node.getCX(rightSplit - 1);
-        const risingNode = DS.SVG().bTreeNode(false, 1, risingX, node.cy());
+        const risingNode = this.$DS.SVG().bTreeNode(false, 1, risingX, node.cy());
         risingNode.setHighlight(true);
         risingNode.setText(0, risingValue);
 
         const rightValues = node.numValues() - rightSplit;
         const rightX = node.getCX(rightSplit + rightValues / 2 - 0.5);
-        const rightNode = DS.SVG().bTreeNode(node.isLeaf(), rightValues, rightX, node.cy());
+        const rightNode = this.$DS.SVG().bTreeNode(node.isLeaf(), rightValues, rightX, node.cy());
         rightNode.setHighlight(true);
         for (let i = rightSplit; i < node.numValues(); i++) {
             const j = i - rightSplit;
@@ -192,11 +215,11 @@ DS.BTree = class BTree {
 
         if (parent) {
             parent.setChild(parentIndex, risingNode);
-            await DS.pause();
+            await this.$DS.pause();
             risingNode.setCenter(parent.getCX(parentIndex - 0.5), parent.cy(), true);
             node.setHighlight(false);
             rightNode.setHighlight(false);
-            await DS.pause();
+            await this.$DS.pause();
             parent.insertValue(parentIndex, risingValue);
             parent.setChild(parentIndex, node);
             parent.setChild(parentIndex + 1, rightNode);
@@ -238,15 +261,15 @@ DS.BTree = class BTree {
 
     async print() {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return;
         }
-        const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
+        const pointer = this.$DS.SVG().highlightCircle(this.getStartX(), this.getStartY());
         const printed = [];
-        printed.push(DS.SVG().text("Printed nodes: ").x(DS.$Info.x).cy(DS.$SvgHeight - 80));
+        printed.push(this.$DS.SVG().text("Printed nodes: ").x(this.$DS.$Info.x).cy(this.$DS.$SvgHeight - 80));
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
-        await DS.pause();
+        await this.$DS.pause();
         for (const lbl of printed) lbl.remove();
     }
 
@@ -259,26 +282,26 @@ DS.BTree = class BTree {
         } else {
             for (let i = 0; i < node.numChildren(); i++) {
                 pointer.setCenter(node.getCX(i - 0.5), node.y() + node.height(), true);
-                await DS.pause();
+                await this.$DS.pause();
                 await this.printHelper(node.getChild(i), pointer, printed);
                 if (i < node.numValues()) {
                     pointer.setCenter(node.getCX(i), node.cy(), true);
                     await this.printOneLabel(node, i, printed);
                 } else {
                     pointer.setCenter(node.getCX(i - 0.5), node.cy(), true);
-                    await DS.pause();
+                    await this.$DS.pause();
                 }
             }
         }
     }
 
     async printOneLabel(node, i, printed) {
-        const lbl = DS.SVG().text(node.getText(i)).center(node.getCX(i), node.cy());
-        await DS.pause();
+        const lbl = this.$DS.SVG().text(node.getText(i)).center(node.getCX(i), node.cy());
+        await this.$DS.pause();
         const last = printed[printed.length - 1];
-        DS.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
+        this.$DS.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
         printed.push(lbl);
-        await DS.pause();
+        await this.$DS.pause();
     }
 
 
@@ -287,19 +310,19 @@ DS.BTree = class BTree {
 
     async delete(value) {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return;
         }
-        await DS.pause('delete.search', value);
+        await this.$DS.pause('delete.search', value);
         const found = await this.findHelper(value);
         if (!found.success) {
             found.node.setHighlight(true);
-            await DS.pause('delete.notexists', value);
+            await this.$DS.pause('delete.notexists', value);
             found.node.setHighlight(false);
             return;
         }
         found.node.setHighlight(true);
-        await DS.pause('delete.found', value);
+        await this.$DS.pause('delete.found', value);
         found.node.setHighlight(false);
         if (found.node.isLeaf()) {
             await this.deleteLeaf(found.node, found.i);
@@ -308,7 +331,7 @@ DS.BTree = class BTree {
         }
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
-            await DS.pause('delete.root.empty');
+            await this.$DS.pause('delete.root.empty');
             const newRoot = this.treeRoot.isLeaf() ? null : this.treeRoot.getLeft();
             this.treeRoot.remove();
             this.treeRoot = newRoot;
@@ -318,7 +341,7 @@ DS.BTree = class BTree {
 
     async deleteLeaf(node, i) {
         node.setHighlight(true);
-        await DS.pause('delete.leaf.nth', node, this.getOrdinal(i, node.numValues()));
+        await this.$DS.pause('delete.leaf.nth', node, this.getOrdinal(i, node.numValues()));
         node.deleteValue(i);
         this.resizeTree();
         node.setHighlight(false);
@@ -327,31 +350,31 @@ DS.BTree = class BTree {
 
     async deleteNonleaf(node, i) {
         node.addClass("marked");
-        const pointer = DS.SVG().highlightCircle(node.getCX(i), node.cy());
-        await DS.pause('find.predecessor', node.getText(i));
+        const pointer = this.$DS.SVG().highlightCircle(node.getCX(i), node.cy());
+        await this.$DS.pause('find.predecessor', node.getText(i));
         let maxNode = node.getChild(i);
         let j;
         while (true) {
             j = maxNode.numValues() - 1;
             pointer.setCenter(maxNode.getCX(j), maxNode.cy(), true);
-            await DS.pause();
+            await this.$DS.pause();
             if (maxNode.isLeaf()) break;
             maxNode = maxNode.getRight();
         }
         const maxValue = maxNode.getText(j);
-        const risingNode = DS.SVG().bTreeNode(false, 1, maxNode.getCX(j), maxNode.cy());
+        const risingNode = this.$DS.SVG().bTreeNode(false, 1, maxNode.getCX(j), maxNode.cy());
         risingNode.setHighlight(true);
         risingNode.setText(0, maxValue);
-        await DS.pause('delete.replace', node.getText(i), maxValue);
+        await this.$DS.pause('delete.replace', node.getText(i), maxValue);
         pointer.remove();
         risingNode.setCenter(node.getCX(i), node.cy(), true);
         node.setText(i, "");
-        await DS.pause();
+        await this.$DS.pause();
         node.setText(i, maxValue);
         risingNode.remove();
         node.removeClass("marked");
         maxNode.setHighlight(true);
-        await DS.pause('delete.leaf.value', maxValue, maxNode);
+        await this.$DS.pause('delete.leaf.value', maxValue, maxNode);
         await this.deleteLeaf(maxNode, j);
     }
 
@@ -362,7 +385,7 @@ DS.BTree = class BTree {
         if (!parent) return;
 
         node.setHighlight(true);
-        await DS.pause('node.tooFew', node);
+        await this.$DS.pause('node.tooFew', node);
         const i = node.getParentIndex();
         if (i > 0 && parent.getChild(i - 1).numValues() > this.getMinKeys()) {
             // Steal from left sibling
@@ -389,17 +412,17 @@ DS.BTree = class BTree {
         node.setHighlight(true);
         parent.setHighlight(true);
         rightSib.setHighlight(true);
-        await DS.pause('node.mergeRight', node, parentValue, rightSib);
+        await this.$DS.pause('node.mergeRight', node, parentValue, rightSib);
 
-        const sinkingNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const sinkingNode = this.$DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         sinkingNode.setHighlight(true);
         sinkingNode.setText(0, parentValue);
         parent.setText(parentIndex, "");
         const sinkingX = (node.x() + node.width() + rightSib.x()) / 2;
         sinkingNode.setCenter(sinkingX, node.cy(), true);
-        node.setCenter(sinkingX - (DS.getObjectSize() + node.width()) / 2, node.cy(), true);
-        rightSib.setCenter(sinkingX + (DS.getObjectSize() + rightSib.width()) / 2, node.cy(), true);
-        await DS.pause();
+        node.setCenter(sinkingX - (this.$DS.getObjectSize() + node.width()) / 2, node.cy(), true);
+        rightSib.setCenter(sinkingX + (this.$DS.getObjectSize() + rightSib.width()) / 2, node.cy(), true);
+        await this.$DS.pause();
 
         const nodeSize = node.numValues();
         const textsToInsert = [parentValue].concat(rightSib.getTexts());
@@ -414,7 +437,7 @@ DS.BTree = class BTree {
         sinkingNode.remove();
         rightSib.remove();
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         node.setHighlight(false);
         parent.setHighlight(false);
         return node;
@@ -429,12 +452,12 @@ DS.BTree = class BTree {
 
         const leftValue = parent.getText(parentIndex);
         const rightValue = rightSib.getText(0);
-        await DS.pause('node.steal.right', node, leftValue, rightValue);
+        await this.$DS.pause('node.steal.right', node, leftValue, rightValue);
 
-        const leftNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const leftNode = this.$DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
-        const rightNode = DS.SVG().bTreeNode(false, 1, rightSib.getCX(0), rightSib.cy());
+        const rightNode = this.$DS.SVG().bTreeNode(false, 1, rightSib.getCX(0), rightSib.cy());
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
 
@@ -445,7 +468,7 @@ DS.BTree = class BTree {
         leftNode.setCenter(node.getCX(node.numValues() - 1), node.cy(), true);
         rightNode.setCenter(parent.getCX(parentIndex), parent.cy(), true);
         if (!node.isLeaf()) node.setChild(node.numChildren() - 1, rightSib.getChild(0));
-        await DS.pause();
+        await this.$DS.pause();
 
         leftNode.remove();
         rightNode.remove();
@@ -453,7 +476,7 @@ DS.BTree = class BTree {
         parent.setText(parentIndex, rightValue);
         node.setText(node.numValues() - 1, leftValue);
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         node.setHighlight(false);
         parent.setHighlight(false);
         rightSib.setHighlight(false);
@@ -471,12 +494,12 @@ DS.BTree = class BTree {
 
         const rightValue = parent.getText(parentIndex);
         const leftValue = leftSib.getText(leftSib.numValues() - 1);
-        await DS.pause('node.steal.left', node, leftValue, rightValue);
+        await this.$DS.pause('node.steal.left', node, leftValue, rightValue);
 
-        const rightNode = DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const rightNode = this.$DS.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
-        const leftNode = DS.SVG().bTreeNode(false, 1, leftSib.getCX(leftSib.numValues() - 1), leftSib.cy());
+        const leftNode = this.$DS.SVG().bTreeNode(false, 1, leftSib.getCX(leftSib.numValues() - 1), leftSib.cy());
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
 
@@ -487,7 +510,7 @@ DS.BTree = class BTree {
         rightNode.setCenter(node.getCX(0), node.cy(), true);
         leftNode.setCenter(parent.getCX(parentIndex), parent.cy(), true);
         if (!node.isLeaf()) node.setChild(0, leftSib.getChild(leftSib.numChildren() - 1));
-        await DS.pause();
+        await this.$DS.pause();
 
         rightNode.remove();
         leftNode.remove();
@@ -495,7 +518,7 @@ DS.BTree = class BTree {
         parent.setText(parentIndex, leftValue);
         node.setText(0, rightValue);
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         node.setHighlight(false);
         parent.setHighlight(false);
         leftSib.setHighlight(false);

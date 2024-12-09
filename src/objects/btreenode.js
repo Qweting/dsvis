@@ -59,7 +59,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
 
     insertValue(i, text, leftChildInsert = false) {
         if (i < this.numValues()) {
-            const dx = (i / Math.max(1, this.numValues()) - 1) * DS.getObjectSize();
+            const dx = (i / Math.max(1, this.numValues()) - 1) * this.engine().getObjectSize();
             this.dmoveCenter(dx, 0);
         }
         this.$values.splice(i, 0, null);
@@ -96,7 +96,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
             this.$lines.pop()?.remove();
         }
 
-        const w0 = DS.getObjectSize(), h = DS.getObjectSize(), stroke = DS.getStrokeWidth();
+        const w0 = this.engine().getObjectSize(), h = this.engine().getObjectSize(), stroke = this.engine().getStrokeWidth();
         if (!this.$rect) this.$rect = this.rect(w0 * nvalues, h).stroke({width: stroke}).center(0, 0);
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
@@ -119,7 +119,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
     }
 
     getCX(i) {
-        return this.cx() + DS.getObjectSize() * (i - this.numValues() / 2 + 0.5);
+        return this.cx() + this.engine().getObjectSize() * (i - this.numValues() / 2 + 0.5);
     }
 
     getWidth() {
@@ -217,7 +217,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
                 }
                 child.$parent.remove();
             }
-            const edge = DS.SVG().bTreeConnection(this, child, i, this.numChildren());
+            const edge = this.engine().SVG().bTreeConnection(this, child, i, this.numChildren());
             this.$children[i] = edge;
             child.$parent = edge;
         }
@@ -270,8 +270,8 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
 
     resize(startX, startY, animate = true) {
         this._resizeWidths();
-        if (startX + this.$rightWidth > DS.$SvgWidth - DS.$Info.x) startX = DS.$SvgWidth - this.$rightWidth - DS.$Info.x;
-        if (startX - this.$leftWidth < DS.$Info.x) startX = this.$leftWidth + DS.$Info.x;
+        if (startX + this.$rightWidth > this.engine().$SvgWidth - this.engine().$Info.x) startX = this.engine().$SvgWidth - this.$rightWidth - this.engine().$Info.x;
+        if (startX - this.$leftWidth < this.engine().$Info.x) startX = this.$leftWidth + this.engine().$Info.x;
         this._setNewPositions(startX, startY, animate);
     }
 
@@ -283,7 +283,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
             for (const child of this.getChildren()) {
                 this.$childWidths += child._resizeWidths();
             }
-            this.$width = Math.max(this.$width, this.$childWidths + this.numValues() * DS.getSpacingX());
+            this.$width = Math.max(this.$width, this.$childWidths + this.numValues() * this.engine().getSpacingX());
             left = this.getLeft().$leftWidth || 0;
             right = this.getRight().$rightWidth || 0;
         }
@@ -298,7 +298,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         if (this.isLeaf()) return;
         x -= this.$leftWidth;
         const spacing = (this.$width - this.$childWidths) / this.numValues();
-        const nextY = y + this.getHeight() + DS.getSpacingY();
+        const nextY = y + this.getHeight() + this.engine().getSpacingY();
         for (const child of this.getChildren()) {
             child._setNewPositions(x + child.$leftWidth, nextY, animate);
             x += child.$width + spacing;

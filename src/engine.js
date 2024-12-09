@@ -10,592 +10,560 @@ const DS = {};
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
-DS.$Svg = null;
-DS.$SvgWidth = 1000;
-DS.$SvgHeight = 600;
+DS.Engine = class {
 
-DS.$Info = {
-    x: 30,
-    y: 40,
-    ybody: 70,
-    ystatus: DS.$SvgHeight - 30,
-    title: null,
-    body: null,
-    status: null,
-};
+    $Svg = null;
+    $SvgWidth = 1000;
+    $SvgHeight = 600;
 
-
-DS.$Current = null;
-DS.$Actions = null;
-DS.$CurrentAction = null;
-DS.$CurrentStep = null;
-DS.$DEBUG = false;
-
-DS.$EventListeners = {
-    stepForward: {},
-    stepBackward: {},
-    fastForward: {},
-    fastBackward: {},
-    toggleRunner: {},
-};
-
-DS.$Toolbar = {};
-DS.$Defaults = {};
-DS.$Cookies = {};
-DS.$CookieExpireDays = 30;
+    $Info = {
+        x: 30,
+        y: 40,
+        ybody: 70,
+        ystatus: this.$SvgHeight - 30,
+        title: null,
+        body: null,
+        status: null,
+    };
 
 
-///////////////////////////////////////////////////////////////////////////////
-// Animation speed
+    $Current = null;
+    $Actions = null;
+    $CurrentAction = null;
+    $CurrentStep = null;
+    $DEBUG = false;
 
-DS.$Defaults.animationSpeed = 1000; // milliseconds per step
-DS.getAnimationSpeed = () => parseInt(DS.$Toolbar.animationSpeed?.value) || DS.$Defaults.animationSpeed;
+    $EventListeners = {
+        stepForward: {},
+        stepBackward: {},
+        fastForward: {},
+        fastBackward: {},
+        toggleRunner: {},
+    };
 
-DS.$Cookies.animationSpeed = {
-    getCookie: (value) => DS.$Toolbar.animationSpeed.value = value,
-    setCookie: () => DS.getAnimationSpeed(),
-};
+    $Toolbar = {
+        animationSpeed: null,
+    };
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Relative size of objects (nodes, texts, etc)
-
-DS.$Defaults.sizeClass = "medium";
-DS.$Defaults.objectSize = 40;
-DS.$ObjectSize = {
-    tiny: 0.70,
-    small: 0.85,
-    medium: 1.00,
-    large: 1.15,
-    huge: 1.30,
-};
-
-DS.getObjectSize = () => DS.$Defaults.objectSize * DS.$ObjectSize[DS.getSizeClass()];
-DS.getSizeClass = () => DS.$Toolbar.objectSize?.value.toLowerCase() || DS.$Defaults.sizeClass;
-DS.getStrokeWidth = () => DS.getObjectSize() / 12;
-
-DS.$Cookies.objectSize = {
-    getCookie: (value) => DS.$Toolbar.objectSize.value = value,
-    setCookie: () => DS.getSizeClass(),
-};
-
-DS.setDefaultObjectSize = function() {
-    const sizeClass = DS.getSizeClass();
-    for (const cls in DS.$ObjectSize) {
-        if (cls === sizeClass) DS.$Svg.addClass(cls);
-        else DS.$Svg.removeClass(cls);
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Inititalisation
-
-DS.initialise = function(svgID) {
-    DS.initEngine(svgID);
-    DS.initAlgorithm();
-    DS.initGeneralToolbar();
-    DS.initToolbar();
-    DS.loadCookies();
-    DS.resetAll();
-};
-
-
-DS.initEngine = function(svgID) {
-    DS.$DEBUG = new URL(window.location).searchParams.get("debug");
-    DS.$Svg = SVG(svgID).viewbox(0, 0, DS.$SvgWidth, DS.$SvgHeight);
-    if (DS.$DEBUG) DS.$Svg.addClass("debug");
-};
-
-
-DS.initGeneralToolbar = function() {
-    const tools = DS.$Toolbar;
-    tools.generalControls = document.getElementById("generalControls");
-    tools.stepForward = document.getElementById("stepForward");
-    tools.stepBackward = document.getElementById("stepBackward");
-    tools.toggleRunner = document.getElementById("toggleRunner");
-    tools.fastForward = document.getElementById("fastForward");
-    tools.fastBackward = document.getElementById("fastBackward");
-    tools.objectSize = document.getElementById("objectSize");
-
-    tools.animationSpeed = document.getElementById("animationSpeed");
-    tools.animationSpeed.addEventListener("change", () => DS.saveCookies());
-};
-
-
-DS.resetAll = function() {
-    DS.$Actions = [];
-    DS.reset();
-};
-
-DS.confirmResetAll = function() {
-    if (confirm("This clears the canvas and your history!")) DS.resetAll();
-};
-
-
-DS.reset = async function() {
-    DS.clearCanvas()
-    if (DS.$Current) await DS.$Current.reset();
-    DS.resetListeners();
-};
-
-
-DS.initAlgorithm = function() {
-    const algoClass = new URL(window.location).searchParams.get("algorithm");
-    const algoSelect = document.getElementById("algorithmSelector");
-    if (algoClass && /^[\w.]+$/.test(algoClass) && DS[algoClass]) {
-        if (algoSelect) algoSelect.value = algoClass;
-        DS.$Current = new DS[algoClass]();
-    } else {
-        if (algoSelect) algoSelect.value = "";
-        DS.$Current = null;
-        window.history.replaceState("", "", window.location.pathname);
-    }
-};
-
-
-DS.selectAlgorithm = function() {
-    const algoClass = document.getElementById("algorithmSelector").value;
-    if (algoClass) {
-        const params = {algorithm: algoClass};
-        if (DS.$DEBUG) params.debug = DS.$DEBUG;
-        const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
-        window.history.replaceState("", "", url);
-    }
-    window.location.reload();
-};
-
-
-DS.SVG = function(id) {
-    return id ? SVG(`#${id}`) : DS.$Svg;
-};
-
-
-DS.clearCanvas = function() {
-    DS.$Svg.clear();
-    const w = DS.$SvgWidth;
-    const h = DS.$SvgHeight;
-    if (DS.$DEBUG) {
-        for (let x = 1; x < w / 100; x++) DS.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
-        for (let y = 1; y < h / 100; y++) DS.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
-    }
-    DS.setDefaultObjectSize();
-    DS.$Info.title = DS.$Svg.text("").addClass("title").x(DS.$Info.x).cy(DS.$Info.y);
-    DS.$Info.body = DS.$Svg.text("").addClass("message").x(DS.$Info.x).cy(DS.$Info.ybody);
-    DS.$Info.status = DS.$Svg.text("").addClass("status-report").x(DS.$Info.x).cy(DS.$Info.ystatus);
-};
-
-
-DS.setStatus = function(status, timeout = 10) {
-    setTimeout(() => {
-        if (status === "running") {
-            DS.$Info.status.text("Animating").removeClass("paused").addClass("running");
-        } else if (status === "paused") {
-            DS.$Info.status.text("Paused").addClass("paused").removeClass("running");
-        } else {
-            DS.$Info.status.text("Idle").removeClass("paused").removeClass("running");
-        }
-    },
-    timeout,
-    );
-};
-
-
-///////////////////////////////////////////////////////////////////////////////
-// The default listeners
-
-DS.$IdleListeners = {
-    stepBackward: {
-        type: "click",
-        condition: () => DS.$Actions.length > 0,
-        handler: () => {
-            DS.setRunning(false);
-            const action = DS.$Actions.pop();
-            DS.execute(action.oper, action.args, action.nsteps - 1);
+    $CookieExpireDays = 30;
+    $Cookies = {
+        animationSpeed: {
+            getCookie: (value) => this.$Toolbar.animationSpeed.value = value,
+            setCookie: () => this.getAnimationSpeed(),
         },
-    },
-    fastBackward: {
-        type: "click",
-        condition: () => DS.$Actions.length > 0,
-        handler: () => {
-            DS.$Actions.pop();
-            if (DS.$Actions.length > 0) {
-                const action = DS.$Actions.pop();
-                DS.execute(action.oper, action.args, action.nsteps);
-            } else {
-                DS.reset();
-            }
+        objectSize: {
+            getCookie: (value) => this.$Toolbar.objectSize.value = value,
+            setCookie: () => this.getSizeClass(),
         },
-    },
-    objectSize: {
-        type: "change",
-        condition: () => true,
-        handler: () => {
-            if (DS.$Actions.length > 0) {
-                const action = DS.$Actions.pop();
-                DS.execute(action.oper, action.args, action.nsteps);
-            } else {
-                DS.reset();
-            }
-        },
-    },
-};
+    };
+
+    $Defaults = {
+        animationSpeed: 1000, // milliseconds per step
+        sizeClass: "medium",
+        objectSize: 40,
+    };
+
+    $ObjectSize = {
+        tiny: 0.70,
+        small: 0.85,
+        medium: 1.00,
+        large: 1.15,
+        huge: 1.30,
+    };
 
 
-DS.$AsyncListeners = {
-    stepForward: {
-        type: "click",
-        handler: (resolve, reject) => {
-            DS.setRunning(false);
-            DS.stepForward(resolve, reject);
-        },
-    },
-    fastForward: {
-        type: "click",
-        handler: (resolve, reject) => {
-            DS.$Actions[DS.$CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
-            DS.fastForward(resolve, reject);
-        },
-    },
-    toggleRunner: {
-        type: "click",
-        handler: (resolve, reject) => {
-            DS.toggleRunner();
-            if (DS.isRunning()) {
-                DS.stepForward(resolve, reject);
-            } else {
-                DS.$CurrentStep++;
-                resolve();
-            }
-        },
-    },
-    stepBackward: {
-        type: "click",
-        handler: (resolve, reject) => reject({until: DS.$CurrentStep - 1}),
-    },
-    fastBackward: {
-        type: "click",
-        handler: (resolve, reject) => reject({until: 0}),
-    },
-    objectSize: {
-        type: "change",
-        handler: (resolve, reject) => reject({until: DS.$CurrentStep}),
-    },
-};
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Updating listeners
-
-DS.disableWhenRunning = function(disable) {
-    SVG.find(".disableWhenRunning").forEach((elem) => elem.node.disabled = disable);
-};
-
-
-DS.resetListeners = function(isAsync) {
-    DS.saveCookies();
-    DS.removeAllListeners();
-    if (!DS.$Current) {
-        DS.disableWhenRunning(true);
-        return;
-    }
-    DS.addListener("toggleRunner", "click", () => DS.toggleRunner());
-    if (isAsync) {
-        DS.disableWhenRunning(true);
-        DS.setStatus("paused");
-        return;
+    getAnimationSpeed() {
+        return parseInt(this.$Toolbar.animationSpeed?.value) || this.$Defaults.animationSpeed;
     }
 
-    DS.disableWhenRunning(false);
-    DS.setIdleTitle();
-    DS.setStatus("inactive");
-    for (const id in DS.$IdleListeners) {
-        const listener = DS.$IdleListeners[id];
-        if (listener.condition()) {
-            if (DS.$DEBUG) DS.addListener(id, listener.type, () => {
-                console.log(`${id} ${listener.type}: ${JSON.stringify(DS.$Actions)}`);
-                listener.handler();
-            });
-            else DS.addListener(id, listener.type, listener.handler);
+    getObjectSize() {
+        return this.$Defaults.objectSize * this.$ObjectSize[this.getSizeClass()];
+    }
+
+    getSizeClass() {
+        return this.$Toolbar.objectSize?.value.toLowerCase() || this.$Defaults.sizeClass;
+    }
+
+    getSpacingX() {
+        return this.getObjectSize();
+    }
+
+    getSpacingY() {
+        return this.getObjectSize();
+    }
+
+    getStrokeWidth() {
+        return this.getObjectSize() / 12;
+    }
+
+    setDefaultObjectSize() {
+        const sizeClass = this.getSizeClass();
+        for (const cls in this.$ObjectSize) {
+            if (cls === sizeClass) this.$Svg.addClass(cls);
+            else this.$Svg.removeClass(cls);
         }
     }
-};
 
 
-DS.addListener = function(id, type, handler) {
-    const listeners = DS.$EventListeners;
-    if (!listeners[id]) listeners[id] = {};
-    const elem = DS.$Toolbar[id];
-    const oldHandler = listeners[id][type];
-    if (oldHandler) elem.removeEventListener(type, oldHandler);
-    listeners[id][type] = handler;
-    elem.addEventListener(type, handler);
-    elem.disabled = false;
-};
+    ///////////////////////////////////////////////////////////////////////////////
+    // Inititalisation
 
-
-DS.removeAllListeners = function() {
-    const listeners = DS.$EventListeners;
-    for (const id in listeners) {
-        const elem = DS.$Toolbar[id];
-        elem.disabled = true;
-        for (const type in listeners[id]) elem.removeEventListener(type, listeners[id][type]);
-        listeners[id] = {};
+    initialise(container, algorithm) {
+        this.initEngine(container, algorithm);
+        this.initGeneralToolbar();
+        this.loadCookies();
+        this.resetAll();
     }
-};
 
 
-///////////////////////////////////////////////////////////////////////////////
-// Executing the actions
+    initEngine(container, algorithm) {
+        this.$Container = document.querySelector(container);
+        this.$DEBUG = new URL(window.location).searchParams.get("debug");
+        this.$Svg = SVG(this.$Container.querySelector("svg"));
+        this.$Svg.viewbox(0, 0, this.$SvgWidth, this.$SvgHeight);
+        this.$Svg.$Engine = this;
+        if (this.$DEBUG) this.$Svg.addClass("debug");
+        this.$Current = algorithm;
+    }
 
-DS.submit = function(method, field) {
-    try {
-        let values = [];
-        if (field != null) {
-            const val = field.value.trim();
-            field.value = "";
-            if (val === "") return false;
-            values = val.split(/\s+/).map((v) => DS.normalizeNumber(v));
+
+    initGeneralToolbar() {
+        const container = this.$Container;
+        const tools = this.$Toolbar;
+        tools.generalControls = container.querySelector(".generalControls");
+        tools.stepForward = container.querySelector(".stepForward");
+        tools.stepBackward = container.querySelector(".stepBackward");
+        tools.toggleRunner = container.querySelector(".toggleRunner");
+        tools.fastForward = container.querySelector(".fastForward");
+        tools.fastBackward = container.querySelector(".fastBackward");
+        tools.objectSize = container.querySelector(".objectSize");
+
+        tools.animationSpeed = container.querySelector(".animationSpeed");
+        tools.animationSpeed.addEventListener("change", () => this.saveCookies());
+    }
+
+
+    resetAll() {
+        this.$Actions = [];
+        this.reset();
+    }
+
+    confirmResetAll() {
+        if (confirm("This clears the canvas and your history!")) this.resetAll();
+    }
+
+
+    async reset() {
+        this.clearCanvas();
+        if (this.$Current) await this.$Current.reset();
+        this.resetListeners();
+    }
+
+
+    SVG(id) {
+        return id ? SVG(`#${id}`) : this.$Svg;
+    }
+
+
+    clearCanvas() {
+        this.$Svg.clear();
+        const w = this.$SvgWidth;
+        const h = this.$SvgHeight;
+        if (this.$DEBUG) {
+            for (let x = 1; x < w / 100; x++) this.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
+            for (let y = 1; y < h / 100; y++) this.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
         }
-        DS.execute(method, values);
-    } catch (error) {
-        console.error(error);
+        this.setDefaultObjectSize();
+        this.$Info.title = this.$Svg.text("").addClass("title").x(this.$Info.x).cy(this.$Info.y);
+        this.$Info.body = this.$Svg.text("").addClass("message").x(this.$Info.x).cy(this.$Info.ybody);
+        this.$Info.status = this.$Svg.text("").addClass("status-report").x(this.$Info.x).cy(this.$Info.ystatus);
     }
-    return false;
-};
 
 
-DS.execute = async function(operation, args = [], until = 0) {
-    await DS.reset();
-    DS.$Actions.push({oper: operation, args: args, nsteps: until});
-    if (DS.$DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(DS.$Actions)}`);
+    setStatus(status, timeout = 10) {
+        setTimeout(() => {
+            if (status === "running") {
+                this.$Info.status.text("Animating").removeClass("paused").addClass("running");
+            } else if (status === "paused") {
+                this.$Info.status.text("Paused").addClass("paused").removeClass("running");
+            } else {
+                this.$Info.status.text("Idle").removeClass("paused").removeClass("running");
+            }
+        },
+        timeout,
+        );
+    }
 
-    try {
-        await DS.runActionsLoop()
-        DS.$Actions[DS.$Actions.length - 1].nsteps = DS.$CurrentStep;
-        if (DS.$DEBUG) console.log(`DONE / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
-        DS.resetListeners();
-    } catch (reason) {
-        if (typeof reason !== "object" || reason.until == null) {
-            console.error(reason);
-            DS.resetListeners();
+
+    setIdleTitle() {
+        this.$Info.title.text("Select an action from the menu above");
+        this.$Info.body.text("");
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // The default listeners
+
+    $IdleListeners = {
+        stepBackward: {
+            type: "click",
+            condition: () => this.$Actions.length > 0,
+            handler: () => {
+                this.setRunning(false);
+                const action = this.$Actions.pop();
+                this.execute(action.oper, action.args, action.nsteps - 1);
+            },
+        },
+        fastBackward: {
+            type: "click",
+            condition: () => this.$Actions.length > 0,
+            handler: () => {
+                this.$Actions.pop();
+                if (this.$Actions.length > 0) {
+                    const action = this.$Actions.pop();
+                    this.execute(action.oper, action.args, action.nsteps);
+                } else {
+                    this.reset();
+                }
+            },
+        },
+        objectSize: {
+            type: "change",
+            condition: () => true,
+            handler: () => {
+                if (this.$Actions.length > 0) {
+                    const action = this.$Actions.pop();
+                    this.execute(action.oper, action.args, action.nsteps);
+                } else {
+                    this.reset();
+                }
+            },
+        },
+    };
+
+
+    $AsyncListeners = {
+        stepForward: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.setRunning(false);
+                this.stepForward(resolve, reject);
+            },
+        },
+        fastForward: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.$Actions[this.$CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
+                this.fastForward(resolve, reject);
+            },
+        },
+        toggleRunner: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.toggleRunner();
+                if (this.isRunning()) {
+                    this.stepForward(resolve, reject);
+                } else {
+                    this.$CurrentStep++;
+                    resolve();
+                }
+            },
+        },
+        stepBackward: {
+            type: "click",
+            handler: (resolve, reject) => reject({until: this.$CurrentStep - 1}),
+        },
+        fastBackward: {
+            type: "click",
+            handler: (resolve, reject) => reject({until: 0}),
+        },
+        objectSize: {
+            type: "change",
+            handler: (resolve, reject) => reject({until: this.$CurrentStep}),
+        },
+    };
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Updating listeners
+
+    disableWhenRunning(disable) {
+        for (const elem of this.$Container.querySelectorAll(".disableWhenRunning"))
+            elem.disabled = disable;
+    }
+
+
+    resetListeners(isAsync) {
+        this.saveCookies();
+        this.removeAllListeners();
+        if (!this.$Current) {
+            this.disableWhenRunning(true);
             return;
         }
-        DS.$Actions.pop();
-        until = reason.until;
-        if (DS.$DEBUG) console.log(`BACK ${until} / ${DS.$CurrentStep}: ${JSON.stringify(DS.$Actions)}`);
-        if (until > 0) {
-            DS.setRunning(false);
+        this.addListener("toggleRunner", "click", () => this.toggleRunner());
+        if (isAsync) {
+            this.disableWhenRunning(true);
+            this.setStatus("paused");
+            return;
         }
-        if (until <= 0 && DS.$Actions.length > 0) {
-            const action = DS.$Actions.pop();
-            operation = action.oper, args = action.args, until = action.nsteps;
-        }
-        if (until > 0) {
-            DS.execute(operation, args, until);
-        } else {
-            DS.reset();
-        }
-    }
-};
 
-
-DS.runActionsLoop = async function() {
-    for (let nAction = 0; nAction < DS.$Actions.length; nAction++) {
-        DS.resetListeners(true);
-        const action = DS.$Actions[nAction];
-        DS.$CurrentAction = nAction;
-        DS.$CurrentStep = 0;
-        // Make camelCase separate words: https://stackoverflow.com/a/21148630
-        let message = action.oper.match(/[A-Za-z][a-z]*/g).join(" ");
-        message = `${message.charAt(0).toUpperCase() + message.substring(1)} ${action.args.join(", ")}`;
-        if (DS.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(DS.$Actions)}`);
-        DS.$Info.title.text(message);
-        await DS.pause("");
-        await DS.$Current[action.oper](...action.args);
-    }
-};
-
-
-DS.pause = function(message, ...args) {
-    const title = DS.getMessage(message, ...args);
-    if (DS.$DEBUG) console.log(`${DS.$CurrentStep}. Doing: ${title} (running: ${DS.isRunning()}), ${JSON.stringify(DS.$Actions)}`);
-    if (DS.$resetting) return;
-    if (title != null) {
-        DS.$Info.body.text(title);
-    }
-    return new Promise((resolve, reject) => {
-        const action = DS.$Actions[DS.$CurrentAction];
-        if (action.nsteps != null && DS.$CurrentStep < action.nsteps) {
-            DS.fastForward(resolve, reject);
-        } else {
-            let runnerTimer = null;
-            for (const id in DS.$AsyncListeners) {
-                const listener = DS.$AsyncListeners[id];
-                DS.addListener(id, listener.type, () => {
-                    clearTimeout(runnerTimer);
-                    listener.handler(resolve, reject);
+        this.disableWhenRunning(false);
+        this.setIdleTitle();
+        this.setStatus("inactive");
+        for (const id in this.$IdleListeners) {
+            const listener = this.$IdleListeners[id];
+            if (listener.condition()) {
+                if (this.$DEBUG) this.addListener(id, listener.type, () => {
+                    console.log(`${id} ${listener.type}: ${JSON.stringify(this.$Actions)}`);
+                    listener.handler();
                 });
-            }
-            if (DS.isRunning()) {
-                DS.setStatus("running");
-                runnerTimer = setTimeout(() => DS.stepForward(resolve, reject), DS.getAnimationSpeed() * 1.1);
+                else this.addListener(id, listener.type, listener.handler);
             }
         }
-    });
-};
+    }
 
 
-DS.updateDefault = function(obj, defaultObj) {
-    for (const key in defaultObj) {
-        if (!(key in obj)) {
-            obj[key] = defaultObj[key];
-        } else if (typeof obj[key] === 'object' && typeof defaultObj[key] === 'object') {
-            DS.updateDefault(obj[key], defaultObj[key]);
+    addListener(id, type, handler) {
+        const listeners = this.$EventListeners;
+        if (!listeners[id]) listeners[id] = {};
+        const elem = this.$Toolbar[id];
+        const oldHandler = listeners[id][type];
+        if (oldHandler) elem.removeEventListener(type, oldHandler);
+        listeners[id][type] = handler;
+        elem.addEventListener(type, handler);
+        elem.disabled = false;
+    }
+
+
+    removeAllListeners() {
+        const listeners = this.$EventListeners;
+        for (const id in listeners) {
+            const elem = this.$Toolbar[id];
+            elem.disabled = true;
+            for (const type in listeners[id]) elem.removeEventListener(type, listeners[id][type]);
+            listeners[id] = {};
         }
     }
-}
 
 
-DS.getMessage = function(message, ...args) {
-    if (Array.isArray(message)) [message, ...args] = [...message, ...args];
-    if (typeof message !== 'string') {
-        if (args.length > 0) console.error("Unknown message:", message, ...args);
-        return message;
+    ///////////////////////////////////////////////////////////////////////////////
+    // Executing the actions
+
+    submit(method, field) {
+        try {
+            let values = [];
+            if (field != null) {
+                const val = field.value.trim();
+                field.value = "";
+                if (val === "") return false;
+                values = val.split(/\s+/).map((v) => DS.normalizeNumber(v));
+            }
+            this.execute(method, values);
+        } catch (error) {
+            console.error(error);
+        }
+        return false;
     }
-    if (!message) return args.join("\n");
-    let title = DS.$Current.messages || DS.$Current.constructor.messages || {};
-    const keys = message.split(".");
-    if (!(keys[0] in title)) return [message, ...args].join("\n");
-    for (const key of keys) {
-        if (!(typeof title === 'object' && key in title)) {
+
+
+    async execute(operation, args = [], until = 0) {
+        await this.reset();
+        this.$Actions.push({oper: operation, args: args, nsteps: until});
+        if (this.$DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(this.$Actions)}`);
+
+        try {
+            await this.runActionsLoop();
+            this.$Actions[this.$Actions.length - 1].nsteps = this.$CurrentStep;
+            if (this.$DEBUG) console.log(`DONE / ${this.$CurrentStep}: ${JSON.stringify(this.$Actions)}`);
+            this.resetListeners();
+        } catch (reason) {
+            if (typeof reason !== "object" || reason.until == null) {
+                console.error(reason);
+                this.resetListeners();
+                return;
+            }
+            this.$Actions.pop();
+            until = reason.until;
+            if (this.$DEBUG) console.log(`BACK ${until} / ${this.$CurrentStep}: ${JSON.stringify(this.$Actions)}`);
+            if (until > 0) {
+                this.setRunning(false);
+            }
+            if (until <= 0 && this.$Actions.length > 0) {
+                const action = this.$Actions.pop();
+                operation = action.oper, args = action.args, until = action.nsteps;
+            }
+            if (until > 0) {
+                this.execute(operation, args, until);
+            } else {
+                this.reset();
+            }
+        }
+    }
+
+
+    async runActionsLoop() {
+        for (let nAction = 0; nAction < this.$Actions.length; nAction++) {
+            this.resetListeners(true);
+            const action = this.$Actions[nAction];
+            this.$CurrentAction = nAction;
+            this.$CurrentStep = 0;
+            // Make camelCase separate words: https://stackoverflow.com/a/21148630
+            let message = action.oper.match(/[A-Za-z][a-z]*/g).join(" ");
+            message = `${message.charAt(0).toUpperCase() + message.substring(1)} ${action.args.join(", ")}`;
+            if (this.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(this.$Actions)}`);
+            this.$Info.title.text(message);
+            await this.pause("");
+            await this.$Current[action.oper](...action.args);
+        }
+    }
+
+
+    pause(message, ...args) {
+        const title = this.getMessage(message, ...args);
+        if (this.$DEBUG) console.log(`${this.$CurrentStep}. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(this.$Actions)}`);
+        if (this.$resetting) return null;
+        if (title != null) {
+            this.$Info.body.text(title);
+        }
+        return new Promise((resolve, reject) => {
+            const action = this.$Actions[this.$CurrentAction];
+            if (action.nsteps != null && this.$CurrentStep < action.nsteps) {
+                this.fastForward(resolve, reject);
+            } else {
+                let runnerTimer = null;
+                for (const id in this.$AsyncListeners) {
+                    const listener = this.$AsyncListeners[id];
+                    this.addListener(id, listener.type, () => {
+                        clearTimeout(runnerTimer);
+                        listener.handler(resolve, reject);
+                    });
+                }
+                if (this.isRunning()) {
+                    this.setStatus("running");
+                    runnerTimer = setTimeout(() => this.stepForward(resolve, reject), this.getAnimationSpeed() * 1.1);
+                }
+            }
+        });
+    }
+
+
+    getMessage(message, ...args) {
+        if (Array.isArray(message)) [message, ...args] = [...message, ...args];
+        if (typeof message !== "string") {
+            if (args.length > 0) console.error("Unknown message:", message, ...args);
+            return message;
+        }
+        if (!message) return args.join("\n");
+        let title = this.$Current.messages || this.$Current.constructor.messages || {};
+        const keys = message.split(".");
+        if (!(keys[0] in title)) return [message, ...args].join("\n");
+        for (const key of keys) {
+            if (!(typeof title === "object" && key in title)) {
+                console.error("Unknown message:", message, ...args);
+                return [message, ...args].join("\n");
+            }
+            title = title[key];
+        }
+        if (typeof title === "function") title = title(...args);
+        if (Array.isArray(title)) title = title.join("\n");
+        if (typeof title === "object") {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        title = title[key];
+        return title;
     }
-    if (Array.isArray(title)) title = title.join("\n");
-    if (typeof title === 'object') {
-        console.error("Unknown message:", message, ...args);
-        return [message, ...args].join("\n");
+
+
+    stepForward(resolve, reject) {
+        this.$CurrentStep++;
+        this.$animating = true;
+        resolve();
     }
-    if (typeof title === 'function') title = title(...args);
-    return title;
-}
 
 
-DS.stepForward = function(resolve, reject) {
-    DS.$CurrentStep++;
-    DS.$animating = true;
-    resolve();
-};
-
-
-DS.fastForward = function(resolve, reject) {
-    const action = DS.$Actions[DS.$CurrentAction];
-    if (DS.$CurrentStep >= action.nsteps) {
-        action.nsteps = DS.$CurrentStep;
+    fastForward(resolve, reject) {
+        const action = this.$Actions[this.$CurrentAction];
+        if (this.$CurrentStep >= action.nsteps) {
+            action.nsteps = this.$CurrentStep;
+        }
+        this.$CurrentStep++;
+        this.$animating = false;
+        if (this.$DEBUG) setTimeout(resolve, 10);
+        else resolve();
     }
-    DS.$CurrentStep++;
-    DS.$animating = false;
-    if (DS.$DEBUG) setTimeout(resolve, 10);
-    else resolve();
-};
 
 
-DS.isRunning = function() {
-    return DS.$Toolbar.toggleRunner.classList.contains("selected");
-};
+    isRunning() {
+        return this.$Toolbar.toggleRunner.classList.contains("selected");
+    }
 
 
-DS.setRunning = function(running) {
-    const classes = DS.$Toolbar.toggleRunner.classList;
-    if (running) classes.add("selected");
-    else classes.remove("selected");
-};
+    setRunning(running) {
+        const classes = this.$Toolbar.toggleRunner.classList;
+        if (running) classes.add("selected");
+        else classes.remove("selected");
+    }
 
 
-DS.toggleRunner = function() {
-    DS.$Toolbar.toggleRunner.classList.toggle("selected");
-};
+    toggleRunner() {
+        this.$Toolbar.toggleRunner.classList.toggle("selected");
+    }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// Cookies
+    ///////////////////////////////////////////////////////////////////////////////
+    // Cookies
 
 
-DS.loadCookies = function() {
-    if (DS.$DEBUG) console.log("Loading cookies", document.cookie);
-    const allCookies = document.cookie.split(";");
-    for (const cookieName in DS.$Cookies) {
-        for (const cookie of allCookies) {
-            const [cookieName0, value0] = cookie.split("=", 2);
-            if (cookieName0.trim() === cookieName) {
-                const value = decodeURIComponent(value0);
-                DS.$Cookies[cookieName].getCookie(value);
-                break;
+    loadCookies() {
+        if (this.$DEBUG) console.log("Loading cookies", document.cookie);
+        const allCookies = document.cookie.split(";");
+        for (const cookieName in this.$Cookies) {
+            for (const cookie of allCookies) {
+                const [cookieName0, value0] = cookie.split("=", 2);
+                if (cookieName0.trim() === cookieName) {
+                    const value = decodeURIComponent(value0);
+                    this.$Cookies[cookieName].getCookie(value);
+                    break;
+                }
             }
         }
     }
-};
 
 
-DS.saveCookies = function() {
-    let expires = "";
-    if (DS.$CookieExpireDays > 0) {
-        const exdate = new Date();
-        exdate.setDate(exdate.getDate() + DS.$CookieExpireDays);
-        expires = `;expires=${exdate.toUTCString()}`;
+    saveCookies() {
+        let expires = "";
+        if (this.$CookieExpireDays > 0) {
+            const exdate = new Date();
+            exdate.setDate(exdate.getDate() + this.$CookieExpireDays);
+            expires = `;expires=${exdate.toUTCString()}`;
+        }
+        for (const cookieName in this.$Cookies) {
+            const value = encodeURIComponent(this.$Cookies[cookieName].setCookie());
+            document.cookie = `${cookieName}=${value}${expires}`;
+        }
+        if (this.$DEBUG) console.log("Setting cookies", document.cookie);
     }
-    for (const cookieName in DS.$Cookies) {
-        const value = encodeURIComponent(DS.$Cookies[cookieName].setCookie());
-        document.cookie = `${cookieName}=${value}${expires}`;
+
+
+    animate(elem, animate = true) {
+        if (this.$animating && animate) {
+            this.setStatus("running");
+            this.setStatus("paused", this.getAnimationSpeed());
+            return elem.animate(this.getAnimationSpeed(), 0, "now");
+        } else {
+            return elem;
+        }
     }
-    if (DS.$DEBUG) console.log("Setting cookies", document.cookie);
 };
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-DS.animate = function(elem, animate = true) {
-    if (DS.$animating && animate) {
-        DS.setStatus("running");
-        DS.setStatus("paused", DS.getAnimationSpeed());
-        return elem.animate(DS.getAnimationSpeed(), 0, "now");
-    } else {
-        return elem;
-    }
-};
-
 
 DS.normalizeNumber = function(input) {
     input = input.trim();
     return input === "" || isNaN(input) ? input : Number(input);
-};
-
-
-// Non-breaking space:
-DS.$nbsp = " ";
-
-DS.compare = function(a, b) {
-    // We use non-breaking space as a proxy for the empty string,
-    // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === DS.$nbsp) a = "";
-    if (b === DS.$nbsp) b = "";
-    if (isNaN(a) === isNaN(b)) {
-        // a and b are (1) both numbers or (2) both non-numbers
-        if (!isNaN(a)) {
-            // a and b are both numbers
-            a = Number(a);
-            b = Number(b);
-        }
-        return a === b ? 0 : a < b ? -1 : 1;
-    } else {
-        // a and b are of different types
-        // let's say that numbers are smaller than non-numbers
-        return isNaN(a) ? 1 : -1;
-    }
 };
 
 
@@ -644,4 +612,40 @@ DS.addReturnSubmit = function(field, allowed, action) {
         };
     }
 };
+
+
+DS.updateDefault = function(obj, defaultObj) {
+    for (const key in defaultObj) {
+        if (!(key in obj)) {
+            obj[key] = defaultObj[key];
+        } else if (typeof obj[key] === "object" && typeof defaultObj[key] === "object") {
+            DS.updateDefault(obj[key], defaultObj[key]);
+        }
+    }
+};
+
+
+// Non-breaking space:
+DS.$nbsp = " ";
+
+DS.compare = function(a, b) {
+    // We use non-breaking space as a proxy for the empty string,
+    // because SVG text objects reset coordinates to (0, 0) for the empty string.
+    if (a === DS.$nbsp) a = "";
+    if (b === DS.$nbsp) b = "";
+    if (isNaN(a) === isNaN(b)) {
+        // a and b are (1) both numbers or (2) both non-numbers
+        if (!isNaN(a)) {
+            // a and b are both numbers
+            a = Number(a);
+            b = Number(b);
+        }
+        return a === b ? 0 : a < b ? -1 : 1;
+    } else {
+        // a and b are of different types
+        // let's say that numbers are smaller than non-numbers
+        return isNaN(a) ? 1 : -1;
+    }
+};
+
 

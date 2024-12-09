@@ -18,10 +18,13 @@ SVG.extend(SVG.Element, {
         return [this.cx(), this.cy()];
     },
     setCenter: function(x, y, animate = false) {
-        return DS.animate(this, animate).center(x, y);
+        return this.engine().animate(this, animate).center(x, y);
     },
     dmoveCenter: function(dx, dy, animate = false) {
         return this.setCenter(this.cx() + dx, this.cy() + dy, animate);
+    },
+    engine: function() {
+        return this.root().$Engine;
     },
 });
 
@@ -47,7 +50,7 @@ SVG.extend(SVG.Container, {
 
 SVG.HighlightCircle = class HighlightCircle extends SVG.Circle {
     init(x, y) {
-        return this.size(DS.getObjectSize()).stroke({width: DS.getStrokeWidth()}).center(x, y).addClass("highlight-circle");
+        return this.size(this.engine().getObjectSize()).stroke({width: this.engine().getStrokeWidth()}).center(x, y).addClass("highlight-circle");
     }
 
     getSize() {
@@ -55,7 +58,7 @@ SVG.HighlightCircle = class HighlightCircle extends SVG.Circle {
     }
 
     setSize(diameter, animate = false) {
-        DS.animate(this, animate).attr("r", diameter / 2);
+        this.engine().animate(this, animate).attr("r", diameter / 2);
         return this;
     }
 };
@@ -63,7 +66,7 @@ SVG.HighlightCircle = class HighlightCircle extends SVG.Circle {
 
 SVG.TextCircle = class TextCircle extends SVG.G {
     init(text, x, y) {
-        this.$circle = this.circle(DS.getObjectSize()).stroke({width: DS.getStrokeWidth()}).center(0, 0);
+        this.$circle = this.circle(this.engine().getObjectSize()).stroke({width: this.engine().getStrokeWidth()}).center(0, 0);
         this.$text = this.text(text).center(0, 0);
         if (x && y) this.center(x, y);
         return this;
@@ -87,7 +90,7 @@ SVG.TextCircle = class TextCircle extends SVG.G {
     }
 
     setSize(diameter, animate = false) {
-        DS.animate(this.$circle, animate).attr("r", diameter / 2);
+        this.engine().animate(this.$circle, animate).attr("r", diameter / 2);
         return this;
     }
 
@@ -103,7 +106,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
     $nullary = {};
 
     init(text, x, y) {
-        const bgSize = 3 * DS.getObjectSize();
+        const bgSize = 3 * this.engine().getObjectSize();
         this.rect(bgSize, bgSize).center(0, 0).addClass("invisible");
         return super.init(text, x, y);
     }
@@ -172,7 +175,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
                 }
                 inEdge.remove();
             }
-            const edge = DS.SVG().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
+            const edge = this.engine().SVG().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
             this.$outgoing[outKey] = edge;
             successor.$incoming[inKey] = edge;
         } else {
@@ -261,11 +264,11 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
     $edgebends = {left: 0.1, right: -0.1};
 
     init(text, x, y) {
-        const d = DS.getObjectSize();
-        const nX = 0.5 * d, nY = 0.8 * d, nR = 2 * DS.getStrokeWidth();
+        const d = this.engine().getObjectSize();
+        const nX = 0.5 * d, nY = 0.8 * d, nR = 2 * this.engine().getStrokeWidth();
         const nullpath = (s) => `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${-2 * nR},0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
-        this.$nullary.left = this.path(nullpath(-1)).stroke({width: DS.getStrokeWidth()}).addClass("nullnode");
-        this.$nullary.right = this.path(nullpath(1)).stroke({width: DS.getStrokeWidth()}).addClass("nullnode");
+        this.$nullary.left = this.path(nullpath(-1)).stroke({width: this.engine().getStrokeWidth()}).addClass("nullnode");
+        this.$nullary.right = this.path(nullpath(1)).stroke({width: this.engine().getStrokeWidth()}).addClass("nullnode");
         return super.init(text, x, y);
     }
 
@@ -378,13 +381,13 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
     resize(startX, startY, animate = true) {
         this._resizeWidths();
-        if (startX + this.$rightWidth > DS.$SvgWidth - DS.$Info.x) startX = DS.$SvgWidth - this.$rightWidth - DS.$Info.x;
-        if (startX - this.$leftWidth < DS.$Info.x) startX = this.$leftWidth + DS.$Info.x;
+        if (startX + this.$rightWidth > this.engine().$SvgWidth - this.engine().$Info.x) startX = this.engine().$SvgWidth - this.$rightWidth - this.engine().$Info.x;
+        if (startX - this.$leftWidth < this.engine().$Info.x) startX = this.$leftWidth + this.engine().$Info.x;
         this._setNewPositions(startX, startY, animate);
     }
 
     _resizeWidths() {
-        let width = DS.getSpacingX();
+        let width = this.engine().getSpacingX();
         const left = this.getLeft();
         if (left) width += left._resizeWidths();
         const right = this.getRight();
@@ -401,7 +404,7 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
     _setNewPositions(x, y, animate) {
         this.setCenter(x, y, animate);
-        const nextY = y + this.getSize() + DS.getSpacingY();
+        const nextY = y + this.getSize() + this.engine().getSpacingY();
         const left = this.getLeft();
         if (left) left._setNewPositions(x - this.$leftWidth + left.$leftWidth, nextY, animate);
         const right = this.getRight();
@@ -445,7 +448,7 @@ SVG.Connection = class Connection extends SVG.Path {
         this.$start = start;
         this.$end = end;
         Object.assign(this.$coords, {x1: start.cx(), y1: start.cy(), x2: end.cx(), y2: end.cy(), r2: end.getSize() / 2});
-        this.stroke({width: DS.getStrokeWidth()});
+        this.stroke({width: this.engine().getStrokeWidth()});
         this.back();
         this.setBend(bend);
         if (directed) this._createArrow();
@@ -467,7 +470,7 @@ SVG.Connection = class Connection extends SVG.Path {
 
     update(newCoords = null, animate = false) {
         Object.assign(this.$coords, newCoords);
-        DS.animate(this, animate).plot(this._getPath());
+        this.engine().animate(this, animate).plot(this._getPath());
         if (this.isDirected()) this._redrawArrow(animate);
     }
 
@@ -481,7 +484,7 @@ SVG.Connection = class Connection extends SVG.Path {
         const marker = this.reference("marker-end");
         const radius = this.$coords.r2;
         const stroke = this.attr("stroke-width");
-        DS.animate(marker, animate).attr({refX: radius / stroke + 5});
+        this.engine().animate(marker, animate).attr({refX: radius / stroke + 5});
     }
 
     toString() {

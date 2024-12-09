@@ -28,7 +28,7 @@ SVG.DSArray = class DSArray extends SVG.G {
     }
 
     getCX(i) {
-        return this.cx() + DS.getObjectSize() * (i - this.getSize() / 2 + 0.5);
+        return this.cx() + this.engine().getObjectSize() * (i - this.getSize() / 2 + 0.5);
     }
 
     getSize() {
@@ -41,7 +41,9 @@ SVG.DSArray = class DSArray extends SVG.G {
             this.$values.pop()?.remove();
             this.$indices.pop()?.remove();
         }
-        const w0 = DS.getObjectSize(), h = DS.getObjectSize(), stroke = DS.getStrokeWidth();
+        const w0 = this.engine().getObjectSize();
+        const h = this.engine().getObjectSize();
+        const stroke = this.engine().getStrokeWidth();
         if (!this.$rect) this.$rect = this.rect(w0 * size, 3 * h).addClass("invisible").center(0, 0);
         this.$rect.width(w0 * size);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
@@ -90,8 +92,8 @@ SVG.DSArray = class DSArray extends SVG.G {
     swap(j, k, animate = false) {
         const jText = this.$values[j], kText = this.$values[k];
         const jX = this.getCX(j), kX = this.getCX(k);
-        DS.animate(jText, animate).cx(kX);
-        DS.animate(kText, animate).cx(jX);
+        this.engine().animate(jText, animate).cx(kX);
+        this.engine().animate(kText, animate).cx(jX);
         this.$values[k] = jText;
         this.$values[j] = kText;
     }

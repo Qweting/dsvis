@@ -5,40 +5,64 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BST = class BST {
-    constructor(initialValues = null) {
-        this._initialValues = initialValues;
+    $DS;
+    $initialValues;
+
+    constructor(engine, initialValues = null) {
+        this.$DS = engine;
+        this.$initialValues = initialValues;
     }
 
     async reset() {
         this.treeRoot = null;
-        if (this._initialValues) {
-            DS.$resetting = true;
-            await this.insert(...this._initialValues);
-            DS.$resetting = false;
+        if (this.$initialValues) {
+            this.$DS.$resetting = true;
+            await this.insert(...this.$initialValues);
+            this.$DS.$resetting = false;
         }
     }
 
+    getStartX() {
+        return this.$DS.$Info.x + this.$DS.getObjectSize() / 2;
+    }
+
+    getStartY() {
+        return this.$DS.$Info.y * 4;
+    }
+
+    getRootX() {
+        return this.$DS.$SvgWidth / 2;
+    }
+
+    getRootY() {
+        return 2 * this.$DS.$Info.y + this.$DS.getObjectSize() / 2;
+    }
+
     initToolbar() {
-        DS.$Toolbar.generalControls.insertAdjacentHTML("beforeend", '<label><input id="showNullNodes" type="checkbox"/> Show null nodes</label>');
-        DS.$Toolbar.showNullNodes = document.getElementById("showNullNodes");
-        DS.$Toolbar.showNullNodes.addEventListener("change", () => this.toggleNullNodes());
+        this.$DS.$Toolbar.generalControls.insertAdjacentHTML("beforeend", `
+            <span class="formgroup"><label>
+                <input class="showNullNodes" type="checkbox"/> Show null nodes
+            </label></span>`,
+        );
+        this.$DS.$Toolbar.showNullNodes = this.$DS.$Container.querySelector(".showNullNodes");
+        this.$DS.$Toolbar.showNullNodes.addEventListener("change", () => this.toggleNullNodes());
         this.toggleNullNodes(true);
     }
 
     toggleNullNodes = function(show) {
-        if (show == null) show = DS.$Toolbar.showNullNodes.checked;
-        DS.$Toolbar.showNullNodes.checked = show;
-        if (show) DS.SVG().addClass("shownullnodes");
-        else DS.SVG().removeClass("shownullnodes");
+        if (show == null) show = this.$DS.$Toolbar.showNullNodes.checked;
+        this.$DS.$Toolbar.showNullNodes.checked = show;
+        if (show) this.$DS.SVG().addClass("shownullnodes");
+        else this.$DS.SVG().removeClass("shownullnodes");
     };
 
     newNode(text) {
-        return DS.SVG().binaryNode(text, DS.getStartX(), DS.getStartY());
+        return this.$DS.SVG().binaryNode(text, this.getStartX(), this.getStartY());
     }
 
     resizeTree() {
-        const animate = !DS.$resetting;
-        this.treeRoot?.resize(DS.getRootX(), DS.getRootY(), animate);
+        const animate = !this.$DS.$resetting;
+        this.treeRoot?.resize(this.getRootX(), this.getRootY(), animate);
     }
 
     async insert(...values) {
@@ -47,14 +71,14 @@ DS.BST = class BST {
 
     async find(value) {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return null;
         }
-        await DS.pause('find.start', value);
+        await this.$DS.pause('find.start', value);
         const found = await this.findHelper(value);
         found.node.setHighlight(true);
         const path = found.success ? 'find.found' : 'find.notfound';
-        await DS.pause(path, value);
+        await this.$DS.pause(path, value);
         found.node.setHighlight(false);
         return found;
     }
@@ -62,7 +86,7 @@ DS.BST = class BST {
     async findHelper(value) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
+        const pointer = this.$DS.SVG().highlightCircle(node.cx(), node.cy());
         while (node) {
             node.setHighlight(true);
             const cmp = DS.compare(value, node.getText());
@@ -76,7 +100,7 @@ DS.BST = class BST {
             parent = node;
             node = parent.getChild(direction);
             if (node) pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause('find.look', direction);
+            await this.$DS.pause('find.look', direction);
             parent.setChildHighlight(direction, false);
         }
         pointer.remove();
@@ -86,16 +110,16 @@ DS.BST = class BST {
     async insertOne(value) {
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
-            await DS.pause('insert.newroot', value);
+            await this.$DS.pause('insert.newroot', value);
             this.resizeTree();
-            await DS.pause();
+            await this.$DS.pause();
             return {success: true, node: this.treeRoot};
         }
-        await DS.pause('insert.search', value);
+        await this.$DS.pause('insert.search', value);
         const found = await this.findHelper(value);
         if (found.success) {
             found.node.setHighlight(true);
-            await DS.pause('insert.exists', found.node);
+            await this.$DS.pause('insert.exists', found.node);
             found.node.setHighlight(false);
             return {success: false, node: found.node};
         }
@@ -105,30 +129,30 @@ DS.BST = class BST {
         found.node.setChild(direction, child);
         child.setHighlight(true);
         found.node.setChildHighlight(direction, true);
-        await DS.pause('insert.child', value, direction);
+        await this.$DS.pause('insert.child', value, direction);
         found.node.setChildHighlight(direction, false);
         child.setHighlight(false);
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         return {success: true, node: child};
     }
 
     async delete(value) {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return null;
         }
-        await DS.pause('delete.search', value);
+        await this.$DS.pause('delete.search', value);
         const found = await this.findHelper(value);
         if (!found.success) {
             found.node.setHighlight(true);
-            await DS.pause('delete.notexists', value);
+            await this.$DS.pause('delete.notexists', value);
             found.node.setHighlight(false);
             const direction = DS.compare(value, found.node.getText()) < 0 ? "left" : "right";
             return {success: false, direction: direction, parent: found.node};
         }
         found.node.setHighlight(true);
-        await DS.pause('delete.found', value);
+        await this.$DS.pause('delete.found', value);
         return await this.deleteHelper(found.node);
     }
 
@@ -136,16 +160,16 @@ DS.BST = class BST {
         if (!(node.getLeft() && node.getRight())) {
             return await this.deleteNode(node);
         }
-        const pointer = DS.SVG().highlightCircle(node.cx(), node.cy());
+        const pointer = this.$DS.SVG().highlightCircle(node.cx(), node.cy());
         node.setHighlight(false);
         node.addClass("marked");
-        await DS.pause('delete.predecessor.search', node);
+        await this.$DS.pause('delete.predecessor.search', node);
 
         let predecessor = node.getLeft();
         while (true) {
             predecessor.setParentHighlight(true);
             pointer.setCenter(predecessor.cx(), predecessor.cy(), true);
-            await DS.pause();
+            await this.$DS.pause();
             predecessor.setParentHighlight(false);
             if (!predecessor.getRight()) break;
             predecessor = predecessor.getRight();
@@ -153,17 +177,17 @@ DS.BST = class BST {
         predecessor.setHighlight(true);
         pointer.remove();
         const newText = predecessor.getText();
-        const moving = DS.SVG().textCircle(newText, predecessor.cx(), predecessor.cy());
+        const moving = this.$DS.SVG().textCircle(newText, predecessor.cx(), predecessor.cy());
         moving.addClass("unfilled");
         moving.setHighlight(true);
-        await DS.pause('delete.predecessor.replace', node, predecessor);
+        await this.$DS.pause('delete.predecessor.replace', node, predecessor);
         moving.setCenter(node.cx(), node.cy(), true);
         node.setText("");
-        await DS.pause();
+        await this.$DS.pause();
         node.setText(newText);
         moving.remove();
         node.removeClass("marked");
-        await DS.pause('delete.predecessor.delete', predecessor);
+        await this.$DS.pause('delete.predecessor.delete', predecessor);
         return await this.deleteNode(predecessor);
     }
 
@@ -174,14 +198,14 @@ DS.BST = class BST {
         if (!parent) {
             if (!child) {
                 this.treeRoot = null;
-                await DS.pause('delete.root.singleton', node);
+                await this.$DS.pause('delete.root.singleton', node);
             } else {
                 this.treeRoot = child;
-                await DS.pause('delete.root.onechild', child, node);
+                await this.$DS.pause('delete.root.onechild', child, node);
             }
             node.remove();
             this.resizeTree();
-            await DS.pause();
+            await this.$DS.pause();
             return {success: true, direction: null, parent: null};
         }
 
@@ -193,52 +217,52 @@ DS.BST = class BST {
             parent.setChild(direction, child);
             child.setHighlight(true);
             parent.setChildHighlight(direction, true);
-            await DS.pause('delete.redirect', parent, child);
+            await this.$DS.pause('delete.redirect', parent, child);
             parent.setChildHighlight(direction, false);
             child.setHighlight(false);
             node.setHighlight(true);
-            await DS.pause('delete.node', node);
+            await this.$DS.pause('delete.node', node);
         } else {
-            await DS.pause('delete.leaf', node);
+            await this.$DS.pause('delete.leaf', node);
         }
         node.remove();
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         return {success: true, direction: direction, parent: parent};
     }
 
     async print() {
         if (!this.treeRoot) {
-            await DS.pause('general.empty');
+            await this.$DS.pause('general.empty');
             return;
         }
-        const pointer = DS.SVG().highlightCircle(DS.getStartX(), DS.getStartY());
+        const pointer = this.$DS.SVG().highlightCircle(this.getStartX(), this.getStartY());
         const printed = [];
-        printed.push(DS.SVG().text("Printed nodes: ").x(DS.$Info.x).cy(DS.$SvgHeight - 80));
+        printed.push(this.$DS.SVG().text("Printed nodes: ").x(this.$DS.$Info.x).cy(this.$DS.$SvgHeight - 80));
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
-        await DS.pause();
+        await this.$DS.pause();
         for (const lbl of printed) lbl.remove();
     }
 
     async printHelper(node, pointer, printed) {
         pointer.setCenter(node.cx(), node.cy(), true);
-        await DS.pause();
+        await this.$DS.pause();
         if (node.getLeft()) {
             await this.printHelper(node.getLeft(), pointer, printed);
             pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause();
+            await this.$DS.pause();
         }
-        const lbl = DS.SVG().text(node.getText()).center(node.cx(), node.cy());
-        await DS.pause();
+        const lbl = this.$DS.SVG().text(node.getText()).center(node.cx(), node.cy());
+        await this.$DS.pause();
         const last = printed[printed.length - 1];
-        DS.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
+        this.$DS.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
         printed.push(lbl);
-        await DS.pause();
+        await this.$DS.pause();
         if (node.getRight()) {
             await this.printHelper(node.getRight(), pointer, printed);
             pointer.setCenter(node.cx(), node.cy(), true);
-            await DS.pause();
+            await this.$DS.pause();
         }
     }
 
@@ -259,7 +283,7 @@ DS.BST = class BST {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
-        await DS.pause('rotate.zigzag', child, right, node, left);
+        await this.$DS.pause('rotate.zigzag', child, right, node, left);
         await this.singleRotate(right, child);
         return await this.singleRotate(left, node);
     }
@@ -274,7 +298,7 @@ DS.BST = class BST {
 
         A.setChildHighlight(right, true);
         B.setHighlight(true);
-        await DS.pause('rotate.single', A, left);
+        await this.$DS.pause('rotate.single', A, left);
 
         const parent = A.getParent();
         if (parent) {
@@ -288,9 +312,9 @@ DS.BST = class BST {
 
         B.setChildHighlight(left, true);
         A.setHighlight(true);
-        await DS.pause();
+        await this.$DS.pause();
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
 
         B.setChildHighlight(left, false);
         A.setHighlight(false);

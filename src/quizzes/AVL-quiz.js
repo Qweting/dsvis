@@ -4,89 +4,65 @@
 /* globals DS, SVG */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.getStartX = () => DS.$Info.x + DS.getObjectSize() / 2;
-DS.getStartY = () => DS.$Info.y * 4;
-DS.getRootX = () => DS.$SvgWidth / 2;
-DS.getRootY = () => DS.$Info.y + DS.getObjectSize() / 2;
-DS.getSpacingX = () => DS.getObjectSize();
-DS.getSpacingY = () => DS.getObjectSize();
+function initialiseAVLQuiz(containerID) {
+    const engine = new DS.Engine();
+    const algorithm = new DS.AVLQuiz(this, ["K"]);
 
+    // Overrides
+    engine.setIdleTitle = function() {
+        const isBST = this.$Current.isBST();
+        const unbalanced = this.$Current.isUnbalanced();
+        const message = (
+            !isBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
+            !isBST ? "Tree is not a BST!" :
+            unbalanced ? "Tree is unbalanced!" :
+            "Tree is a correct AVL tree"
+        );
+        this.$Info.title.text(message);
+        this.$Info.body.text("");
+    };
 
-///////////////////////////////////////////////////////////////////////////////
-// Inititalisation
+    engine.initialise(containerID, algorithm);
 
-// Override:
-DS.initAlgorithm = function() {
-    DS.$Current = new DS.AVLQuiz();
-};
-
-
-DS.initToolbar = function() {
-    const tools = DS.$Toolbar;
-    tools.insertField = document.getElementById("insertField");
-    tools.createLeft = document.getElementById("createLeft");
-    tools.createRight = document.getElementById("createRight");
-    tools.moveParent = document.getElementById("moveParent");
-    tools.moveLeft = document.getElementById("moveLeft");
-    tools.moveRight = document.getElementById("moveRight");
-    tools.rotateLeft = document.getElementById("rotateLeft");
-    tools.rotateRight = document.getElementById("rotateRight");
-    tools.markNode = document.getElementById("markNode");
-    tools.copyToMark = document.getElementById("copyToMark");
-    tools.deleteNode = document.getElementById("deleteNode");
-    tools.restartQuiz = document.getElementById("restartQuiz");
+    const container = engine.$Container;
+    const tools = engine.$Toolbar;
+    tools.insertField = container.querySelector(".insertField");
+    tools.createLeft = container.querySelector(".createLeft");
+    tools.createRight = container.querySelector(".createRight");
+    tools.moveParent = container.querySelector(".moveParent");
+    tools.moveLeft = container.querySelector(".moveLeft");
+    tools.moveRight = container.querySelector(".moveRight");
+    tools.rotateLeft = container.querySelector(".rotateLeft");
+    tools.rotateRight = container.querySelector(".rotateRight");
+    tools.markNode = container.querySelector(".markNode");
+    tools.copyToMark = container.querySelector(".copyToMark");
+    tools.deleteNode = container.querySelector(".deleteNode");
+    tools.restartQuiz = container.querySelector(".restartQuiz");
 
     DS.addReturnSubmit(tools.insertField, "ALPHANUM");
-    tools.createLeft.addEventListener("click", () => DS.submit("insertLeft", tools.insertField));
-    tools.createRight.addEventListener("click", () => DS.submit("insertRight", tools.insertField));
-    tools.moveParent.addEventListener("click", () => DS.execute("moveParent"));
-    tools.moveLeft.addEventListener("click", () => DS.execute("moveChild", ["left"]));
-    tools.moveRight.addEventListener("click", () => DS.execute("moveChild", ["right"]));
-    tools.rotateLeft.addEventListener("click", () => DS.execute("rotateCurrent", ["left"]));
-    tools.rotateRight.addEventListener("click", () => DS.execute("rotateCurrent", ["right"]));
-    tools.markNode.addEventListener("click", () => DS.execute("markNode"));
-    tools.copyToMark.addEventListener("click", () => DS.execute("copyToMark"));
-    tools.deleteNode.addEventListener("click", () => DS.execute("deleteCurrent"));
-    tools.restartQuiz.addEventListener("click", () => DS.restartQuiz());
+    tools.createLeft.addEventListener("click", () => engine.submit("insertLeft", tools.insertField));
+    tools.createRight.addEventListener("click", () => engine.submit("insertRight", tools.insertField));
+    tools.moveParent.addEventListener("click", () => engine.execute("moveParent"));
+    tools.moveLeft.addEventListener("click", () => engine.execute("moveChild", ["left"]));
+    tools.moveRight.addEventListener("click", () => engine.execute("moveChild", ["right"]));
+    tools.rotateLeft.addEventListener("click", () => engine.execute("rotateCurrent", ["left"]));
+    tools.rotateRight.addEventListener("click", () => engine.execute("rotateCurrent", ["right"]));
+    tools.markNode.addEventListener("click", () => engine.execute("markNode"));
+    tools.copyToMark.addEventListener("click", () => engine.execute("copyToMark"));
+    tools.deleteNode.addEventListener("click", () => engine.execute("deleteCurrent"));
+    tools.restartQuiz.addEventListener("click", () => engine.resetAll());
 
-    DS.setRunning(true);
-    DS.$Current.initToolbar?.();
+    engine.$Current?.initToolbar?.();
+    engine.setRunning(true);
 };
 
 
-DS.restartQuiz = function() {
-    DS.reset();
-    DS.$Actions = [];
-};
-
-DS.toggleNullNodes = function() {
-    const show = DS.$Toolbar.showNullNodes.checked;
-    if (show) DS.SVG().addClass("shownullnodes");
-    else DS.SVG().removeClass("shownullnodes");
-};
-
-
-DS.setIdleTitle = function() {
-    const isBST = DS.$Current.isBST();
-    const unbalanced = DS.$Current.isUnbalanced();
-    const message = (
-        !isBST && unbalanced ? "Tree is not a BST, and it's unbalanced!" :
-        !isBST ? "Tree is not a BST!" :
-        unbalanced ? "Tree is unbalanced!" :
-        "Tree is a correct AVL tree"
-    );
-    DS.$Info.title.text(message);
-    DS.$Info.body.text("");
-};
 
 
 DS.AVLQuiz = class AVLQuiz extends DS.BST {
 
-    reset() {
-        super.reset();
-        this.treeRoot = this.newNode("K");
-        this.resizeTree(false);
-        this.updateHeights();
+    async reset() {
+        await super.reset();
         this.setCurrent(this.treeRoot);
         this.mark = null;
     }
@@ -126,15 +102,15 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     }
 
     newNode(text) {
-        return DS.SVG().avlNode(text, DS.getStartX(), DS.getStartY());
+        return this.$DS.SVG().avlNode(text, this.getStartX(), this.getStartY());
     }
 
     async setCurrent(node, animate) {
         this.current?.setHighlight(false);
         if (animate) {
-            const cursor = DS.SVG().highlightCircle(this.current.cx(), this.current.cy());
+            const cursor = this.$DS.SVG().highlightCircle(this.current.cx(), this.current.cy());
             cursor.setCenter(node.cx(), node.cy(), animate);
-            await DS.pause();
+            await this.$DS.pause();
             cursor.remove();
         }
         this.current = node;
@@ -144,7 +120,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     async moveParent() {
         const parent = this.current.getParent();
         if (!parent) {
-            await DS.pause("The root node doesn't have a parent!");
+            await this.$DS.pause("The root node doesn't have a parent!");
             return;
         }
         await this.setCurrent(parent, true);
@@ -153,7 +129,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     async moveChild(direction) {
         const child = this.current.getChild(direction);
         if (!child) {
-            await DS.pause(`There is no ${direction} child!`);
+            await this.$DS.pause(`There is no ${direction} child!`);
             return;
         }
         await this.setCurrent(child, true);
@@ -175,11 +151,11 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         if (!this.mark) return;
         if (this.mark === this.current) return;
 
-        const moving = DS.SVG().textCircle(this.current.getText(), this.current.cx(), this.current.cy());
+        const moving = this.$DS.SVG().textCircle(this.current.getText(), this.current.cx(), this.current.cy());
         moving.setHighlight(true);
-        await DS.pause(`Replace the value of ${this.mark} with ${this.current}`);
+        await this.$DS.pause(`Replace the value of ${this.mark} with ${this.current}`);
         moving.setCenter(this.mark.cx(), this.mark.cy(), true);
-        await DS.pause();
+        await this.$DS.pause();
         this.mark.setText(this.current.getText());
         moving.remove();
     }
@@ -194,38 +170,38 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
 
     async insertBelow(direction, value) {
         if (this.current.getChild(direction)) {
-            await DS.pause(`There is already a ${direction} child!`);
+            await this.$DS.pause(`There is already a ${direction} child!`);
             return;
         }
         const child = this.newNode(value);
         this.current.setChild(direction, child);
         child.setHighlight(true);
         this.current.setChildHighlight(direction, true);
-        await DS.pause(`Insert ${value} as ${direction} child`);
+        await this.$DS.pause(`Insert ${value} as ${direction} child`);
         this.current.setChildHighlight(direction, false);
         // this.cursor.hide();
         this.resizeTree();
-        await DS.pause();
+        await this.$DS.pause();
         child.setHighlight(false);
         await this.setCurrent(child);
-        await DS.pause("Updating heights");
+        await this.$DS.pause("Updating heights");
         this.updateHeights();
     }
 
     async deleteCurrent() {
         if (this.current.getLeft() || this.current.getRight()) {
-            await DS.pause("Not a leaf node!");
+            await this.$DS.pause("Not a leaf node!");
             return;
         }
         const parent = this.current.getParent();
         if (!parent) {
-            await DS.pause("Cannot remove the root!");
+            await this.$DS.pause("Cannot remove the root!");
             return;
         }
         this.current.remove();
         await this.setCurrent(parent, true);
         this.resizeTree();
-        await DS.pause("Updating heights");
+        await this.$DS.pause("Updating heights");
         this.updateHeights();
     }
 
@@ -233,12 +209,12 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         const right = left === "left" ? "right" : "left";
         const child = this.current.getChild(right);
         if (!child) {
-            await DS.pause(`Cannot rotate ${left}\nNode doesn't have a ${right} child!`);
+            await this.$DS.pause(`Cannot rotate ${left}\nNode doesn't have a ${right} child!`);
             return;
         }
         const node = await this.singleRotate(left, this.current);
         await this.setCurrent(node);
-        await DS.pause("Updating heights");
+        await this.$DS.pause("Updating heights");
         this.updateHeights();
     }
 

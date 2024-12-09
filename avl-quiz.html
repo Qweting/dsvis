@@ -11,65 +11,65 @@
 <script type="text/javascript" src="src/quizzes/AVL-quiz.js"></script>
 </head>
 
-<body onload="DS.initialise('#canvas')">
+<body onload="initialiseAVLQuiz('#avlquizContainer')">
 
 <header>
   <h1><a href="index.html">Visualizations of data structures and algorithms</a></h1>
 </header>
 
 <main>
-<section>
+<section id="avlquizContainer">
 
 <h2>Playground for AVL trees</h2>
 
-<fieldset id="algorithmControls">
+<fieldset class="algorithmControls">
   <span class="formgroup">
     <label>Create:
-      <input id="insertField" type="text" size="1" maxlength="4" class="disableWhenRunning"/>
-      <input id="createLeft" type="submit" value="Left child" class="disableWhenRunning"/>
-      <input id="createRight" type="submit" value="Right child" class="disableWhenRunning"/>
+      <input class="insertField disableWhenRunning" type="text" size="1" maxlength="4"/>
+      <input class="createLeft disableWhenRunning" type="submit" value="Left child"/>
+      <input class="createRight disableWhenRunning" type="submit" value="Right child"/>
     </label>
   </span>
   <span class="formgroup">
     <label>Move to:
-      <input id="moveParent" type="submit" value="Parent" class="disableWhenRunning"/>
-      <input id="moveLeft" type="submit" value="Left child" class="disableWhenRunning"/>
-      <input id="moveRight" type="submit" value="Right child" class="disableWhenRunning"/>
+      <input class="moveParent disableWhenRunning" type="submit" value="Parent"/>
+      <input class="moveLeft disableWhenRunning" type="submit" value="Left child"/>
+      <input class="moveRight disableWhenRunning" type="submit" value="Right child"/>
     </label>
   </span>
   <span class="formgroup">
     <label>Rotate:
-      <input id="rotateLeft" type="submit" value="Left" class="disableWhenRunning"/>
-      <input id="rotateRight" type="submit" value="Right" class="disableWhenRunning"/>
+      <input class="rotateLeft disableWhenRunning" type="submit" value="Left"/>
+      <input class="rotateRight disableWhenRunning" type="submit" value="Right"/>
     </label>
   </span>
   <span class="formgroup">
     <label>Action:
-      <input id="markNode" type="submit" value="Mark node" class="disableWhenRunning"/>
-      <input id="copyToMark" type="submit" value="Copy to mark" class="disableWhenRunning"/>
-      <input id="deleteNode" type="submit" value="Delete leaf" class="disableWhenRunning"/>
+      <input class="markNode disableWhenRunning" type="submit" value="Mark node"/>
+      <input class="copyToMark disableWhenRunning" type="submit" value="Copy to mark"/>
+      <input class="deleteNode disableWhenRunning" type="submit" value="Delete leaf"/>
     </label>
   </span>
 </fieldset>
 
 <div>
-  <svg id="canvas"></svg>
+  <svg></svg>
 </div>
 
-<fieldset id="generalControls">
+<fieldset class="generalControls">
   <span class="formgroup">
-    <input id="restartQuiz" type="submit" value="Restart" class="disableWhenRunning"/>
+    <input class="restartQuiz disableWhenRunning" type="submit" value="Restart"/>
   </span>
   <span class="formgroup">
-    <button id="fastBackward">&lt;&lt;</button>
-    <button id="stepBackward">&lt;</button>
-    <button id="toggleRunner">Run</button>
-    <button id="stepForward">&gt;</button>
-    <button id="fastForward">&gt;&gt;</button>
+    <button class="fastBackward">&lt;&lt;</button>
+    <button class="stepBackward">&lt;</button>
+    <button class="toggleRunner">Run</button>
+    <button class="stepForward">&gt;</button>
+    <button class="fastForward">&gt;&gt;</button>
   </span>
   <span class="formgroup">
     <label>Speed:
-      <select id="animationSpeed">
+      <select class="animationSpeed">
         <option value="1200">Slowest</option>
         <option value="700" selected>Slow</option>
         <option value="300">Fast</option>
@@ -79,7 +79,7 @@
   </span>
   <span class="formgroup">
     <label>Node size:
-      <select id="objectSize">
+      <select class="objectSize">
         <option value="tiny">Tiny</option>
         <option value="small">Small</option>
         <option value="medium" selected>Medium</option>
