@@ -5,65 +5,49 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BST = class BST extends DS.Engine {
-    $initialValues;
+    initialValues;
 
     constructor(container, initialValues = null) {
         super(container);
-        this.$initialValues = initialValues;
+        this.initialValues = initialValues;
     }
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.treeRoot = null;
-        if (this.$initialValues) {
-            this.$resetting = true;
-            await this.insert(...this.$initialValues);
-            this.$resetting = false;
+        if (this.initialValues) {
+            this.State.resetting = true;
+            await this.insert(...this.initialValues);
+            this.State.resetting = false;
         }
-    }
-
-    getStartX() {
-        return this.$Info.x + this.getObjectSize() / 2;
-    }
-
-    getStartY() {
-        return this.$Info.y * 4;
-    }
-
-    getRootX() {
-        return this.$SvgWidth / 2;
-    }
-
-    getRootY() {
-        return 2 * this.$Info.y + this.getObjectSize() / 2;
     }
 
     initToolbar() {
         super.initToolbar();
-        this.$Toolbar.generalControls.insertAdjacentHTML("beforeend", `
+        this.Toolbar.generalControls.insertAdjacentHTML("beforeend", `
             <span class="formgroup"><label>
                 <input class="showNullNodes" type="checkbox"/> Show null nodes
             </label></span>`,
         );
-        this.$Toolbar.showNullNodes = this.$Container.querySelector(".showNullNodes");
-        this.$Toolbar.showNullNodes.addEventListener("change", () => this.toggleNullNodes());
+        this.Toolbar.showNullNodes = this.Container.querySelector(".showNullNodes");
+        this.Toolbar.showNullNodes.addEventListener("change", () => this.toggleNullNodes());
         this.toggleNullNodes(true);
     }
 
     toggleNullNodes(show) {
-        if (show == null) show = this.$Toolbar.showNullNodes.checked;
-        this.$Toolbar.showNullNodes.checked = show;
-        if (show) this.SVG().addClass("shownullnodes");
-        else this.SVG().removeClass("shownullnodes");
+        if (show == null) show = this.Toolbar.showNullNodes.checked;
+        this.Toolbar.showNullNodes.checked = show;
+        if (show) this.SVG.addClass("shownullnodes");
+        else this.SVG.removeClass("shownullnodes");
     }
 
     newNode(text) {
-        return this.SVG().binaryNode(text, this.getStartX(), this.getStartY());
+        return this.SVG.binaryNode(text, ...this.getNodeStart());
     }
 
     resizeTree() {
-        const animate = !this.$resetting;
-        this.treeRoot?.resize(this.getRootX(), this.getRootY(), animate);
+        const animate = !this.State.resetting;
+        this.treeRoot?.resize(...this.getTreeRoot(), animate);
     }
 
     async insert(...values) {
@@ -87,7 +71,7 @@ DS.BST = class BST extends DS.Engine {
     async findHelper(value) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = this.SVG().highlightCircle(node.cx(), node.cy());
+        const pointer = this.SVG.highlightCircle(node.cx(), node.cy());
         while (node) {
             node.setHighlight(true);
             const cmp = DS.compare(value, node.getText());
@@ -161,7 +145,7 @@ DS.BST = class BST extends DS.Engine {
         if (!(node.getLeft() && node.getRight())) {
             return await this.deleteNode(node);
         }
-        const pointer = this.SVG().highlightCircle(node.cx(), node.cy());
+        const pointer = this.SVG.highlightCircle(node.cx(), node.cy());
         node.setHighlight(false);
         node.addClass("marked");
         await this.pause('delete.predecessor.search', node);
@@ -178,7 +162,7 @@ DS.BST = class BST extends DS.Engine {
         predecessor.setHighlight(true);
         pointer.remove();
         const newText = predecessor.getText();
-        const moving = this.SVG().textCircle(newText, predecessor.cx(), predecessor.cy());
+        const moving = this.SVG.textCircle(newText, predecessor.cx(), predecessor.cy());
         moving.addClass("unfilled");
         moving.setHighlight(true);
         await this.pause('delete.predecessor.replace', node, predecessor);
@@ -237,9 +221,9 @@ DS.BST = class BST extends DS.Engine {
             await this.pause('general.empty');
             return;
         }
-        const pointer = this.SVG().highlightCircle(this.getStartX(), this.getStartY());
-        const printed = [];
-        printed.push(this.SVG().text("Printed nodes: ").x(this.$Info.x).cy(this.$SvgHeight - 80));
+        const {x, y} = this.Info.printer.bbox();
+        const printed = [this.SVG.text("Printed nodes: ").addClass("printer").x(x).y(y)];
+        const pointer = this.SVG.highlightCircle(...this.getNodeStart());
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
         await this.pause();
@@ -254,10 +238,11 @@ DS.BST = class BST extends DS.Engine {
             pointer.setCenter(node.cx(), node.cy(), true);
             await this.pause();
         }
-        const lbl = this.SVG().text(node.getText()).center(node.cx(), node.cy());
+        const lbl = this.SVG.text(node.getText()).center(node.cx(), node.cy());
         await this.pause();
         const last = printed[printed.length - 1];
-        this.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
+        const spacing = this.getNodeSpacing() / 2;
+        this.animate(lbl).x(last.bbox().x2 + spacing).cy(last.cy());
         printed.push(lbl);
         await this.pause();
         if (node.getRight()) {

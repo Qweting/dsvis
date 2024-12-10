@@ -24,7 +24,7 @@ SVG.extend(SVG.Element, {
         return this.setCenter(this.cx() + dx, this.cy() + dy, animate);
     },
     engine: function() {
-        return this.root().$Engine;
+        return this.root().$engine;
     },
 });
 
@@ -80,7 +80,7 @@ SVG.TextCircle = class TextCircle extends SVG.G {
         if (text == null) text = "";
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = DS.$nbsp;
+        if (text === "") text = DS.NBSP;
         this.$text.text(text);
         return this;
     }
@@ -175,7 +175,7 @@ SVG.GraphNode = class GraphNode extends SVG.TextCircle {
                 }
                 inEdge.remove();
             }
-            const edge = this.engine().SVG().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
+            const edge = this.root().connection(this, successor, this.getBend(outKey), this.getDirected(outKey));
             this.$outgoing[outKey] = edge;
             successor.$incoming[inKey] = edge;
         } else {
@@ -381,13 +381,17 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
     resize(startX, startY, animate = true) {
         this._resizeWidths();
-        if (startX + this.$rightWidth > this.engine().$SvgWidth - this.engine().$Info.x) startX = this.engine().$SvgWidth - this.$rightWidth - this.engine().$Info.x;
-        if (startX - this.$leftWidth < this.engine().$Info.x) startX = this.$leftWidth + this.engine().$Info.x;
+        const svgMargin = this.engine().$Svg.margin;
+        const svgWidth = this.root().viewbox().width;
+        if (startX + this.$rightWidth > svgWidth - svgMargin)
+            startX = svgWidth - this.$rightWidth - svgMargin;
+        if (startX - this.$leftWidth < svgMargin)
+            startX = this.$leftWidth + svgMargin;
         this._setNewPositions(startX, startY, animate);
     }
 
     _resizeWidths() {
-        let width = this.engine().getSpacingX();
+        let width = this.engine().getNodeSpacing();
         const left = this.getLeft();
         if (left) width += left._resizeWidths();
         const right = this.getRight();
@@ -404,7 +408,8 @@ SVG.BinaryNode = class BinaryNode extends SVG.GraphNode {
 
     _setNewPositions(x, y, animate) {
         this.setCenter(x, y, animate);
-        const nextY = y + this.getSize() + this.engine().getSpacingY();
+        const ySpacing = this.engine().getNodeSpacing();
+        const nextY = y + this.getSize() + ySpacing;
         const left = this.getLeft();
         if (left) left._setNewPositions(x - this.$leftWidth + left.$leftWidth, nextY, animate);
         const right = this.getRight();

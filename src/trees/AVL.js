@@ -7,7 +7,7 @@
 DS.AVL = class AVL extends DS.BST {
 
     newNode(text) {
-        return this.SVG().avlNode(text, this.getStartX(), this.getStartY());
+        return this.SVG.avlNode(text, ...this.getNodeStart());
     }
 
     getHeight(node) {
@@ -41,7 +41,7 @@ DS.AVL = class AVL extends DS.BST {
 
     async updateHeights(node, fromchild) {
         const child = node.getChild(fromchild) || node;
-        this.pointer = this.SVG().highlightCircle(child.cx(), child.cy());
+        this.pointer = this.SVG.highlightCircle(child.cx(), child.cy());
         while (node) {
             this.pointer.setCenter(node.cx(), node.cy(), true);
             await this.pause('node.updateHeight');
@@ -73,7 +73,7 @@ DS.AVL = class AVL extends DS.BST {
         } else {
             node = await this.doubleRotate(left, node);
         }
-        this.pointer = this.SVG().highlightCircle(node.cx(), node.cy());
+        this.pointer = this.SVG.highlightCircle(node.cx(), node.cy());
         await this.pause('node.balanced');
         return node;
     }

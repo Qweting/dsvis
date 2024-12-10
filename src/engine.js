@@ -11,28 +11,50 @@ const DS = {};
 // Constants and global variables
 
 DS.Engine = class {
+    // Default variable names start with $
 
-    $Svg = null;
-    $SvgWidth = 1000;
-    $SvgHeight = 600;
+    $Svg = {
+        width: 1000,
+        height: 600,
+        margin: 30,
+        objectSize: 40,
+        animationSpeed: 1000, // milliseconds per step
+    };
 
-    $Info = {
-        x: 30,
-        y: 40,
-        ybody: 70,
-        ystatus: this.$SvgHeight - 30,
-        title: null,
-        body: null,
-        status: null,
+    $CookieExpireDays = 30;
+    $Cookies = {
+        animationSpeed: {
+            getCookie: (value) => this.Toolbar.animationSpeed.value = value,
+            setCookie: () => this.getAnimationSpeed(),
+        },
+        objectSize: {
+            getCookie: (value) => this.Toolbar.objectSize.value = value,
+            setCookie: () => this.getObjectSize(),
+        },
     };
 
 
-    $Actions = null;
-    $CurrentAction = null;
-    $CurrentStep = null;
-    $DEBUG = false;
+    SVG = null;
+    Container = null;
+    Toolbar = {};
+    Actions = null;
+    CurrentAction = null;
+    CurrentStep = null;
+    DEBUG = false;
 
-    $EventListeners = {
+    State = {
+        resetting: null,
+        animating: null,
+    };
+
+    Info = {
+        title: null,
+        body: null,
+        printer: null,
+        status: null,
+    };
+
+    EventListeners = {
         stepForward: {},
         stepBackward: {},
         fastForward: {},
@@ -40,41 +62,16 @@ DS.Engine = class {
         toggleRunner: {},
     };
 
-    $Toolbar = {
-        animationSpeed: null,
-    };
-
-    $CookieExpireDays = 30;
-    $Cookies = {
-        animationSpeed: {
-            getCookie: (value) => this.$Toolbar.animationSpeed.value = value,
-            setCookie: () => this.getAnimationSpeed(),
-        },
-        objectSize: {
-            getCookie: (value) => this.$Toolbar.objectSize.value = value,
-            setCookie: () => this.getObjectSize(),
-        },
-    };
-
-    $Defaults = {
-        animationSpeed: 1000, // milliseconds per step
-        objectSize: 40, // compared to svg width (1000)
-    };
-
 
     getAnimationSpeed() {
-        return parseInt(this.$Toolbar.animationSpeed?.value) || this.$Defaults.animationSpeed;
+        return parseInt(this.Toolbar.animationSpeed?.value) || this.$Svg.animationSpeed;
     }
 
     getObjectSize() {
-        return parseInt(this.$Toolbar.objectSize?.value) || this.$Defaults.objectSize;
+        return parseInt(this.Toolbar.objectSize?.value) || this.$Svg.objectSize;
     }
 
-    getSpacingX() {
-        return this.getObjectSize();
-    }
-
-    getSpacingY() {
+    getNodeSpacing() {
         return this.getObjectSize();
     }
 
@@ -82,27 +79,46 @@ DS.Engine = class {
         return this.getObjectSize() / 12;
     }
 
+    getNodeStart() {
+        return [
+            this.$Svg.margin + this.getObjectSize() / 2,
+            this.$Svg.margin * 4,
+        ];
+    }
+
+    getTreeRoot() {
+        return [
+            this.SVG.viewbox().width / 2,
+            2 * this.$Svg.margin + this.getObjectSize() / 2,
+        ];
+    }
+
 
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
-    constructor(container) {
-        this.$Container = document.querySelector(container);
-        this.$DEBUG = new URL(window.location).searchParams.get("debug");
-        this.$Svg = SVG(this.$Container.querySelector("svg"));
-        this.$Svg.viewbox(0, 0, this.$SvgWidth, this.$SvgHeight);
-        this.$Svg.$Engine = this;
-        if (this.$DEBUG) this.$Svg.addClass("debug");
+    constructor(container, defaults = {}) {
+        for (const key in defaults) {
+            if (!(key.startsWith("$"))) throw new TypeError(`Invalid default key: ${key}`)
+        }
+        DS.updateDefault(this, defaults, true);
+        this.Container = document.querySelector(container);
+        this.DEBUG = new URL(window.location).searchParams.get("debug");
+        this.SVG = SVG(this.Container.querySelector("svg"));
+        this.SVG.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
+        this.SVG.$engine = this;
+        if (this.DEBUG) this.SVG.addClass("debug");
     }
 
     initialise() {
         this.initToolbar();
         this.resetAll();
+        this.setRunning(true);
     }
 
     initToolbar() {
-        const container = this.$Container;
-        const tools = this.$Toolbar;
+        const container = this.Container;
+        const tools = this.Toolbar;
         tools.generalControls = container.querySelector(".generalControls");
         tools.algorithmControls = container.querySelector(".algorithmControls");
 
@@ -119,7 +135,7 @@ DS.Engine = class {
 
 
     resetAll() {
-        this.$Actions = [];
+        this.Actions = [];
         this.loadCookies();
         this.reset();
     }
@@ -140,28 +156,25 @@ DS.Engine = class {
     }
 
 
-    SVG(id) {
-        return id ? SVG(`#${id}`) : this.$Svg;
-    }
-
-
     clearCanvas() {
-        this.$Svg.clear();
-        const w = this.$Svg.viewbox().width;
-        const h = this.$Svg.viewbox().height;
-        if (this.$DEBUG) {
-            for (let x = 1; x < w / 100; x++) this.$Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
-            for (let y = 1; y < h / 100; y++) this.$Svg.line(0, y * 100, w, y * 100).addClass("gridline");
+        this.SVG.clear();
+        const w = this.SVG.viewbox().width;
+        const h = this.SVG.viewbox().height;
+        if (this.DEBUG) {
+            for (let x = 1; x < w / 100; x++) this.SVG.line(x * 100, 0, x * 100, h).addClass("gridline");
+            for (let y = 1; y < h / 100; y++) this.SVG.line(0, y * 100, w, y * 100).addClass("gridline");
         }
-        this.$Info.title = this.$Svg.text("").addClass("title").x(this.$Info.x).cy(this.$Info.y);
-        this.$Info.body = this.$Svg.text("").addClass("message").x(this.$Info.x).cy(this.$Info.ybody);
-        this.$Info.status = this.$Svg.text("").addClass("status-report").x(this.$Info.x).cy(this.$Info.ystatus);
+        const margin = this.$Svg.margin;
+        this.Info.title = this.SVG.text(DS.NBSP).addClass("title").x(margin).y(margin);
+        this.Info.body = this.SVG.text(DS.NBSP).addClass("message").x(margin).y(2 * margin);
+        this.Info.printer = this.SVG.text(DS.NBSP).addClass("printer").x(margin).cy(h - 2 * margin);
+        this.Info.status = this.SVG.text(DS.NBSP).addClass("status-report").x(margin).cy(h - margin);
         this.updateCSSVariables();
     }
 
 
     updateCSSVariables() {
-        const relativeSize = Math.round(100 * this.getObjectSize() / this.$Defaults.objectSize);
+        const relativeSize = Math.round(100 * this.getObjectSize() / this.$Svg.objectSize);
         document.documentElement.style.setProperty('--node-font-size', `${relativeSize}%`);
     }
 
@@ -169,11 +182,11 @@ DS.Engine = class {
     setStatus(status, timeout = 10) {
         setTimeout(() => {
             if (status === "running") {
-                this.$Info.status.text("Animating").removeClass("paused").addClass("running");
+                this.Info.status.text("Animating").removeClass("paused").addClass("running");
             } else if (status === "paused") {
-                this.$Info.status.text("Paused").addClass("paused").removeClass("running");
+                this.Info.status.text("Paused").addClass("paused").removeClass("running");
             } else {
-                this.$Info.status.text("Idle").removeClass("paused").removeClass("running");
+                this.Info.status.text("Idle").removeClass("paused").removeClass("running");
             }
         },
         timeout,
@@ -182,8 +195,8 @@ DS.Engine = class {
 
 
     setIdleTitle() {
-        this.$Info.title.text("Select an action from the menu above");
-        this.$Info.body.text("");
+        this.Info.title.text("Select an action from the menu above");
+        this.Info.body.text(DS.NBSP);
     }
 
 
@@ -193,20 +206,20 @@ DS.Engine = class {
     $IdleListeners = {
         stepBackward: {
             type: "click",
-            condition: () => this.$Actions.length > 0,
+            condition: () => this.Actions.length > 0,
             handler: () => {
                 this.setRunning(false);
-                const action = this.$Actions.pop();
+                const action = this.Actions.pop();
                 this.execute(action.oper, action.args, action.nsteps - 1);
             },
         },
         fastBackward: {
             type: "click",
-            condition: () => this.$Actions.length > 0,
+            condition: () => this.Actions.length > 0,
             handler: () => {
-                this.$Actions.pop();
-                if (this.$Actions.length > 0) {
-                    const action = this.$Actions.pop();
+                this.Actions.pop();
+                if (this.Actions.length > 0) {
+                    const action = this.Actions.pop();
                     this.execute(action.oper, action.args, action.nsteps);
                 } else {
                     this.reset();
@@ -217,8 +230,8 @@ DS.Engine = class {
             type: "change",
             condition: () => true,
             handler: () => {
-                if (this.$Actions.length > 0) {
-                    const action = this.$Actions.pop();
+                if (this.Actions.length > 0) {
+                    const action = this.Actions.pop();
                     this.execute(action.oper, action.args, action.nsteps);
                 } else {
                     this.reset();
@@ -239,7 +252,7 @@ DS.Engine = class {
         fastForward: {
             type: "click",
             handler: (resolve, reject) => {
-                this.$Actions[this.$CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
+                this.Actions[this.CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
                 this.fastForward(resolve, reject);
             },
         },
@@ -250,14 +263,14 @@ DS.Engine = class {
                 if (this.isRunning()) {
                     this.stepForward(resolve, reject);
                 } else {
-                    this.$CurrentStep++;
+                    this.CurrentStep++;
                     resolve();
                 }
             },
         },
         stepBackward: {
             type: "click",
-            handler: (resolve, reject) => reject({until: this.$CurrentStep - 1}),
+            handler: (resolve, reject) => reject({until: this.CurrentStep - 1, running: false}),
         },
         fastBackward: {
             type: "click",
@@ -265,7 +278,7 @@ DS.Engine = class {
         },
         objectSize: {
             type: "change",
-            handler: (resolve, reject) => reject({until: this.$CurrentStep}),
+            handler: (resolve, reject) => reject({until: this.CurrentStep}),
         },
     };
 
@@ -274,12 +287,12 @@ DS.Engine = class {
     // Updating listeners
 
     disableWhenRunning(disable) {
-        for (const elem of this.$Container.querySelectorAll(".disableWhenRunning"))
+        for (const elem of this.Container.querySelectorAll(".disableWhenRunning"))
             elem.disabled = disable;
     }
 
 
-    resetListeners(isAsync) {
+    resetListeners(isRunning) {
         this.saveCookies();
         this.removeAllListeners();
         if (this.constructor === DS.Engine) {
@@ -287,7 +300,7 @@ DS.Engine = class {
             return;
         }
         this.addListener("toggleRunner", "click", () => this.toggleRunner());
-        if (isAsync) {
+        if (isRunning) {
             this.disableWhenRunning(true);
             this.setStatus("paused");
             return;
@@ -299,8 +312,8 @@ DS.Engine = class {
         for (const id in this.$IdleListeners) {
             const listener = this.$IdleListeners[id];
             if (listener.condition()) {
-                if (this.$DEBUG) this.addListener(id, listener.type, () => {
-                    console.log(`${id} ${listener.type}: ${JSON.stringify(this.$Actions)}`);
+                if (this.DEBUG) this.addListener(id, listener.type, () => {
+                    console.log(`${id} ${listener.type}: ${JSON.stringify(this.Actions)}`);
                     listener.handler();
                 });
                 else this.addListener(id, listener.type, listener.handler);
@@ -310,9 +323,9 @@ DS.Engine = class {
 
 
     addListener(id, type, handler) {
-        const listeners = this.$EventListeners;
+        const listeners = this.EventListeners;
         if (!listeners[id]) listeners[id] = {};
-        const elem = this.$Toolbar[id];
+        const elem = this.Toolbar[id];
         const oldHandler = listeners[id][type];
         if (oldHandler) elem.removeEventListener(type, oldHandler);
         listeners[id][type] = handler;
@@ -322,9 +335,9 @@ DS.Engine = class {
 
 
     removeAllListeners() {
-        const listeners = this.$EventListeners;
+        const listeners = this.EventListeners;
         for (const id in listeners) {
-            const elem = this.$Toolbar[id];
+            const elem = this.Toolbar[id];
             elem.disabled = true;
             for (const type in listeners[id]) elem.removeEventListener(type, listeners[id][type]);
             listeners[id] = {};
@@ -354,13 +367,13 @@ DS.Engine = class {
 
     async execute(operation, args = [], until = 0) {
         await this.reset();
-        this.$Actions.push({oper: operation, args: args, nsteps: until});
-        if (this.$DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(this.$Actions)}`);
+        this.Actions.push({oper: operation, args: args, nsteps: until});
+        if (this.DEBUG) console.log(`EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(this.Actions)}`);
 
         try {
             await this.runActionsLoop();
-            this.$Actions[this.$Actions.length - 1].nsteps = this.$CurrentStep;
-            if (this.$DEBUG) console.log(`DONE / ${this.$CurrentStep}: ${JSON.stringify(this.$Actions)}`);
+            this.Actions[this.Actions.length - 1].nsteps = this.CurrentStep;
+            if (this.DEBUG) console.log(`DONE / ${this.CurrentStep}: ${JSON.stringify(this.Actions)}`);
             this.resetListeners();
         } catch (reason) {
             if (typeof reason !== "object" || reason.until == null) {
@@ -368,14 +381,13 @@ DS.Engine = class {
                 this.resetListeners();
                 return;
             }
-            this.$Actions.pop();
+            this.Actions.pop();
+            if ('running' in reason)
+                this.setRunning(reason.running);
             until = reason.until;
-            if (this.$DEBUG) console.log(`BACK ${until} / ${this.$CurrentStep}: ${JSON.stringify(this.$Actions)}`);
-            if (until > 0) {
-                this.setRunning(false);
-            }
-            if (until <= 0 && this.$Actions.length > 0) {
-                const action = this.$Actions.pop();
+            if (this.DEBUG) console.log(`RERUN ${until} / ${this.CurrentStep}: ${JSON.stringify(this.Actions)}`);
+            if (until <= 0 && this.Actions.length > 0) {
+                const action = this.Actions.pop();
                 operation = action.oper, args = action.args, until = action.nsteps;
             }
             if (until > 0) {
@@ -388,16 +400,16 @@ DS.Engine = class {
 
 
     async runActionsLoop() {
-        for (let nAction = 0; nAction < this.$Actions.length; nAction++) {
+        for (let nAction = 0; nAction < this.Actions.length; nAction++) {
             this.resetListeners(true);
-            const action = this.$Actions[nAction];
-            this.$CurrentAction = nAction;
-            this.$CurrentStep = 0;
+            const action = this.Actions[nAction];
+            this.CurrentAction = nAction;
+            this.CurrentStep = 0;
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             let message = action.oper.match(/[A-Za-z][a-z]*/g).join(" ");
             message = `${message.charAt(0).toUpperCase() + message.substring(1)} ${action.args.join(", ")}`;
-            if (this.$DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(this.$Actions)}`);
-            this.$Info.title.text(message);
+            if (this.DEBUG) console.log(`CALL ${nAction}: ${message}, ${JSON.stringify(this.Actions)}`);
+            this.Info.title.text(message);
             await this.pause("");
             await this[action.oper](...action.args);
         }
@@ -406,14 +418,14 @@ DS.Engine = class {
 
     pause(message, ...args) {
         const title = this.getMessage(message, ...args);
-        if (this.$DEBUG) console.log(`${this.$CurrentStep}. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(this.$Actions)}`);
-        if (this.$resetting) return null;
+        if (this.DEBUG) console.log(`${this.CurrentStep}. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(this.Actions)}`);
+        if (this.State.resetting) return null;
         if (title != null) {
-            this.$Info.body.text(title);
+            this.Info.body.text(title);
         }
         return new Promise((resolve, reject) => {
-            const action = this.$Actions[this.$CurrentAction];
-            if (action.nsteps != null && this.$CurrentStep < action.nsteps) {
+            const action = this.Actions[this.CurrentAction];
+            if (action.nsteps != null && this.CurrentStep < action.nsteps) {
                 this.fastForward(resolve, reject);
             } else {
                 let runnerTimer = null;
@@ -456,43 +468,44 @@ DS.Engine = class {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
+        if (title === "") title = DS.NBSP;
         return title;
     }
 
 
     stepForward(resolve, reject) {
-        this.$CurrentStep++;
-        this.$animating = true;
+        this.CurrentStep++;
+        this.State.animating = true;
         resolve();
     }
 
 
     fastForward(resolve, reject) {
-        const action = this.$Actions[this.$CurrentAction];
-        if (this.$CurrentStep >= action.nsteps) {
-            action.nsteps = this.$CurrentStep;
+        const action = this.Actions[this.CurrentAction];
+        if (this.CurrentStep >= action.nsteps) {
+            action.nsteps = this.CurrentStep;
         }
-        this.$CurrentStep++;
-        this.$animating = false;
-        if (this.$DEBUG) setTimeout(resolve, 10);
+        this.CurrentStep++;
+        this.State.animating = false;
+        if (this.DEBUG) setTimeout(resolve, 10);
         else resolve();
     }
 
 
     isRunning() {
-        return this.$Toolbar.toggleRunner.classList.contains("selected");
+        return this.Toolbar.toggleRunner.classList.contains("selected");
     }
 
 
     setRunning(running) {
-        const classes = this.$Toolbar.toggleRunner.classList;
+        const classes = this.Toolbar.toggleRunner.classList;
         if (running) classes.add("selected");
         else classes.remove("selected");
     }
 
 
     toggleRunner() {
-        this.$Toolbar.toggleRunner.classList.toggle("selected");
+        this.Toolbar.toggleRunner.classList.toggle("selected");
     }
 
 
@@ -501,7 +514,7 @@ DS.Engine = class {
 
 
     loadCookies() {
-        if (this.$DEBUG) console.log("Loading cookies", document.cookie);
+        if (this.DEBUG) console.log("Loading cookies", document.cookie);
         const allCookies = document.cookie.split(";");
         for (const cookieName in this.$Cookies) {
             for (const cookie of allCookies) {
@@ -527,12 +540,12 @@ DS.Engine = class {
             const value = encodeURIComponent(this.$Cookies[cookieName].setCookie());
             document.cookie = `${cookieName}=${value}${expires}`;
         }
-        if (this.$DEBUG) console.log("Setting cookies", document.cookie);
+        if (this.DEBUG) console.log("Setting cookies", document.cookie);
     }
 
 
     animate(elem, animate = true) {
-        if (this.$animating && animate) {
+        if (this.State.animating && animate) {
             this.setStatus("running");
             this.setStatus("paused", this.getAnimationSpeed());
             return elem.animate(this.getAnimationSpeed(), 0, "now");
@@ -600,25 +613,33 @@ DS.addReturnSubmit = function(field, allowed, action) {
 };
 
 
-DS.updateDefault = function(obj, defaultObj) {
+DS.updateDefault = function(obj, defaultObj, override = false) {
     for (const key in defaultObj) {
         if (!(key in obj)) {
             obj[key] = defaultObj[key];
         } else if (typeof obj[key] === "object" && typeof defaultObj[key] === "object") {
             DS.updateDefault(obj[key], defaultObj[key]);
+        } else if (override) {
+            obj[key] = defaultObj[key];
         }
     }
 };
 
 
+DS.modulo = function(n, d) {
+    const rem = n % d;
+    return rem < 0 ? rem + d : rem;
+}
+
+
 // Non-breaking space:
-DS.$nbsp = " ";
+DS.NBSP = "\u00A0";
 
 DS.compare = function(a, b) {
     // We use non-breaking space as a proxy for the empty string,
     // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === DS.$nbsp) a = "";
-    if (b === DS.$nbsp) b = "";
+    if (a === DS.NBSP) a = "";
+    if (b === DS.NBSP) b = "";
     if (isNaN(a) === isNaN(b)) {
         // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(a)) {
@@ -633,5 +654,4 @@ DS.compare = function(a, b) {
         return isNaN(a) ? 1 : -1;
     }
 };
-
 

@@ -180,10 +180,13 @@ text.status-report.running {
 
 text.title, text.message {
 	fill: brown;
-	text-anchor: start;
 }
 text.title {
 	font-weight: bold;
+}
+
+text.printer {
+	fill: blue;
 }
 
 circle, rect, polygon {

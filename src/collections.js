@@ -12,7 +12,7 @@ function initialiseCollections(containerID) {
     algoSelector.addEventListener("change", () => {
         if (algoSelector.value) {
             const params = {algorithm: algoSelector.value};
-            if (CollectionEngine.$DEBUG) params.debug = CollectionEngine.$DEBUG;
+            if (CollectionEngine.DEBUG) params.debug = CollectionEngine.DEBUG;
             const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
             window.history.replaceState("", "", url);
         }
@@ -27,8 +27,8 @@ function initialiseCollections(containerID) {
     CollectionEngine = new Collection(containerID);
     CollectionEngine.initialise();
 
-    const container = CollectionEngine.$Container;
-    const tools = CollectionEngine.$Toolbar;
+    const container = CollectionEngine.Container;
+    const tools = CollectionEngine.Toolbar;
     tools.insertSelect = container.querySelector(".insertSelect");
     tools.insertField = container.querySelector(".insertField");
     tools.insertSubmit = container.querySelector(".insertSubmit");
@@ -52,7 +52,4 @@ function initialiseCollections(containerID) {
     tools.deleteSubmit.addEventListener("click", () => CollectionEngine.submit("delete", tools.deleteField));
     tools.printSubmit.addEventListener("click", () => CollectionEngine.submit("print"));
     tools.clearSubmit.addEventListener("click", () => CollectionEngine.confirmResetAll());
-
-    CollectionEngine.$Current?.initToolbar?.();
-    CollectionEngine.setRunning(true);
 }

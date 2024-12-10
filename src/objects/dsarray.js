@@ -50,7 +50,7 @@ SVG.DSArray = class DSArray extends SVG.G {
         for (let i = 0; i < size; i++) {
             if (!this.$backgrounds[i]) this.$backgrounds[i] = this.rect(w0, h).stroke({width: stroke}).addClass("background");
             this.$backgrounds[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
-            if (!this.$values[i]) this.$values[i] = this.text(DS.$nbsp);
+            if (!this.$values[i]) this.$values[i] = this.text(DS.NBSP);
             this.$values[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
             if (!this.$indices[i]) this.$indices[i] = this.text(i).addClass("arrayindex");
             this.$indices[i].center(cx + w0 * (i - size / 2 + 0.5), cy + h * 0.8);
@@ -84,7 +84,7 @@ SVG.DSArray = class DSArray extends SVG.G {
         if (text == null) text = "";
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = DS.$nbsp;
+        if (text === "") text = DS.NBSP;
         this.$values[i].text(text);
         return this;
     }

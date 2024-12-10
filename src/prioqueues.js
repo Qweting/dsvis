@@ -12,7 +12,7 @@ function initialisePrioQueues(containerID) {
     algoSelector.addEventListener("change", () => {
         if (algoSelector.value) {
             const params = {algorithm: algoSelector.value};
-            if (PQEngine.$DEBUG) params.debug = PQEngine.$DEBUG;
+            if (PQEngine.DEBUG) params.debug = PQEngine.DEBUG;
             const url = `${window.location.pathname}?${new URLSearchParams(params)}`;
             window.history.replaceState("", "", url);
         }
@@ -27,8 +27,8 @@ function initialisePrioQueues(containerID) {
     PQEngine = new PrioQueue(containerID);
     PQEngine.initialise();
 
-    const container = PQEngine.$Container;
-    const tools = PQEngine.$Toolbar;
+    const container = PQEngine.Container;
+    const tools = PQEngine.Toolbar;
     tools.insertSelect = container.querySelector(".insertSelect");
     tools.insertField = container.querySelector(".insertField");
     tools.insertSubmit = container.querySelector(".insertSubmit");
@@ -43,7 +43,4 @@ function initialisePrioQueues(containerID) {
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
     tools.deleteSubmit.addEventListener("click", () => PQEngine.submit("deleteMin", tools.deleteField));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
-
-    PQEngine.$Current?.initToolbar?.();
-    PQEngine.setRunning(true);
 }

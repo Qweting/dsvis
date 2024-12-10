@@ -101,7 +101,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
-            if (!this.$values[i]) this.$values[i] = this.text(DS.$nbsp);
+            if (!this.$values[i]) this.$values[i] = this.text(DS.NBSP);
             this.$values[i].center(cx + w0 * (i - nvalues / 2 + 0.5), cy);
             if (i > 0) {
                 const dx = w0 * (i - nvalues / 2), dy = h / 2;
@@ -153,7 +153,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         if (text == null) text = "";
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = DS.$nbsp;
+        if (text === "") text = DS.NBSP;
         this.$values[i].text(text);
         return this;
     }
@@ -217,7 +217,7 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
                 }
                 child.$parent.remove();
             }
-            const edge = this.engine().SVG().bTreeConnection(this, child, i, this.numChildren());
+            const edge = this.root().bTreeConnection(this, child, i, this.numChildren());
             this.$children[i] = edge;
             child.$parent = edge;
         }
@@ -270,8 +270,12 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
 
     resize(startX, startY, animate = true) {
         this._resizeWidths();
-        if (startX + this.$rightWidth > this.engine().$SvgWidth - this.engine().$Info.x) startX = this.engine().$SvgWidth - this.$rightWidth - this.engine().$Info.x;
-        if (startX - this.$leftWidth < this.engine().$Info.x) startX = this.$leftWidth + this.engine().$Info.x;
+        const svgMargin = this.engine().$Svg.margin;
+        const svgWidth = this.root().viewbox().width;
+        if (startX + this.$rightWidth > svgWidth - svgMargin)
+            startX = svgWidth - this.$rightWidth - svgMargin;
+        if (startX - this.$leftWidth < svgMargin)
+            startX = this.$leftWidth + svgMargin;
         this._setNewPositions(startX, startY, animate);
     }
 
@@ -283,7 +287,8 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
             for (const child of this.getChildren()) {
                 this.$childWidths += child._resizeWidths();
             }
-            this.$width = Math.max(this.$width, this.$childWidths + this.numValues() * this.engine().getSpacingX());
+            const xSpacing = this.engine().getNodeSpacing();
+            this.$width = Math.max(this.$width, this.$childWidths + this.numValues() * xSpacing);
             left = this.getLeft().$leftWidth || 0;
             right = this.getRight().$rightWidth || 0;
         }
@@ -297,11 +302,12 @@ SVG.BTreeNode = class BTreeNode extends SVG.G {
         this.setCenter(x, y, animate);
         if (this.isLeaf()) return;
         x -= this.$leftWidth;
-        const spacing = (this.$width - this.$childWidths) / this.numValues();
-        const nextY = y + this.getHeight() + this.engine().getSpacingY();
+        const xSpacing = (this.$width - this.$childWidths) / this.numValues();
+        const ySpacing = this.engine().getNodeSpacing();
+        const nextY = y + this.getHeight() + ySpacing;
         for (const child of this.getChildren()) {
             child._setNewPositions(x + child.$leftWidth, nextY, animate);
-            x += child.$width + spacing;
+            x += child.$width + xSpacing;
         }
     }
 

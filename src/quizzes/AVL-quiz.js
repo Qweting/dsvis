@@ -11,8 +11,8 @@ function initialiseAVLQuiz(containerID) {
     AVLEngine = new DS.AVLQuiz(containerID, ["K"]);
     AVLEngine.initialise();
 
-    const container = AVLEngine.$Container;
-    const tools = AVLEngine.$Toolbar;
+    const container = AVLEngine.Container;
+    const tools = AVLEngine.Toolbar;
     tools.insertField = container.querySelector(".insertField");
     tools.createLeft = container.querySelector(".createLeft");
     tools.createRight = container.querySelector(".createRight");
@@ -38,9 +38,6 @@ function initialiseAVLQuiz(containerID) {
     tools.copyToMark.addEventListener("click", () => AVLEngine.execute("copyToMark"));
     tools.deleteNode.addEventListener("click", () => AVLEngine.execute("deleteCurrent"));
     tools.restartQuiz.addEventListener("click", () => AVLEngine.resetAll());
-
-    AVLEngine.$Current?.initToolbar?.();
-    AVLEngine.setRunning(true);
 }
 
 
@@ -96,18 +93,18 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
             unbalanced ? "Tree is unbalanced!" :
             "Tree is a correct AVL tree"
         );
-        this.$Info.title.text(message);
-        this.$Info.body.text("");
+        this.Info.title.text(message);
+        this.Info.body.text(DS.NBSP);
     }
 
     newNode(text) {
-        return this.SVG().avlNode(text, this.getStartX(), this.getStartY());
+        return this.SVG.avlNode(text, ...this.getNodeStart());
     }
 
     async setCurrent(node, animate) {
         this.current?.setHighlight(false);
         if (animate) {
-            const cursor = this.SVG().highlightCircle(this.current.cx(), this.current.cy());
+            const cursor = this.SVG.highlightCircle(this.current.cx(), this.current.cy());
             cursor.setCenter(node.cx(), node.cy(), animate);
             await this.pause();
             cursor.remove();
@@ -150,7 +147,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
         if (!this.mark) return;
         if (this.mark === this.current) return;
 
-        const moving = this.SVG().textCircle(this.current.getText(), this.current.cx(), this.current.cy());
+        const moving = this.SVG.textCircle(this.current.getText(), this.current.cx(), this.current.cy());
         moving.setHighlight(true);
         await this.pause(`Replace the value of ${this.mark} with ${this.current}`);
         moving.setCenter(this.mark.cx(), this.mark.cy(), true);

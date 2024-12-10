@@ -5,26 +5,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 DS.BTree = class BTree extends DS.Engine {
-    $initialValues;
+    initialValues;
 
     constructor(container, initialValues = null) {
         super(container);
-        this.$initialValues = initialValues;
+        this.initialValues = initialValues;
     }
 
     async reset() {
         await super.reset();
         this.treeRoot = null;
-        if (this.$initialValues) {
-            this.$resetting = true;
-            await this.insert(...this.$initialValues);
-            this.$resetting = false;
+        if (this.initialValues) {
+            this.State.resetting = true;
+            await this.insert(...this.initialValues);
+            this.State.resetting = false;
         }
     }
 
     initToolbar() {
         super.initToolbar();
-        this.$Toolbar.algorithmControls.insertAdjacentHTML("beforeend", `
+        this.Toolbar.algorithmControls.insertAdjacentHTML("beforeend", `
             <span class="formgroup"><label>
                 Max degree: <select class="maxDegree disableWhenRunning">
                     <option value="3">2/3-tree</option>
@@ -34,28 +34,12 @@ DS.BTree = class BTree extends DS.Engine {
                 </select>
             </label></span>`,
         );
-        this.$Toolbar.maxDegree = this.$Container.querySelector(".maxDegree");
-        this.$Toolbar.maxDegree.addEventListener("change", () => this.confirmResetAll());
-    }
-
-    getStartX() {
-        return this.$Info.x + this.getObjectSize() / 2;
-    }
-
-    getStartY() {
-        return this.$Info.y * 4;
-    }
-
-    getRootX() {
-        return this.$SvgWidth / 2;
-    }
-
-    getRootY() {
-        return 2 * this.$Info.y + this.getObjectSize() / 2;
+        this.Toolbar.maxDegree = this.Container.querySelector(".maxDegree");
+        this.Toolbar.maxDegree.addEventListener("change", () => this.confirmResetAll());
     }
 
     getMaxDegree() {
-        return parseInt(this.$Toolbar.maxDegree.value);
+        return parseInt(this.Toolbar.maxDegree.value);
     }
 
     getMaxKeys() {
@@ -71,8 +55,8 @@ DS.BTree = class BTree extends DS.Engine {
     }
 
     resizeTree() {
-        const animate = !this.$resetting;
-        this.treeRoot?.resize(this.getRootX(), this.getRootY(), animate);
+        const animate = !this.State.resetting;
+        this.treeRoot?.resize(...this.getTreeRoot(), animate);
     }
 
     async insert(...values) {
@@ -99,7 +83,7 @@ DS.BTree = class BTree extends DS.Engine {
     async findHelper(value, findLeaf = false) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = this.SVG().highlightCircle(this.getStartX(), this.getStartY());
+        const pointer = this.SVG.highlightCircle(...this.getNodeStart());
         while (node) {
             pointer.setCenter(node.getCX(0), node.cy(), true);
             node.setHighlight(true);
@@ -146,7 +130,7 @@ DS.BTree = class BTree extends DS.Engine {
         if (this.treeRoot) {
             await this.insertBottomup(value);
         } else {
-            this.treeRoot = this.SVG().bTreeNode(true, 1, this.getStartX(), this.getStartY());
+            this.treeRoot = this.SVG.bTreeNode(true, 1, ...this.getNodeStart());
             this.treeRoot.setText(0, value);
             await this.pause('insert.newroot', value);
             this.resizeTree();
@@ -192,13 +176,13 @@ DS.BTree = class BTree extends DS.Engine {
         const risingValue = node.getText(this.getSplitIndex());
         const rightSplit = this.getSplitIndex() + 1;
         const risingX = node.getCX(rightSplit - 1);
-        const risingNode = this.SVG().bTreeNode(false, 1, risingX, node.cy());
+        const risingNode = this.SVG.bTreeNode(false, 1, risingX, node.cy());
         risingNode.setHighlight(true);
         risingNode.setText(0, risingValue);
 
         const rightValues = node.numValues() - rightSplit;
         const rightX = node.getCX(rightSplit + rightValues / 2 - 0.5);
-        const rightNode = this.SVG().bTreeNode(node.isLeaf(), rightValues, rightX, node.cy());
+        const rightNode = this.SVG.bTreeNode(node.isLeaf(), rightValues, rightX, node.cy());
         rightNode.setHighlight(true);
         for (let i = rightSplit; i < node.numValues(); i++) {
             const j = i - rightSplit;
@@ -265,9 +249,9 @@ DS.BTree = class BTree extends DS.Engine {
             await this.pause('general.empty');
             return;
         }
-        const pointer = this.SVG().highlightCircle(this.getStartX(), this.getStartY());
-        const printed = [];
-        printed.push(this.SVG().text("Printed nodes: ").x(this.$Info.x).cy(this.$SvgHeight - 80));
+        const {x, y} = this.Info.printer.bbox();
+        const printed = [this.SVG.text("Printed nodes: ").addClass("printer").x(x).y(y)];
+        const pointer = this.SVG.highlightCircle(...this.getNodeStart());
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
         await this.pause();
@@ -297,10 +281,11 @@ DS.BTree = class BTree extends DS.Engine {
     }
 
     async printOneLabel(node, i, printed) {
-        const lbl = this.SVG().text(node.getText(i)).center(node.getCX(i), node.cy());
+        const lbl = this.SVG.text(node.getText(i)).center(node.getCX(i), node.cy());
         await this.pause();
         const last = printed[printed.length - 1];
-        this.animate(lbl).x(last.bbox().x2 + 10).cy(last.cy());
+        const spacing = this.getNodeSpacing() / 2;
+        this.animate(lbl).x(last.bbox().x2 + spacing).cy(last.cy());
         printed.push(lbl);
         await this.pause();
     }
@@ -351,7 +336,7 @@ DS.BTree = class BTree extends DS.Engine {
 
     async deleteNonleaf(node, i) {
         node.addClass("marked");
-        const pointer = this.SVG().highlightCircle(node.getCX(i), node.cy());
+        const pointer = this.SVG.highlightCircle(node.getCX(i), node.cy());
         await this.pause('find.predecessor', node.getText(i));
         let maxNode = node.getChild(i);
         let j;
@@ -363,7 +348,7 @@ DS.BTree = class BTree extends DS.Engine {
             maxNode = maxNode.getRight();
         }
         const maxValue = maxNode.getText(j);
-        const risingNode = this.SVG().bTreeNode(false, 1, maxNode.getCX(j), maxNode.cy());
+        const risingNode = this.SVG.bTreeNode(false, 1, maxNode.getCX(j), maxNode.cy());
         risingNode.setHighlight(true);
         risingNode.setText(0, maxValue);
         await this.pause('delete.replace', node.getText(i), maxValue);
@@ -415,7 +400,7 @@ DS.BTree = class BTree extends DS.Engine {
         rightSib.setHighlight(true);
         await this.pause('node.mergeRight', node, parentValue, rightSib);
 
-        const sinkingNode = this.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const sinkingNode = this.SVG.bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         sinkingNode.setHighlight(true);
         sinkingNode.setText(0, parentValue);
         parent.setText(parentIndex, "");
@@ -455,10 +440,10 @@ DS.BTree = class BTree extends DS.Engine {
         const rightValue = rightSib.getText(0);
         await this.pause('node.steal.right', node, leftValue, rightValue);
 
-        const leftNode = this.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const leftNode = this.SVG.bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
-        const rightNode = this.SVG().bTreeNode(false, 1, rightSib.getCX(0), rightSib.cy());
+        const rightNode = this.SVG.bTreeNode(false, 1, rightSib.getCX(0), rightSib.cy());
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
 
@@ -497,10 +482,10 @@ DS.BTree = class BTree extends DS.Engine {
         const leftValue = leftSib.getText(leftSib.numValues() - 1);
         await this.pause('node.steal.left', node, leftValue, rightValue);
 
-        const rightNode = this.SVG().bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
+        const rightNode = this.SVG.bTreeNode(false, 1, parent.getCX(parentIndex), parent.cy());
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
-        const leftNode = this.SVG().bTreeNode(false, 1, leftSib.getCX(leftSib.numValues() - 1), leftSib.cy());
+        const leftNode = this.SVG.bTreeNode(false, 1, leftSib.getCX(leftSib.numValues() - 1), leftSib.cy());
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
 
