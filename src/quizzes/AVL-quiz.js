@@ -8,8 +8,8 @@
 let AVLEngine = null;
 
 function initialiseAVLQuiz(containerID) {
-    AVLEngine = new DS.AVLQuiz(containerID, ["K"]);
-    AVLEngine.initialise();
+    AVLEngine = new DS.AVLQuiz(containerID);
+    AVLEngine.initialise(["K"]);
 
     const container = AVLEngine.Container;
     const tools = AVLEngine.Toolbar;

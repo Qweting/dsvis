@@ -8,9 +8,9 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
     arraySize = 28;
     initialValues;
 
-    constructor(container, initialValues = null) {
-        super(container);
+    initialise(initialValues = null) {
         this.initialValues = initialValues;
+        super.initialise();
     }
 
     async reset() {

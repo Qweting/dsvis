@@ -7,9 +7,9 @@
 DS.BTree = class BTree extends DS.Engine {
     initialValues;
 
-    constructor(container, initialValues = null) {
-        super(container);
+    initialise(initialValues = null) {
         this.initialValues = initialValues;
+        super.initialise();
     }
 
     async reset() {

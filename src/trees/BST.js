@@ -7,9 +7,9 @@
 DS.BST = class BST extends DS.Engine {
     initialValues;
 
-    constructor(container, initialValues = null) {
-        super(container);
+    initialise(initialValues = null) {
         this.initialValues = initialValues;
+        super.initialise();
     }
 
     async resetAlgorithm() {
