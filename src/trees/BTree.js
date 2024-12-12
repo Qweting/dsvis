@@ -12,8 +12,8 @@ DS.BTree = class BTree extends DS.Engine {
         super.initialise();
     }
 
-    async reset() {
-        await super.reset();
+    async resetAlgorithm() {
+        await super.resetAlgorithm();
         this.treeRoot = null;
         if (this.initialValues) {
             this.State.resetting = true;

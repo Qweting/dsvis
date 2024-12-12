@@ -13,8 +13,8 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
         super.initialise();
     }
 
-    async reset() {
-        await super.reset();
+    async resetAlgorithm() {
+        await super.resetAlgorithm();
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();

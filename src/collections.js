@@ -38,7 +38,6 @@ function initialiseCollections(containerID) {
     tools.deleteSubmit = container.querySelector(".deleteSubmit");
     tools.printSubmit = container.querySelector(".printSubmit");
     tools.clearSubmit = container.querySelector(".clearSubmit");
-    tools.showNullNodes = container.querySelector(".showNullNodes");
 
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
