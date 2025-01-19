@@ -348,16 +348,15 @@ DS.Engine = class {
     ///////////////////////////////////////////////////////////////////////////////
     // Executing the actions
 
-    submit(method, field) {
+    submit(method, val) {
         try {
-            let values = [];
-            if (field != null) {
-                const val = field.value.trim();
+            if (val?.value) {
+                const field = val;
+                val = field.value;
                 field.value = "";
-                if (val === "") return false;
-                values = val.split(/\s+/).map((v) => DS.normalizeNumber(v));
             }
-            this.execute(method, values);
+            const values = DS.parseValues(val);
+            if (values) this.execute(method, values);
         } catch (error) {
             console.error(error);
         }
@@ -564,6 +563,15 @@ DS.normalizeNumber = function(input) {
     input = input.trim();
     return input === "" || isNaN(input) ? input : Number(input);
 };
+
+
+DS.parseValues = function(values) {
+    if (!values) return null;
+    if (typeof values === 'string') {
+        values = values.trim().split(/\s+/);
+    }
+    return values.map((v) => DS.normalizeNumber(v));
+}
 
 
 DS.addReturnSubmit = function(field, allowed, action) {

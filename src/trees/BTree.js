@@ -8,7 +8,7 @@ DS.BTree = class BTree extends DS.Engine {
     initialValues;
 
     initialise(initialValues = null) {
-        this.initialValues = initialValues;
+        this.initialValues = DS.parseValues(initialValues);
         super.initialise();
     }
 

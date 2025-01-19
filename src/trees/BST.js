@@ -8,7 +8,7 @@ DS.BST = class BST extends DS.Engine {
     initialValues;
 
     initialise(initialValues = null) {
-        this.initialValues = initialValues;
+        this.initialValues = DS.parseValues(initialValues);
         super.initialise();
     }
 
