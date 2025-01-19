@@ -134,10 +134,10 @@ DS.Engine = class {
     }
 
 
-    resetAll() {
+    async resetAll() {
         this.Actions = [];
         this.loadCookies();
-        this.reset();
+        await this.reset();
     }
 
     confirmResetAll() {
@@ -348,7 +348,7 @@ DS.Engine = class {
     ///////////////////////////////////////////////////////////////////////////////
     // Executing the actions
 
-    submit(method, val) {
+    async submit(method, val) {
         try {
             if (val?.value) {
                 const field = val;
@@ -356,7 +356,7 @@ DS.Engine = class {
                 field.value = "";
             }
             const values = DS.parseValues(val);
-            if (values) this.execute(method, values);
+            if (values) await this.execute(method, values);
         } catch (error) {
             console.error(error);
         }
