@@ -99,7 +99,7 @@ DS.Engine = class {
 
     constructor(container, defaults = {}) {
         for (const key in defaults) {
-            if (!(key.startsWith("$"))) throw new TypeError(`Invalid default key: ${key}`)
+            if (!(key.startsWith("$"))) throw new TypeError(`Invalid default key: ${key}`);
         }
         DS.updateDefault(this, defaults, true);
         this.Container = document.querySelector(container);
@@ -175,7 +175,7 @@ DS.Engine = class {
 
     updateCSSVariables() {
         const relativeSize = Math.round(100 * this.getObjectSize() / this.$Svg.objectSize);
-        document.documentElement.style.setProperty('--node-font-size', `${relativeSize}%`);
+        document.documentElement.style.setProperty("--node-font-size", `${relativeSize}%`);
     }
 
 
@@ -381,7 +381,7 @@ DS.Engine = class {
                 return;
             }
             this.Actions.pop();
-            if ('running' in reason)
+            if ("running" in reason)
                 this.setRunning(reason.running);
             until = reason.until;
             if (this.DEBUG) console.log(`RERUN ${until} / ${this.CurrentStep}: ${JSON.stringify(this.Actions)}`);
@@ -567,11 +567,11 @@ DS.normalizeNumber = function(input) {
 
 DS.parseValues = function(values) {
     if (!values) return null;
-    if (typeof values === 'string') {
+    if (typeof values === "string") {
         values = values.trim().split(/\s+/);
     }
     return values.map((v) => DS.normalizeNumber(v));
-}
+};
 
 
 DS.addReturnSubmit = function(field, allowed, action) {
@@ -637,7 +637,7 @@ DS.updateDefault = function(obj, defaultObj, override = false) {
 DS.modulo = function(n, d) {
     const rem = n % d;
     return rem < 0 ? rem + d : rem;
-}
+};
 
 
 // Non-breaking space:
