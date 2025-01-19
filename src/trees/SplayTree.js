@@ -1,10 +1,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.SplayTree = class SplayTree extends DS.BST {
+DSVis.SplayTree = class SplayTree extends DSVis.BST {
 
     async find(value) {
         const found = await super.find(value);
@@ -23,7 +23,7 @@ DS.SplayTree = class SplayTree extends DS.BST {
 
     async delete(value) {
         await this.find(value);
-        if (DS.compare(value, this.treeRoot.getText()) !== 0) {
+        if (DSVis.compare(value, this.treeRoot.getText()) !== 0) {
             await this.pause('delete.notexists', value);
             return;
         }
@@ -125,7 +125,7 @@ DS.SplayTree = class SplayTree extends DS.BST {
 };
 
 
-DS.SplayTree.messages = {
+DSVis.SplayTree.messages = {
     delete: {
         root: "Remove root, leaving left and right trees",
         singleChild: (right, left) => `No ${right} tree, make ${left} tree the root`,
@@ -137,5 +137,5 @@ DS.SplayTree.messages = {
         zigzig: (node, left, child) => `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
     },
 };
-DS.updateDefault(DS.SplayTree.messages, DS.BST.messages);
+DSVis.updateDefault(DSVis.SplayTree.messages, DSVis.BST.messages);
 

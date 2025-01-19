@@ -1,14 +1,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.BST = class BST extends DS.Engine {
+DSVis.BST = class BST extends DSVis.Engine {
     initialValues;
 
     initialise(initialValues = null) {
-        this.initialValues = DS.parseValues(initialValues);
+        this.initialValues = DSVis.parseValues(initialValues);
         super.initialise();
     }
 
@@ -74,7 +74,7 @@ DS.BST = class BST extends DS.Engine {
         const pointer = this.SVG.highlightCircle(node.cx(), node.cy());
         while (node) {
             node.setHighlight(true);
-            const cmp = DS.compare(value, node.getText());
+            const cmp = DSVis.compare(value, node.getText());
             if (cmp === 0) {
                 pointer.remove();
                 node.setHighlight(false);
@@ -109,7 +109,7 @@ DS.BST = class BST extends DS.Engine {
             return {success: false, node: found.node};
         }
         const child = this.newNode(value);
-        const cmp = DS.compare(value, found.node.getText());
+        const cmp = DSVis.compare(value, found.node.getText());
         const direction = cmp < 0 ? "left" : "right";
         found.node.setChild(direction, child);
         child.setHighlight(true);
@@ -133,7 +133,7 @@ DS.BST = class BST extends DS.Engine {
             found.node.setHighlight(true);
             await this.pause('delete.notexists', value);
             found.node.setHighlight(false);
-            const direction = DS.compare(value, found.node.getText()) < 0 ? "left" : "right";
+            const direction = DSVis.compare(value, found.node.getText()) < 0 ? "left" : "right";
             return {success: false, direction: direction, parent: found.node};
         }
         found.node.setHighlight(true);
@@ -312,7 +312,7 @@ DS.BST = class BST extends DS.Engine {
 };
 
 
-DS.BST.messages = {
+DSVis.BST.messages = {
     general: {
         empty: "Tree is empty",
     },

@@ -1,10 +1,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.BinaryHeap = class BinaryHeap extends DS.Engine {
+DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
     arraySize = 28;
     initialValues;
 
@@ -92,7 +92,7 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
             this.heapArray.setIndexHighlight(parentIndex, true);
             const direction = (currentIndex - 1) / 2 === parentIndex ? "left" : "right";
             parentNode.setChildHighlight(direction, true);
-            const cmp = DS.compare(value, parentValue);
+            const cmp = DSVis.compare(value, parentValue);
             if (cmp >= 0) {
                 await this.pause('insert.stopShift', parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
@@ -165,7 +165,7 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
             await this.pause('delete.shiftDown');
             let direction = "left";
             let childValue = this.heapArray.getValue(childIndex);
-            if (childIndex + 1 < this.heapSize && DS.compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
+            if (childIndex + 1 < this.heapSize && DSVis.compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
                 direction = "right";
                 childIndex++;
                 childValue = this.heapArray.getValue(childIndex);
@@ -176,7 +176,7 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
             currentNode.setChildHighlight(direction, true);
             childNode.setHighlight(true);
 
-            const cmp = DS.compare(currentValue, childValue);
+            const cmp = DSVis.compare(currentValue, childValue);
             if (cmp <= 0) {
                 await this.pause('delete.stopShift', currentValue, childValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
@@ -205,7 +205,7 @@ DS.BinaryHeap = class BinaryHeap extends DS.Engine {
 };
 
 
-DS.BinaryHeap.messages = {
+DSVis.BinaryHeap.messages = {
     general: {
         empty: "Heap is empty!",
         full: "Heap is full!",

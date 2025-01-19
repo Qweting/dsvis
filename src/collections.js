@@ -1,7 +1,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 /* exported initialiseCollections, CollectionEngine */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -20,10 +20,10 @@ function initialiseCollections(containerID) {
     });
 
     let algoClass = new URL(window.location).searchParams.get("algorithm");
-    if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DS))
+    if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DSVis))
         algoClass = "";
     algoSelector.value = algoClass;
-    const Collection = algoClass ? DS[algoClass] : DS.Engine;
+    const Collection = algoClass ? DSVis[algoClass] : DSVis.Engine;
     CollectionEngine = new Collection(containerID);
     CollectionEngine.initialise();
 
@@ -43,11 +43,11 @@ function initialiseCollections(containerID) {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
     });
-    DS.addReturnSubmit(tools.insertField, "ALPHANUM+", () => CollectionEngine.submit("insert", tools.insertField));
+    DSVis.addReturnSubmit(tools.insertField, "ALPHANUM+", () => CollectionEngine.submit("insert", tools.insertField));
     tools.insertSubmit.addEventListener("click", () => CollectionEngine.submit("insert", tools.insertField));
-    DS.addReturnSubmit(tools.findField, "ALPHANUM", () => CollectionEngine.submit("find", tools.findField));
+    DSVis.addReturnSubmit(tools.findField, "ALPHANUM", () => CollectionEngine.submit("find", tools.findField));
     tools.findSubmit.addEventListener("click", () => CollectionEngine.submit("find", tools.findField));
-    DS.addReturnSubmit(tools.deleteField, "ALPHANUM", () => CollectionEngine.submit("delete", tools.deleteField));
+    DSVis.addReturnSubmit(tools.deleteField, "ALPHANUM", () => CollectionEngine.submit("delete", tools.deleteField));
     tools.deleteSubmit.addEventListener("click", () => CollectionEngine.submit("delete", tools.deleteField));
     tools.printSubmit.addEventListener("click", () => CollectionEngine.submit("print"));
     tools.clearSubmit.addEventListener("click", () => CollectionEngine.confirmResetAll());

@@ -1,7 +1,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals SVG, DS */
+/* globals SVG, DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
 SVG.extend(SVG.Element, {
@@ -80,7 +80,7 @@ SVG.TextCircle = class TextCircle extends SVG.G {
         if (text == null) text = "";
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = DS.NBSP;
+        if (text === "") text = DSVis.NBSP;
         this.$text.text(text);
         return this;
     }

@@ -1,10 +1,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS, SVG */
+/* globals DSVis, SVG */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.AVL = class AVL extends DS.BST {
+DSVis.AVL = class AVL extends DSVis.BST {
 
     newNode(text) {
         return this.SVG.avlNode(text, ...this.getNodeStart());
@@ -131,12 +131,12 @@ SVG.extend(SVG.Container, {
 });
 
 
-DS.AVL.messages = {
+DSVis.AVL.messages = {
     node: {
         updateHeight: "Update node heights",
         unbalanced: "Node is unbalanced!",
         balanced: "Node is now balanced",
     },
 };
-DS.updateDefault(DS.AVL.messages, DS.BST.messages);
+DSVis.updateDefault(DSVis.AVL.messages, DSVis.BST.messages);
 

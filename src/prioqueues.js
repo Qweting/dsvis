@@ -1,7 +1,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 /* exported initialisePrioQueues, PQEngine */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -20,10 +20,10 @@ function initialisePrioQueues(containerID) {
     });
 
     let algoClass = new URL(window.location).searchParams.get("algorithm");
-    if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DS))
+    if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DSVis))
         algoClass = "";
     algoSelector.value = algoClass;
-    const PrioQueue = algoClass ? DS[algoClass] : DS.Engine;
+    const PrioQueue = algoClass ? DSVis[algoClass] : DSVis.Engine;
     PQEngine = new PrioQueue(containerID);
     PQEngine.initialise();
 
@@ -39,7 +39,7 @@ function initialisePrioQueues(containerID) {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
     });
-    DS.addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
+    DSVis.addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
     tools.deleteSubmit.addEventListener("click", () => PQEngine.submit("deleteMin", tools.deleteField));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());

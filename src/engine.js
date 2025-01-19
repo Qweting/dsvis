@@ -2,15 +2,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
 /* globals SVG */
-/* exported DS */
+/* exported DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-const DS = {};
+const DSVis = {};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
-DS.Engine = class {
+DSVis.Engine = class {
     // Default variable names start with $
 
     $Svg = {
@@ -101,7 +101,7 @@ DS.Engine = class {
         for (const key in defaults) {
             if (!(key.startsWith("$"))) throw new TypeError(`Invalid default key: ${key}`);
         }
-        DS.updateDefault(this, defaults, true);
+        DSVis.updateDefault(this, defaults, true);
         this.Container = document.querySelector(container);
         this.DEBUG = new URL(window.location).searchParams.get("debug");
         this.SVG = SVG(this.Container.querySelector("svg"));
@@ -165,10 +165,10 @@ DS.Engine = class {
             for (let y = 1; y < h / 100; y++) this.SVG.line(0, y * 100, w, y * 100).addClass("gridline");
         }
         const margin = this.$Svg.margin;
-        this.Info.title = this.SVG.text(DS.NBSP).addClass("title").x(margin).y(margin);
-        this.Info.body = this.SVG.text(DS.NBSP).addClass("message").x(margin).y(2 * margin);
-        this.Info.printer = this.SVG.text(DS.NBSP).addClass("printer").x(margin).cy(h - 2 * margin);
-        this.Info.status = this.SVG.text(DS.NBSP).addClass("status-report").x(margin).cy(h - margin);
+        this.Info.title = this.SVG.text(DSVis.NBSP).addClass("title").x(margin).y(margin);
+        this.Info.body = this.SVG.text(DSVis.NBSP).addClass("message").x(margin).y(2 * margin);
+        this.Info.printer = this.SVG.text(DSVis.NBSP).addClass("printer").x(margin).cy(h - 2 * margin);
+        this.Info.status = this.SVG.text(DSVis.NBSP).addClass("status-report").x(margin).cy(h - margin);
         this.updateCSSVariables();
     }
 
@@ -196,7 +196,7 @@ DS.Engine = class {
 
     setIdleTitle() {
         this.Info.title.text("Select an action from the menu above");
-        this.Info.body.text(DS.NBSP);
+        this.Info.body.text(DSVis.NBSP);
     }
 
 
@@ -295,7 +295,7 @@ DS.Engine = class {
     resetListeners(isRunning) {
         this.saveCookies();
         this.removeAllListeners();
-        if (this.constructor === DS.Engine) {
+        if (this.constructor === DSVis.Engine) {
             this.disableWhenRunning(true);
             return;
         }
@@ -355,7 +355,7 @@ DS.Engine = class {
                 val = field.value;
                 field.value = "";
             }
-            const values = DS.parseValues(val);
+            const values = DSVis.parseValues(val);
             if (values) await this.execute(method, values);
         } catch (error) {
             console.error(error);
@@ -467,7 +467,7 @@ DS.Engine = class {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        if (title === "") title = DS.NBSP;
+        if (title === "") title = DSVis.NBSP;
         return title;
     }
 
@@ -559,22 +559,22 @@ DS.Engine = class {
 // Helper functions
 
 
-DS.normalizeNumber = function(input) {
+DSVis.normalizeNumber = function(input) {
     input = input.trim();
     return input === "" || isNaN(input) ? input : Number(input);
 };
 
 
-DS.parseValues = function(values) {
+DSVis.parseValues = function(values) {
     if (!values) return null;
     if (typeof values === "string") {
         values = values.trim().split(/\s+/);
     }
-    return values.map((v) => DS.normalizeNumber(v));
+    return values.map((v) => DSVis.normalizeNumber(v));
 };
 
 
-DS.addReturnSubmit = function(field, allowed, action) {
+DSVis.addReturnSubmit = function(field, allowed, action) {
     allowed = (
         allowed === "int" ? "0-9" :
         allowed === "int+" ? "0-9 " :
@@ -621,12 +621,12 @@ DS.addReturnSubmit = function(field, allowed, action) {
 };
 
 
-DS.updateDefault = function(obj, defaultObj, override = false) {
+DSVis.updateDefault = function(obj, defaultObj, override = false) {
     for (const key in defaultObj) {
         if (!(key in obj)) {
             obj[key] = defaultObj[key];
         } else if (typeof obj[key] === "object" && typeof defaultObj[key] === "object") {
-            DS.updateDefault(obj[key], defaultObj[key]);
+            DSVis.updateDefault(obj[key], defaultObj[key]);
         } else if (override) {
             obj[key] = defaultObj[key];
         }
@@ -634,20 +634,20 @@ DS.updateDefault = function(obj, defaultObj, override = false) {
 };
 
 
-DS.modulo = function(n, d) {
+DSVis.modulo = function(n, d) {
     const rem = n % d;
     return rem < 0 ? rem + d : rem;
 };
 
 
 // Non-breaking space:
-DS.NBSP = "\u00A0";
+DSVis.NBSP = "\u00A0";
 
-DS.compare = function(a, b) {
+DSVis.compare = function(a, b) {
     // We use non-breaking space as a proxy for the empty string,
     // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === DS.NBSP) a = "";
-    if (b === DS.NBSP) b = "";
+    if (a === DSVis.NBSP) a = "";
+    if (b === DSVis.NBSP) b = "";
     if (isNaN(a) === isNaN(b)) {
         // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(a)) {

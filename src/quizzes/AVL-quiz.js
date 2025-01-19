@@ -1,14 +1,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS, SVG */
+/* globals DSVis, SVG */
 /* exported initialiseAVLQuiz, AVLEngine */
 ///////////////////////////////////////////////////////////////////////////////
 
 let AVLEngine = null;
 
 function initialiseAVLQuiz(containerID) {
-    AVLEngine = new DS.AVLQuiz(containerID);
+    AVLEngine = new DSVis.AVLQuiz(containerID);
     AVLEngine.initialise(["K"]);
 
     const container = AVLEngine.Container;
@@ -26,7 +26,7 @@ function initialiseAVLQuiz(containerID) {
     tools.deleteNode = container.querySelector(".deleteNode");
     tools.restartQuiz = container.querySelector(".restartQuiz");
 
-    DS.addReturnSubmit(tools.insertField, "ALPHANUM");
+    DSVis.addReturnSubmit(tools.insertField, "ALPHANUM");
     tools.createLeft.addEventListener("click", () => AVLEngine.submit("insertLeft", tools.insertField));
     tools.createRight.addEventListener("click", () => AVLEngine.submit("insertRight", tools.insertField));
     tools.moveParent.addEventListener("click", () => AVLEngine.execute("moveParent"));
@@ -41,7 +41,7 @@ function initialiseAVLQuiz(containerID) {
 }
 
 
-DS.AVLQuiz = class AVLQuiz extends DS.BST {
+DSVis.AVLQuiz = class AVLQuiz extends DSVis.BST {
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
@@ -66,7 +66,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
     _validateBST(node, min) {
         const left = node.getLeft();
         if (left) min = this._validateBST(left, min);
-        if (DS.compare(min, node.getText()) >= 0) {
+        if (DSVis.compare(min, node.getText()) >= 0) {
             throw new Error(`Order mismatch: ${min} > ${node.getText()}`);
         }
         min = node.getText();
@@ -94,7 +94,7 @@ DS.AVLQuiz = class AVLQuiz extends DS.BST {
             "Tree is a correct AVL tree"
         );
         this.Info.title.text(message);
-        this.Info.body.text(DS.NBSP);
+        this.Info.body.text(DSVis.NBSP);
     }
 
     newNode(text) {

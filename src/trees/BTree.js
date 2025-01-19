@@ -1,14 +1,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.BTree = class BTree extends DS.Engine {
+DSVis.BTree = class BTree extends DSVis.Engine {
     initialValues;
 
     initialise(initialValues = null) {
-        this.initialValues = DS.parseValues(initialValues);
+        this.initialValues = DSVis.parseValues(initialValues);
         super.initialise();
     }
 
@@ -92,7 +92,7 @@ DS.BTree = class BTree extends DS.Engine {
             let cmpStr = value;
             while (i < node.numValues()) {
                 const txt = node.getText(i);
-                const cmp = DS.compare(value, txt);
+                const cmp = DSVis.compare(value, txt);
                 if (cmp === 0) {
                     cmpStr = `${txt} = ${value}`;
                     break;
@@ -103,7 +103,7 @@ DS.BTree = class BTree extends DS.Engine {
                 cmpStr = `${txt} < ${value}`;
                 i++;
             }
-            const found = i < node.numValues() && DS.compare(value, node.getText(i)) === 0;
+            const found = i < node.numValues() && DSVis.compare(value, node.getText(i)) === 0;
             pointer.setCenter(node.getCX(i - (found ? 0 : 0.5)), node.cy(), true);
 
             if (node.isLeaf() || (found && !findLeaf)) {
@@ -514,7 +514,7 @@ DS.BTree = class BTree extends DS.Engine {
 };
 
 
-DS.BTree.messages = {
+DSVis.BTree.messages = {
     find: {
         predecessor: (val) => `Find the predecessor value of ${val}`,
     },
@@ -551,4 +551,4 @@ DS.BTree.messages = {
         },
     },
 };
-DS.updateDefault(DS.BTree.messages, DS.BST.messages);
+DSVis.updateDefault(DSVis.BTree.messages, DSVis.BST.messages);

@@ -1,10 +1,10 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
-/* globals DS */
+/* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DS.RedBlack = class RedBlack extends DS.BST {
+DSVis.RedBlack = class RedBlack extends DSVis.BST {
 
     newNode(text) {
         return super.newNode(text).addClass("red");
@@ -210,7 +210,7 @@ DS.RedBlack = class RedBlack extends DS.BST {
 };
 
 
-DS.RedBlack.messages = {
+DSVis.RedBlack.messages = {
     color: {
         redRootBlack: "Tree root is red: Color it black",
         rootBlack: "Color the root black",
@@ -255,5 +255,5 @@ DS.RedBlack.messages = {
         ],
     },
 };
-DS.updateDefault(DS.RedBlack.messages, DS.BST.messages);
+DSVis.updateDefault(DSVis.RedBlack.messages, DSVis.BST.messages);
 
