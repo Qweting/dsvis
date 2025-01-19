@@ -504,7 +504,7 @@ DS.Engine = class {
 
 
     toggleRunner() {
-        this.Toolbar.toggleRunner.classList.toggle("selected");
+        this.setRunning(!this.isRunning());
     }
 
 
