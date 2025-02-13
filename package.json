@@ -1,0 +1,21 @@
+{
+  "name": "dsvis",
+  "version": "1.0.0",
+  "description": "- **[Try out the library here!](https://chalmersgu-data-structure-courses.github.io/dsvis/)**",
+  "main": "index.js",
+  "dependencies": {
+    "@svgdotjs/svg.js": "^3.2.4"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.7.3",
+    "webpack": "^5.97.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "scripts": {
+    "dev": "webpack-dev-server --mode development",
+    "build": "webpack --mode production"
+  },
+  "author": "",
+  "license": "ISC"
+}
