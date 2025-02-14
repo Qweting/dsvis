@@ -1,5 +1,5 @@
 import { Element, Text } from "@svgdotjs/svg.js";
-import { Svg } from "./objects";
+import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
 export type EngineToolbarItems = {
   animationSpeed: HTMLSelectElement;

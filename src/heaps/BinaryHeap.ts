@@ -29,7 +29,7 @@ export class BinaryHeap extends Engine {
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
-        this.heapArray = this.Svg.dsArray(this.arraySize, xRoot, this.Svg.viewbox().height - yRoot);
+        this.heapArray = this.Svg.dsArray(this.arraySize, xRoot, this.Svg.viewbox().height - yRoot, true);
         if (Number(this.heapArray.x()) < this.$Svg.margin)
             this.heapArray.x(this.$Svg.margin);
         this.heapSize = 0;

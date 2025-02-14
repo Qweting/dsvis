@@ -8,6 +8,7 @@ import { GraphNode } from "./graph-node";
 import { HighlightCircle } from "./highlight-circle";
 import { TextCircle } from "./text-circle";
 import { Engine } from "../../src/engine";
+import { DSArray } from "./dsarray";
 
 declare module "@svgdotjs/svg.js" {
   interface Svg {
@@ -81,6 +82,7 @@ declare module "@svgdotjs/svg.js" {
       numChildren: number,
       strokeWidth: number
     ): BTreeConnection;
+    dsArray(size: number, x: number, y: number, horizontal: boolean): DSArray;
   }
 }
 
@@ -199,6 +201,9 @@ extend(Container, {
     return (this as Container)
       .put(new BTreeConnection())
       .init(start, end, child, numChildren, strokeWidth);
+  },
+  dsArray: function(size: number, x: number, y: number, horizontal: boolean) {
+      return ((this as Container).put(new DSArray()) as DSArray).init(size, x, y, horizontal);
   },
 });
 

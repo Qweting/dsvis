@@ -4,20 +4,8 @@
 /* globals SVG, DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-import { Circle, G, Text, extend, Container, Rect } from "@svgdotjs/svg.js";
+import { G, Text, Rect } from "@svgdotjs/svg.js";
 import { NBSP } from "../../src/engine";
-
-declare module "@svgdotjs/svg.js" {
-    interface Container {
-      dsArray(size: number, x: number, y: number, horizontal?: boolean): DSArray
-    }
-  }
-
-extend(Container, {
-    dsArray: function(size: number, x: number, y: number, horizontal: boolean = true) {
-        return ((this as Container).put(new DSArray()) as DSArray).init(size, x, y, horizontal);
-    },
-});
 
 export class DSArray extends G {
     $horizontal: boolean | null = null;
