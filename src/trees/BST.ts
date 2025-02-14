@@ -19,11 +19,10 @@ export class BST extends Engine {
   initialValues: (string | number)[] = [];
   treeRoot: BinaryNode | null = null;
 
-  toolbar: BSTToolbarItems;
+  toolbar!: BSTToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
   constructor(containerSelector: string) {
     super(containerSelector);
-    this.toolbar = this.getToolbar();
   }
 
   getToolbar(): BSTToolbarItems {

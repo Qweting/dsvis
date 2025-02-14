@@ -24,6 +24,7 @@ declare module "@svgdotjs/svg.js" {
   }
 
   interface Container {
+    put<T extends Element>(element: T, i?: number): T;
     highlightCircle(
       x: number,
       y: number,
@@ -97,8 +98,10 @@ extend(Element, {
     return [(this as Element).cx(), (this as Element).cy()] as [number, number];
   },
   setCenter(x: number, y: number, animationDuration: number = 0) {
-    (this as Element).engine().animate(this as Element, animationDuration > 0).center(x, y);
-    return this as Element;
+    return (this as Element)
+      .engine()
+      .animate(this as Element, animationDuration > 0)
+      .center(x, y);
   },
   dmoveCenter(dx: number, dy: number, animationDuration: number = 0) {
     (this as Element).setCenter(
@@ -108,18 +111,16 @@ extend(Element, {
     );
     return this as Element;
   },
-  animateSVG(duration: number) {
-    // TODO: Created by me, should be able to simplify code later
-    (this as Element).animate(duration, 0, "now");
-    return this as Element;
+  engine() {
+    return (this as Element).root().$engine;
   },
 });
 
 extend(Container, {
   highlightCircle(x: number, y: number, radius: number, strokeWidth: number) {
-    return (
-      (this as Container).put(new HighlightCircle()) as HighlightCircle
-    ).init(x, y, radius, strokeWidth);
+    return (this as Container)
+      .put(new HighlightCircle())
+      .init(x, y, radius, strokeWidth);
   },
   textCircle(
     text: string,
@@ -128,13 +129,9 @@ extend(Container, {
     size: number,
     strokeWidth: number
   ) {
-    return ((this as Container).put(new TextCircle()) as TextCircle).init(
-      text,
-      x,
-      y,
-      size,
-      strokeWidth
-    );
+    return (this as Container)
+      .put(new TextCircle())
+      .init(text, x, y, size, strokeWidth);
   },
   graphNode(
     text: string,
@@ -143,13 +140,9 @@ extend(Container, {
     size: number,
     strokeWidth: number
   ) {
-    return ((this as Container).put(new GraphNode()) as GraphNode).init(
-      text,
-      x,
-      y,
-      size,
-      strokeWidth
-    );
+    return (this as Container)
+      .put(new GraphNode())
+      .init(text, x, y, size, strokeWidth);
   },
   binaryNode(
     text: string,
@@ -158,13 +151,9 @@ extend(Container, {
     size: number,
     strokeWidth: number
   ) {
-    return ((this as Container).put(new BinaryNode()) as BinaryNode).init(
-      text,
-      x,
-      y,
-      size,
-      strokeWidth
-    );
+    return (this as Container)
+      .put(new BinaryNode())
+      .init(text, x, y, size, strokeWidth);
   },
   avlNode(
     text: string,
@@ -173,13 +162,9 @@ extend(Container, {
     size: number,
     strokeWidth: number
   ) {
-    return ((this as Container).put(new AVLNode()) as AVLNode).init(
-      text,
-      x,
-      y,
-      size,
-      strokeWidth
-    );
+    return (this as Container)
+      .put(new AVLNode())
+      .init(text, x, y, size, strokeWidth);
   },
   connection<T extends TextCircle>(
     start: T,
@@ -188,13 +173,9 @@ extend(Container, {
     bend?: number,
     directed?: boolean
   ) {
-    return ((this as Container).put(new Connection<T>()) as Connection<T>).init(
-      start,
-      end,
-      strokeWidth,
-      bend,
-      directed
-    );
+    return (this as Container)
+      .put(new Connection<T>())
+      .init(start, end, strokeWidth, bend, directed);
   },
   bTreeNode(
     leaf: boolean,
@@ -204,9 +185,9 @@ extend(Container, {
     objectSize: number,
     strokeWidth: number
   ) {
-    return (
-      (this as Container).put(new BTreeNode()) as unknown as BTreeNode
-    ).init(leaf, nvalues, x, y, objectSize, strokeWidth);
+    return (this as Container)
+      .put(new BTreeNode())
+      .init(leaf, nvalues, x, y, objectSize, strokeWidth);
   },
   bTreeConnection(
     start: BTreeNode,
@@ -215,9 +196,9 @@ extend(Container, {
     numChildren: number,
     strokeWidth: number
   ) {
-    return (
-      (this as Container).put(new BTreeConnection()) as BTreeConnection
-    ).init(start, end, child, numChildren, strokeWidth);
+    return (this as Container)
+      .put(new BTreeConnection())
+      .init(start, end, child, numChildren, strokeWidth);
   },
 });
 
