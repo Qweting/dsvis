@@ -53,8 +53,8 @@ export class BinaryHeap extends Engine {
     }
 
     async swap(j: number, k: number, message: string, ...args: Array<string>) {
-        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
-        if (!this.heapArray) throw new Error("Heap array not initialised");
+        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
+        if (this.heapArray === null) throw new Error("Heap array not initialised");
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
         const jLabel = this.Svg.textCircle(jNode.getText(), jNode.cx(), jNode.cy(), this.getObjectSize(), this.getStrokeWidth());
         const kLabel = this.Svg.textCircle(kNode.getText(), kNode.cx(), kNode.cy(), this.getObjectSize(), this.getStrokeWidth());
@@ -70,9 +70,9 @@ export class BinaryHeap extends Engine {
 
 
     async insertOne(value: string) {
-        if (!this.heapSize) throw new Error("Heap size not initialised");
-        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
-        if (!this.heapArray) throw new Error("Heap array not initialised");
+        if (this.heapSize === null) throw new Error("Heap size not initialised");
+        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
+        if (this.heapArray === null) throw new Error("Heap array not initialised");
         if (this.heapSize >= this.arraySize) {
             await this.pause('general.full');
             return;
@@ -134,10 +134,10 @@ export class BinaryHeap extends Engine {
 
 
     async deleteMin() {
-        if (!this.heapSize) throw new Error("Heap size not initialised");
-        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
-        if (!this.heapArray) throw new Error("Heap array not initialised");
-        if (!this.treeRoot) throw new Error("Tree root not initialised");
+        if (this.heapSize === null) throw new Error("Heap size not initialised");
+        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
+        if (this.heapArray === null) throw new Error("Heap array not initialised");
+        if (this.treeRoot === null) throw new Error("Tree root not initialised");
         if (this.heapSize === 0) {
             await this.pause('general.empty');
             return;
