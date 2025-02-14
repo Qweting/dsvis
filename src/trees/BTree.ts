@@ -12,6 +12,7 @@ import {
   parseValues,
 } from "../../src/engine";
 import { BTreeNode } from "../../src/objects/btree-node";
+import { BSTMessages } from "./BST";
 
 type BTreeToolbarItems = EngineToolbarItems & {
   maxDegree: HTMLSelectElement;
@@ -22,7 +23,22 @@ export class BTree extends Engine {
   treeRoot: BTreeNode | null = null;
 
   // @ts-expect-error TODO fix message typing
-  messages = BTreeMessages;
+  messages = {
+    ...BSTMessages,
+    ...BTreeMessages,
+    find: {
+      ...BSTMessages.find,
+      ...BTreeMessages.find,
+    },
+    insert: {
+      ...BSTMessages.insert,
+      ...BTreeMessages.insert,
+    },
+    delete: {
+      ...BSTMessages.delete,
+      ...BTreeMessages.delete,
+    },
+  };
 
   toolbar: BTreeToolbarItems;
 
@@ -34,7 +50,7 @@ export class BTree extends Engine {
   getToolbar(): BTreeToolbarItems {
     const toolbar = super.getToolbar();
 
-    this.toolbar.algorithmControls.insertAdjacentHTML(
+    toolbar.algorithmControls.insertAdjacentHTML(
       "beforeend",
       `<span class="formgroup"><label>
         Max degree:
