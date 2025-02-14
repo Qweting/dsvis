@@ -40,11 +40,10 @@ export class BTree extends Engine {
     },
   };
 
-  toolbar: BTreeToolbarItems;
+  toolbar!: BTreeToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
   constructor(containerSelector: string) {
     super(containerSelector);
-    this.toolbar = this.getToolbar();
   }
 
   getToolbar(): BTreeToolbarItems {
