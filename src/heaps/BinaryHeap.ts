@@ -4,11 +4,22 @@
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
-    arraySize = 28;
-    initialValues;
+import { compare, Engine } from "src/engine";
+import { BinaryNode, Children } from "src/objects/binary-node";
+import { DSArray } from "src/objects/dsarray";
 
-    initialise(initialValues = null) {
+export class BinaryHeap extends Engine {
+    // @ts-expect-error TODO fix message typing
+    messages = BinaryHeapMessages;
+
+    arraySize: number = 28;
+    initialValues: Array<string> | null = null;
+    treeRoot: BinaryNode | null = null;
+    treeNodes: Array<BinaryNode> | null = null;
+    heapArray: DSArray | null = null;
+    heapSize: number | null = null;
+
+    initialise(initialValues: Array<string> | null = null) {
         this.initialValues = initialValues;
         super.initialise();
     }
@@ -18,8 +29,8 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
-        this.heapArray = this.SVG.dsArray(this.arraySize, xRoot, this.SVG.viewbox().height - yRoot);
-        if (this.heapArray.x() < this.$Svg.margin)
+        this.heapArray = this.Svg.dsArray(this.arraySize, xRoot, this.Svg.viewbox().height - yRoot);
+        if (Number(this.heapArray.x()) < this.$Svg.margin)
             this.heapArray.x(this.$Svg.margin);
         this.heapSize = 0;
         if (this.initialValues) {
@@ -31,19 +42,24 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
 
     resizeTree() {
         const animate = !this.State.resetting;
-        this.treeRoot?.resize(...this.getTreeRoot(), animate);
+        this.treeRoot?.resize(...this.getTreeRoot(), 
+        this.$Svg.margin,
+        this.getNodeSpacing(),
+        animate ? this.getAnimationSpeed() : 0);
     }
 
-    async insert(...values) {
+    async insert(...values: Array<string>) {
         for (const val of values) await this.insertOne(val);
     }
 
-    async swap(j, k, message, ...args) {
+    async swap(j: number, k: number, message: string, ...args: Array<string>) {
+        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
+        if (!this.heapArray) throw new Error("Heap array not initialised");
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
-        const jLabel = this.SVG.textCircle(jNode.getText(), jNode.cx(), jNode.cy());
-        const kLabel = this.SVG.textCircle(kNode.getText(), kNode.cx(), kNode.cy());
-        jLabel.setCenter(kLabel.cx(), kLabel.cy(), true);
-        kLabel.setCenter(jLabel.cx(), jLabel.cy(), true);
+        const jLabel = this.Svg.textCircle(jNode.getText(), jNode.cx(), jNode.cy(), this.getObjectSize(), this.getStrokeWidth());
+        const kLabel = this.Svg.textCircle(kNode.getText(), kNode.cx(), kNode.cy(), this.getObjectSize(), this.getStrokeWidth());
+        jLabel.setCenter(kLabel.cx(), kLabel.cy(), this.getAnimationSpeed());
+        kLabel.setCenter(jLabel.cx(), jLabel.cy(), this.getAnimationSpeed());
         this.heapArray.swap(j, k, true);
         await this.pause(message, ...args);
         jNode.setText(kLabel.getText());
@@ -53,7 +69,10 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
     }
 
 
-    async insertOne(value) {
+    async insertOne(value: string) {
+        if (!this.heapSize) throw new Error("Heap size not initialised");
+        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
+        if (!this.heapArray) throw new Error("Heap array not initialised");
         if (this.heapSize >= this.arraySize) {
             await this.pause('general.full');
             return;
@@ -62,20 +81,20 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         let currentIndex = this.heapSize;
         let parentIndex = Math.floor((currentIndex - 1) / 2);
         let parentNode = this.treeNodes[parentIndex];
-        const arrayLabel = this.SVG.textCircle(value, ...this.getNodeStart());
-        let treeNode = this.SVG.binaryNode(value, ...this.getNodeStart());
+        const arrayLabel = this.Svg.textCircle(value, ...this.getNodeStart(), this.getObjectSize(), this.getStrokeWidth());
+        let treeNode = this.Svg.binaryNode(value, ...this.getNodeStart(), this.getObjectSize(), this.getStrokeWidth());
         this.treeNodes[currentIndex] = treeNode;
         await this.pause('insert.value', value);
 
-        arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), true);
+        arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), this.getAnimationSpeed());
         if (currentIndex === 0) {
             this.treeRoot = treeNode;
         } else {
             const direction = (currentIndex - 1) / 2 === parentIndex ? "left" : "right";
-            parentNode.setChild(direction, treeNode);
+            parentNode.setChild(direction, treeNode, this.getStrokeWidth());
         }
         this.resizeTree();
-        await this.pause();
+        await this.pause(undefined);
 
         arrayLabel.remove();
         this.heapArray.setDisabled(currentIndex, false);
@@ -92,7 +111,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             this.heapArray.setIndexHighlight(parentIndex, true);
             const direction = (currentIndex - 1) / 2 === parentIndex ? "left" : "right";
             parentNode.setChildHighlight(direction, true);
-            const cmp = DSVis.compare(value, parentValue);
+            const cmp = compare(value, parentValue);
             if (cmp >= 0) {
                 await this.pause('insert.stopShift', parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
@@ -115,6 +134,10 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
 
 
     async deleteMin() {
+        if (!this.heapSize) throw new Error("Heap size not initialised");
+        if (!this.treeNodes) throw new Error("Tree nodes not initialised");
+        if (!this.heapArray) throw new Error("Heap array not initialised");
+        if (!this.treeRoot) throw new Error("Tree root not initialised");
         if (this.heapSize === 0) {
             await this.pause('general.empty');
             return;
@@ -122,13 +145,13 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         this.heapSize--;
         const minValue = this.heapArray.getValue(0);
 
-        const arrayLabel = this.SVG.textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy());
+        const arrayLabel = this.Svg.textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy(), this.getObjectSize(), this.getStrokeWidth());
         if (this.heapSize === 0) {
             await this.pause('delete.root', minValue);
-            this.heapArray.setValue(0);
-            arrayLabel.setCenter(...this.getNodeStart(), true);
-            this.treeRoot.setCenter(...this.getNodeStart(), true);
-            await this.pause();
+            this.heapArray.setValue(0, "");
+            arrayLabel.setCenter(...this.getNodeStart(), this.getAnimationSpeed());
+            this.treeRoot.setCenter(...this.getNodeStart(), this.getAnimationSpeed());
+            await this.pause(undefined);
             arrayLabel.remove();
             this.heapArray.setDisabled(0, true);
             this.treeRoot.remove();
@@ -136,14 +159,14 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             return;
         }
 
-        const treeLabel = this.SVG.textCircle(minValue, this.treeRoot.cx(), this.treeRoot.cy());
+        const treeLabel = this.Svg.textCircle(minValue, this.treeRoot.cx(), this.treeRoot.cy(), this.getObjectSize(), this.getStrokeWidth());
         await this.pause('remove.minValue', minValue);
-        this.heapArray.setValue(0);
-        this.treeRoot.setText();
-        arrayLabel.setCenter(...this.getNodeStart(), true);
-        treeLabel.setCenter(...this.getNodeStart(), true);
+        this.heapArray.setValue(0, "");
+        this.treeRoot.setText(null);
+        arrayLabel.setCenter(...this.getNodeStart(), this.getAnimationSpeed());
+        treeLabel.setCenter(...this.getNodeStart(), this.getAnimationSpeed());
         const currentValue = this.heapArray.getValue(this.heapSize);
-        await this.pause();
+        await this.pause(undefined);
         await this.swap(0, this.heapSize, 'swap.lastToFirst', currentValue);
         this.treeNodes[this.heapSize].remove();
         this.heapArray.setDisabled(this.heapSize, true);
@@ -163,9 +186,9 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             }
 
             await this.pause('delete.shiftDown');
-            let direction = "left";
+            let direction: Children = "left";
             let childValue = this.heapArray.getValue(childIndex);
-            if (childIndex + 1 < this.heapSize && DSVis.compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
+            if (childIndex + 1 < this.heapSize && compare(childValue, this.heapArray.getValue(childIndex + 1)) > 0) {
                 direction = "right";
                 childIndex++;
                 childValue = this.heapArray.getValue(childIndex);
@@ -176,7 +199,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             currentNode.setChildHighlight(direction, true);
             childNode.setHighlight(true);
 
-            const cmp = DSVis.compare(currentValue, childValue);
+            const cmp = compare(currentValue, childValue);
             if (cmp <= 0) {
                 await this.pause('delete.stopShift', currentValue, childValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
@@ -196,7 +219,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             currentNode = childNode;
         }
 
-        await this.pause();
+        await this.pause(undefined);
         arrayLabel.remove();
         treeLabel.remove();
         this.resizeTree();
@@ -205,29 +228,29 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
 };
 
 
-DSVis.BinaryHeap.messages = {
+export const BinaryHeapMessages = {
     general: {
         empty: "Heap is empty!",
         full: "Heap is full!",
         finished: "Finished",
     },
     insert: {
-        value: (value) => `Insert value: ${value}`,
+        value: (value: string) => `Insert value: ${value}`,
         shiftUp: "Shift the value upwards",
-        stopShift: (parentValue) => `The parent ${parentValue} is not larger: stop here`,
-        shiftAgain: (parentValue) => `The parent ${parentValue} is larger`,
+        stopShift: (parentValue: string) => `The parent ${parentValue} is not larger: stop here`,
+        shiftAgain: (parentValue: string) => `The parent ${parentValue} is larger`,
     },
     delete: {
-        root: (minValue) => `Remove the root: ${minValue}`,
-        minValue: (minValue) => `Remove the minimum value: ${minValue}`,
+        root: (minValue: string) => `Remove the root: ${minValue}`,
+        minValue: (minValue: string) => `Remove the minimum value: ${minValue}`,
         lastHeap: "Remove the new last heap value",
         shiftDown: "Shift the value downwards",
-        stopShift: (currentValue, childValue) => `The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`,
-        shiftAgain: (currentValue, childValue) => `The value ${currentValue} is larger than the smallest child ${childValue}`,
+        stopShift: (currentValue: string, childValue: string) => `The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`,
+        shiftAgain: (currentValue: string, childValue: string) => `The value ${currentValue} is larger than the smallest child ${childValue}`,
     },
     swap: {
-        swap: (a, b) => `Swap ${a} and ${b}`,
-        lastToFirst: (val) => `Swap in the last heap value to the first position: ${val}`,
+        swap: (a: number, b: number) => `Swap ${a} and ${b}`,
+        lastToFirst: (val: number) => `Swap in the last heap value to the first position: ${val}`,
     },
 };
 

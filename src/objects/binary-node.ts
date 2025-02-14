@@ -2,7 +2,7 @@ import { Path } from "@svgdotjs/svg.js";
 import { Connection } from "./connection";
 import { GraphNode } from "./graph-node";
 
-type Children = "left" | "right";
+export type Children = "left" | "right";
 export class BinaryNode extends GraphNode {
   $incoming: { parent: Connection<BinaryNode> | null } = {
     parent: null,

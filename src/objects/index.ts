@@ -7,6 +7,7 @@ import { Connection } from "./connection";
 import { GraphNode } from "./graph-node";
 import { HighlightCircle } from "./highlight-circle";
 import { TextCircle } from "./text-circle";
+import { Engine } from "../../src/engine";
 
 declare module "@svgdotjs/svg.js" {
   interface Svg {
@@ -96,7 +97,7 @@ extend(Element, {
     return [(this as Element).cx(), (this as Element).cy()] as [number, number];
   },
   setCenter(x: number, y: number, animationDuration: number = 0) {
-    (this as Element).animateSVG(animationDuration).center(x, y);
+    (this as Element).engine().animate(this as Element, animationDuration > 0).center(x, y);
     return this as Element;
   },
   dmoveCenter(dx: number, dy: number, animationDuration: number = 0) {
