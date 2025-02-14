@@ -64,7 +64,9 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
     animationDuration: number = 0
   ): this {
     Object.assign(this.$coords, newCoords);
-    this.animateSVG(animationDuration).plot(this._getPath());
+    (this.engine().animate(this, animationDuration > 0) as this).plot(
+      this._getPath()
+    );
     if (this.isDirected()) this._redrawArrow(animationDuration);
     return this;
   }
@@ -79,7 +81,9 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
     const marker = this.reference("marker-end") as Marker;
     const radius = this.$coords.r2;
     const stroke = this.attr("stroke-width");
-    marker?.animateSVG(animationDuration).attr({ refX: radius / stroke + 5 });
+    this.engine()
+      .animate(marker, animationDuration > 0)
+      .attr({ refX: radius / stroke + 5 });
   }
 
   toString(): string {
