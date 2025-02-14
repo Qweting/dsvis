@@ -24,7 +24,7 @@ export class TextCircle extends G {
     return this.$text?.text() || "";
   }
 
-  setText(text: string): this {
+  setText(text: string | null): this {
     if (text == null) text = "";
     text = `${text}`;
     // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)

@@ -9,13 +9,17 @@ import { HighlightCircle } from "./highlight-circle";
 import { TextCircle } from "./text-circle";
 
 declare module "@svgdotjs/svg.js" {
+  interface Svg {
+    $engine: Engine;
+  }
+
   interface Element {
     getHighlight(): boolean;
     setHighlight(high: boolean | null): this;
     getCenter(): [number, number];
     setCenter(x: number, y: number, animationDuration?: number): this;
     dmoveCenter(dx: number, dy: number, animationDuration?: number): this;
-    animateSVG(duration: number): this;
+    engine(): Engine;
   }
 
   interface Container {

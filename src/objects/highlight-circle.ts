@@ -16,7 +16,9 @@ export class HighlightCircle extends Circle {
   }
 
   setSize(diameter: number, animationDuration: number) {
-    this.animate(animationDuration).attr("r", String(diameter / 2));
+    this.engine()
+      .animate(this, animationDuration > 0)
+      .attr("r", String(diameter / 2));
     return this;
   }
 }
