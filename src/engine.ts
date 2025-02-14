@@ -148,6 +148,7 @@ export class Engine {
 
     this.Svg = new Svg(svgContainer);
     this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
+    this.Svg.$engine = this;
 
     const debugParam = new URLSearchParams(window.location.href).get("debug");
     this.DEBUG = Boolean(debugParam || false);
