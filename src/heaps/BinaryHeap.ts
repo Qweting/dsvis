@@ -4,9 +4,9 @@
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-import { compare, Engine } from "src/engine";
-import { BinaryNode, Children } from "src/objects/binary-node";
-import { DSArray } from "src/objects/dsarray";
+import { compare, Engine } from "../../src/engine";
+import { BinaryNode, Children } from "../../src/objects/binary-node";
+import { DSArray } from "../../src/objects/dsarray";
 
 export class BinaryHeap extends Engine {
     // @ts-expect-error TODO fix message typing

@@ -470,10 +470,13 @@ export class Engine {
   ///////////////////////////////////////////////////////////////////////////////
   // Executing the actions
 
-  async submit(method: string, field: HTMLInputElement): Promise<boolean> {
+  async submit(method: string, field: HTMLInputElement | null): Promise<boolean> {
     try {
-      const rawValue = field.value;
-      field.value = "";
+      let rawValue: string = "";
+      if (field) {
+        rawValue = field.value;
+        field.value = "";
+      }
       const values = parseValues(rawValue);
       if (values) await this.execute(method, values);
       return true;
