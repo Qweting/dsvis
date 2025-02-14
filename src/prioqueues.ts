@@ -12,6 +12,8 @@ const PRIOQUEUES = {
   BinaryHeap: BinaryHeap,
 } as const;
 
+initialisePrioQueues('#prioqueuesContainer');
+
 function initialisePrioQueues(containerID: string) {
     const algoSelector = document.querySelector(`${containerID} .algorithmSelector`) as HTMLSelectElement;
     if (!algoSelector) throw new Error("Could not find algo selector");

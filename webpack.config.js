@@ -5,6 +5,7 @@ module.exports = {
   devtool: "eval-source-map",
   entry: {
     collections: "./src/collections.ts",
+    prioqueues: "./src/prioqueues.ts",
   },
   resolve: {
     extensions: [".ts", ".js"],
