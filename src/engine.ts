@@ -470,7 +470,10 @@ export class Engine {
   ///////////////////////////////////////////////////////////////////////////////
   // Executing the actions
 
-  async submit(method: string, field: HTMLInputElement | null): Promise<boolean> {
+  async submit(
+    method: string,
+    field: HTMLInputElement | null
+  ): Promise<boolean> {
     try {
       let rawValue: string = "";
       if (field) {
@@ -747,7 +750,7 @@ export function parseValues(
 export function addReturnSubmit(
   field: HTMLInputElement,
   allowed: string,
-  action: () => void
+  action?: () => void
 ): void {
   allowed =
     allowed === "int"

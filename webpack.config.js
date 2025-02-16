@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     collections: "./src/collections.ts",
     prioqueues: "./src/prioqueues.ts",
+    "avl-quiz": "./src/quizzes/AVL-quiz.ts",
   },
   resolve: {
     extensions: [".ts", ".js"],

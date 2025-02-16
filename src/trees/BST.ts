@@ -43,7 +43,7 @@ export class BST extends Engine {
     return { ...toolbar, showNullNodes };
   }
 
-  initialise(initialValues = null): this {
+  initialise(initialValues: string[] | null = null): this {
     this.initialValues = parseValues(initialValues);
     super.initialise();
     return this;

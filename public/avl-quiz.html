@@ -1,102 +1,157 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<link rel="stylesheet" href="dsvis.css">
-<script type="text/javascript" src="lib/svg.min.js"></script>
-<script type="text/javascript" src="src/engine.js"></script>
-<script type="text/javascript" src="src/objects/basicobjects.js"></script>
-<script type="text/javascript" src="src/trees/BST.js"></script>
-<script type="text/javascript" src="src/trees/AVL.js"></script>
-<script type="text/javascript" src="src/quizzes/AVL-quiz.js"></script>
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="dsvis.css" />
+    <script src="js/avl-quiz.js" defer type="text/javascript"></script>
+  </head>
 
-<body onload="initialiseAVLQuiz('#avlquizContainer')">
+  <body>
+    <header>
+      <h1>
+        <a href="index.html"
+          >Visualizations of data structures and algorithms</a
+        >
+      </h1>
+    </header>
 
-<header>
-  <h1><a href="index.html">Visualizations of data structures and algorithms</a></h1>
-</header>
+    <main>
+      <section id="avlquizContainer">
+        <h2>Playground for AVL trees</h2>
 
-<main>
-<section id="avlquizContainer">
+        <fieldset class="algorithmControls">
+          <span class="formgroup">
+            <label
+              >Create:
+              <input
+                class="insertField disableWhenRunning"
+                type="text"
+                size="1"
+                maxlength="4"
+              />
+              <input
+                class="createLeft disableWhenRunning"
+                type="submit"
+                value="Left child"
+              />
+              <input
+                class="createRight disableWhenRunning"
+                type="submit"
+                value="Right child"
+              />
+            </label>
+          </span>
+          <span class="formgroup">
+            <label
+              >Move to:
+              <input
+                class="moveParent disableWhenRunning"
+                type="submit"
+                value="Parent"
+              />
+              <input
+                class="moveLeft disableWhenRunning"
+                type="submit"
+                value="Left child"
+              />
+              <input
+                class="moveRight disableWhenRunning"
+                type="submit"
+                value="Right child"
+              />
+            </label>
+          </span>
+          <span class="formgroup">
+            <label
+              >Rotate:
+              <input
+                class="rotateLeft disableWhenRunning"
+                type="submit"
+                value="Left"
+              />
+              <input
+                class="rotateRight disableWhenRunning"
+                type="submit"
+                value="Right"
+              />
+            </label>
+          </span>
+          <span class="formgroup">
+            <label
+              >Action:
+              <input
+                class="markNode disableWhenRunning"
+                type="submit"
+                value="Mark node"
+              />
+              <input
+                class="copyToMark disableWhenRunning"
+                type="submit"
+                value="Copy to mark"
+              />
+              <input
+                class="deleteNode disableWhenRunning"
+                type="submit"
+                value="Delete leaf"
+              />
+            </label>
+          </span>
+        </fieldset>
 
-<h2>Playground for AVL trees</h2>
+        <div>
+          <svg></svg>
+        </div>
 
-<fieldset class="algorithmControls">
-  <span class="formgroup">
-    <label>Create:
-      <input class="insertField disableWhenRunning" type="text" size="1" maxlength="4"/>
-      <input class="createLeft disableWhenRunning" type="submit" value="Left child"/>
-      <input class="createRight disableWhenRunning" type="submit" value="Right child"/>
-    </label>
-  </span>
-  <span class="formgroup">
-    <label>Move to:
-      <input class="moveParent disableWhenRunning" type="submit" value="Parent"/>
-      <input class="moveLeft disableWhenRunning" type="submit" value="Left child"/>
-      <input class="moveRight disableWhenRunning" type="submit" value="Right child"/>
-    </label>
-  </span>
-  <span class="formgroup">
-    <label>Rotate:
-      <input class="rotateLeft disableWhenRunning" type="submit" value="Left"/>
-      <input class="rotateRight disableWhenRunning" type="submit" value="Right"/>
-    </label>
-  </span>
-  <span class="formgroup">
-    <label>Action:
-      <input class="markNode disableWhenRunning" type="submit" value="Mark node"/>
-      <input class="copyToMark disableWhenRunning" type="submit" value="Copy to mark"/>
-      <input class="deleteNode disableWhenRunning" type="submit" value="Delete leaf"/>
-    </label>
-  </span>
-</fieldset>
+        <fieldset class="generalControls">
+          <span class="formgroup">
+            <input
+              class="restartQuiz disableWhenRunning"
+              type="submit"
+              value="Restart"
+            />
+          </span>
+          <span class="formgroup">
+            <button class="fastBackward">&lt;&lt;</button>
+            <button class="stepBackward">&lt;</button>
+            <button class="toggleRunner">Run</button>
+            <button class="stepForward">&gt;</button>
+            <button class="fastForward">&gt;&gt;</button>
+          </span>
+          <span class="formgroup">
+            <label
+              >Speed:
+              <select class="animationSpeed">
+                <option value="1200">Slowest</option>
+                <option value="700" selected>Slow</option>
+                <option value="300">Fast</option>
+                <option value="100">Fastest</option>
+              </select>
+            </label>
+          </span>
+          <span class="formgroup">
+            <label
+              >Node size:
+              <select class="objectSize">
+                <option value="12">Tiny</option>
+                <option value="20">Small</option>
+                <option value="28">Medium</option>
+                <option value="40" selected>Large</option>
+                <option value="50">Huge</option>
+              </select>
+            </label>
+          </span>
+        </fieldset>
+      </section>
+    </main>
 
-<div>
-  <svg></svg>
-</div>
-
-<fieldset class="generalControls">
-  <span class="formgroup">
-    <input class="restartQuiz disableWhenRunning" type="submit" value="Restart"/>
-  </span>
-  <span class="formgroup">
-    <button class="fastBackward">&lt;&lt;</button>
-    <button class="stepBackward">&lt;</button>
-    <button class="toggleRunner">Run</button>
-    <button class="stepForward">&gt;</button>
-    <button class="fastForward">&gt;&gt;</button>
-  </span>
-  <span class="formgroup">
-    <label>Speed:
-      <select class="animationSpeed">
-        <option value="1200">Slowest</option>
-        <option value="700" selected>Slow</option>
-        <option value="300">Fast</option>
-        <option value="100">Fastest</option>
-      </select>
-    </label>
-  </span>
-  <span class="formgroup">
-    <label>Node size:
-      <select class="objectSize">
-        <option value="12">Tiny</option>
-        <option value="20">Small</option>
-        <option value="28">Medium</option>
-        <option value="40" selected>Large</option>
-        <option value="50">Huge</option>
-    </select>
-    </label>
-  </span>
-</fieldset>
-
-</section>
-</main>
-
-<footer>
-  <p>&copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a>,
-    open source code <a href="https://github.com/ChalmersGU-data-structure-courses/dsvis">on GitHub</a></p>
-</footer>
-
-</body>
+    <footer>
+      <p>
+        &copy;2024 <a href="https://github.com/heatherleaf">Peter Ljunglöf</a>,
+        open source code
+        <a href="https://github.com/ChalmersGU-data-structure-courses/dsvis"
+          >on GitHub</a
+        >
+      </p>
+    </footer>
+  </body>
 </html>
