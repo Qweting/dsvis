@@ -1,6 +1,6 @@
 import { Element, Marker, Path } from "@svgdotjs/svg.js";
 import { BTreeNode } from "./btree-node";
-import { TextCircle } from "./text-circle";
+import { GraphNode } from "./graph-node";
 
 type ConnectionCoordinates = {
   x1: number;
@@ -10,7 +10,7 @@ type ConnectionCoordinates = {
   r2: number;
 };
 
-export class Connection<T extends TextCircle | BTreeNode> extends Path {
+export class Connection<T extends GraphNode | BTreeNode> extends Path {
   $coords: ConnectionCoordinates = {
     r2: 0,
     x1: 0,
@@ -18,26 +18,24 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
     y1: 0,
     y2: 0,
   };
-  $start: T | null = null;
-  $end: T | null = null;
+  $start: T;
+  $end: T;
   $bend: number = 0;
 
-  init(
-    start: T,
-    end: T,
-    strokeWidth: number,
-    bend: number = 0,
-    directed: boolean = false
-  ): this {
+  constructor(start: T, end: T) {
+    super();
     this.$start = start;
     this.$end = end;
-    Object.assign(this.$coords, {
+    this.$coords = {
       x1: start.cx(),
       y1: start.cy(),
       x2: end.cx(),
       y2: end.cy(),
       r2: end.getSize() / 2,
-    });
+    };
+  }
+
+  init(strokeWidth: number, bend: number = 0, directed: boolean = false): this {
     this.stroke({ width: strokeWidth });
     this.back();
     this.setBend(bend);
@@ -78,9 +76,13 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
   }
 
   _redrawArrow(animationDuration: number = 0): void {
-    const marker = this.reference("marker-end") as Marker;
+    const marker = this.reference<Marker>("marker-end");
     const radius = this.$coords.r2;
     const stroke = this.attr("stroke-width");
+
+    if (!marker || typeof stroke !== "number")
+      throw Error("Marker must exist and stroke must be a number");
+
     this.engine()
       .animate(marker, animationDuration > 0)
       .attr({ refX: radius / stroke + 5 });
@@ -90,11 +92,11 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
     return `${this.getStart()} --> ${this.getEnd()}`;
   }
 
-  getStart(): T | null {
+  getStart(): T {
     return this.$start;
   }
 
-  getEnd(): T | null {
+  getEnd(): T {
     return this.$end;
   }
 
@@ -125,5 +127,9 @@ export class Connection<T extends TextCircle | BTreeNode> extends Path {
     const xControl = (C.x1 + C.x2) / 2 + (C.y1 - C.y2) * this.getBend();
     const yControl = (C.y1 + C.y2) / 2 + (C.x2 - C.x1) * this.getBend();
     return `M ${C.x1} ${C.y1} Q ${xControl} ${yControl} ${C.x2} ${C.y2}`;
+  }
+
+  getCoords(): ConnectionCoordinates {
+    return this.$coords;
   }
 }

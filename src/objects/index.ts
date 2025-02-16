@@ -1,14 +1,14 @@
 import { Container, Element, extend, Svg } from "@svgdotjs/svg.js";
+import { Engine } from "../../src/engine";
 import { AVLNode } from "./avl-node";
 import { BinaryNode } from "./binary-node";
 import { BTreeConnection } from "./btree-connection";
 import { BTreeNode } from "./btree-node";
 import { Connection } from "./connection";
+import { DSArray } from "./dsarray";
 import { GraphNode } from "./graph-node";
 import { HighlightCircle } from "./highlight-circle";
 import { TextCircle } from "./text-circle";
-import { Engine } from "../../src/engine";
-import { DSArray } from "./dsarray";
 
 declare module "@svgdotjs/svg.js" {
   interface Svg {
@@ -60,7 +60,7 @@ declare module "@svgdotjs/svg.js" {
       size: number,
       strokeWidth: number
     ): AVLNode;
-    connection<T extends TextCircle>(
+    connection<T extends GraphNode>(
       start: T,
       end: T,
       strokeWidth: number,
@@ -168,7 +168,7 @@ extend(Container, {
       .put(new AVLNode())
       .init(text, x, y, size, strokeWidth);
   },
-  connection<T extends TextCircle>(
+  connection<T extends GraphNode>(
     start: T,
     end: T,
     strokeWidth: number,
@@ -176,8 +176,8 @@ extend(Container, {
     directed?: boolean
   ) {
     return (this as Container)
-      .put(new Connection<T>())
-      .init(start, end, strokeWidth, bend, directed);
+      .put(new Connection<T>(start, end))
+      .init(strokeWidth, bend, directed);
   },
   bTreeNode(
     leaf: boolean,
@@ -199,11 +199,11 @@ extend(Container, {
     strokeWidth: number
   ) {
     return (this as Container)
-      .put(new BTreeConnection())
-      .init(start, end, child, numChildren, strokeWidth);
+      .put(new BTreeConnection(start, end, child, numChildren))
+      .init(strokeWidth);
   },
-  dsArray: function(size: number, x: number, y: number, horizontal: boolean) {
-      return ((this as Container).put(new DSArray()) as DSArray).init(size, x, y, horizontal);
+  dsArray: function (size: number, x: number, y: number, horizontal: boolean) {
+    return (this as Container).put(new DSArray()).init(size, x, y, horizontal);
   },
 });
 

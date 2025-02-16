@@ -197,9 +197,8 @@ export class BTreeNode extends G {
 
   getChildren(): BTreeNode[] {
     return (
-      this.$children
-        ?.map((e) => e?.getEnd())
-        .filter((e) => e !== null && e !== undefined) || []
+      this.$children?.map((e) => e?.getEnd()).filter((e) => e !== undefined) ||
+      []
     );
   }
 
@@ -238,7 +237,7 @@ export class BTreeNode extends G {
 
   setChild(i: number, child: BTreeNode | null, strokeWidth: number): this {
     if (this.$children?.[i]) {
-      const oldChild = this.$children[i].getEnd()!;
+      const oldChild = this.$children[i].getEnd();
       oldChild.$parent = null;
       this.$children[i].remove();
     }
@@ -247,7 +246,7 @@ export class BTreeNode extends G {
     } else {
       if (child.$parent) {
         const oldParent = child.$parent.getStart();
-        oldParent?.$children?.forEach((oldParentChild) => {
+        oldParent.$children?.forEach((oldParentChild) => {
           if (child.$parent === oldParentChild) {
             oldParentChild = null;
           }
@@ -295,8 +294,8 @@ export class BTreeNode extends G {
 
     if (this.$parent) {
       const i = this.getParentIndex();
-      if (i && this.$parent.getStart()?.$children?.[i])
-        this.$parent.getStart()!.$children![i] = null;
+      if (i !== null && this.$parent.getStart().$children?.[i])
+        this.$parent.getStart().$children![i] = null;
       this.$parent.remove();
       this.$parent = null;
     }

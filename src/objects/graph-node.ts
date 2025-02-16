@@ -46,13 +46,13 @@ export class GraphNode extends TextCircle {
   getPredecessors(): GraphNode[] {
     return Object.values(this.$incoming)
       .map((e) => e?.getStart())
-      .filter((e) => e !== undefined && e !== null);
+      .filter((e) => e !== undefined);
   }
 
   getSuccessors(): GraphNode[] {
     return Object.values(this.$outgoing)
       .map((e) => e?.getEnd())
-      .filter((e) => e !== undefined && e !== null);
+      .filter((e) => e !== undefined);
   }
 
   getPredecessor(inKey: string): GraphNode | null {
@@ -82,7 +82,7 @@ export class GraphNode extends TextCircle {
     const outEdge = this.$outgoing[outKey];
     if (outEdge) {
       const oldSuccessor = outEdge.getEnd();
-      const oldIncoming = oldSuccessor?.$incoming;
+      const oldIncoming = oldSuccessor.$incoming;
       for (const k in oldIncoming) {
         if (oldIncoming[k] === outEdge) delete oldIncoming[k];
       }
@@ -92,7 +92,7 @@ export class GraphNode extends TextCircle {
       const inEdge = successor.$incoming[inKey];
       if (inEdge) {
         const oldPredecessor = inEdge.getStart();
-        const oldOutgoing = oldPredecessor?.$outgoing;
+        const oldOutgoing = oldPredecessor.$outgoing;
         for (const k in oldOutgoing) {
           if (oldOutgoing[k] === inEdge) delete oldOutgoing[k];
         }
@@ -142,14 +142,13 @@ export class GraphNode extends TextCircle {
     return this;
   }
 
-  // TODO: Better naming: Remove what? Itself
   // TODO: Refactor to use foreach loop?
   remove(): this {
     for (const outKey in this.$outgoing) {
       const outEdge = this.$outgoing[outKey];
       if (!outEdge) continue;
       const end = outEdge.getEnd();
-      const incoming = end?.$incoming;
+      const incoming = end.$incoming;
       for (const inKey in incoming) {
         if (outEdge === incoming[inKey]) {
           delete incoming[inKey];
@@ -161,7 +160,7 @@ export class GraphNode extends TextCircle {
       const inEdge = this.$incoming[inKey];
       if (!inEdge) continue;
       const start = inEdge.getStart();
-      const outgoing = start?.$outgoing;
+      const outgoing = start.$outgoing;
       for (const outKey in outgoing) {
         if (inEdge === outgoing[outKey]) {
           delete outgoing[outKey];
