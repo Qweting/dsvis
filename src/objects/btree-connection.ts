@@ -2,13 +2,13 @@ import {BTreeNode} from "./btree-node";
 import {Connection} from "./connection";
 
 type BTreeConnectionCoordinates = {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  r2: number;
-  n: number;
-  i: number;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    r2: number;
+    n: number;
+    i: number;
 };
 
 export class BTreeConnection extends Connection<BTreeNode> {

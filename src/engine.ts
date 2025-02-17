@@ -2,22 +2,22 @@ import {Element, Text} from "@svgdotjs/svg.js";
 import {Svg} from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
 export type EngineToolbarItems = {
-  animationSpeed: HTMLSelectElement;
-  objectSize: HTMLSelectElement;
+    animationSpeed: HTMLSelectElement;
+    objectSize: HTMLSelectElement;
 
-  generalControls: HTMLFieldSetElement;
-  algorithmControls: HTMLFieldSetElement;
+    generalControls: HTMLFieldSetElement;
+    algorithmControls: HTMLFieldSetElement;
 
-  stepForward: HTMLButtonElement;
-  stepBackward: HTMLButtonElement;
-  toggleRunner: HTMLButtonElement;
-  fastForward: HTMLButtonElement;
-  fastBackward: HTMLButtonElement;
+    stepForward: HTMLButtonElement;
+    stepBackward: HTMLButtonElement;
+    toggleRunner: HTMLButtonElement;
+    fastForward: HTMLButtonElement;
+    fastBackward: HTMLButtonElement;
 };
 
 type Listeners = "click" | "change"; // TODO: Better naming.
 type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
+type Reject = (props: {until?: number; running?: boolean}) => void;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
@@ -59,25 +59,25 @@ export class Engine {
 
     container: HTMLElement;
     toolbar: EngineToolbarItems;
-    actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
+    actions: {oper: string; args: unknown[]; nsteps: number}[] = [];
     CurrentAction: number = 0; // was = null before, this should work better
     CurrentStep: number = 0; // was = null before, this should work better
     DEBUG = true;
 
     State: {
-    resetting: boolean;
-    animating: boolean;
-  } = {
+        resetting: boolean;
+        animating: boolean;
+    } = {
             resetting: false,
             animating: false,
         };
 
     Info: {
-    title: Text | undefined;
-    body: Text | undefined;
-    printer: Text | undefined;
-    status: Text | undefined;
-  } = {
+        title: Text | undefined;
+        body: Text | undefined;
+        printer: Text | undefined;
+        status: Text | undefined;
+    } = {
             title: undefined,
             body: undefined,
             printer: undefined,
@@ -307,9 +307,9 @@ export class Engine {
     // The default listeners
 
     $IdleListeners: Record<
-    string,
-    { type: Listeners; condition: () => boolean; handler: () => void }
-  > = {
+        string,
+        {type: Listeners; condition: () => boolean; handler: () => void}
+    > = {
             stepBackward: {
                 type: "click",
                 condition: () => this.actions.length > 0,
@@ -348,12 +348,12 @@ export class Engine {
 
     // TODO: Fix some nice type for this
     $AsyncListeners: Record<
-    string,
-    {
-      type: Listeners;
-      handler: (resolve: Resolve, reject: Reject) => void;
-    }
-  > = {
+        string,
+        {
+            type: Listeners;
+            handler: (resolve: Resolve, reject: Reject) => void;
+        }
+    > = {
             stepForward: {
                 type: "click",
                 handler: (resolve, reject) => {
@@ -401,7 +401,7 @@ export class Engine {
     disableWhenRunning(disabled: boolean): void {
         for (const elem of this.container.querySelectorAll<
       HTMLInputElement | HTMLSelectElement
-    >(".disableWhenRunning"))
+        >(".disableWhenRunning"))
             elem.disabled = disabled;
     }
 

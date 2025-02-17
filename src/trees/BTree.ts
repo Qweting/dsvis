@@ -10,7 +10,7 @@ import {BTreeNode} from "../../src/objects/btree-node";
 import {BSTMessages} from "./BST";
 
 type BTreeToolbarItems = EngineToolbarItems & {
-  maxDegree: HTMLSelectElement;
+    maxDegree: HTMLSelectElement;
 };
 
 export class BTree extends Engine {
@@ -569,7 +569,7 @@ export class BTree extends Engine {
         } else {
             // Merge with left sibling
             const nextNode = await this.mergeRight(
-        parent.getChild(i - 1) as BTreeNode
+                parent.getChild(i - 1) as BTreeNode
             );
             await this.repairAfterDelete(nextNode.getParent() as BTreeNode);
         }
@@ -626,8 +626,8 @@ export class BTree extends Engine {
             if (!node.isLeaf()) {
                 node.setChild(
                     nodeSize + i + 1,
-          rightSib?.getChild(i) as BTreeNode,
-          this.getStrokeWidth()
+                    rightSib?.getChild(i) as BTreeNode,
+                    this.getStrokeWidth()
                 );
             }
         }

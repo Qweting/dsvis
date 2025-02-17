@@ -3,11 +3,11 @@ import {BTreeNode} from "./btree-node";
 import {GraphNode} from "./graph-node";
 
 type ConnectionCoordinates = {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  r2: number;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    r2: number;
 };
 
 export class Connection<T extends GraphNode | BTreeNode> extends Path {

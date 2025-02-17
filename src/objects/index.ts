@@ -11,79 +11,79 @@ import {HighlightCircle} from "./highlight-circle";
 import {TextCircle} from "./text-circle";
 
 declare module "@svgdotjs/svg.js" {
-  interface Svg {
-    $engine: Engine;
-  }
+    interface Svg {
+        $engine: Engine;
+    }
 
-  interface Element {
-    getHighlight(): boolean;
-    setHighlight(high: boolean | null): this;
-    getCenter(): [number, number];
-    setCenter(x: number, y: number, animationDuration?: number): this;
-    dmoveCenter(dx: number, dy: number, animationDuration?: number): this;
-    engine(): Engine;
-  }
+    interface Element {
+        getHighlight(): boolean;
+        setHighlight(high: boolean | null): this;
+        getCenter(): [number, number];
+        setCenter(x: number, y: number, animationDuration?: number): this;
+        dmoveCenter(dx: number, dy: number, animationDuration?: number): this;
+        engine(): Engine;
+    }
 
-  interface Container {
-    put<T extends Element>(element: T, i?: number): T;
-    highlightCircle(
-      x: number,
-      y: number,
-      radius: number,
-      strokeWidth: number
-    ): HighlightCircle;
-    textCircle(
-      text: string,
-      x: number,
-      y: number,
-      size: number,
-      strokeWidth: number
-    ): TextCircle;
-    graphNode(
-      text: string,
-      x: number,
-      y: number,
-      size: number,
-      strokeWidth: number
-    ): GraphNode;
-    binaryNode(
-      text: string,
-      x: number,
-      y: number,
-      size: number,
-      strokeWidth: number
-    ): BinaryNode;
-    avlNode(
-      text: string,
-      x: number,
-      y: number,
-      size: number,
-      strokeWidth: number
-    ): AVLNode;
-    connection<T extends GraphNode>(
-      start: T,
-      end: T,
-      strokeWidth: number,
-      bend?: number,
-      directed?: boolean
-    ): Connection<T>;
-    bTreeNode(
-      leaf: boolean,
-      nvalues: number,
-      x: number,
-      y: number,
-      objectSize: number,
-      strokeWidth: number
-    ): BTreeNode;
-    bTreeConnection(
-      start: BTreeNode,
-      end: BTreeNode,
-      child: number,
-      numChildren: number,
-      strokeWidth: number
-    ): BTreeConnection;
-    dsArray(size: number, x: number, y: number, horizontal: boolean): DSArray;
-  }
+    interface Container {
+        put<T extends Element>(element: T, i?: number): T;
+        highlightCircle(
+            x: number,
+            y: number,
+            radius: number,
+            strokeWidth: number
+        ): HighlightCircle;
+        textCircle(
+            text: string,
+            x: number,
+            y: number,
+            size: number,
+            strokeWidth: number
+        ): TextCircle;
+        graphNode(
+            text: string,
+            x: number,
+            y: number,
+            size: number,
+            strokeWidth: number
+        ): GraphNode;
+        binaryNode(
+            text: string,
+            x: number,
+            y: number,
+            size: number,
+            strokeWidth: number
+        ): BinaryNode;
+        avlNode(
+            text: string,
+            x: number,
+            y: number,
+            size: number,
+            strokeWidth: number
+        ): AVLNode;
+        connection<T extends GraphNode>(
+            start: T,
+            end: T,
+            strokeWidth: number,
+            bend?: number,
+            directed?: boolean
+        ): Connection<T>;
+        bTreeNode(
+            leaf: boolean,
+            nvalues: number,
+            x: number,
+            y: number,
+            objectSize: number,
+            strokeWidth: number
+        ): BTreeNode;
+        bTreeConnection(
+            start: BTreeNode,
+            end: BTreeNode,
+            child: number,
+            numChildren: number,
+            strokeWidth: number
+        ): BTreeConnection;
+        dsArray(size: number, x: number, y: number, horizontal: boolean): DSArray;
+    }
 }
 
 extend(Element, {

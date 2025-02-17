@@ -295,7 +295,7 @@ export class BTreeNode extends G {
         if (this.$parent) {
             const i = this.getParentIndex();
             if (i !== null && this.$parent.getStart().$children?.[i])
-        this.$parent.getStart().$children![i] = null;
+                this.$parent.getStart().$children![i] = null;
             this.$parent.remove();
             this.$parent = null;
         }

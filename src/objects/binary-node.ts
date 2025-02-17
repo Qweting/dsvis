@@ -4,17 +4,17 @@ import {GraphNode} from "./graph-node";
 
 export type Children = "left" | "right";
 export class BinaryNode extends GraphNode {
-    $incoming: { parent: Connection<BinaryNode> | null } = {
+    $incoming: {parent: Connection<BinaryNode> | null} = {
         parent: null,
     };
     $outgoing: {
-    left: Connection<BinaryNode> | null;
-    right: Connection<BinaryNode> | null;
-  } = {
+        left: Connection<BinaryNode> | null;
+        right: Connection<BinaryNode> | null;
+    } = {
             left: null,
             right: null,
         };
-    $nullary: { left: Path | null; right: Path | null } = {
+    $nullary: {left: Path | null; right: Path | null} = {
         left: null,
         right: null,
     };

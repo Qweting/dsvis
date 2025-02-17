@@ -34,10 +34,10 @@ export class SplayTree extends BST {
     }
 
     async delete(value: string): Promise<{
-    success: boolean;
-    direction: "left" | "right" | null;
-    parent: BinaryNode | null;
-  } | null> {
+        success: boolean;
+        direction: "left" | "right" | null;
+        parent: BinaryNode | null;
+    } | null> {
         if (!this.treeRoot)
             return {success: false, direction: null, parent: null};
 

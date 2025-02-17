@@ -19,8 +19,8 @@ export class AVLQuiz extends BST {
     isBST() {
         try {
             this._validateBST(
-        this.treeRoot as AVLNode | null,
-        "" //Number.MIN_SAFE_INTEGER
+                this.treeRoot as AVLNode | null,
+                "" //Number.MIN_SAFE_INTEGER
             );
         } catch (error) {
             if (error instanceof Error) {
@@ -225,10 +225,10 @@ export class AVLQuiz extends BST {
     updateHeightsHelper(node: AVLNode | null): number {
         if (!node) return 0;
         const leftHeight = this.updateHeightsHelper(
-      node.getLeft() as AVLNode | null
+            node.getLeft() as AVLNode | null
         );
         const rightHeight = this.updateHeightsHelper(
-      node.getRight() as AVLNode | null
+            node.getRight() as AVLNode | null
         );
         const height = 1 + Math.max(leftHeight, rightHeight);
         node.setHeight(height);

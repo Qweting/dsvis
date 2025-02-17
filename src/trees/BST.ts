@@ -9,7 +9,7 @@ import {BinaryNode} from "../objects/binary-node";
 import {HighlightCircle} from "../objects/highlight-circle";
 
 type BSTToolbarItems = EngineToolbarItems & {
-  showNullNodes: HTMLInputElement;
+    showNullNodes: HTMLInputElement;
 };
 
 export class BST extends Engine {
@@ -102,9 +102,9 @@ export class BST extends Engine {
     }
 
     async find(value: string | number): Promise<{
-    success: boolean;
-    node: BinaryNode | null;
-  }> {
+        success: boolean;
+        node: BinaryNode | null;
+    }> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return {success: false, node: null};
@@ -124,12 +124,12 @@ export class BST extends Engine {
     | {
         success: true;
         node: BinaryNode;
-      }
+    }
     | {
         success: false;
         node: BinaryNode | null;
-      }
-  > {
+    }
+    > {
         let parent: BinaryNode | null = null;
         let node: BinaryNode | null = this.treeRoot;
         const pointer = this.Svg.highlightCircle(
@@ -161,9 +161,9 @@ export class BST extends Engine {
 
     // TODO: Could be changed to only return the success part
     async insertOne(value: string): Promise<{
-    success: boolean;
-    node: BinaryNode | null;
-  }> {
+        success: boolean;
+        node: BinaryNode | null;
+    }> {
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value);
             await this.pause("insert.newroot", value);
@@ -196,10 +196,10 @@ export class BST extends Engine {
 
     // TODO: update type with separate for success true and false
     async delete(value: string | number): Promise<{
-    success: boolean;
-    direction: "left" | "right" | null;
-    parent: BinaryNode | null;
-  } | null> {
+        success: boolean;
+        direction: "left" | "right" | null;
+        parent: BinaryNode | null;
+    } | null> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return null;
@@ -220,10 +220,10 @@ export class BST extends Engine {
     }
 
     async deleteHelper(node: BinaryNode | null): Promise<{
-    success: boolean;
-    direction: "left" | "right" | null;
-    parent: BinaryNode | null;
-  }> {
+        success: boolean;
+        direction: "left" | "right" | null;
+        parent: BinaryNode | null;
+    }> {
         if (!(node?.getLeft() && node?.getRight())) {
             return await this.deleteNode(node);
         }
@@ -274,10 +274,10 @@ export class BST extends Engine {
     }
 
     async deleteNode(node: BinaryNode | null | undefined): Promise<{
-    success: boolean;
-    direction: "left" | "right" | null;
-    parent: BinaryNode | null;
-  }> {
+        success: boolean;
+        direction: "left" | "right" | null;
+        parent: BinaryNode | null;
+    }> {
     // The node will NOT have two children - this has been taken care of by deleteHelper
         const child = node?.getLeft() || node?.getRight();
         const parent = node?.getParent();
