@@ -1,15 +1,8 @@
-
-///////////////////////////////////////////////////////////////////////////////
-// Import and export information used by the Javascript linter ESLint:
-/* globals DSVis */
-/* exported initialisePrioQueues, PQEngine */
-///////////////////////////////////////////////////////////////////////////////
-
-import { addReturnSubmit, Engine } from "./engine";
-import { BinaryHeap } from "./heaps/BinaryHeap";
+import {addReturnSubmit, Engine} from "./engine";
+import {BinaryHeap} from "./heaps/BinaryHeap";
 
 const PRIOQUEUES = {
-  BinaryHeap: BinaryHeap,
+    BinaryHeap: BinaryHeap,
 } as const;
 
 initialisePrioQueues('#prioqueuesContainer');
@@ -19,25 +12,25 @@ function initialisePrioQueues(containerID: string) {
     if (!algoSelector) throw new Error("Could not find algo selector");
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
-    
+
         if (algoSelector.value in PRIOQUEUES)
-          searchParams.set("algorithm", algoSelector.value);
+            searchParams.set("algorithm", algoSelector.value);
         else searchParams.delete("algorithm");
-    
+
         if (PQEngine.DEBUG) searchParams.set("debug", "true");
         else searchParams.delete("debug");
-    
+
         const url = `${window.location.pathname}?${searchParams}`;
         window.history.replaceState("", "", url);
         window.location.reload();
     });
 
     let algo = new URL(window.location.href).searchParams.get("algorithm");
-  if (!(algo && /^[\w.]+$/.test(algo) && algo in PRIOQUEUES)) {
-    algo = "";
-  }
-  const algoClass = algo as keyof typeof PRIOQUEUES | "";
-  algoSelector.value = algo;
+    if (!(algo && /^[\w.]+$/.test(algo) && algo in PRIOQUEUES)) {
+        algo = "";
+    }
+    const algoClass = algo as keyof typeof PRIOQUEUES | "";
+    algoSelector.value = algo;
     const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Engine;
     const PQEngine = new PrioQueue(containerID);
     PQEngine.initialise();
@@ -56,29 +49,29 @@ function initialisePrioQueues(containerID: string) {
 }
 
 function getPrioQueuesToolbar(container: HTMLElement) {
-  const insertSelect = container.querySelector<HTMLSelectElement>(
-    "select.insertSelect"
-  );
-  const insertField =
+    const insertSelect = container.querySelector<HTMLSelectElement>(
+        "select.insertSelect"
+    );
+    const insertField =
     container.querySelector<HTMLInputElement>("input.insertField");
-  const insertSubmit =
+    const insertSubmit =
     container.querySelector<HTMLInputElement>("input.insertSubmit");
-  const deleteSubmit =
+    const deleteSubmit =
     container.querySelector<HTMLInputElement>("input.deleteSubmit");
-  const clearSubmit =
+    const clearSubmit =
     container.querySelector<HTMLInputElement>("input.clearSubmit");
 
-  if (!insertSelect) throw new Error("Missing insert select");
-  if (!insertField) throw new Error("Missing insert field");
-  if (!insertSubmit) throw new Error("Missing insert submit");
-  if (!deleteSubmit) throw new Error("Missing delete submit");
-  if (!clearSubmit) throw new Error("Missing clear submit");
+    if (!insertSelect) throw new Error("Missing insert select");
+    if (!insertField) throw new Error("Missing insert field");
+    if (!insertSubmit) throw new Error("Missing insert submit");
+    if (!deleteSubmit) throw new Error("Missing delete submit");
+    if (!clearSubmit) throw new Error("Missing clear submit");
 
-  return {
-    insertSelect,
-    insertField,
-    insertSubmit,
-    deleteSubmit,
-    clearSubmit,
-  };
+    return {
+        insertSelect,
+        insertField,
+        insertSubmit,
+        deleteSubmit,
+        clearSubmit,
+    };
 }

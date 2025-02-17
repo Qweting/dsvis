@@ -67,6 +67,7 @@ export default tseslint.config(
 
             "no-use-before-define": ["error", {
                 classes: false,
+                functions: false,
             }],
 
             "block-scoped-var": ["error"],

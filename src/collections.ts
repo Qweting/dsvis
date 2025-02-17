@@ -1,16 +1,16 @@
-import { addReturnSubmit, Engine } from "./engine";
-import { AVL } from "./trees/AVL";
-import { BST } from "./trees/BST";
-import { BTree } from "./trees/BTree";
-import { RedBlack } from "./trees/RedBlack";
-import { SplayTree } from "./trees/SplayTree";
+import {addReturnSubmit, Engine} from "./engine";
+import {AVL} from "./trees/AVL";
+import {BST} from "./trees/BST";
+import {BTree} from "./trees/BTree";
+import {RedBlack} from "./trees/RedBlack";
+import {SplayTree} from "./trees/SplayTree";
 
 const COLLECTIONS = {
-  BST: BST,
-  AVL: AVL,
-  RedBlack: RedBlack,
-  SplayTree: SplayTree,
-  BTree: BTree,
+    BST: BST,
+    AVL: AVL,
+    RedBlack: RedBlack,
+    SplayTree: SplayTree,
+    BTree: BTree,
 } as const;
 
 type CollectionToolbarItems = {
@@ -28,112 +28,112 @@ type CollectionToolbarItems = {
 initialiseCollections("#collectionsContainer");
 
 function initialiseCollections(containerID: string) {
-  const algoSelector = document.querySelector(
-    `${containerID} select.algorithmSelector`
-  ) as HTMLSelectElement;
+    const algoSelector = document.querySelector(
+        `${containerID} select.algorithmSelector`
+    ) as HTMLSelectElement;
 
-  if (!algoSelector) throw new Error("Could not find algo selector");
+    if (!algoSelector) throw new Error("Could not find algo selector");
 
-  algoSelector.addEventListener("change", () => {
-    const searchParams = new URLSearchParams();
+    algoSelector.addEventListener("change", () => {
+        const searchParams = new URLSearchParams();
 
-    if (algoSelector.value in COLLECTIONS)
-      searchParams.set("algorithm", algoSelector.value);
-    else searchParams.delete("algorithm");
+        if (algoSelector.value in COLLECTIONS)
+            searchParams.set("algorithm", algoSelector.value);
+        else searchParams.delete("algorithm");
 
-    if (CollectionEngine.DEBUG) searchParams.set("debug", "true");
-    else searchParams.delete("debug");
+        if (CollectionEngine.DEBUG) searchParams.set("debug", "true");
+        else searchParams.delete("debug");
 
-    const url = `${window.location.pathname}?${searchParams}`;
-    window.history.replaceState("", "", url);
-    window.location.reload();
-  });
+        const url = `${window.location.pathname}?${searchParams}`;
+        window.history.replaceState("", "", url);
+        window.location.reload();
+    });
 
-  let algo = new URL(window.location.href).searchParams.get("algorithm");
-  if (!(algo && /^[\w.]+$/.test(algo) && algo in COLLECTIONS)) {
-    algo = "";
-  }
-  const algoClass = algo as keyof typeof COLLECTIONS | "";
-  algoSelector.value = algo;
-  const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
-  const CollectionEngine = new Collection(containerID);
-  CollectionEngine.initialise();
+    let algo = new URL(window.location.href).searchParams.get("algorithm");
+    if (!(algo && /^[\w.]+$/.test(algo) && algo in COLLECTIONS)) {
+        algo = "";
+    }
+    const algoClass = algo as keyof typeof COLLECTIONS | "";
+    algoSelector.value = algo;
+    const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
+    const CollectionEngine = new Collection(containerID);
+    CollectionEngine.initialise();
 
-  const toolbar = getCollectionsToolbar(CollectionEngine.container);
+    const toolbar = getCollectionsToolbar(CollectionEngine.container);
 
-  toolbar.insertSelect.addEventListener("change", () => {
-    toolbar.insertField.value = toolbar.insertSelect.value;
-    toolbar.insertSelect.value = "";
-  });
+    toolbar.insertSelect.addEventListener("change", () => {
+        toolbar.insertField.value = toolbar.insertSelect.value;
+        toolbar.insertSelect.value = "";
+    });
 
-  addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
-    CollectionEngine.submit("insert", toolbar.insertField)
-  );
+    addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
+        CollectionEngine.submit("insert", toolbar.insertField)
+    );
 
-  toolbar.insertSubmit.addEventListener("click", () => {
-    CollectionEngine.submit("insert", toolbar.insertField);
-  });
+    toolbar.insertSubmit.addEventListener("click", () => {
+        CollectionEngine.submit("insert", toolbar.insertField);
+    });
 
-  addReturnSubmit(toolbar.findField, "ALPHANUM", () =>
-    CollectionEngine.submit("find", toolbar.findField)
-  );
-  toolbar.findSubmit.addEventListener("click", () =>
-    CollectionEngine.submit("find", toolbar.findField)
-  );
-  addReturnSubmit(toolbar.deleteField, "ALPHANUM", () =>
-    CollectionEngine.submit("delete", toolbar.deleteField)
-  );
-  toolbar.deleteSubmit.addEventListener("click", () =>
-    CollectionEngine.submit("delete", toolbar.deleteField)
-  );
-  toolbar.printSubmit.addEventListener("click", () =>
-    CollectionEngine.submit("print", toolbar.printSubmit)
-  );
-  toolbar.clearSubmit.addEventListener("click", () =>
-    CollectionEngine.confirmResetAll()
-  );
+    addReturnSubmit(toolbar.findField, "ALPHANUM", () =>
+        CollectionEngine.submit("find", toolbar.findField)
+    );
+    toolbar.findSubmit.addEventListener("click", () =>
+        CollectionEngine.submit("find", toolbar.findField)
+    );
+    addReturnSubmit(toolbar.deleteField, "ALPHANUM", () =>
+        CollectionEngine.submit("delete", toolbar.deleteField)
+    );
+    toolbar.deleteSubmit.addEventListener("click", () =>
+        CollectionEngine.submit("delete", toolbar.deleteField)
+    );
+    toolbar.printSubmit.addEventListener("click", () =>
+        CollectionEngine.submit("print", toolbar.printSubmit)
+    );
+    toolbar.clearSubmit.addEventListener("click", () =>
+        CollectionEngine.confirmResetAll()
+    );
 }
 
 function getCollectionsToolbar(container: HTMLElement) {
-  const insertSelect = container.querySelector<HTMLSelectElement>(
-    "select.insertSelect"
-  );
-  const insertField =
+    const insertSelect = container.querySelector<HTMLSelectElement>(
+        "select.insertSelect"
+    );
+    const insertField =
     container.querySelector<HTMLInputElement>("input.insertField");
-  const insertSubmit =
+    const insertSubmit =
     container.querySelector<HTMLInputElement>("input.insertSubmit");
-  const findField =
+    const findField =
     container.querySelector<HTMLInputElement>("input.findField");
-  const findSubmit =
+    const findSubmit =
     container.querySelector<HTMLInputElement>("input.findSubmit");
-  const deleteField =
+    const deleteField =
     container.querySelector<HTMLInputElement>("input.deleteField");
-  const deleteSubmit =
+    const deleteSubmit =
     container.querySelector<HTMLInputElement>("input.deleteSubmit");
-  const printSubmit =
+    const printSubmit =
     container.querySelector<HTMLInputElement>("input.printSubmit");
-  const clearSubmit =
+    const clearSubmit =
     container.querySelector<HTMLInputElement>("input.clearSubmit");
 
-  if (!insertSelect) throw new Error("Missing insert select");
-  if (!insertField) throw new Error("Missing insert field");
-  if (!insertSubmit) throw new Error("Missing insert submit");
-  if (!findField) throw new Error("Missing find field");
-  if (!findSubmit) throw new Error("Missing find submit");
-  if (!deleteField) throw new Error("Missing delete field");
-  if (!deleteSubmit) throw new Error("Missing delete submit");
-  if (!printSubmit) throw new Error("Missing print submit");
-  if (!clearSubmit) throw new Error("Missing clear submit");
+    if (!insertSelect) throw new Error("Missing insert select");
+    if (!insertField) throw new Error("Missing insert field");
+    if (!insertSubmit) throw new Error("Missing insert submit");
+    if (!findField) throw new Error("Missing find field");
+    if (!findSubmit) throw new Error("Missing find submit");
+    if (!deleteField) throw new Error("Missing delete field");
+    if (!deleteSubmit) throw new Error("Missing delete submit");
+    if (!printSubmit) throw new Error("Missing print submit");
+    if (!clearSubmit) throw new Error("Missing clear submit");
 
-  return {
-    insertSelect,
-    insertField,
-    insertSubmit,
-    findField,
-    findSubmit,
-    deleteField,
-    deleteSubmit,
-    printSubmit,
-    clearSubmit,
-  };
+    return {
+        insertSelect,
+        insertField,
+        insertSubmit,
+        findField,
+        findSubmit,
+        deleteField,
+        deleteSubmit,
+        printSubmit,
+        clearSubmit,
+    };
 }

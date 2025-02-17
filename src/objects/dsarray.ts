@@ -1,11 +1,5 @@
-
-///////////////////////////////////////////////////////////////////////////////
-// Import and export information used by the Javascript linter ESLint:
-/* globals SVG, DSVis */
-///////////////////////////////////////////////////////////////////////////////
-
-import { G, Text, Rect } from "@svgdotjs/svg.js";
-import { NBSP } from "../../src/engine";
+import {G, Text, Rect} from "@svgdotjs/svg.js";
+import {NBSP} from "../../src/engine";
 
 export class DSArray extends G {
     $horizontal: boolean | null = null;

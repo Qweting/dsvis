@@ -1,12 +1,6 @@
-
-///////////////////////////////////////////////////////////////////////////////
-// Import and export information used by the Javascript linter ESLint:
-/* globals DSVis */
-///////////////////////////////////////////////////////////////////////////////
-
-import { compare, Engine } from "../../src/engine";
-import { BinaryNode, Children } from "../../src/objects/binary-node";
-import { DSArray } from "../../src/objects/dsarray";
+import {compare, Engine} from "../../src/engine";
+import {BinaryNode, Children} from "../../src/objects/binary-node";
+import {DSArray} from "../../src/objects/dsarray";
 
 export class BinaryHeap extends Engine {
     // @ts-expect-error TODO fix message typing
@@ -42,10 +36,10 @@ export class BinaryHeap extends Engine {
 
     resizeTree() {
         const animate = !this.State.resetting;
-        this.treeRoot?.resize(...this.getTreeRoot(), 
-        this.$Svg.margin,
-        this.getNodeSpacing(),
-        animate ? this.getAnimationSpeed() : 0);
+        this.treeRoot?.resize(...this.getTreeRoot(),
+            this.$Svg.margin,
+            this.getNodeSpacing(),
+            animate ? this.getAnimationSpeed() : 0);
     }
 
     async insert(...values: Array<string>) {
