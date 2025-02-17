@@ -1,31 +1,12 @@
-import stylistic from "@stylistic/eslint-plugin";
-import globals from "globals";
-import path from "node:path";
-import {fileURLToPath} from "node:url";
-import js from "@eslint/js";
-import {FlatCompat} from "@eslint/eslintrc";
+import tseslint from 'typescript-eslint';
+import stylisticJs from '@stylistic/eslint-plugin-js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all,
-});
-
-export default [
-    ...compat.extends("eslint:recommended", "plugin:@stylistic/recommended-extends"),
+export default tseslint.config(
+    tseslint.configs.recommended,
     {
         plugins: {
-            "@stylistic": stylistic,
+            "@stylistic": stylisticJs,
         },
-
-        languageOptions: {
-            globals: {
-                ...globals.browser,
-            },
-        },
-
         rules: {
             "@stylistic/semi": ["error", "always"],
 
@@ -108,4 +89,4 @@ export default [
             "prefer-template": ["warn"],
         },
     },
-];
+);
