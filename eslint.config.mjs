@@ -88,6 +88,8 @@ export default tseslint.config(
             "default-param-last": ["warn"],
             "no-shadow": ["warn"],
             "prefer-template": ["warn"],
+
+            "no-ternary": ["error"],
         },
     },
 );
