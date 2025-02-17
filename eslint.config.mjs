@@ -1,11 +1,11 @@
 import tseslint from 'typescript-eslint';
-import stylisticJs from '@stylistic/eslint-plugin-js';
+import stylistic from '@stylistic/eslint-plugin';
 
 export default tseslint.config(
     tseslint.configs.recommended,
     {
         plugins: {
-            "@stylistic": stylisticJs,
+            "@stylistic": stylistic,
         },
         rules: {
             "@stylistic/semi": ["error", "always"],
