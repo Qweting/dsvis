@@ -23,6 +23,9 @@ function initialiseCollections(containerID) {
     if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DSVis))
         algoClass = "";
     algoSelector.value = algoClass;
+
+    console.log("Selected algorithm:", algoClass); // Debugging
+
     const Collection = algoClass ? DSVis[algoClass] : DSVis.Engine;
     CollectionEngine = new Collection(containerID);
     CollectionEngine.initialise();
