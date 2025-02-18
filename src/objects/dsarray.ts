@@ -1,18 +1,26 @@
-import { G, Text, Rect } from "@svgdotjs/svg.js";
+import { G, Rect, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "../../src/engine";
 
 export class DSArray extends G {
-    $horizontal: boolean | null = null;
-    $rect: Rect | null = null;
-    $backgrounds: Array<Rect> = [];
-    $values: Array<Text> = [];
-    $indices: Array<Text> = [];
+    $horizontal: boolean;
+    $rect: Rect;
+    $backgrounds: Rect[] = [];
+    $values: Text[] = [];
+    $indices: Text[] = [];
 
-    init(size: number, x: number, y: number, horizontal: boolean = true) {
+    constructor(size: number, objectSize: number, horizontal: boolean = true) {
+        super();
         this.$horizontal = horizontal;
         this.$values = new Array(size);
+        this.$rect = this.rect(objectSize * size, 3 * objectSize)
+            .addClass("invisible")
+            .center(0, 0);
+    }
+
+    init(size: number, x: number, y: number) {
         this.setSize(size);
         this.clear();
+
         if (x && y) {
             this.center(x, y);
         }
@@ -39,11 +47,6 @@ export class DSArray extends G {
         const w0 = this.engine().getObjectSize();
         const h = this.engine().getObjectSize();
         const stroke = this.engine().getStrokeWidth();
-        if (!this.$rect) {
-            this.$rect = this.rect(w0 * size, 3 * h)
-                .addClass("invisible")
-                .center(0, 0);
-        }
         this.$rect.width(w0 * size);
         const cx = this.$rect.cx(),
             cy = this.$rect.cy();

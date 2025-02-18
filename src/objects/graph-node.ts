@@ -1,4 +1,4 @@
-import { find, Path } from "@svgdotjs/svg.js";
+import { find, Path, Rect } from "@svgdotjs/svg.js";
 import { Connection } from "./connection";
 import { TextCircle } from "./text-circle";
 
@@ -6,17 +6,19 @@ export class GraphNode extends TextCircle {
     $incoming: Record<string, Connection<GraphNode> | null> = {};
     $outgoing: Record<string, Connection<GraphNode> | null> = {};
     $nullary: Record<string, Path | null> = {};
+    $rect: Rect;
 
-    init(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ): this {
+    constructor(text: string, size: number, strokeWidth: number) {
+        super(text, size, strokeWidth);
+
         const bgSize = 3 * size;
-        this.rect(bgSize, bgSize).center(0, 0).addClass("invisible");
-        return super.init(text, x, y, size, strokeWidth);
+        this.$rect = this.rect(bgSize, bgSize).addClass("invisible");
+    }
+
+    init(x: number, y: number): this {
+        this.$rect.center(0, 0);
+        super.init(x, y);
+        return this;
     }
 
     getBend(key: unknown): number {

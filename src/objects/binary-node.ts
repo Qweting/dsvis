@@ -14,22 +14,15 @@ export class BinaryNode extends GraphNode {
         left: null,
         right: null,
     };
-    $nullary: { left: Path | null; right: Path | null } = {
-        left: null,
-        right: null,
-    };
+    $nullary: { left: Path; right: Path };
     $edgebends = { left: 0.1, right: -0.1 };
     $leftWidth: number = 0;
     $rightWidth: number = 0;
     $width: number = 0;
 
-    init(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ): this {
+    constructor(text: string, size: number, strokeWidth: number) {
+        super(text, size, strokeWidth);
+
         const d = size;
         const nX = 0.5 * d,
             nY = 0.8 * d,
@@ -39,13 +32,20 @@ export class BinaryNode extends GraphNode {
                 -2 * nR
             },0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
 
-        this.$nullary.left = this.path(nullpath(-1))
-            .stroke({ width: strokeWidth })
-            .addClass("nullnode");
-        this.$nullary.right = this.path(nullpath(1))
-            .stroke({ width: strokeWidth })
-            .addClass("nullnode");
-        return super.init(text, x, y, size, strokeWidth);
+        this.$nullary = {
+            left: this.path(nullpath(-1))
+                .stroke({ width: strokeWidth })
+                .addClass("nullnode"),
+            right: this.path(nullpath(1))
+                .stroke({ width: strokeWidth })
+                .addClass("nullnode"),
+        };
+    }
+
+    init(x: number, y: number): this {
+        this.$nullary.left.back();
+        this.$nullary.right.back();
+        return super.init(x, y);
     }
 
     getBend(c: Children): number {

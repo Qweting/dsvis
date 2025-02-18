@@ -2,20 +2,18 @@ import { Circle, G, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "../../src/engine";
 
 export class TextCircle extends G {
-    $circle: Circle | null = null;
-    $text: Text | null = null;
+    $circle: Circle;
+    $text: Text;
 
-    init(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ): this {
-        this.$circle = this.circle(size)
-            .stroke({ width: strokeWidth })
-            .center(0, 0);
-        this.$text = this.text(text).center(0, 0);
+    constructor(text: string, size: number, strokeWidth: number) {
+        super();
+        this.$circle = this.circle(size).stroke({ width: strokeWidth });
+        this.$text = this.text(text);
+    }
+
+    init(x: number, y: number): this {
+        this.$circle.center(0, 0);
+        this.$text.center(0, 0);
         if (x && y) {
             this.center(x, y);
         }
@@ -23,7 +21,7 @@ export class TextCircle extends G {
     }
 
     getText(): string {
-        return this.$text?.text() || "";
+        return this.$text.text();
     }
 
     setText(text: string | null): this {
@@ -35,12 +33,12 @@ export class TextCircle extends G {
         if (text === "") {
             text = NBSP;
         }
-        this.$text?.text(text);
+        this.$text.text(text);
         return this;
     }
 
     getSize(): number {
-        const r = this.attr("r");
+        const r = this.$circle.attr("r");
         if (typeof r === "number") {
             return r * 2;
         }
@@ -50,8 +48,10 @@ export class TextCircle extends G {
         return 0;
     }
 
-    setSize(diameter: number, animationDuration: number = 0): this {
-        this.animate(animationDuration).attr("r", String(diameter / 2));
+    setSize(diameter: number, animationDuration: number = 0) {
+        this.engine()
+            .animate(this.$circle, animationDuration > 0)
+            .attr("r", String(diameter / 2));
         return this;
     }
 

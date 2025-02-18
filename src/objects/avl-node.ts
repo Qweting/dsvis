@@ -2,30 +2,24 @@ import { Text } from "@svgdotjs/svg.js";
 import { BinaryNode } from "./binary-node";
 
 export class AVLNode extends BinaryNode {
-    $height: Text | null = null;
-    init(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ): this {
-        const d = size;
-        this.$height = this.text("1")
-            .center(-0.6 * d, -0.5 * d)
-            .addClass("avlheight");
-        return super.init(text, x, y, size, strokeWidth);
+    $height: Text;
+
+    constructor(text: string, size: number, strokeWidth: number) {
+        super(text, size, strokeWidth);
+        this.$height = this.text("1").addClass("avlheight");
+    }
+    init(x: number, y: number): this {
+        const size = this.getSize();
+        this.$height.center(-0.6 * size, -0.5 * size);
+        return super.init(x, y);
     }
 
     getHeight(): number {
-        if (this.$height) {
-            return parseInt(this.$height.text());
-        }
-        return 1;
+        return parseInt(this.$height.text());
     }
 
     setHeight(height: number): this {
-        this.$height?.text(String(height));
+        this.$height.text(String(height));
         return this;
     }
 
@@ -48,11 +42,11 @@ export class AVLNode extends BinaryNode {
     }
 
     getHeightHighlight(): boolean {
-        return this.$height?.getHighlight() || false;
+        return this.$height.getHighlight();
     }
 
     setHeightHighlight(high: boolean | null): this {
-        this.$height?.setHighlight(high);
+        this.$height.setHighlight(high);
         return this;
     }
 }

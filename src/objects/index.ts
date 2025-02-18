@@ -86,6 +86,7 @@ declare module "@svgdotjs/svg.js" {
             size: number,
             x: number,
             y: number,
+            objectSize: number,
             horizontal: boolean
         ): DSArray;
     }
@@ -144,8 +145,8 @@ extend(Container, {
         strokeWidth: number
     ) {
         return (this as Container)
-            .put(new TextCircle())
-            .init(text, x, y, size, strokeWidth);
+            .put(new TextCircle(text, size, strokeWidth))
+            .init(x, y);
     },
     graphNode(
         text: string,
@@ -155,8 +156,8 @@ extend(Container, {
         strokeWidth: number
     ) {
         return (this as Container)
-            .put(new GraphNode())
-            .init(text, x, y, size, strokeWidth);
+            .put(new GraphNode(text, size, strokeWidth))
+            .init(x, y);
     },
     binaryNode(
         text: string,
@@ -166,8 +167,8 @@ extend(Container, {
         strokeWidth: number
     ) {
         return (this as Container)
-            .put(new BinaryNode())
-            .init(text, x, y, size, strokeWidth);
+            .put(new BinaryNode(text, size, strokeWidth))
+            .init(x, y);
     },
     avlNode(
         text: string,
@@ -177,8 +178,8 @@ extend(Container, {
         strokeWidth: number
     ) {
         return (this as Container)
-            .put(new AVLNode())
-            .init(text, x, y, size, strokeWidth);
+            .put(new AVLNode(text, size, strokeWidth))
+            .init(x, y);
     },
     connection<T extends GraphNode>(
         start: T,
@@ -214,15 +215,16 @@ extend(Container, {
             .put(new BTreeConnection(start, end, child, numChildren))
             .init(strokeWidth);
     },
-    dsArray: function (
+    dsArray(
         size: number,
         x: number,
         y: number,
+        objectSize: number,
         horizontal: boolean
     ) {
         return (this as Container)
-            .put(new DSArray())
-            .init(size, x, y, horizontal);
+            .put(new DSArray(size, objectSize, horizontal))
+            .init(size, x, y);
     },
 });
 

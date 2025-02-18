@@ -27,6 +27,7 @@ export class BinaryHeap extends Engine {
             this.arraySize,
             xRoot,
             this.Svg.viewbox().height - yRoot,
+            this.getObjectSize(),
             true
         );
         if (Number(this.heapArray.x()) < this.$Svg.margin) {
