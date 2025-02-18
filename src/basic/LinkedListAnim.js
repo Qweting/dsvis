@@ -1,9 +1,10 @@
+
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
-import LinkedList from "./LinkedList"
+import LinkedList from "./LinkedList.js"
 
 DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
     // Limit the size of the list to maintain readability
@@ -17,6 +18,14 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         this.linkedList = new LinkedList();
         this.initialValues = initialValues;
         super.initialise();
+
+        // For testing purposes
+        console.log("Testing 2");
+        this.tester();
+    }
+
+    async tester() {
+        console.log("Testing 2");
     }
 
     async resetAlgorithm() {
@@ -57,6 +66,6 @@ DSVis.LinkedListAnim.messages = {
     insert: {
         element: (element) => `Insert element: ${element}`,
     },
-    delete: {
-    },
+    //delete: {
+   // },
 }
