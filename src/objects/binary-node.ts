@@ -2,6 +2,9 @@ import { Path } from "@svgdotjs/svg.js";
 import { Connection } from "./connection";
 import { GraphNode } from "./graph-node";
 
+const binaryDirs = ["left", "right"] as const;
+type BinaryDir = (typeof binaryDirs)[number];
+
 export type Children = "left" | "right";
 export class BinaryNode extends GraphNode {
     $incoming: { parent: Connection<BinaryNode> | null } = {
@@ -23,22 +26,9 @@ export class BinaryNode extends GraphNode {
     constructor(text: string, size: number, strokeWidth: number) {
         super(text, size, strokeWidth);
 
-        const d = size;
-        const nX = 0.5 * d,
-            nY = 0.8 * d,
-            nR = 2 * strokeWidth;
-        const nullpath = (s: number) =>
-            `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${
-                -2 * nR
-            },0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
-
         this.$nullary = {
-            left: this.path(nullpath(-1))
-                .stroke({ width: strokeWidth })
-                .addClass("nullnode"),
-            right: this.path(nullpath(1))
-                .stroke({ width: strokeWidth })
-                .addClass("nullnode"),
+            left: this.getNullPath("left", size, strokeWidth),
+            right: this.getNullPath("right", size, strokeWidth),
         };
     }
 
@@ -46,6 +36,24 @@ export class BinaryNode extends GraphNode {
         this.$nullary.left.back();
         this.$nullary.right.back();
         return super.init(x, y);
+    }
+
+    getNullPath(side: Children, objectSize: number, strokeWidth: number): Path {
+        const s = side === "left" ? -1 : 1;
+
+        const nX = 0.5 * objectSize;
+        const nY = 0.8 * objectSize;
+        const nR = 2 * strokeWidth;
+
+        const pathString = `M 0,0 L ${
+            s * nX
+        },${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${
+            -2 * nR
+        },0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
+
+        return this.path(pathString)
+            .stroke({ width: strokeWidth })
+            .addClass("nullnode");
     }
 
     getBend(c: Children): number {
@@ -234,7 +242,6 @@ export class BinaryNode extends GraphNode {
     validate(): void {
         const parent = this.$incoming.parent?.getStart();
         if (parent) {
-            parent.$incoming;
             const c = this.isLeftChild() ? "left" : "right";
             if (parent.$outgoing[c]?.getEnd() !== this) {
                 console.error("Parent mismatch");
@@ -253,9 +260,10 @@ export class BinaryNode extends GraphNode {
                 console.error(`Wrong n:o parent edges, ${n}`);
             }
         }
-        for (const c of ["left", "right"]) {
-            const child = this.$outgoing[c as Children]?.getEnd();
-            if (child?.$incoming.parent?.getStart() !== this) {
+        binaryDirs.map((c) => {
+            const child = this.$outgoing[c]?.getEnd();
+            if (!child) return;
+            if (child.$incoming.parent?.getStart() !== this) {
                 console.error(`${c} child mismatch`);
             }
             let n = 0;
@@ -271,6 +279,6 @@ export class BinaryNode extends GraphNode {
             if (n !== 1) {
                 console.error(`Wrong n:o ${c} child edges, ${n}`);
             }
-        }
+        });
     }
 }
