@@ -400,11 +400,7 @@ export class BTree extends Engine {
             return;
         }
 
-        if (!this.Info.printer) {
-            throw new Error("No info printer");
-        }
-
-        const { x, y } = this.Info.printer.bbox();
+        const { x, y } = this.info.printer.bbox();
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
