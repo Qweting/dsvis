@@ -1,21 +1,25 @@
-import { compare } from "../../src/engine";
+import { compare, MessagesObject, updateDefault } from "../../src/engine";
 import { BinaryNode } from "../../src/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
+const SplayTreeMessages = {
+    delete: {
+        root: "Remove root, leaving left and right trees",
+        singleChild: (right: "left" | "right", left: "left" | "right") =>
+            `No ${right} tree, make ${left} tree the root`,
+        splayLargest: "Splay largest element in left tree to root",
+        connectLeftRight:
+            "Left tree now has no right subtree, connect left and right trees",
+    },
+    rotate: {
+        splayUp: (node: BinaryNode) => `Now splaying ${node} up to the root`,
+        zigzig: (node: BinaryNode, left: "left" | "right", child: BinaryNode) =>
+            `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
+    },
+};
+
 export class SplayTree extends BST {
-    // @ts-expect-error TODO: Error because change of delete.root from object to string
-    messages = {
-        ...BSTMessages,
-        ...SplayTreeMessages,
-        rotate: {
-            ...BSTMessages.rotate,
-            ...SplayTreeMessages.rotate,
-        },
-        delete: {
-            ...BSTMessages.delete,
-            ...SplayTreeMessages.delete,
-        },
-    };
+    messages: MessagesObject = updateDefault(SplayTreeMessages, BSTMessages);
     async find(value: string | number) {
         const found = await super.find(value);
         if (found?.node) {
@@ -157,19 +161,3 @@ export class SplayTree extends BST {
         return await this.singleRotate(left, child);
     }
 }
-
-const SplayTreeMessages = {
-    delete: {
-        root: "Remove root, leaving left and right trees",
-        singleChild: (right: "left" | "right", left: "left" | "right") =>
-            `No ${right} tree, make ${left} tree the root`,
-        splayLargest: "Splay largest element in left tree to root",
-        connectLeftRight:
-            "Left tree now has no right subtree, connect left and right trees",
-    },
-    rotate: {
-        splayUp: (node: BinaryNode) => `Now splaying ${node} up to the root`,
-        zigzig: (node: BinaryNode, left: "left" | "right", child: BinaryNode) =>
-            `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
-    },
-};

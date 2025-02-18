@@ -1,10 +1,40 @@
-import { compare, Engine } from "../../src/engine";
+import { compare, Engine, MessagesObject } from "../../src/engine";
 import { BinaryNode, Children } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
 
+export const BinaryHeapMessages = {
+    general: {
+        empty: "Heap is empty!",
+        full: "Heap is full!",
+        finished: "Finished",
+    },
+    insert: {
+        value: (value: string) => `Insert value: ${value}`,
+        shiftUp: "Shift the value upwards",
+        stopShift: (parentValue: string) =>
+            `The parent ${parentValue} is not larger: stop here`,
+        shiftAgain: (parentValue: string) =>
+            `The parent ${parentValue} is larger`,
+    },
+    delete: {
+        root: (minValue: string) => `Remove the root: ${minValue}`,
+        minValue: (minValue: string) => `Remove the minimum value: ${minValue}`,
+        lastHeap: "Remove the new last heap value",
+        shiftDown: "Shift the value downwards",
+        stopShift: (currentValue: string, childValue: string) =>
+            `The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`,
+        shiftAgain: (currentValue: string, childValue: string) =>
+            `The value ${currentValue} is larger than the smallest child ${childValue}`,
+    },
+    swap: {
+        swap: (a: number, b: number) => `Swap ${a} and ${b}`,
+        lastToFirst: (val: number) =>
+            `Swap in the last heap value to the first position: ${val}`,
+    },
+};
+
 export class BinaryHeap extends Engine {
-    // @ts-expect-error TODO fix message typing
-    messages = BinaryHeapMessages;
+    messages: MessagesObject = BinaryHeapMessages;
 
     arraySize: number = 28;
     initialValues: Array<string> | null = null;
@@ -308,34 +338,3 @@ export class BinaryHeap extends Engine {
         this.resizeTree();
     }
 }
-
-export const BinaryHeapMessages = {
-    general: {
-        empty: "Heap is empty!",
-        full: "Heap is full!",
-        finished: "Finished",
-    },
-    insert: {
-        value: (value: string) => `Insert value: ${value}`,
-        shiftUp: "Shift the value upwards",
-        stopShift: (parentValue: string) =>
-            `The parent ${parentValue} is not larger: stop here`,
-        shiftAgain: (parentValue: string) =>
-            `The parent ${parentValue} is larger`,
-    },
-    delete: {
-        root: (minValue: string) => `Remove the root: ${minValue}`,
-        minValue: (minValue: string) => `Remove the minimum value: ${minValue}`,
-        lastHeap: "Remove the new last heap value",
-        shiftDown: "Shift the value downwards",
-        stopShift: (currentValue: string, childValue: string) =>
-            `The value ${currentValue} is not larger than the smallest child ${childValue}: stop here`,
-        shiftAgain: (currentValue: string, childValue: string) =>
-            `The value ${currentValue} is larger than the smallest child ${childValue}`,
-    },
-    swap: {
-        swap: (a: number, b: number) => `Swap ${a} and ${b}`,
-        lastToFirst: (val: number) =>
-            `Swap in the last heap value to the first position: ${val}`,
-    },
-};

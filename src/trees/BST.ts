@@ -13,8 +13,58 @@ type BSTToolbarItems = EngineToolbarItems & {
     showNullNodes: HTMLInputElement;
 };
 
+export const BSTMessages = {
+    general: {
+        empty: "Tree is empty",
+    },
+    find: {
+        start: (value: string) => `Searching for ${value}`,
+        found: (value: string) => `Found ${value}`,
+        notfound: (value: string) => `Did not find ${value}`,
+        look: (direction: "left" | "right") => `Look into ${direction} child`,
+    },
+    insert: {
+        newroot: (value: string) => `Create a new tree root ${value}`,
+        search: (value: string) => `Searching for node to insert ${value}`,
+        exists: (node: string) => `There is already a node ${node}`,
+        child: (value: string, direction: "left" | "right") =>
+            `Insert ${value} as ${direction} child`,
+    },
+    delete: {
+        search: (value: string) => `Searching for node to delete ${value}`,
+        notexists: (value: string) => `There is no node ${value}`,
+        found: (value: string) => `Found node ${value} to delete`,
+        predecessor: {
+            search: (node: string) => `Finding the predecessor node of ${node}`,
+            replace: (node: string, predecessor: string) =>
+                `Replace the value of ${node} with ${predecessor}`,
+            delete: (predecessor: string) =>
+                `Now delete the predecessor ${predecessor}`,
+        },
+        redirect: (parent: string, child: string) =>
+            `Redirect parent ${parent} to child ${child}`,
+        root: {
+            singleton: (root: string) => `Remove the root node ${root}`,
+            onechild: (child: string, root: string) =>
+                `Make the child ${child} the new root,\nand remove node ${root}`,
+        },
+        node: (node: string) => `Remove node ${node}`,
+        leaf: (node: string) => `Remove leaf node ${node}`,
+    },
+    rotate: {
+        single: (node: string, dir: "left" | "right") =>
+            `Rotate ${node} ${dir}`,
+        zigzag: (
+            child: string,
+            dir1: "left" | "right",
+            node: string,
+            dir2: "left" | "right"
+        ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
+    },
+};
+
 export class BST extends Engine {
-    messages = BSTMessages;
+    messages: MessagesObject = BSTMessages;
 
     initialValues: (string | number)[] = [];
     treeRoot: BinaryNode | null = null;
@@ -471,55 +521,3 @@ export class BST extends Engine {
         return B;
     }
 }
-
-export const BSTMessages: MessagesObject = {
-    general: {
-        empty: "Tree is empty",
-    },
-    find: {
-        start: (value: string) => `Searching for ${value}`,
-        found: (value: string) => `Found ${value}`,
-        notfound: (value: string) => `Did not find ${value}`,
-        look: (direction: "left" | "right") => `Look into ${direction} child`,
-    },
-    insert: {
-        newroot: (value: string) => `Create a new tree root ${value}`,
-        search: (value: string) => `Searching for node to insert ${value}`,
-        exists: (node: string) => `There is already a node ${node}`,
-        child: (value: string, direction: "left" | "right") =>
-            `Insert ${value} as ${direction} child`,
-    },
-    delete: {
-        search: (value: string) => `Searching for node to delete ${value}`,
-        notexists: (value: string) => `There is no node ${value}`,
-        found: (value: string) => `Found node ${value} to delete`,
-        predecessor: {
-            search: (node: string) => `Finding the predecessor node of ${node}`,
-            replace: (node: string, predecessor: string) =>
-                `Replace the value of ${node} with ${predecessor}`,
-            delete: (predecessor: string) =>
-                `Now delete the predecessor ${predecessor}`,
-        },
-        redirect: (parent: string, child: string) =>
-            `Redirect parent ${parent} to child ${child}`,
-        root: {
-            singleton: (root: string) => `Remove the root node ${root}`,
-            onechild: (child: string, root: string) => [
-                `Make the child ${child} the new root,`,
-                `and remove node ${root}`,
-            ],
-        },
-        node: (node: string) => `Remove node ${node}`,
-        leaf: (node: string) => `Remove leaf node ${node}`,
-    },
-    rotate: {
-        single: (node: string, dir: "left" | "right") =>
-            `Rotate ${node} ${dir}`,
-        zigzag: (
-            child: string,
-            dir1: "left" | "right",
-            node: string,
-            dir2: "left" | "right"
-        ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
-    },
-};

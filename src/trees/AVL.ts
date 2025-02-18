@@ -3,8 +3,16 @@ import { AVLNode } from "../../src/objects/avl-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
+export const AVLmessages = {
+    node: {
+        updateHeight: "Update node heights",
+        unbalanced: "Node is unbalanced!",
+        balanced: "Node is now balanced",
+    },
+};
+
 export class AVL extends BST {
-    messages = updateDefault(AVLmessages, BSTMessages);
+    messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
     treeRoot: AVLNode | null = null;
     pointer: HighlightCircle | null = null;
 
@@ -145,11 +153,3 @@ export class AVL extends BST {
         }
     }
 }
-
-export const AVLmessages: MessagesObject = {
-    node: {
-        updateHeight: "Update node heights",
-        unbalanced: "Node is unbalanced!",
-        balanced: "Node is now balanced",
-    },
-};

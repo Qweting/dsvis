@@ -21,10 +21,9 @@ type Reject = (props: { until?: number; running?: boolean }) => void;
 
 export interface MessagesObject {
     [key: string]:
-        | string
-        | string[]
+        | string // handled like () => string
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        | ((...args: any[]) => string | string[])
+        | ((...args: any[]) => string)
         | MessagesObject;
 }
 
@@ -143,16 +142,7 @@ export class Engine {
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
-    // TODO: Remove defaults?
-    // Imposible to type default and it is not used for passing in anything anywere
-    constructor(containerSelector: string, defaults = {}) {
-        for (const key in defaults) {
-            if (!key.startsWith("$")) {
-                throw new TypeError(`Invalid default key: ${key}`);
-            }
-        }
-        updateDefault(this, defaults, true);
-
+    constructor(containerSelector: string) {
         const container =
             document.querySelector<HTMLElement>(containerSelector);
         if (!container) {
@@ -945,11 +935,11 @@ export function addReturnSubmit(
 
 // Merges all keys from defaultObject into object
 // Set override to true to overwrite existing keys
-export function updateDefault<Object extends MessagesObject>(
-    object: Object,
-    defaultObject: Object,
+export function updateDefault(
+    object: MessagesObject,
+    defaultObject: MessagesObject,
     override: boolean = false
-) {
+): MessagesObject {
     for (const key in defaultObject) {
         if (!(key in object)) {
             object[key] = defaultObject[key];
@@ -964,6 +954,7 @@ export function updateDefault<Object extends MessagesObject>(
             object[key] = defaultObject[key];
         }
     }
+    return object;
 }
 
 export function modulo(n: number, d: number): number {

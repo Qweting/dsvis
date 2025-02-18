@@ -4,7 +4,9 @@ import {
     compare,
     Engine,
     EngineToolbarItems,
+    MessagesObject,
     parseValues,
+    updateDefault,
 } from "../../src/engine";
 import { BTreeNode } from "../../src/objects/btree-node";
 import { BSTMessages } from "./BST";
@@ -13,27 +15,48 @@ type BTreeToolbarItems = EngineToolbarItems & {
     maxDegree: HTMLSelectElement;
 };
 
+const BTreeMessages = {
+    find: {
+        predecessor: (val: string) => `Find the predecessor value of ${val}`,
+    },
+    insert: {
+        nth: (val: string, nth: number) =>
+            `Insert ${val} as ${nth} value in the node`,
+    },
+    delete: {
+        root: {
+            empty: "Remove empty tree root",
+        },
+        leaf: {
+            nth: (leaf: BTreeNode, nth: number) =>
+                `Delete the ${nth} value in leaf ${leaf}`,
+            value: (val: string, leaf: BTreeNode) =>
+                `Now delete ${val} in the leaf node ${leaf}`,
+        },
+        replace: (val: string, newVal: string) =>
+            `Replace the value ${val} with ${newVal}`,
+    },
+    node: {
+        lookNthChild: (nth: number) => `Look into ${nth} child`,
+        split: (node: BTreeNode) => `Splitting node ${node}`,
+        tooFew: (node: BTreeNode) => `Node ${node} has too few values`,
+        mergeRight: (node: BTreeNode, parent: BTreeNode, rightSib: BTreeNode) =>
+            `Merging nodes:\n${node} + [${parent}] + ${rightSib}`,
+        steal: {
+            right: (node: BTreeNode, left: BTreeNode, right: BTreeNode) =>
+                `Stealing from right sibling:\n${node} ← [${left}] ← [${right}]`,
+
+            left: (node: BTreeNode, left: BTreeNode, right: BTreeNode) =>
+                `Stealing from left sibling:\n[${left}] → [${right}] → ${node}`,
+        },
+    },
+};
+
 export class BTree extends Engine {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
 
-    // @ts-expect-error TODO fix message typing
-    messages = {
-        ...BSTMessages,
-        ...BTreeMessages,
-        find: {
-            ...BSTMessages.find,
-            ...BTreeMessages.find,
-        },
-        insert: {
-            ...BSTMessages.insert,
-            ...BTreeMessages.insert,
-        },
-        delete: {
-            ...BSTMessages.delete,
-            ...BTreeMessages.delete,
-        },
-    };
+    messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
 
     toolbar!: BTreeToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
@@ -836,46 +859,3 @@ export class BTree extends Engine {
         return node;
     }
 }
-
-const BTreeMessages = {
-    find: {
-        predecessor: (val: string) => `Find the predecessor value of ${val}`,
-    },
-    insert: {
-        nth: (val: string, nth: number) =>
-            `Insert ${val} as ${nth} value in the node`,
-    },
-    delete: {
-        root: {
-            empty: "Remove empty tree root",
-        },
-        leaf: {
-            nth: (leaf: BTreeNode, nth: number) =>
-                `Delete the ${nth} value in leaf ${leaf}`,
-            value: (val: string, leaf: BTreeNode) =>
-                `Now delete ${val} in the leaf node ${leaf}`,
-        },
-        replace: (val: string, newVal: string) =>
-            `Replace the value ${val} with ${newVal}`,
-    },
-    node: {
-        lookNthChild: (nth: number) => `Look into ${nth} child`,
-        split: (node: BTreeNode) => `Splitting node ${node}`,
-        tooFew: (node: BTreeNode) => `Node ${node} has too few values`,
-        mergeRight: (
-            node: BTreeNode,
-            parent: BTreeNode,
-            rightSib: BTreeNode
-        ) => ["Merging nodes:", `${node} + [${parent}] + ${rightSib}`],
-        steal: {
-            right: (node: BTreeNode, left: BTreeNode, right: BTreeNode) => [
-                "Stealing from right sibling:",
-                `${node} ← [${left}] ← [${right}]`,
-            ],
-            left: (node: BTreeNode, left: BTreeNode, right: BTreeNode) => [
-                "Stealing from left sibling:",
-                `[${left}] → [${right}] → ${node}`,
-            ],
-        },
-    },
-} as const;
