@@ -48,24 +48,19 @@ export class Engine {
         animationSpeed: 1000, // milliseconds per step
     };
 
-    $CookieExpireDays = 30;
-    $Cookies = {
-        //TODO: confusing naming
+    $COOKIE_EXPIRE_DAYS = 30;
+    $cookies = {
         animationSpeed: {
-            getCookie: (value: string) => {
-                if (this.toolbar.animationSpeed) {
-                    this.toolbar.animationSpeed.value = value;
-                }
+            setCookie: (value: string) => {
+                this.toolbar.animationSpeed.value = value;
             },
-            setCookie: () => this.getAnimationSpeed(),
+            getCookie: () => this.getAnimationSpeed(),
         },
         objectSize: {
-            getCookie: (value: string) => {
-                if (this.toolbar.objectSize) {
-                    this.toolbar.objectSize.value = value;
-                }
+            setCookie: (value: string) => {
+                this.toolbar.objectSize.value = value;
             },
-            setCookie: () => this.getObjectSize(),
+            getCookie: () => this.getObjectSize(),
         },
     };
 
@@ -806,35 +801,34 @@ export class Engine {
             console.log("Loading cookies", document.cookie);
         }
         const allCookies = document.cookie.split(";");
-        for (const cookieName in this.$Cookies) {
-            for (const cookie of allCookies) {
-                const [cookieName0, value0] = cookie.split("=", 2);
-                if (cookieName0.trim() === cookieName) {
-                    const value = decodeURIComponent(value0);
-                    this.$Cookies[
-                        cookieName as keyof typeof this.$Cookies
-                    ].getCookie(value);
-                    break;
+        Object.entries(this.$cookies).map(([cookieName, cookieValue]) => {
+            allCookies.map((cookie) => {
+                const splitCookie = cookie.split("=");
+                if (splitCookie.length !== 2) {
+                    throw new Error("Invalid cookie format");
                 }
-            }
-        }
+                const [documentCookieName, documentCookieValue] = splitCookie;
+                if (documentCookieName.trim() === cookieName) {
+                    const value = decodeURIComponent(documentCookieValue);
+                    cookieValue.setCookie(value);
+                }
+            });
+        });
     }
 
     saveCookies(): void {
         let expires = "";
-        if (this.$CookieExpireDays > 0) {
+        if (this.$COOKIE_EXPIRE_DAYS > 0) {
             const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$CookieExpireDays);
+            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
             expires = `;expires=${exdate.toUTCString()}`;
         }
-        for (const cookieName in this.$Cookies) {
-            const value = encodeURIComponent(
-                this.$Cookies[
-                    cookieName as keyof typeof this.$Cookies
-                ].setCookie()
-            );
-            document.cookie = `${cookieName}=${value}${expires}`;
-        }
+
+        Object.entries(this.$cookies).map(([cookieName, value]) => {
+            const cookieValue = encodeURIComponent(value.getCookie());
+            document.cookie = `${cookieName}=${cookieValue}${expires}`;
+        });
+
         if (this.DEBUG) {
             console.log("Setting cookies", document.cookie);
         }
