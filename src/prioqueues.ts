@@ -8,12 +8,14 @@ const PRIOQUEUES = {
 initialisePrioQueues("#prioqueuesContainer");
 
 function initialisePrioQueues(containerID: string) {
-    const algoSelector = document.querySelector(
+    const algoSelector = document.querySelector<HTMLSelectElement>(
         `${containerID} .algorithmSelector`
-    ) as HTMLSelectElement;
+    );
+
     if (!algoSelector) {
         throw new Error("Could not find algo selector");
     }
+
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
@@ -38,8 +40,10 @@ function initialisePrioQueues(containerID: string) {
     if (!(algo && /^[\w.]+$/.test(algo) && algo in PRIOQUEUES)) {
         algo = "";
     }
+
     const algoClass = algo as keyof typeof PRIOQUEUES | "";
     algoSelector.value = algo;
+
     const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Engine;
     const PQEngine = new PrioQueue(containerID);
     PQEngine.initialise();

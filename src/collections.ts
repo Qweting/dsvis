@@ -28,9 +28,9 @@ type CollectionToolbarItems = {
 initialiseCollections("#collectionsContainer");
 
 function initialiseCollections(containerID: string) {
-    const algoSelector = document.querySelector(
+    const algoSelector = document.querySelector<HTMLSelectElement>(
         `${containerID} select.algorithmSelector`
-    ) as HTMLSelectElement;
+    );
 
     if (!algoSelector) {
         throw new Error("Could not find algo selector");
@@ -62,6 +62,7 @@ function initialiseCollections(containerID: string) {
     }
     const algoClass = algo as keyof typeof COLLECTIONS | "";
     algoSelector.value = algo;
+
     const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
     const CollectionEngine = new Collection(containerID);
     CollectionEngine.initialise();
