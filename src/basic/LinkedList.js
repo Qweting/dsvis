@@ -7,7 +7,7 @@ class Node {
     }
 }
 // linkedlist class
-class LinkedList {
+export default class LinkedList {
     constructor() {
         // head will points to the first element of the list
         this.head = null;

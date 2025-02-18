@@ -3,14 +3,18 @@
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
+import LinkedList from "./LinkedList"
+
 DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
     // Limit the size of the list to maintain readability
-    // maxListSize = 10;
-    
+    maxListSize = 10;
+    //
+    linkedList;
     // Only used for hard-coded values
     initialValues;
 
     initialise(initialValues = null) {
+        this.linkedList = new LinkedList();
         this.initialValues = initialValues;
         super.initialise();
     }
@@ -22,6 +26,18 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
             this.State.resetting = true;
             await this.insert(...this.initialValues);
             this.State.resetting = false;
+        }
+    }
+
+    async insert(...values) {
+        for (const val of values) await this.insertOne(val);
+        this.linkedList.printList();
+    }
+
+    async insertOne(value) {
+        if (this.linkedList.size >= this.maxListSize) {
+            await this.pause('general.full');
+            return;
         }
     }
 }
