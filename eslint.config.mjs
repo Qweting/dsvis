@@ -1,50 +1,9 @@
 import tseslint from 'typescript-eslint';
-import stylistic from '@stylistic/eslint-plugin-ts';
 
 export default tseslint.config(
     tseslint.configs.recommended,
     {
-        plugins: {
-            "@stylistic": stylistic,
-        },
         rules: {
-            "@stylistic/semi": ["error", "always"],
-
-            "@stylistic/indent": ["error", 4, {
-                flatTernaryExpressions: true,
-            }],
-
-            "@stylistic/quotes": "off",
-
-            "@stylistic/no-multiple-empty-lines": ["warn", {
-                max: 2,
-            }],
-
-            "@stylistic/array-bracket-spacing": ["warn", "never"],
-
-            "@stylistic/padded-blocks": ["warn", {
-                blocks: "never",
-                switches: "never",
-            }],
-
-            "@stylistic/brace-style": ["warn", "1tbs"],
-            "@stylistic/arrow-parens": ["warn", "always"],
-            "@stylistic/no-trailing-spaces": ["warn"],
-
-            "@stylistic/no-multi-spaces": ["warn", {
-                ignoreEOLComments: false,
-            }],
-
-            "@stylistic/space-infix-ops": ["warn"],
-
-            "@stylistic/space-before-function-paren": ["warn", {
-                anonymous: "never",
-                named: "never",
-                asyncArrow: "always",
-            }],
-
-            "@stylistic/multiline-ternary": "off",
-            "@stylistic/operator-linebreak": "off",
             "eqeqeq": ["error", "smart"],
 
             "no-constant-condition": ["error", {
