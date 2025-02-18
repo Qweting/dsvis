@@ -131,13 +131,13 @@ export class BST extends Engine {
     // TODO: Change success to found because we always find something
     async findHelper(value: string | number): Promise<
         | {
-            success: true;
-            node: BinaryNode;
-        }
+              success: true;
+              node: BinaryNode;
+          }
         | {
-            success: false;
-            node: BinaryNode | null;
-        }
+              success: false;
+              node: BinaryNode | null;
+          }
     > {
         let parent: BinaryNode | null = null;
         let node: BinaryNode | null = this.treeRoot;
@@ -160,7 +160,11 @@ export class BST extends Engine {
             parent = node;
             node = parent.getChild(direction);
             if (node) {
-                pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+                pointer.setCenter(
+                    node.cx(),
+                    node.cy(),
+                    this.getAnimationSpeed()
+                );
             }
             await this.pause("find.look", direction);
             parent.setChildHighlight(direction, false);
@@ -221,7 +225,9 @@ export class BST extends Engine {
             await this.pause("delete.notexists", value);
             found.node?.setHighlight(false);
             const direction =
-                compare(value, found.node?.getText() || "") < 0 ? "left" : "right";
+                compare(value, found.node?.getText() || "") < 0
+                    ? "left"
+                    : "right";
             return { success: false, direction: direction, parent: found.node };
         }
         found.node?.setHighlight(true);
@@ -507,7 +513,8 @@ export const BSTMessages = {
         leaf: (node: string) => `Remove leaf node ${node}`,
     },
     rotate: {
-        single: (node: string, dir: "left" | "right") => `Rotate ${node} ${dir}`,
+        single: (node: string, dir: "left" | "right") =>
+            `Rotate ${node} ${dir}`,
         zigzag: (
             child: string,
             dir1: "left" | "right",

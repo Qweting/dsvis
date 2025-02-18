@@ -71,9 +71,9 @@ export class Engine {
         resetting: boolean;
         animating: boolean;
     } = {
-            resetting: false,
-            animating: false,
-        };
+        resetting: false,
+        animating: false,
+    };
 
     Info: {
         title: Text | undefined;
@@ -81,11 +81,11 @@ export class Engine {
         printer: Text | undefined;
         status: Text | undefined;
     } = {
-            title: undefined,
-            body: undefined,
-            printer: undefined,
-            status: undefined,
-        };
+        title: undefined,
+        body: undefined,
+        printer: undefined,
+        status: undefined,
+    };
 
     EventListeners: Record<string, Partial<Record<Listeners, () => void>>> = {
         stepForward: {},
@@ -120,7 +120,10 @@ export class Engine {
     }
 
     getNodeStart(): [number, number] {
-        return [this.$Svg.margin + this.getObjectSize() / 2, this.$Svg.margin * 4];
+        return [
+            this.$Svg.margin + this.getObjectSize() / 2,
+            this.$Svg.margin * 4,
+        ];
     }
 
     getTreeRoot(): [number, number] {
@@ -143,7 +146,8 @@ export class Engine {
         }
         updateDefault(this, defaults, true);
 
-        const container = document.querySelector<HTMLElement>(containerSelector);
+        const container =
+            document.querySelector<HTMLElement>(containerSelector);
         if (!container) {
             throw new Error("No container found");
         }
@@ -160,7 +164,9 @@ export class Engine {
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = this;
 
-        const debugParam = new URLSearchParams(window.location.href).get("debug");
+        const debugParam = new URLSearchParams(window.location.href).get(
+            "debug"
+        );
         this.DEBUG = Boolean(debugParam || false);
         if (this.DEBUG) {
             this.Svg.addClass("debug");
@@ -168,15 +174,19 @@ export class Engine {
     }
 
     getToolbar(): EngineToolbarItems {
-        const generalControls = this.container.querySelector<HTMLFieldSetElement>(
-            "fieldset.generalControls"
-        );
-        const algorithmControls = this.container.querySelector<HTMLFieldSetElement>(
-            "fieldset.algorithmControls"
-        );
+        const generalControls =
+            this.container.querySelector<HTMLFieldSetElement>(
+                "fieldset.generalControls"
+            );
+        const algorithmControls =
+            this.container.querySelector<HTMLFieldSetElement>(
+                "fieldset.algorithmControls"
+            );
 
         const stepForward =
-            this.container.querySelector<HTMLButtonElement>("button.stepForward");
+            this.container.querySelector<HTMLButtonElement>(
+                "button.stepForward"
+            );
         const stepBackward = this.container.querySelector<HTMLButtonElement>(
             "button.stepBackward"
         );
@@ -184,12 +194,16 @@ export class Engine {
             "button.toggleRunner"
         );
         const fastForward =
-            this.container.querySelector<HTMLButtonElement>("button.fastForward");
+            this.container.querySelector<HTMLButtonElement>(
+                "button.fastForward"
+            );
         const fastBackward = this.container.querySelector<HTMLButtonElement>(
             "button.fastBackward"
         );
         const objectSize =
-            this.container.querySelector<HTMLSelectElement>("select.objectSize");
+            this.container.querySelector<HTMLSelectElement>(
+                "select.objectSize"
+            );
         const animationSpeed = this.container.querySelector<HTMLSelectElement>(
             "select.animationSpeed"
         );
@@ -268,7 +282,7 @@ export class Engine {
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> { }
+    async resetAlgorithm(): Promise<void> {}
 
     clearCanvas(): void {
         this.Svg.clear();
@@ -283,7 +297,10 @@ export class Engine {
             }
         }
         const margin = this.$Svg.margin;
-        this.Info.title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
+        this.Info.title = this.Svg.text(NBSP)
+            .addClass("title")
+            .x(margin)
+            .y(margin);
         this.Info.body = this.Svg.text(NBSP)
             .addClass("message")
             .x(margin)
@@ -322,9 +339,15 @@ export class Engine {
                     .removeClass("paused")
                     .addClass("running");
             } else if (status === "paused") {
-                currentStatus.text("Paused").addClass("paused").removeClass("running");
+                currentStatus
+                    .text("Paused")
+                    .addClass("paused")
+                    .removeClass("running");
             } else {
-                currentStatus.text("Idle").removeClass("paused").removeClass("running");
+                currentStatus
+                    .text("Idle")
+                    .removeClass("paused")
+                    .removeClass("running");
             }
         }, timeout);
     }
@@ -346,41 +369,41 @@ export class Engine {
         string,
         { type: Listeners; condition: () => boolean; handler: () => void }
     > = {
-            stepBackward: {
-                type: "click",
-                condition: () => this.actions.length > 0,
-                handler: () => {
-                    this.setRunning(false);
-                    const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
-                    this.execute(action.oper, action.args, action.nsteps - 1);
-                },
+        stepBackward: {
+            type: "click",
+            condition: () => this.actions.length > 0,
+            handler: () => {
+                this.setRunning(false);
+                const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
+                this.execute(action.oper, action.args, action.nsteps - 1);
             },
-            fastBackward: {
-                type: "click",
-                condition: () => this.actions.length > 0,
-                handler: () => {
-                    this.actions.pop();
-                    if (this.actions.length > 0) {
-                        const action = this.actions.pop()!;
-                        this.execute(action.oper, action.args, action.nsteps);
-                    } else {
-                        this.reset();
-                    }
-                },
+        },
+        fastBackward: {
+            type: "click",
+            condition: () => this.actions.length > 0,
+            handler: () => {
+                this.actions.pop();
+                if (this.actions.length > 0) {
+                    const action = this.actions.pop()!;
+                    this.execute(action.oper, action.args, action.nsteps);
+                } else {
+                    this.reset();
+                }
             },
-            objectSize: {
-                type: "change",
-                condition: () => true,
-                handler: () => {
-                    if (this.actions.length > 0) {
-                        const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                        this.execute(action.oper, action.args, action.nsteps);
-                    } else {
-                        this.reset();
-                    }
-                },
+        },
+        objectSize: {
+            type: "change",
+            condition: () => true,
+            handler: () => {
+                if (this.actions.length > 0) {
+                    const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
+                    this.execute(action.oper, action.args, action.nsteps);
+                } else {
+                    this.reset();
+                }
             },
-        };
+        },
+    };
 
     // TODO: Fix some nice type for this
     $AsyncListeners: Record<
@@ -390,46 +413,47 @@ export class Engine {
             handler: (resolve: Resolve, reject: Reject) => void;
         }
     > = {
-            stepForward: {
-                type: "click",
-                handler: (resolve, reject) => {
-                    this.setRunning(false);
+        stepForward: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.setRunning(false);
+                this.stepForward(resolve, reject);
+            },
+        },
+        fastForward: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.actions[this.CurrentAction].nsteps =
+                    Number.MAX_SAFE_INTEGER;
+                this.fastForward(resolve, reject);
+            },
+        },
+        toggleRunner: {
+            type: "click",
+            handler: (resolve, reject) => {
+                this.toggleRunner();
+                if (this.isRunning()) {
                     this.stepForward(resolve, reject);
-                },
+                } else {
+                    this.CurrentStep++;
+                    resolve(undefined);
+                }
             },
-            fastForward: {
-                type: "click",
-                handler: (resolve, reject) => {
-                    this.actions[this.CurrentAction].nsteps = Number.MAX_SAFE_INTEGER;
-                    this.fastForward(resolve, reject);
-                },
-            },
-            toggleRunner: {
-                type: "click",
-                handler: (resolve, reject) => {
-                    this.toggleRunner();
-                    if (this.isRunning()) {
-                        this.stepForward(resolve, reject);
-                    } else {
-                        this.CurrentStep++;
-                        resolve(undefined);
-                    }
-                },
-            },
-            stepBackward: {
-                type: "click",
-                handler: (resolve, reject) =>
-                    reject({ until: this.CurrentStep - 1, running: false }),
-            },
-            fastBackward: {
-                type: "click",
-                handler: (resolve, reject) => reject({ until: 0 }),
-            },
-            objectSize: {
-                type: "change",
-                handler: (resolve, reject) => reject({ until: this.CurrentStep }),
-            },
-        };
+        },
+        stepBackward: {
+            type: "click",
+            handler: (resolve, reject) =>
+                reject({ until: this.CurrentStep - 1, running: false }),
+        },
+        fastBackward: {
+            type: "click",
+            handler: (resolve, reject) => reject({ until: 0 }),
+        },
+        objectSize: {
+            type: "change",
+            handler: (resolve, reject) => reject({ until: this.CurrentStep }),
+        },
+    };
 
     ///////////////////////////////////////////////////////////////////////////////
     // Updating listeners
@@ -465,7 +489,9 @@ export class Engine {
                 if (this.DEBUG) {
                     this.addListener(id, listener.type, () => {
                         console.log(
-                            `${id} ${listener.type}: ${JSON.stringify(this.actions)}`
+                            `${id} ${listener.type}: ${JSON.stringify(
+                                this.actions
+                            )}`
                         );
                         listener.handler();
                     });
@@ -503,12 +529,17 @@ export class Engine {
             const elem = this.toolbar[id as keyof typeof this.toolbar];
 
             if (!elem) {
-                throw new Error("Could not find element to remove listener from");
+                throw new Error(
+                    "Could not find element to remove listener from"
+                );
             }
 
             elem.disabled = true;
             for (const type in listeners[id]) {
-                elem.removeEventListener(type, listeners[id][type as Listeners]!);
+                elem.removeEventListener(
+                    type,
+                    listeners[id][type as Listeners]!
+                );
             } // ! because we know that the type exists
             listeners[id] = {};
         }
@@ -547,18 +578,21 @@ export class Engine {
         this.actions.push({ oper: operation, args: args, nsteps: until });
         if (this.DEBUG) {
             console.log(
-                `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
-                    this.actions
-                )}`
+                `EXEC ${until}: ${operation} ${args.join(
+                    ", "
+                )}, ${JSON.stringify(this.actions)}`
             );
         }
 
         try {
             await this.runActionsLoop();
-            this.actions[this.actions.length - 1].nsteps = this.CurrentStep || 0; // TODO: Not sure if this is correct
+            this.actions[this.actions.length - 1].nsteps =
+                this.CurrentStep || 0; // TODO: Not sure if this is correct
             if (this.DEBUG) {
                 console.log(
-                    `DONE / ${this.CurrentStep}: ${JSON.stringify(this.actions)}`
+                    `DONE / ${this.CurrentStep}: ${JSON.stringify(
+                        this.actions
+                    )}`
                 );
             }
             this.resetListeners(false);
@@ -608,11 +642,14 @@ export class Engine {
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
             let message = messageArr.join(" ");
-            message = `${message.charAt(0).toUpperCase() + message.substring(1)
-                } ${action.args.join(", ")}`;
+            message = `${
+                message.charAt(0).toUpperCase() + message.substring(1)
+            } ${action.args.join(", ")}`;
             if (this.DEBUG) {
                 console.log(
-                    `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
+                    `CALL ${nAction}: ${message}, ${JSON.stringify(
+                        this.actions
+                    )}`
                 );
             }
             this.Info.title?.text(message);
@@ -637,7 +674,8 @@ export class Engine {
         const title = this.getMessage(message, ...args);
         if (this.DEBUG) {
             console.log(
-                `${this.CurrentStep
+                `${
+                    this.CurrentStep
                 }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
                     this.actions
                 )}`
@@ -737,7 +775,9 @@ export class Engine {
     }
 
     isRunning(): boolean {
-        return this.toolbar.toggleRunner?.classList.contains("selected") || false;
+        return (
+            this.toolbar.toggleRunner?.classList.contains("selected") || false
+        );
     }
 
     setRunning(running: boolean): this {
@@ -770,9 +810,9 @@ export class Engine {
                 const [cookieName0, value0] = cookie.split("=", 2);
                 if (cookieName0.trim() === cookieName) {
                     const value = decodeURIComponent(value0);
-                    this.$Cookies[cookieName as keyof typeof this.$Cookies].getCookie(
-                        value
-                    );
+                    this.$Cookies[
+                        cookieName as keyof typeof this.$Cookies
+                    ].getCookie(value);
                     break;
                 }
             }
@@ -788,7 +828,9 @@ export class Engine {
         }
         for (const cookieName in this.$Cookies) {
             const value = encodeURIComponent(
-                this.$Cookies[cookieName as keyof typeof this.$Cookies].setCookie()
+                this.$Cookies[
+                    cookieName as keyof typeof this.$Cookies
+                ].setCookie()
             );
             document.cookie = `${cookieName}=${value}${expires}`;
         }
@@ -840,28 +882,28 @@ export function addReturnSubmit(
         allowed === "int"
             ? "0-9"
             : allowed === "int+"
-                ? "0-9 "
-                : allowed === "float"
-                    ? "-.0-9"
-                    : allowed === "float+"
-                        ? "-.0-9 "
-                        : allowed === "ALPHA"
-                            ? "A-Z"
-                            : allowed === "ALPHA+"
-                                ? "A-Z "
-                                : allowed === "alpha"
-                                    ? "a-zA-Z"
-                                    : allowed === "alpha+"
-                                        ? "a-zA-Z "
-                                        : allowed === "ALPHANUM"
-                                            ? "A-Z0-9"
-                                            : allowed === "ALPHANUM+"
-                                                ? "A-Z0-9 "
-                                                : allowed === "alphanum"
-                                                    ? "a-zA-Z0-9"
-                                                    : allowed === "alphanum+"
-                                                        ? "a-zA-Z0-9 "
-                                                        : allowed;
+            ? "0-9 "
+            : allowed === "float"
+            ? "-.0-9"
+            : allowed === "float+"
+            ? "-.0-9 "
+            : allowed === "ALPHA"
+            ? "A-Z"
+            : allowed === "ALPHA+"
+            ? "A-Z "
+            : allowed === "alpha"
+            ? "a-zA-Z"
+            : allowed === "alpha+"
+            ? "a-zA-Z "
+            : allowed === "ALPHANUM"
+            ? "A-Z0-9"
+            : allowed === "ALPHANUM+"
+            ? "A-Z0-9 "
+            : allowed === "alphanum"
+            ? "a-zA-Z0-9"
+            : allowed === "alphanum+"
+            ? "a-zA-Z0-9 "
+            : allowed;
 
     const regex = new RegExp(`[^${allowed}]`, "g");
 
@@ -869,8 +911,8 @@ export function addReturnSubmit(
         allowed === allowed.toUpperCase()
             ? (s) => s.toUpperCase()
             : allowed === allowed.toLowerCase()
-                ? (s) => s.toLowerCase()
-                : (s) => s;
+            ? (s) => s.toLowerCase()
+            : (s) => s;
 
     // Idea taken from here: https://stackoverflow.com/a/14719818
     field.oninput = (event) => {

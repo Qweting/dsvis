@@ -82,7 +82,12 @@ declare module "@svgdotjs/svg.js" {
             numChildren: number,
             strokeWidth: number
         ): BTreeConnection;
-        dsArray(size: number, x: number, y: number, horizontal: boolean): DSArray;
+        dsArray(
+            size: number,
+            x: number,
+            y: number,
+            horizontal: boolean
+        ): DSArray;
     }
 }
 
@@ -101,7 +106,10 @@ extend(Element, {
         return this as Element;
     },
     getCenter() {
-        return [(this as Element).cx(), (this as Element).cy()] as [number, number];
+        return [(this as Element).cx(), (this as Element).cy()] as [
+            number,
+            number
+        ];
     },
     setCenter(x: number, y: number, animationDuration: number = 0) {
         return (this as Element)
@@ -206,8 +214,15 @@ extend(Container, {
             .put(new BTreeConnection(start, end, child, numChildren))
             .init(strokeWidth);
     },
-    dsArray: function (size: number, x: number, y: number, horizontal: boolean) {
-        return (this as Container).put(new DSArray()).init(size, x, y, horizontal);
+    dsArray: function (
+        size: number,
+        x: number,
+        y: number,
+        horizontal: boolean
+    ) {
+        return (this as Container)
+            .put(new DSArray())
+            .init(size, x, y, horizontal);
     },
 });
 

@@ -57,7 +57,8 @@ export class SplayTree extends BST {
             const left = this.treeRoot.getLeft() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
             const child =
-                this.treeRoot.getLeft() || (this.treeRoot.getRight() as BinaryNode);
+                this.treeRoot.getLeft() ||
+                (this.treeRoot.getRight() as BinaryNode);
             const newRoot = child.setHighlight(true);
             await this.pause("delete.singleChild", right, left);
             this.treeRoot.remove();

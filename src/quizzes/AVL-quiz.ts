@@ -70,10 +70,10 @@ export class AVLQuiz extends BST {
             !isBST && unbalanced
                 ? "Tree is not a BST, and it's unbalanced!"
                 : !isBST
-                    ? "Tree is not a BST!"
-                    : unbalanced
-                        ? "Tree is unbalanced!"
-                        : "Tree is a correct AVL tree";
+                ? "Tree is not a BST!"
+                : unbalanced
+                ? "Tree is unbalanced!"
+                : "Tree is a correct AVL tree";
         this.Info.title?.text(message);
         this.Info.body?.text(NBSP);
     }
@@ -157,8 +157,14 @@ export class AVLQuiz extends BST {
             this.getStrokeWidth()
         );
         moving.setHighlight(true);
-        await this.pause(`Replace the value of ${this.mark} with ${this.current}`);
-        moving.setCenter(this.mark.cx(), this.mark.cy(), this.getAnimationSpeed());
+        await this.pause(
+            `Replace the value of ${this.mark} with ${this.current}`
+        );
+        moving.setCenter(
+            this.mark.cx(),
+            this.mark.cy(),
+            this.getAnimationSpeed()
+        );
         await this.pause(undefined);
         this.mark.setText(this.current.getText());
         moving.remove();
@@ -228,7 +234,10 @@ export class AVLQuiz extends BST {
             );
             return;
         }
-        const node = (await this.singleRotate(direction, this.current)) as AVLNode;
+        const node = (await this.singleRotate(
+            direction,
+            this.current
+        )) as AVLNode;
         await this.setCurrent(node, false);
         await this.pause("Updating heights");
         this.updateHeights();
@@ -270,14 +279,16 @@ function initialiseAVLQuiz(containerID: string) {
         container.querySelector<HTMLInputElement>("input.createRight");
     const moveParent =
         container.querySelector<HTMLInputElement>("input.moveParent");
-    const moveLeft = container.querySelector<HTMLInputElement>("input.moveLeft");
+    const moveLeft =
+        container.querySelector<HTMLInputElement>("input.moveLeft");
     const moveRight =
         container.querySelector<HTMLInputElement>("input.moveRight");
     const rotateLeft =
         container.querySelector<HTMLInputElement>("input.rotateLeft");
     const rotateRight =
         container.querySelector<HTMLInputElement>("input.rotateRight");
-    const markNode = container.querySelector<HTMLInputElement>("input.markNode");
+    const markNode =
+        container.querySelector<HTMLInputElement>("input.markNode");
     const copyToMark =
         container.querySelector<HTMLInputElement>("input.copyToMark");
     const deleteNode =

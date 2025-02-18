@@ -36,7 +36,9 @@ export class BTreeConnection extends Connection<BTreeNode> {
         if (this.$coords.n <= 1) {
             return 0;
         }
-        return this.$maxBend * (1 - (2 * this.$coords.i) / (this.$coords.n - 1));
+        return (
+            this.$maxBend * (1 - (2 * this.$coords.i) / (this.$coords.n - 1))
+        );
     }
 
     _getPath(): string {

@@ -106,10 +106,18 @@ export class BTreeNode extends G {
         return this;
     }
 
-    setNumValues(nvalues: number, objectSize: number, strokeWidth: number): this {
+    setNumValues(
+        nvalues: number,
+        objectSize: number,
+        strokeWidth: number
+    ): this {
         while (nvalues < this.numValues()) {
             if (!this.isLeaf()) {
-                this.setChild(this.$children?.length || 0 - 1, null, strokeWidth);
+                this.setChild(
+                    this.$children?.length || 0 - 1,
+                    null,
+                    strokeWidth
+                );
                 this.$children?.pop();
             }
             this.$values.pop()?.remove();
@@ -210,8 +218,9 @@ export class BTreeNode extends G {
 
     getChildren(): BTreeNode[] {
         return (
-            this.$children?.map((e) => e?.getEnd()).filter((e) => e !== undefined) ||
-            []
+            this.$children
+                ?.map((e) => e?.getEnd())
+                .filter((e) => e !== undefined) || []
         );
     }
 
@@ -395,7 +404,11 @@ export class BTreeNode extends G {
         const ySpacing = nodeSpacing;
         const nextY = y + this.getHeight() + ySpacing;
         for (const child of this.getChildren()) {
-            child?._setNewPositions(x + child.$leftWidth, nextY, animationDuration);
+            child?._setNewPositions(
+                x + child.$leftWidth,
+                nextY,
+                animationDuration
+            );
             x += (child?.$width || 0) + xSpacing;
         }
     }

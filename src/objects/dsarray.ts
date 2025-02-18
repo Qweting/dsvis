@@ -20,7 +20,10 @@ export class DSArray extends G {
     }
 
     getCX(i: number): number {
-        return this.cx() + this.engine().getObjectSize() * (i - this.getSize() / 2 + 0.5);
+        return (
+            this.cx() +
+            this.engine().getObjectSize() * (i - this.getSize() / 2 + 0.5)
+        );
     }
 
     getSize(): number {
@@ -37,13 +40,18 @@ export class DSArray extends G {
         const h = this.engine().getObjectSize();
         const stroke = this.engine().getStrokeWidth();
         if (!this.$rect) {
-            this.$rect = this.rect(w0 * size, 3 * h).addClass("invisible").center(0, 0);
+            this.$rect = this.rect(w0 * size, 3 * h)
+                .addClass("invisible")
+                .center(0, 0);
         }
         this.$rect.width(w0 * size);
-        const cx = this.$rect.cx(), cy = this.$rect.cy();
+        const cx = this.$rect.cx(),
+            cy = this.$rect.cy();
         for (let i = 0; i < size; i++) {
             if (!this.$backgrounds[i]) {
-                this.$backgrounds[i] = this.rect(w0, h).stroke({ width: stroke }).addClass("background");
+                this.$backgrounds[i] = this.rect(w0, h)
+                    .stroke({ width: stroke })
+                    .addClass("background");
             }
             this.$backgrounds[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
             if (!this.$values[i]) {
@@ -51,9 +59,14 @@ export class DSArray extends G {
             }
             this.$values[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
             if (!this.$indices[i]) {
-                this.$indices[i] = this.text(i.toString()).addClass("arrayindex");
+                this.$indices[i] = this.text(i.toString()).addClass(
+                    "arrayindex"
+                );
             }
-            this.$indices[i].center(cx + w0 * (i - size / 2 + 0.5), cy + h * 0.8);
+            this.$indices[i].center(
+                cx + w0 * (i - size / 2 + 0.5),
+                cy + h * 0.8
+            );
         }
         return this;
     }
@@ -72,7 +85,9 @@ export class DSArray extends G {
 
     setValues(values: Array<string>) {
         if (values.length !== this.getSize()) {
-            throw new Error(`Wrong number of values: ${values.length} != ${this.getSize()}`);
+            throw new Error(
+                `Wrong number of values: ${values.length} != ${this.getSize()}`
+            );
         }
         for (let i = 0; i < values.length; i++) {
             this.setValue(i, values[i]);
@@ -98,8 +113,10 @@ export class DSArray extends G {
     }
 
     swap(j: number, k: number, animate: boolean = false) {
-        const jText = this.$values[j], kText = this.$values[k];
-        const jX = this.getCX(j), kX = this.getCX(k);
+        const jText = this.$values[j],
+            kText = this.$values[k];
+        const jX = this.getCX(j),
+            kX = this.getCX(k);
         this.engine().animate(jText, animate).cx(kX);
         this.engine().animate(kText, animate).cx(jX);
         this.$values[k] = jText;
@@ -136,5 +153,4 @@ export class DSArray extends G {
         }
         return this;
     }
-};
-
+}

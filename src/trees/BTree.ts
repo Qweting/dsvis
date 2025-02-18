@@ -361,10 +361,10 @@ export class BTree extends Engine {
             return i === 0
                 ? "first"
                 : i === 1
-                    ? "second"
-                    : i === n - 1
-                        ? "last"
-                        : `${i}rd`;
+                ? "second"
+                : i === n - 1
+                ? "last"
+                : `${i}rd`;
         }
     }
 
@@ -482,7 +482,9 @@ export class BTree extends Engine {
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
             await this.pause("delete.root.empty");
-            const newRoot = this.treeRoot.isLeaf() ? null : this.treeRoot.getLeft();
+            const newRoot = this.treeRoot.isLeaf()
+                ? null
+                : this.treeRoot.getLeft();
             this.treeRoot.remove();
             this.treeRoot = newRoot;
             this.resizeTree(this.$Svg.margin, this.getNodeSpacing());
@@ -620,7 +622,8 @@ export class BTree extends Engine {
         sinkingNode.setText(0, parentValue);
         parent.setText(parentIndex, "");
         const sinkingX =
-            (Number(node.x()) + Number(node.width()) + Number(rightSib?.x())) / 2;
+            (Number(node.x()) + Number(node.width()) + Number(rightSib?.x())) /
+            2;
         sinkingNode.setCenter(sinkingX, node.cy(), this.getAnimationSpeed());
         node.setCenter(
             sinkingX - (this.getObjectSize() + Number(node.width())) / 2,
@@ -786,7 +789,13 @@ export class BTree extends Engine {
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
 
-        node.insertValue(0, "", this.getObjectSize(), this.getStrokeWidth(), true);
+        node.insertValue(
+            0,
+            "",
+            this.getObjectSize(),
+            this.getStrokeWidth(),
+            true
+        );
         parent.setText(parentIndex, "");
         leftSib.setText(leftSib.numValues() - 1, "");
 
@@ -853,10 +862,11 @@ const BTreeMessages = {
         lookNthChild: (nth: number) => `Look into ${nth} child`,
         split: (node: BTreeNode) => `Splitting node ${node}`,
         tooFew: (node: BTreeNode) => `Node ${node} has too few values`,
-        mergeRight: (node: BTreeNode, parent: BTreeNode, rightSib: BTreeNode) => [
-            "Merging nodes:",
-            `${node} + [${parent}] + ${rightSib}`,
-        ],
+        mergeRight: (
+            node: BTreeNode,
+            parent: BTreeNode,
+            rightSib: BTreeNode
+        ) => ["Merging nodes:", `${node} + [${parent}] + ${rightSib}`],
         steal: {
             right: (node: BTreeNode, left: BTreeNode, right: BTreeNode) => [
                 "Stealing from right sibling:",

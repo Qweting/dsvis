@@ -11,9 +11,9 @@ export class BinaryNode extends GraphNode {
         left: Connection<BinaryNode> | null;
         right: Connection<BinaryNode> | null;
     } = {
-            left: null,
-            right: null,
-        };
+        left: null,
+        right: null,
+    };
     $nullary: { left: Path | null; right: Path | null } = {
         left: null,
         right: null,
@@ -35,7 +35,8 @@ export class BinaryNode extends GraphNode {
             nY = 0.8 * d,
             nR = 2 * strokeWidth;
         const nullpath = (s: number) =>
-            `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${-2 * nR
+            `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${
+                -2 * nR
             },0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
 
         this.$nullary.left = this.path(nullpath(-1))

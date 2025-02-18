@@ -42,7 +42,10 @@ export class AVL extends BST {
         const result = await super.delete(value);
         if (result?.success) {
             if (result.parent) {
-                await this.updateHeights(result.parent as AVLNode, result.direction);
+                await this.updateHeights(
+                    result.parent as AVLNode,
+                    result.direction
+                );
             }
             await this.updateHeightPositions();
         }
@@ -69,11 +72,15 @@ export class AVL extends BST {
             this.getStrokeWidth()
         );
         while (node) {
-            this.pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+            this.pointer.setCenter(
+                node.cx(),
+                node.cy(),
+                this.getAnimationSpeed()
+            );
             await this.pause("node.updateHeight");
             const leftHeight = this.getHeight(
-                node.getLeft() as AVLNode | null | undefined
-            ),
+                    node.getLeft() as AVLNode | null | undefined
+                ),
                 rightHeight = this.getHeight(
                     node.getRight() as AVLNode | null | undefined
                 );
@@ -96,8 +103,8 @@ export class AVL extends BST {
 
     async rebalance(node: AVLNode) {
         const leftHeight = this.getHeight(
-            node.getLeft() as AVLNode | null | undefined
-        ),
+                node.getLeft() as AVLNode | null | undefined
+            ),
             rightHeight = this.getHeight(
                 node.getRight() as AVLNode | null | undefined
             );
@@ -109,8 +116,8 @@ export class AVL extends BST {
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
         const childLeft = this.getHeight(
-            child?.getChild(left) as AVLNode | null | undefined
-        ),
+                child?.getChild(left) as AVLNode | null | undefined
+            ),
             childRight = this.getHeight(
                 child?.getChild(right) as AVLNode | null | undefined
             );

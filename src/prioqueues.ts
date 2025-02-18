@@ -5,10 +5,12 @@ const PRIOQUEUES = {
     BinaryHeap: BinaryHeap,
 } as const;
 
-initialisePrioQueues('#prioqueuesContainer');
+initialisePrioQueues("#prioqueuesContainer");
 
 function initialisePrioQueues(containerID: string) {
-    const algoSelector = document.querySelector(`${containerID} .algorithmSelector`) as HTMLSelectElement;
+    const algoSelector = document.querySelector(
+        `${containerID} .algorithmSelector`
+    ) as HTMLSelectElement;
     if (!algoSelector) {
         throw new Error("Could not find algo selector");
     }
@@ -49,10 +51,18 @@ function initialisePrioQueues(containerID: string) {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
     });
-    addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
-    tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
-    tools.deleteSubmit.addEventListener("click", () => PQEngine.submit("deleteMin", null));
-    tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
+    addReturnSubmit(tools.insertField, "ALPHANUM+", () =>
+        PQEngine.submit("insert", tools.insertField)
+    );
+    tools.insertSubmit.addEventListener("click", () =>
+        PQEngine.submit("insert", tools.insertField)
+    );
+    tools.deleteSubmit.addEventListener("click", () =>
+        PQEngine.submit("deleteMin", null)
+    );
+    tools.clearSubmit.addEventListener("click", () =>
+        PQEngine.confirmResetAll()
+    );
 }
 
 function getPrioQueuesToolbar(container: HTMLElement) {

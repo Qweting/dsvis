@@ -35,7 +35,11 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         };
     }
 
-    init(strokeWidth: number, bend: number = 0, directed: boolean = false): this {
+    init(
+        strokeWidth: number,
+        bend: number = 0,
+        directed: boolean = false
+    ): this {
         this.stroke({ width: strokeWidth });
         this.back();
         this.setBend(bend);
