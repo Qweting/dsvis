@@ -11,7 +11,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
     async resetAlgorithm() {
         await super.resetAlgorithm();
         const [xRoot, yRoot] = this.getTreeRoot();
-        this.heapArray = this.SVG.dsArray(this.arraySize, xRoot, this.SVG.viewbox().height - yRoot);
+        this.heapArray = this.SVG.dsArray(this.arraySize, xRoot, yRoot+this.$Svg.margin*4);
         if (this.heapArray.x() < this.$Svg.margin)
             this.heapArray.x(this.$Svg.margin);
         this.sortSize = 0;
@@ -102,6 +102,7 @@ DSVis.BinaryHeap.messages = {
     sort: {
         compare: (a, b) => `Compare ${a} and ${b}`,
         swap: (a, b) => `Swap ${a} and ${b}`,
+        foundMin:(a) => `Found a smaller value ${a}`,
     },
     swap: {
         swap: (a, b) => `Swap ${a} and ${b}`,
