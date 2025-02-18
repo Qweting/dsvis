@@ -55,21 +55,13 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
         }
 
         let currentIndex = this.heapSize;
-        let parentIndex = Math.floor((currentIndex - 1) / 2);
-        let parentNode = this.treeNodes[parentIndex];
+        
         const arrayLabel = this.SVG.textCircle(value, ...this.getNodeStart());
-        let treeNode = this.SVG.binaryNode(value, ...this.getNodeStart());
-        this.treeNodes[currentIndex] = treeNode;
+        let sortArray = []
         await this.pause('insert.value', value);
 
         arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), true);
-        if (currentIndex === 0) {
-            this.treeRoot = treeNode;
-        } else {
-            const direction = (currentIndex - 1) / 2 === parentIndex ? "left" : "right";
-            parentNode.setChild(direction, treeNode);
-        }
-        this.resizeTree();
+        sortArray.push(value);
         await this.pause();
 
         arrayLabel.remove();
@@ -80,7 +72,6 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
 
         this.heapArray.setIndexHighlight(currentIndex, false);
-        treeNode.setHighlight(false);
     }
 
 
