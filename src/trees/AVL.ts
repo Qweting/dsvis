@@ -1,10 +1,9 @@
-import { updateDefault } from "../../src/engine";
+import { MessagesObject, updateDefault } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
 export class AVL extends BST {
-    // @ts-expect-error TODO fix message typing
     messages = updateDefault(AVLmessages, BSTMessages);
     treeRoot: AVLNode | null = null;
     pointer: HighlightCircle | null = null;
@@ -153,7 +152,7 @@ export class AVL extends BST {
     }
 }
 
-export const AVLmessages = {
+export const AVLmessages: MessagesObject = {
     node: {
         updateHeight: "Update node heights",
         unbalanced: "Node is unbalanced!",

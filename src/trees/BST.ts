@@ -3,6 +3,7 @@ import {
     compare,
     Engine,
     EngineToolbarItems,
+    MessagesObject,
     parseValues,
 } from "../../src/engine";
 import { BinaryNode } from "../objects/binary-node";
@@ -13,7 +14,6 @@ type BSTToolbarItems = EngineToolbarItems & {
 };
 
 export class BST extends Engine {
-    // @ts-expect-error TODO fix message typing
     messages = BSTMessages;
 
     initialValues: (string | number)[] = [];
@@ -472,7 +472,7 @@ export class BST extends Engine {
     }
 }
 
-export const BSTMessages = {
+export const BSTMessages: MessagesObject = {
     general: {
         empty: "Tree is empty",
     },
@@ -522,4 +522,4 @@ export const BSTMessages = {
             dir2: "left" | "right"
         ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
     },
-} as const;
+};

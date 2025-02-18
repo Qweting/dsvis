@@ -19,6 +19,15 @@ type Listeners = "click" | "change"; // TODO: Better naming.
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
 
+export interface MessagesObject {
+    [key: string]:
+        | string
+        | string[]
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        | ((...args: any[]) => string | string[])
+        | MessagesObject;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
@@ -27,9 +36,7 @@ export class Engine {
 
     Svg: Svg;
 
-    messages:
-        | Record<string, Record<string, string | ((arg0: string) => string)>>
-        | undefined;
+    messages: MessagesObject | undefined;
 
     $Svg = {
         width: 1000,
@@ -936,24 +943,25 @@ export function addReturnSubmit(
     }
 }
 
-// TODO: Fix types
-export function updateDefault(
-    obj: any,
-    defaultObj: any,
+// Merges all keys from defaultObject into object
+// Set override to true to overwrite existing keys
+export function updateDefault<Object extends MessagesObject>(
+    object: Object,
+    defaultObject: Object,
     override: boolean = false
-): void {
-    for (const key in defaultObj) {
-        if (!(key in obj)) {
-            obj[key] = defaultObj[key];
+) {
+    for (const key in defaultObject) {
+        if (!(key in object)) {
+            object[key] = defaultObject[key];
         } else if (
-            typeof obj[key] === "object" &&
-            obj[key] !== null &&
-            typeof defaultObj[key] === "object" &&
-            defaultObj[key] !== null
+            typeof object[key] === "object" &&
+            object[key] !== null &&
+            typeof defaultObject[key] === "object" &&
+            defaultObject[key] !== null
         ) {
-            updateDefault(obj[key], defaultObj[key], override);
+            updateDefault(object[key], defaultObject[key], override);
         } else if (override) {
-            obj[key] = defaultObj[key];
+            object[key] = defaultObject[key];
         }
     }
 }
