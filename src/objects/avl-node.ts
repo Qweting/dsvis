@@ -18,7 +18,9 @@ export class AVLNode extends BinaryNode {
     }
 
     getHeight(): number {
-        if (this.$height) return parseInt(this.$height.text());
+        if (this.$height) {
+            return parseInt(this.$height.text());
+        }
         return 1;
     }
 
@@ -28,13 +30,19 @@ export class AVLNode extends BinaryNode {
     }
 
     updateHeightPosition(): this {
-        if (!this.$height) return this;
+        if (!this.$height) {
+            return this;
+        }
 
         const hx = this.$height.cx();
         const cx = this.cx();
 
-        if (this.isRightChild() && hx - cx < 0) this.$height.cx(2 * cx - hx);
-        if (this.isLeftChild() && hx - cx > 0) this.$height.cx(2 * cx - hx);
+        if (this.isRightChild() && hx - cx < 0) {
+            this.$height.cx(2 * cx - hx);
+        }
+        if (this.isLeftChild() && hx - cx > 0) {
+            this.$height.cx(2 * cx - hx);
+        }
 
         return this;
     }

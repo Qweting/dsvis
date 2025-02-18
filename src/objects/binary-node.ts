@@ -70,7 +70,9 @@ export class BinaryNode extends GraphNode {
 
     getSibling(): BinaryNode | null {
         const parent = this.getParent();
-        if (!parent) return null;
+        if (!parent) {
+            return null;
+        }
         return this === parent.getLeft() ? parent.getRight() : parent.getLeft();
     }
 
@@ -149,9 +151,13 @@ export class BinaryNode extends GraphNode {
 
     deepString(): string {
         let s = "";
-        if (this.getLeft()) s += `(${this.getLeft()?.deepString()}) `;
+        if (this.getLeft()) {
+            s += `(${this.getLeft()?.deepString()}) `;
+        }
         s += this.getText();
-        if (this.getRight()) s += ` (${this.getRight()?.deepString()})`;
+        if (this.getRight()) {
+            s += ` (${this.getRight()?.deepString()})`;
+        }
         return s;
     }
 
@@ -164,10 +170,12 @@ export class BinaryNode extends GraphNode {
     ): this {
         this._resizeWidths(nodeSpacing);
         const svgWidth = this.root().viewbox().width;
-        if (startX + this.$rightWidth > svgWidth - svgMargin)
+        if (startX + this.$rightWidth > svgWidth - svgMargin) {
             startX = svgWidth - this.$rightWidth - svgMargin;
-        if (startX - this.$leftWidth < svgMargin)
+        }
+        if (startX - this.$leftWidth < svgMargin) {
             startX = this.$leftWidth + svgMargin;
+        }
         this._setNewPositions(startX, startY, nodeSpacing, animationDuration);
         return this;
     }
@@ -176,9 +184,13 @@ export class BinaryNode extends GraphNode {
     _resizeWidths(nodeSpacing: number): number {
         let width = nodeSpacing;
         const left = this.getLeft();
-        if (left) width += left._resizeWidths(nodeSpacing);
+        if (left) {
+            width += left._resizeWidths(nodeSpacing);
+        }
         const right = this.getRight();
-        if (right) width += right._resizeWidths(nodeSpacing);
+        if (right) {
+            width += right._resizeWidths(nodeSpacing);
+        }
         width = Math.max(this.getSize(), width);
         const leftWidth = left?.$leftWidth || 0;
         const rightWidth = right?.$rightWidth || 0;
@@ -199,21 +211,23 @@ export class BinaryNode extends GraphNode {
         const ySpacing = nodeSpacing;
         const nextY = y + this.getSize() + ySpacing;
         const left = this.getLeft();
-        if (left)
+        if (left) {
             left._setNewPositions(
                 x - this.$leftWidth + left.$leftWidth,
                 nextY,
                 nodeSpacing,
                 animationDuration
             );
+        }
         const right = this.getRight();
-        if (right)
+        if (right) {
             right._setNewPositions(
                 x + this.$rightWidth - right.$rightWidth,
                 nextY,
                 nodeSpacing,
                 animationDuration
             );
+        }
     }
 
     // TODO: Never used? this.getEdges does not exist.
@@ -222,32 +236,41 @@ export class BinaryNode extends GraphNode {
         if (parent) {
             parent.$incoming;
             const c = this.isLeftChild() ? "left" : "right";
-            if (parent.$outgoing[c]?.getEnd() !== this)
+            if (parent.$outgoing[c]?.getEnd() !== this) {
                 console.error("Parent mismatch");
+            }
             let n = 0;
             // @ts-expect-error Unknown if it has ever worked
             for (const edge of this.getEdges()) {
                 if (edge.getStart() === parent) {
                     n++;
-                    if (edge.getEnd() !== this) console.error("Parent edge mismatch");
+                    if (edge.getEnd() !== this) {
+                        console.error("Parent edge mismatch");
+                    }
                 }
             }
-            if (n !== 1) console.error(`Wrong n:o parent edges, ${n}`);
+            if (n !== 1) {
+                console.error(`Wrong n:o parent edges, ${n}`);
+            }
         }
         for (const c of ["left", "right"]) {
             const child = this.$outgoing[c as Children]?.getEnd();
-            if (child?.$incoming.parent?.getStart() !== this)
+            if (child?.$incoming.parent?.getStart() !== this) {
                 console.error(`${c} child mismatch`);
+            }
             let n = 0;
             // @ts-expect-error Unknown if it has ever worked
             for (const edge of this.getEdges()) {
                 if (edge.getEnd() === child) {
                     n++;
-                    if (edge.getStart() !== this)
+                    if (edge.getStart() !== this) {
                         console.error(`${c} child edge mismatch`);
+                    }
                 }
             }
-            if (n !== 1) console.error(`Wrong n:o ${c} child edges, ${n}`);
+            if (n !== 1) {
+                console.error(`Wrong n:o ${c} child edges, ${n}`);
+            }
         }
     }
 }

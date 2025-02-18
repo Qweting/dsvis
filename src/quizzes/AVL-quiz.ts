@@ -34,22 +34,30 @@ export class AVLQuiz extends BST {
     }
 
     _validateBST(node: AVLNode | null, min: string) {
-        if (!node) return min;
+        if (!node) {
+            return min;
+        }
         const left = node.getLeft() as AVLNode | null;
-        if (left) min = this._validateBST(left, min);
+        if (left) {
+            min = this._validateBST(left, min);
+        }
         if (compare(min, node.getText()) >= 0) {
             throw new Error(`Order mismatch: ${min} > ${node.getText()}`);
         }
         min = node.getText();
         const right = node.getRight() as AVLNode | null;
-        if (right) min = this._validateBST(right, min);
+        if (right) {
+            min = this._validateBST(right, min);
+        }
         return min;
     }
 
     isUnbalanced() {
         for (const node of this.Svg.find("g")) {
             if (node instanceof AVLNode) {
-                if (node.getHeightHighlight()) return true;
+                if (node.getHeightHighlight()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -134,8 +142,12 @@ export class AVLQuiz extends BST {
     }
 
     async copyToMark() {
-        if (!this.mark || !this.current) return;
-        if (this.mark === this.current) return;
+        if (!this.mark || !this.current) {
+            return;
+        }
+        if (this.mark === this.current) {
+            return;
+        }
 
         const moving = this.Svg.textCircle(
             this.current.getText(),
@@ -185,7 +197,9 @@ export class AVLQuiz extends BST {
     }
 
     async deleteCurrent() {
-        if (!this.current) throw new Error("Can not delete a node that is null");
+        if (!this.current) {
+            throw new Error("Can not delete a node that is null");
+        }
         if (this.current.getLeft() || this.current.getRight()) {
             await this.pause("Not a leaf node!");
             return;
@@ -203,7 +217,9 @@ export class AVLQuiz extends BST {
     }
 
     async rotateCurrent(direction: Children) {
-        if (!this.current) throw new Error("Can not rotate a node that is null");
+        if (!this.current) {
+            throw new Error("Can not rotate a node that is null");
+        }
         const right = direction === "left" ? "right" : "left";
         const child = this.current?.getChild(right);
         if (!child) {
@@ -223,7 +239,9 @@ export class AVLQuiz extends BST {
     }
 
     updateHeightsHelper(node: AVLNode | null): number {
-        if (!node) return 0;
+        if (!node) {
+            return 0;
+        }
         const leftHeight = this.updateHeightsHelper(
             node.getLeft() as AVLNode | null
         );
@@ -267,18 +285,42 @@ function initialiseAVLQuiz(containerID: string) {
     const restartQuiz =
     container.querySelector<HTMLInputElement>("input.restartQuiz");
 
-    if (!insertField) throw new Error("Could not find insert field");
-    if (!createLeft) throw new Error("Could not find create left field");
-    if (!createRight) throw new Error("Could not find create right field");
-    if (!moveParent) throw new Error("Could not find move parent field");
-    if (!moveLeft) throw new Error("Could not find move left field");
-    if (!moveRight) throw new Error("Could not find move right field");
-    if (!rotateLeft) throw new Error("Could not find rotate left field");
-    if (!rotateRight) throw new Error("Could not find rotate right field");
-    if (!markNode) throw new Error("Could not find mark node field");
-    if (!copyToMark) throw new Error("Could not find copy to mark field");
-    if (!deleteNode) throw new Error("Could not find delete node field");
-    if (!restartQuiz) throw new Error("Could not find restart quiz field");
+    if (!insertField) {
+        throw new Error("Could not find insert field");
+    }
+    if (!createLeft) {
+        throw new Error("Could not find create left field");
+    }
+    if (!createRight) {
+        throw new Error("Could not find create right field");
+    }
+    if (!moveParent) {
+        throw new Error("Could not find move parent field");
+    }
+    if (!moveLeft) {
+        throw new Error("Could not find move left field");
+    }
+    if (!moveRight) {
+        throw new Error("Could not find move right field");
+    }
+    if (!rotateLeft) {
+        throw new Error("Could not find rotate left field");
+    }
+    if (!rotateRight) {
+        throw new Error("Could not find rotate right field");
+    }
+    if (!markNode) {
+        throw new Error("Could not find mark node field");
+    }
+    if (!copyToMark) {
+        throw new Error("Could not find copy to mark field");
+    }
+    if (!deleteNode) {
+        throw new Error("Could not find delete node field");
+    }
+    if (!restartQuiz) {
+        throw new Error("Could not find restart quiz field");
+    }
 
     addReturnSubmit(insertField, "ALPHANUM");
     createLeft.addEventListener("click", () =>

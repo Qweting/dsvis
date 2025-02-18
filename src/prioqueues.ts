@@ -9,16 +9,23 @@ initialisePrioQueues('#prioqueuesContainer');
 
 function initialisePrioQueues(containerID: string) {
     const algoSelector = document.querySelector(`${containerID} .algorithmSelector`) as HTMLSelectElement;
-    if (!algoSelector) throw new Error("Could not find algo selector");
+    if (!algoSelector) {
+        throw new Error("Could not find algo selector");
+    }
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
-        if (algoSelector.value in PRIOQUEUES)
+        if (algoSelector.value in PRIOQUEUES) {
             searchParams.set("algorithm", algoSelector.value);
-        else searchParams.delete("algorithm");
+        } else {
+            searchParams.delete("algorithm");
+        }
 
-        if (PQEngine.DEBUG) searchParams.set("debug", "true");
-        else searchParams.delete("debug");
+        if (PQEngine.DEBUG) {
+            searchParams.set("debug", "true");
+        } else {
+            searchParams.delete("debug");
+        }
 
         const url = `${window.location.pathname}?${searchParams}`;
         window.history.replaceState("", "", url);
@@ -61,11 +68,21 @@ function getPrioQueuesToolbar(container: HTMLElement) {
     const clearSubmit =
     container.querySelector<HTMLInputElement>("input.clearSubmit");
 
-    if (!insertSelect) throw new Error("Missing insert select");
-    if (!insertField) throw new Error("Missing insert field");
-    if (!insertSubmit) throw new Error("Missing insert submit");
-    if (!deleteSubmit) throw new Error("Missing delete submit");
-    if (!clearSubmit) throw new Error("Missing clear submit");
+    if (!insertSelect) {
+        throw new Error("Missing insert select");
+    }
+    if (!insertField) {
+        throw new Error("Missing insert field");
+    }
+    if (!insertSubmit) {
+        throw new Error("Missing insert submit");
+    }
+    if (!deleteSubmit) {
+        throw new Error("Missing delete submit");
+    }
+    if (!clearSubmit) {
+        throw new Error("Missing clear submit");
+    }
 
     return {
         insertSelect,

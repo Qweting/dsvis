@@ -84,7 +84,9 @@ export class GraphNode extends TextCircle {
             const oldSuccessor = outEdge.getEnd();
             const oldIncoming = oldSuccessor.$incoming;
             for (const k in oldIncoming) {
-                if (oldIncoming[k] === outEdge) delete oldIncoming[k];
+                if (oldIncoming[k] === outEdge) {
+                    delete oldIncoming[k];
+                }
             }
             outEdge.remove();
         }
@@ -94,7 +96,9 @@ export class GraphNode extends TextCircle {
                 const oldPredecessor = inEdge.getStart();
                 const oldOutgoing = oldPredecessor.$outgoing;
                 for (const k in oldOutgoing) {
-                    if (oldOutgoing[k] === inEdge) delete oldOutgoing[k];
+                    if (oldOutgoing[k] === inEdge) {
+                        delete oldOutgoing[k];
+                    }
                 }
                 inEdge.remove();
             }
@@ -120,8 +124,11 @@ export class GraphNode extends TextCircle {
             if (node instanceof GraphNode) {
                 for (const c in node.$nullary) {
                     const show = !node.$outgoing[c];
-                    if (show) node.$nullary[c]?.removeClass("invisible");
-                    else node.$nullary[c]?.addClass("invisible");
+                    if (show) {
+                        node.$nullary[c]?.removeClass("invisible");
+                    } else {
+                        node.$nullary[c]?.addClass("invisible");
+                    }
                 }
             }
         }
@@ -146,7 +153,9 @@ export class GraphNode extends TextCircle {
     remove(): this {
         for (const outKey in this.$outgoing) {
             const outEdge = this.$outgoing[outKey];
-            if (!outEdge) continue;
+            if (!outEdge) {
+                continue;
+            }
             const end = outEdge.getEnd();
             const incoming = end.$incoming;
             for (const inKey in incoming) {
@@ -158,7 +167,9 @@ export class GraphNode extends TextCircle {
         }
         for (const inKey in this.$incoming) {
             const inEdge = this.$incoming[inKey];
-            if (!inEdge) continue;
+            if (!inEdge) {
+                continue;
+            }
             const start = inEdge.getStart();
             const outgoing = start.$outgoing;
             for (const outKey in outgoing) {

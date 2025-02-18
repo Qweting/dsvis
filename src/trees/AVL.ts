@@ -51,7 +51,9 @@ export class AVL extends BST {
 
     async updateHeightPositions() {
         this.Svg.find("g").forEach((node) => {
-            if (node instanceof AVLNode) node.updateHeightPosition();
+            if (node instanceof AVLNode) {
+                node.updateHeightPosition();
+            }
         });
     }
 
@@ -99,7 +101,9 @@ export class AVL extends BST {
             rightHeight = this.getHeight(
                 node.getRight() as AVLNode | null | undefined
             );
-        if (Math.abs(leftHeight - rightHeight) <= 1) return node;
+        if (Math.abs(leftHeight - rightHeight) <= 1) {
+            return node;
+        }
         await this.pause("node.unbalanced");
         const left = leftHeight < rightHeight ? "left" : "right";
         const right = left === "left" ? "right" : "left";

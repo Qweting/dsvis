@@ -29,11 +29,17 @@ export class RedBlack extends BST {
 
     async fixDoubleRed(node: BinaryNode) {
         let parent = node.getParent();
-        if (!parent) return;
-        if (!this.isRed(parent)) return;
+        if (!parent) {
+            return;
+        }
+        if (!this.isRed(parent)) {
+            return;
+        }
 
         let grandparent = parent.getParent();
-        if (!grandparent) return;
+        if (!grandparent) {
+            return;
+        }
 
         const pibling = parent.getSibling();
         if (pibling && this.isRed(pibling)) {
@@ -72,8 +78,9 @@ export class RedBlack extends BST {
         parent = node.getParent();
         grandparent = parent?.getParent() || null;
 
-        if (!parent || !grandparent)
+        if (!parent || !grandparent) {
             throw new Error("Missing parent or grandparent");
+        }
 
         node.setHighlight(true);
         parent.setHighlight(true);
@@ -147,8 +154,11 @@ export class RedBlack extends BST {
             rightChild?.setChildHighlight(right, false);
             rightGrandchild.setHighlight(false);
 
-            if (this.isBlack(parent)) this.colorBlack(rightChild as BinaryNode);
-            else this.colorRed(rightChild as BinaryNode);
+            if (this.isBlack(parent)) {
+                this.colorBlack(rightChild as BinaryNode);
+            } else {
+                this.colorRed(rightChild as BinaryNode);
+            }
             this.colorBlack(parent);
             this.colorBlack(rightGrandchild);
             await this.singleRotate(left, parent);

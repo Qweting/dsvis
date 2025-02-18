@@ -10,8 +10,12 @@ export class HighlightCircle extends Circle {
 
     getSize() {
         const r = this.attr("r");
-        if (typeof r === "number") return r * 2;
-        if (typeof r === "string" && !isNaN(Number(r))) return Number(r) * 2;
+        if (typeof r === "number") {
+            return r * 2;
+        }
+        if (typeof r === "string" && !isNaN(Number(r))) {
+            return Number(r) * 2;
+        }
         return 0;
     }
 

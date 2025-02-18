@@ -60,7 +60,9 @@ export class BTree extends Engine {
         const maxDegree =
       this.container.querySelector<HTMLSelectElement>("select.maxDegree");
 
-        if (!maxDegree) throw new Error("Could not find max degree select element");
+        if (!maxDegree) {
+            throw new Error("Could not find max degree select element");
+        }
 
         return {
             ...toolbar,
@@ -118,7 +120,9 @@ export class BTree extends Engine {
     }
 
     async insert(...values: (number | string)[]) {
-        for (const val of values) await this.insertOne(val);
+        for (const val of values) {
+            await this.insertOne(val);
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -183,7 +187,9 @@ export class BTree extends Engine {
                 return {success: found, node: node, i: i};
             }
 
-            if (found) i++;
+            if (found) {
+                i++;
+            }
             await this.pause(
                 `${cmpStr}: ${this.getMessage(
                     "node.lookNthChild",
@@ -224,7 +230,9 @@ export class BTree extends Engine {
         const found = await this.findHelper(value);
         const node = found.node;
 
-        if (!node) return;
+        if (!node) {
+            return;
+        }
 
         node.setHighlight(true);
         if (found.success) {
@@ -369,7 +377,9 @@ export class BTree extends Engine {
             return;
         }
 
-        if (!this.Info.printer) throw new Error("No info printer");
+        if (!this.Info.printer) {
+            throw new Error("No info printer");
+        }
 
         const {x, y} = this.Info.printer.bbox();
         const printed = [
@@ -383,7 +393,9 @@ export class BTree extends Engine {
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
         await this.pause(undefined);
-        for (const lbl of printed) lbl.remove();
+        for (const lbl of printed) {
+            lbl.remove();
+        }
     }
 
     async printHelper(
@@ -509,7 +521,9 @@ export class BTree extends Engine {
                 this.getAnimationSpeed()
             );
             await this.pause(undefined);
-            if (maxNode?.isLeaf()) break;
+            if (maxNode?.isLeaf()) {
+                break;
+            }
             maxNode = maxNode?.getRight() || null;
         }
         const maxValue = maxNode.getText(j);
@@ -541,9 +555,13 @@ export class BTree extends Engine {
     }
 
     async repairAfterDelete(node: BTreeNode) {
-        if (node.numValues() >= this.getMinKeys()) return;
+        if (node.numValues() >= this.getMinKeys()) {
+            return;
+        }
         const parent = node.getParent();
-        if (!parent) return;
+        if (!parent) {
+            return;
+        }
 
         node.setHighlight(true);
         await this.pause("node.tooFew", node);
@@ -579,7 +597,9 @@ export class BTree extends Engine {
         const parent = node.getParent();
         const parentIndex = node.getParentIndex();
 
-        if (!parent || parentIndex === null) throw new Error("Invalid parent");
+        if (!parent || parentIndex === null) {
+            throw new Error("Invalid parent");
+        }
 
         const parentValue = parent?.getText(parentIndex);
         const rightSib = parent.getChild(parentIndex + 1);
@@ -650,10 +670,11 @@ export class BTree extends Engine {
         const parent = node.getParent();
         const rightSib = parent?.getChild(parentIndex + 1);
 
-        if (!parent || !rightSib)
+        if (!parent || !rightSib) {
             throw new Error(
                 "Can not steal from right, missing parent or right sibling"
             );
+        }
 
         node.setHighlight(true);
         parent.setHighlight(true);
@@ -703,12 +724,13 @@ export class BTree extends Engine {
             parent.cy(),
             this.getAnimationSpeed()
         );
-        if (!node.isLeaf())
+        if (!node.isLeaf()) {
             node.setChild(
                 node.numChildren() - 1,
                 rightSib.getChild(0),
                 this.getStrokeWidth()
             );
+        }
         await this.pause(undefined);
 
         leftNode.remove();
@@ -729,10 +751,11 @@ export class BTree extends Engine {
         const parent = node.getParent();
         const leftSib = parent?.getChild(parentIndex);
 
-        if (!parent || !leftSib)
+        if (!parent || !leftSib) {
             throw new Error(
                 "Can not steal from left, missing parent or left sibling"
             );
+        }
 
         node.setHighlight(true);
         parent.setHighlight(true);
@@ -777,12 +800,13 @@ export class BTree extends Engine {
             parent.cy(),
             this.getAnimationSpeed()
         );
-        if (!node.isLeaf())
+        if (!node.isLeaf()) {
             node.setChild(
                 0,
                 leftSib.getChild(leftSib.numChildren() - 1),
                 this.getStrokeWidth()
             );
+        }
         await this.pause(undefined);
 
         rightNode.remove();

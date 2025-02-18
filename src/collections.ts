@@ -14,15 +14,15 @@ const COLLECTIONS = {
 } as const;
 
 type CollectionToolbarItems = {
-  insertSelect: HTMLSelectElement;
-  insertField: HTMLInputElement;
-  insertSubmit: HTMLInputElement;
-  findField: HTMLInputElement;
-  findSubmit: HTMLInputElement;
-  deleteField: HTMLInputElement;
-  deleteSubmit: HTMLInputElement;
-  printSubmit: HTMLInputElement;
-  clearSubmit: HTMLInputElement;
+    insertSelect: HTMLSelectElement;
+    insertField: HTMLInputElement;
+    insertSubmit: HTMLInputElement;
+    findField: HTMLInputElement;
+    findSubmit: HTMLInputElement;
+    deleteField: HTMLInputElement;
+    deleteSubmit: HTMLInputElement;
+    printSubmit: HTMLInputElement;
+    clearSubmit: HTMLInputElement;
 };
 
 initialiseCollections("#collectionsContainer");
@@ -32,17 +32,24 @@ function initialiseCollections(containerID: string) {
         `${containerID} select.algorithmSelector`
     ) as HTMLSelectElement;
 
-    if (!algoSelector) throw new Error("Could not find algo selector");
+    if (!algoSelector) {
+        throw new Error("Could not find algo selector");
+    }
 
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
-        if (algoSelector.value in COLLECTIONS)
+        if (algoSelector.value in COLLECTIONS) {
             searchParams.set("algorithm", algoSelector.value);
-        else searchParams.delete("algorithm");
+        } else {
+            searchParams.delete("algorithm");
+        }
 
-        if (CollectionEngine.DEBUG) searchParams.set("debug", "true");
-        else searchParams.delete("debug");
+        if (CollectionEngine.DEBUG) {
+            searchParams.set("debug", "true");
+        } else {
+            searchParams.delete("debug");
+        }
 
         const url = `${window.location.pathname}?${searchParams}`;
         window.history.replaceState("", "", url);
@@ -115,15 +122,33 @@ function getCollectionsToolbar(container: HTMLElement) {
     const clearSubmit =
     container.querySelector<HTMLInputElement>("input.clearSubmit");
 
-    if (!insertSelect) throw new Error("Missing insert select");
-    if (!insertField) throw new Error("Missing insert field");
-    if (!insertSubmit) throw new Error("Missing insert submit");
-    if (!findField) throw new Error("Missing find field");
-    if (!findSubmit) throw new Error("Missing find submit");
-    if (!deleteField) throw new Error("Missing delete field");
-    if (!deleteSubmit) throw new Error("Missing delete submit");
-    if (!printSubmit) throw new Error("Missing print submit");
-    if (!clearSubmit) throw new Error("Missing clear submit");
+    if (!insertSelect) {
+        throw new Error("Missing insert select");
+    }
+    if (!insertField) {
+        throw new Error("Missing insert field");
+    }
+    if (!insertSubmit) {
+        throw new Error("Missing insert submit");
+    }
+    if (!findField) {
+        throw new Error("Missing find field");
+    }
+    if (!findSubmit) {
+        throw new Error("Missing find submit");
+    }
+    if (!deleteField) {
+        throw new Error("Missing delete field");
+    }
+    if (!deleteSubmit) {
+        throw new Error("Missing delete submit");
+    }
+    if (!printSubmit) {
+        throw new Error("Missing print submit");
+    }
+    if (!clearSubmit) {
+        throw new Error("Missing clear submit");
+    }
 
     return {
         insertSelect,

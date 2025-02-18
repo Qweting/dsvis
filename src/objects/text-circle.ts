@@ -16,7 +16,9 @@ export class TextCircle extends G {
             .stroke({width: strokeWidth})
             .center(0, 0);
         this.$text = this.text(text).center(0, 0);
-        if (x && y) this.center(x, y);
+        if (x && y) {
+            this.center(x, y);
+        }
         return this;
     }
 
@@ -25,18 +27,26 @@ export class TextCircle extends G {
     }
 
     setText(text: string | null): this {
-        if (text == null) text = "";
+        if (text == null) {
+            text = "";
+        }
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = NBSP;
+        if (text === "") {
+            text = NBSP;
+        }
         this.$text?.text(text);
         return this;
     }
 
     getSize(): number {
         const r = this.attr("r");
-        if (typeof r === "number") return r * 2;
-        if (typeof r === "string" && !isNaN(Number(r))) return Number(r) * 2;
+        if (typeof r === "number") {
+            return r * 2;
+        }
+        if (typeof r === "string" && !isNaN(Number(r))) {
+            return Number(r) * 2;
+        }
         return 0;
     }
 

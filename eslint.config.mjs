@@ -89,7 +89,7 @@ export default tseslint.config(
             "no-shadow": ["warn"],
             "prefer-template": ["warn"],
 
-            "no-ternary": ["error"],
+            "curly": ["error", "all"],
         },
     },
 );

@@ -44,14 +44,17 @@ export class Engine {
     //TODO: confusing naming
         animationSpeed: {
             getCookie: (value: string) => {
-                if (this.toolbar.animationSpeed)
+                if (this.toolbar.animationSpeed) {
                     this.toolbar.animationSpeed.value = value;
+                }
             },
             setCookie: () => this.getAnimationSpeed(),
         },
         objectSize: {
             getCookie: (value: string) => {
-                if (this.toolbar.objectSize) this.toolbar.objectSize.value = value;
+                if (this.toolbar.objectSize) {
+                    this.toolbar.objectSize.value = value;
+                }
             },
             setCookie: () => this.getObjectSize(),
         },
@@ -93,15 +96,17 @@ export class Engine {
     };
 
     getAnimationSpeed(): number {
-        if (this.toolbar.animationSpeed)
+        if (this.toolbar.animationSpeed) {
             return parseInt(this.toolbar.animationSpeed?.value);
+        }
 
         return this.$Svg.animationSpeed;
     }
 
     getObjectSize(): number {
-        if (this.toolbar.objectSize)
+        if (this.toolbar.objectSize) {
             return parseInt(this.toolbar.objectSize?.value);
+        }
 
         return this.$Svg.objectSize;
     }
@@ -132,19 +137,24 @@ export class Engine {
     // Imposible to type default and it is not used for passing in anything anywere
     constructor(containerSelector: string, defaults = {}) {
         for (const key in defaults) {
-            if (!key.startsWith("$"))
+            if (!key.startsWith("$")) {
                 throw new TypeError(`Invalid default key: ${key}`);
+            }
         }
         updateDefault(this, defaults, true);
 
         const container = document.querySelector<HTMLElement>(containerSelector);
-        if (!container) throw new Error("No container found");
+        if (!container) {
+            throw new Error("No container found");
+        }
 
         this.container = container;
         this.toolbar = this.getToolbar();
 
         const svgContainer = this.container.querySelector("svg");
-        if (!svgContainer) throw new Error("No svg element found");
+        if (!svgContainer) {
+            throw new Error("No svg element found");
+        }
 
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
@@ -152,7 +162,9 @@ export class Engine {
 
         const debugParam = new URLSearchParams(window.location.href).get("debug");
         this.DEBUG = Boolean(debugParam || false);
-        if (this.DEBUG) this.Svg.addClass("debug");
+        if (this.DEBUG) {
+            this.Svg.addClass("debug");
+        }
     }
 
     getToolbar(): EngineToolbarItems {
@@ -182,17 +194,34 @@ export class Engine {
             "select.animationSpeed"
         );
 
-        if (!generalControls) throw new Error("Missing general controls fieldset");
-        if (!algorithmControls)
+        if (!generalControls) {
+            throw new Error("Missing general controls fieldset");
+        }
+        if (!algorithmControls) {
             throw new Error("Missing algorithm controls fieldset");
+        }
 
-        if (!stepForward) throw new Error("Missing step forward button");
-        if (!stepBackward) throw new Error("Missing step backward button");
-        if (!toggleRunner) throw new Error("Missing toggle runner button");
-        if (!fastForward) throw new Error("Missing fast forward button");
-        if (!fastBackward) throw new Error("Missing fast backward button");
-        if (!objectSize) throw new Error("Missing object size select");
-        if (!animationSpeed) throw new Error("Missing animation speed select");
+        if (!stepForward) {
+            throw new Error("Missing step forward button");
+        }
+        if (!stepBackward) {
+            throw new Error("Missing step backward button");
+        }
+        if (!toggleRunner) {
+            throw new Error("Missing toggle runner button");
+        }
+        if (!fastForward) {
+            throw new Error("Missing fast forward button");
+        }
+        if (!fastBackward) {
+            throw new Error("Missing fast backward button");
+        }
+        if (!objectSize) {
+            throw new Error("Missing object size select");
+        }
+        if (!animationSpeed) {
+            throw new Error("Missing animation speed select");
+        }
 
         return {
             generalControls,
@@ -246,10 +275,12 @@ export class Engine {
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
         if (this.DEBUG) {
-            for (let x = 1; x < w / 100; x++)
+            for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
-            for (let y = 1; y < h / 100; y++)
+            }
+            for (let y = 1; y < h / 100; y++) {
                 this.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
+            }
         }
         const margin = this.$Svg.margin;
         this.Info.title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
@@ -280,7 +311,9 @@ export class Engine {
 
     setStatus(status: "running" | "paused" | "inactive", timeout = 10): void {
         const currentStatus = this.Info.status;
-        if (currentStatus === undefined) return;
+        if (currentStatus === undefined) {
+            return;
+        }
 
         setTimeout(() => {
             if (status === "running") {
@@ -298,9 +331,12 @@ export class Engine {
 
     setIdleTitle(): void {
     // TODO: Perhaps add errors if not found
-        if (this.Info.title !== undefined)
+        if (this.Info.title !== undefined) {
             this.Info.title.text("Select an action from the menu above");
-        if (this.Info.body !== undefined) this.Info.body.text(NBSP);
+        }
+        if (this.Info.body !== undefined) {
+            this.Info.body.text(NBSP);
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -401,8 +437,9 @@ export class Engine {
     disableWhenRunning(disabled: boolean): void {
         for (const elem of this.container.querySelectorAll<
       HTMLInputElement | HTMLSelectElement
-        >(".disableWhenRunning"))
+        >(".disableWhenRunning")) {
             elem.disabled = disabled;
+        }
     }
 
     resetListeners(isRunning: boolean): void {
@@ -425,27 +462,35 @@ export class Engine {
         for (const id in this.$IdleListeners) {
             const listener = this.$IdleListeners[id];
             if (listener.condition()) {
-                if (this.DEBUG)
+                if (this.DEBUG) {
                     this.addListener(id, listener.type, () => {
                         console.log(
                             `${id} ${listener.type}: ${JSON.stringify(this.actions)}`
                         );
                         listener.handler();
                     });
-                else this.addListener(id, listener.type, listener.handler);
+                } else {
+                    this.addListener(id, listener.type, listener.handler);
+                }
             }
         }
     }
 
     addListener(id: string, type: Listeners, handler: () => void): void {
         const listeners = this.EventListeners;
-        if (!listeners[id]) listeners[id] = {};
+        if (!listeners[id]) {
+            listeners[id] = {};
+        }
         const elem = this.toolbar[id as keyof typeof this.toolbar];
 
-        if (!elem) throw new Error("Could not find element to add listener to");
+        if (!elem) {
+            throw new Error("Could not find element to add listener to");
+        }
 
         const oldHandler = listeners[id][type];
-        if (oldHandler) elem.removeEventListener(type, oldHandler);
+        if (oldHandler) {
+            elem.removeEventListener(type, oldHandler);
+        }
         listeners[id][type] = handler;
         elem.addEventListener(type, handler);
         elem.disabled = false;
@@ -457,12 +502,14 @@ export class Engine {
         for (const id in listeners) {
             const elem = this.toolbar[id as keyof typeof this.toolbar];
 
-            if (!elem)
+            if (!elem) {
                 throw new Error("Could not find element to remove listener from");
+            }
 
             elem.disabled = true;
-            for (const type in listeners[id])
-                elem.removeEventListener(type, listeners[id][type as Listeners]!); // ! because we know that the type exists
+            for (const type in listeners[id]) {
+                elem.removeEventListener(type, listeners[id][type as Listeners]!);
+            } // ! because we know that the type exists
             listeners[id] = {};
         }
     }
@@ -481,7 +528,9 @@ export class Engine {
                 field.value = "";
             }
             const values = parseValues(rawValue);
-            if (values) await this.execute(method, values);
+            if (values) {
+                await this.execute(method, values);
+            }
             return true;
         } catch (error) {
             console.error(error);
@@ -496,20 +545,22 @@ export class Engine {
     ): Promise<void> {
         await this.reset();
         this.actions.push({oper: operation, args: args, nsteps: until});
-        if (this.DEBUG)
+        if (this.DEBUG) {
             console.log(
                 `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
                     this.actions
                 )}`
             );
+        }
 
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].nsteps = this.CurrentStep || 0; // TODO: Not sure if this is correct
-            if (this.DEBUG)
+            if (this.DEBUG) {
                 console.log(
                     `DONE / ${this.CurrentStep}: ${JSON.stringify(this.actions)}`
                 );
+            }
             this.resetListeners(false);
         } catch (reason) {
             if (
@@ -523,15 +574,17 @@ export class Engine {
                 return;
             }
             this.actions.pop();
-            if ("running" in reason && typeof reason.running === "boolean")
+            if ("running" in reason && typeof reason.running === "boolean") {
                 this.setRunning(reason.running);
+            }
             until = reason.until;
-            if (this.DEBUG)
+            if (this.DEBUG) {
                 console.log(
                     `RERUN ${until} / ${this.CurrentStep}: ${JSON.stringify(
                         this.actions
                     )}`
                 );
+            }
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                 (operation = action.oper),
@@ -558,10 +611,11 @@ export class Engine {
             message = `${
                 message.charAt(0).toUpperCase() + message.substring(1)
             } ${action.args.join(", ")}`;
-            if (this.DEBUG)
+            if (this.DEBUG) {
                 console.log(
                     `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
                 );
+            }
             this.Info.title?.text(message);
             await this.pause("");
             if (
@@ -569,8 +623,9 @@ export class Engine {
                     action.oper in this &&
           typeof this[action.oper as keyof Engine] === "function"
                 )
-            )
+            ) {
                 throw new Error("Cannot call action that does not exist");
+            }
             // @ts-expect-error Have checked that it exists and that is a function. Only thing would be to validate input. Better to do in each function in any case
             await this[action.oper](...action.args); // Kommer bli knölig att lösa
         }
@@ -581,7 +636,7 @@ export class Engine {
         ...args: unknown[]
     ): Promise<unknown> | null {
         const title = this.getMessage(message, ...args);
-        if (this.DEBUG)
+        if (this.DEBUG) {
             console.log(
                 `${
                     this.CurrentStep
@@ -589,7 +644,10 @@ export class Engine {
                     this.actions
                 )}`
             );
-        if (this.State.resetting) return null;
+        }
+        if (this.State.resetting) {
+            return null;
+        }
         if (title !== null && this.Info.body !== undefined) {
             this.Info.body.text(title);
         }
@@ -619,16 +677,24 @@ export class Engine {
 
     // TODO: Fix type of title and update return type
     getMessage(message: string | undefined, ...args: unknown[]) {
-        if (Array.isArray(message)) [message, ...args] = [...message, ...args]; // TODO: is this used??
+        if (Array.isArray(message)) {
+            [message, ...args] = [...message, ...args];
+        } // TODO: is this used??
         if (typeof message !== "string") {
-            if (args.length > 0) console.error("Unknown message:", message, ...args);
+            if (args.length > 0) {
+                console.error("Unknown message:", message, ...args);
+            }
             return message;
         }
-        if (!message) return args.join("\n");
+        if (!message) {
+            return args.join("\n");
+        }
         // @ts-expect-error this.constructor.messages dont know what it is
         let title = this.messages || this.constructor.messages || {};
         const keys = message.split(".");
-        if (!(keys[0] in title)) return [message, ...args].join("\n");
+        if (!(keys[0] in title)) {
+            return [message, ...args].join("\n");
+        }
         for (const key of keys) {
             if (!(typeof title === "object" && key in title)) {
                 console.error("Unknown message:", message, ...args);
@@ -636,13 +702,19 @@ export class Engine {
             }
             title = title[key];
         }
-        if (typeof title === "function") title = title(...args);
-        if (Array.isArray(title)) title = title.join("\n");
+        if (typeof title === "function") {
+            title = title(...args);
+        }
+        if (Array.isArray(title)) {
+            title = title.join("\n");
+        }
         if (typeof title === "object") {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        if (title === "") title = NBSP;
+        if (title === "") {
+            title = NBSP;
+        }
         return title;
     }
 
@@ -659,8 +731,11 @@ export class Engine {
         }
         this.CurrentStep++;
         this.State.animating = false;
-        if (this.DEBUG) setTimeout(resolve, 10);
-        else resolve(undefined);
+        if (this.DEBUG) {
+            setTimeout(resolve, 10);
+        } else {
+            resolve(undefined);
+        }
     }
 
     isRunning(): boolean {
@@ -669,9 +744,14 @@ export class Engine {
 
     setRunning(running: boolean): this {
         const classes = this.toolbar.toggleRunner?.classList;
-        if (classes === undefined) throw new Error("Can not access toggleRunner");
-        if (running) classes.add("selected");
-        else classes.remove("selected");
+        if (classes === undefined) {
+            throw new Error("Can not access toggleRunner");
+        }
+        if (running) {
+            classes.add("selected");
+        } else {
+            classes.remove("selected");
+        }
         return this;
     }
 
@@ -683,7 +763,9 @@ export class Engine {
     // Cookies
 
     loadCookies(): void {
-        if (this.DEBUG) console.log("Loading cookies", document.cookie);
+        if (this.DEBUG) {
+            console.log("Loading cookies", document.cookie);
+        }
         const allCookies = document.cookie.split(";");
         for (const cookieName in this.$Cookies) {
             for (const cookie of allCookies) {
@@ -712,7 +794,9 @@ export class Engine {
             );
             document.cookie = `${cookieName}=${value}${expires}`;
         }
-        if (this.DEBUG) console.log("Setting cookies", document.cookie);
+        if (this.DEBUG) {
+            console.log("Setting cookies", document.cookie);
+        }
     }
 
     // TODO: Fix to match the new layout of basic objects
@@ -740,7 +824,9 @@ export function normalizeNumber(input: string): string | number {
 export function parseValues(
     values: string | string[] | null | undefined
 ): (string | number)[] {
-    if (!values) return [];
+    if (!values) {
+        return [];
+    }
     if (typeof values === "string") {
         values = values.trim().split(/\s+/);
     }
@@ -843,8 +929,12 @@ export const NBSP = "\u00A0";
 export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
     // We use non-breaking space as a proxy for the empty string,
     // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === NBSP) a = "";
-    if (b === NBSP) b = "";
+    if (a === NBSP) {
+        a = "";
+    }
+    if (b === NBSP) {
+        b = "";
+    }
     if (isNaN(Number(a)) === isNaN(Number(b))) {
     // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(Number(a))) {

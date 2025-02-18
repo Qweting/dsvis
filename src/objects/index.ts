@@ -91,9 +91,13 @@ extend(Element, {
         return (this as Element).hasClass("highlight");
     },
     setHighlight(high: boolean | null) {
-        if (high == null) (this as Element).toggleClass("highlight");
-        else if (high) (this as Element).addClass("highlight");
-        else (this as Element).removeClass("highlight");
+        if (high == null) {
+            (this as Element).toggleClass("highlight");
+        } else if (high) {
+            (this as Element).addClass("highlight");
+        } else {
+            (this as Element).removeClass("highlight");
+        }
         return this as Element;
     },
     getCenter() {

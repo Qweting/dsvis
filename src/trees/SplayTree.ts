@@ -27,7 +27,9 @@ export class SplayTree extends BST {
     async insertOne(value: string) {
         const result = await super.insertOne(value);
         if (result?.node) {
-            if (!result.success) await this.pause("insert.exists", result.node);
+            if (!result.success) {
+                await this.pause("insert.exists", result.node);
+            }
             await this.splayUp(result.node);
         }
         return result;
@@ -38,8 +40,9 @@ export class SplayTree extends BST {
         direction: "left" | "right" | null;
         parent: BinaryNode | null;
     } | null> {
-        if (!this.treeRoot)
+        if (!this.treeRoot) {
             return {success: false, direction: null, parent: null};
+        }
 
         await this.find(value);
         if (compare(value, this.treeRoot?.getText()) !== 0) {
@@ -97,7 +100,9 @@ export class SplayTree extends BST {
     // Splay a node to the root of the tree
 
     async splayUp(node: BinaryNode) {
-        if (node === this.treeRoot) return;
+        if (node === this.treeRoot) {
+            return;
+        }
         node.setHighlight(true);
         await this.pause("rotate.splayUp", node);
         node.setHighlight(false);
@@ -120,7 +125,9 @@ export class SplayTree extends BST {
 
     async splayHelper(node: BinaryNode) {
         const parent = node.getParent();
-        if (!parent) return;
+        if (!parent) {
+            return;
+        }
 
         const left = node.isLeftChild() ? "left" : "right";
         const right = left === "left" ? "right" : "left";
@@ -140,7 +147,9 @@ export class SplayTree extends BST {
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
 
-        if (!child) return node;
+        if (!child) {
+            return node;
+        }
 
         await this.pause("rotate.zigzig", node, left, child);
         await this.singleRotate(left, node);

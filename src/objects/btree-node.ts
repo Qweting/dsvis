@@ -22,10 +22,14 @@ export class BTreeNode extends G {
         objectSize: number,
         strokeWidth: number
     ): this {
-        if (nvalues < 1) throw new Error("BTreeNode: must have at least one value");
+        if (nvalues < 1) {
+            throw new Error("BTreeNode: must have at least one value");
+        }
         this.$children = leaf ? null : Array(nvalues + 1);
         this.setNumValues(nvalues, objectSize, strokeWidth);
-        if (x && y) this.center(x, y);
+        if (x && y) {
+            this.center(x, y);
+        }
         return this;
     }
 
@@ -115,23 +119,27 @@ export class BTreeNode extends G {
         const w0 = objectSize,
             h = objectSize,
             stroke = strokeWidth;
-        if (!this.$rect)
+        if (!this.$rect) {
             this.$rect = this.rect(w0 * nvalues, h)
                 .stroke({width: stroke})
                 .center(0, 0);
+        }
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
         const cx = this.$rect.cx(),
             cy = this.$rect.cy();
         for (let i = 0; i < nvalues; i++) {
-            if (!this.$values[i]) this.$values[i] = this.text(NBSP);
+            if (!this.$values[i]) {
+                this.$values[i] = this.text(NBSP);
+            }
             this.$values[i].center(cx + w0 * (i - nvalues / 2 + 0.5), cy);
             if (i > 0) {
                 const dx = w0 * (i - nvalues / 2),
                     dy = h / 2;
-                if (!this.$lines[i])
+                if (!this.$lines[i]) {
                     this.$lines[i] = this.line(0, cy - dy, 0, cy + dy).stroke({
                         width: stroke,
                     });
+                }
                 this.$lines[i].cx(cx + dx);
             }
         }
@@ -167,10 +175,11 @@ export class BTreeNode extends G {
     }
 
     setTexts(texts: string[]): this {
-        if (texts.length !== this.numValues())
+        if (texts.length !== this.numValues()) {
             throw new Error(
                 `Wrong number of texts: ${texts.length} != ${this.numValues()}`
             );
+        }
         for (let i = 0; i < texts.length; i++) {
             this.setText(i, texts[i]);
         }
@@ -183,10 +192,14 @@ export class BTreeNode extends G {
     }
 
     setText(i: number, text: string): this {
-        if (text == null) text = "";
+        if (text == null) {
+            text = "";
+        }
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = NBSP;
+        if (text === "") {
+            text = NBSP;
+        }
         this.$values[i].text(text);
         return this;
     }
@@ -220,9 +233,13 @@ export class BTreeNode extends G {
 
     getParentIndex(): number | null {
         const parent = this.getParent();
-        if (!parent) return null;
+        if (!parent) {
+            return null;
+        }
         for (let i = 0; i < parent.numChildren(); i++) {
-            if (this === parent.getChild(i)) return i;
+            if (this === parent.getChild(i)) {
+                return i;
+            }
         }
         return null;
     }
@@ -242,7 +259,9 @@ export class BTreeNode extends G {
             this.$children[i].remove();
         }
         if (!child) {
-            if (this.$children?.[i]) this.$children[i] = null;
+            if (this.$children?.[i]) {
+                this.$children[i] = null;
+            }
         } else {
             if (child.$parent) {
                 const oldParent = child.$parent.getStart();
@@ -260,7 +279,9 @@ export class BTreeNode extends G {
                 this.numChildren(),
                 strokeWidth
             );
-            if (this.$children?.[i]) this.$children[i] = edge;
+            if (this.$children?.[i]) {
+                this.$children[i] = edge;
+            }
             child.$parent = edge;
         }
         return this;
@@ -286,7 +307,9 @@ export class BTreeNode extends G {
     remove(): this {
         if (!this.isLeaf()) {
             this.$children?.forEach((child) => {
-                if (!child) return;
+                if (!child) {
+                    return;
+                }
                 child.remove();
                 child = null;
             });
@@ -294,8 +317,9 @@ export class BTreeNode extends G {
 
         if (this.$parent) {
             const i = this.getParentIndex();
-            if (i !== null && this.$parent.getStart().$children?.[i])
+            if (i !== null && this.$parent.getStart().$children?.[i]) {
                 this.$parent.getStart().$children![i] = null;
+            }
             this.$parent.remove();
             this.$parent = null;
         }
@@ -321,10 +345,12 @@ export class BTreeNode extends G {
     ): this {
         this._resizeWidths(nodeSpacing);
         const svgWidth = this.root().viewbox().width;
-        if (startX + this.$rightWidth > svgWidth - svgMargin)
+        if (startX + this.$rightWidth > svgWidth - svgMargin) {
             startX = svgWidth - this.$rightWidth - svgMargin;
-        if (startX - this.$leftWidth < svgMargin)
+        }
+        if (startX - this.$leftWidth < svgMargin) {
             startX = this.$leftWidth + svgMargin;
+        }
         this._setNewPositions(startX, startY, animationDuration);
 
         return this;
@@ -361,7 +387,9 @@ export class BTreeNode extends G {
         animationDuration: number = 0
     ): void {
         this.setCenter(x, y, animationDuration);
-        if (this.isLeaf()) return;
+        if (this.isLeaf()) {
+            return;
+        }
         x -= this.$leftWidth;
         const xSpacing = (this.$width - this.$childWidths) / this.numValues();
         const ySpacing = nodeSpacing;

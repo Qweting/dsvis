@@ -13,7 +13,9 @@ export class DSArray extends G {
         this.$values = new Array(size);
         this.setSize(size);
         this.clear();
-        if (x && y) this.center(x, y);
+        if (x && y) {
+            this.center(x, y);
+        }
         return this;
     }
 
@@ -34,15 +36,23 @@ export class DSArray extends G {
         const w0 = this.engine().getObjectSize();
         const h = this.engine().getObjectSize();
         const stroke = this.engine().getStrokeWidth();
-        if (!this.$rect) this.$rect = this.rect(w0 * size, 3 * h).addClass("invisible").center(0, 0);
+        if (!this.$rect) {
+            this.$rect = this.rect(w0 * size, 3 * h).addClass("invisible").center(0, 0);
+        }
         this.$rect.width(w0 * size);
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < size; i++) {
-            if (!this.$backgrounds[i]) this.$backgrounds[i] = this.rect(w0, h).stroke({width: stroke}).addClass("background");
+            if (!this.$backgrounds[i]) {
+                this.$backgrounds[i] = this.rect(w0, h).stroke({width: stroke}).addClass("background");
+            }
             this.$backgrounds[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
-            if (!this.$values[i]) this.$values[i] = this.text(NBSP);
+            if (!this.$values[i]) {
+                this.$values[i] = this.text(NBSP);
+            }
             this.$values[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
-            if (!this.$indices[i]) this.$indices[i] = this.text(i.toString()).addClass("arrayindex");
+            if (!this.$indices[i]) {
+                this.$indices[i] = this.text(i.toString()).addClass("arrayindex");
+            }
             this.$indices[i].center(cx + w0 * (i - size / 2 + 0.5), cy + h * 0.8);
         }
         return this;
@@ -61,7 +71,9 @@ export class DSArray extends G {
     }
 
     setValues(values: Array<string>) {
-        if (values.length !== this.getSize()) throw new Error(`Wrong number of values: ${values.length} != ${this.getSize()}`);
+        if (values.length !== this.getSize()) {
+            throw new Error(`Wrong number of values: ${values.length} != ${this.getSize()}`);
+        }
         for (let i = 0; i < values.length; i++) {
             this.setValue(i, values[i]);
         }
@@ -73,10 +85,14 @@ export class DSArray extends G {
     }
 
     setValue(i: number, text: string) {
-        if (text == null) text = "";
+        if (text == null) {
+            text = "";
+        }
         text = `${text}`;
         // Non-breaking space: We need to have some text, otherwise the coordinates are reset to (0, 0)
-        if (text === "") text = NBSP;
+        if (text === "") {
+            text = NBSP;
+        }
         this.$values[i].text(text);
         return this;
     }
@@ -93,20 +109,30 @@ export class DSArray extends G {
 
     setDisabled(i: number, disabled: boolean | null) {
         const bg = this.$backgrounds[i];
-        if (disabled == null) bg.toggleClass("disabled");
-        else if (disabled) bg.addClass("disabled");
-        else bg.removeClass("disabled");
+        if (disabled == null) {
+            bg.toggleClass("disabled");
+        } else if (disabled) {
+            bg.addClass("disabled");
+        } else {
+            bg.removeClass("disabled");
+        }
         return this;
     }
 
     setIndexHighlight(i: number, high: boolean | null) {
         for (const obj of [this.$backgrounds[i], this.$values[i]]) {
-            if (high == null) obj.toggleClass("highlight");
-            else if (high) obj.addClass("highlight");
-            else obj.removeClass("highlight");
+            if (high == null) {
+                obj.toggleClass("highlight");
+            } else if (high) {
+                obj.addClass("highlight");
+            } else {
+                obj.removeClass("highlight");
+            }
         }
         for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.hasClass("highlight")) bg.back();
+            if (!bg.hasClass("highlight")) {
+                bg.back();
+            }
         }
         return this;
     }

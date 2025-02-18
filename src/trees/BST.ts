@@ -38,7 +38,9 @@ export class BST extends Engine {
             "input.showNullNodes"
         );
 
-        if (!showNullNodes) throw new Error("Could not find show null nodes input");
+        if (!showNullNodes) {
+            throw new Error("Could not find show null nodes input");
+        }
 
         return {...toolbar, showNullNodes};
     }
@@ -70,10 +72,15 @@ export class BST extends Engine {
     }
 
     toggleNullNodes(show: boolean | null): this {
-        if (show == null) show = this.toolbar.showNullNodes.checked;
+        if (show == null) {
+            show = this.toolbar.showNullNodes.checked;
+        }
         this.toolbar.showNullNodes.checked = show;
-        if (show) this.Svg.addClass("shownullnodes");
-        else this.Svg.removeClass("shownullnodes");
+        if (show) {
+            this.Svg.addClass("shownullnodes");
+        } else {
+            this.Svg.removeClass("shownullnodes");
+        }
         return this;
     }
 
@@ -98,7 +105,9 @@ export class BST extends Engine {
     }
 
     async insert(...values: string[]): Promise<void> {
-        for (const val of values) await this.insertOne(val);
+        for (const val of values) {
+            await this.insertOne(val);
+        }
     }
 
     async find(value: string | number): Promise<{
@@ -150,8 +159,9 @@ export class BST extends Engine {
             node.setChildHighlight(direction, true);
             parent = node;
             node = parent.getChild(direction);
-            if (node)
+            if (node) {
                 pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+            }
             await this.pause("find.look", direction);
             parent.setChildHighlight(direction, false);
         }
@@ -247,7 +257,9 @@ export class BST extends Engine {
             );
             await this.pause(undefined);
             predecessor?.setParentHighlight(false);
-            if (!predecessor?.getRight()) break;
+            if (!predecessor?.getRight()) {
+                break;
+            }
             predecessor = predecessor.getRight();
         }
         predecessor?.setHighlight(true);
@@ -298,18 +310,20 @@ export class BST extends Engine {
         const direction = parent.getLeft() === node ? "left" : "right";
         if (child) {
             node?.setHighlight(false);
-            if (child === parent.getLeft()?.getLeft())
+            if (child === parent.getLeft()?.getLeft()) {
                 node?.dmoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
                 );
-            if (child === parent.getRight()?.getRight())
+            }
+            if (child === parent.getRight()?.getRight()) {
                 node?.dmoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
                 );
+            }
             parent.setChild(direction, child, this.getStrokeWidth());
             child.setHighlight(true);
             parent.setChildHighlight(direction, true);
@@ -344,7 +358,9 @@ export class BST extends Engine {
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
         await this.pause(undefined);
-        for (const lbl of printed) lbl.remove();
+        for (const lbl of printed) {
+            lbl.remove();
+        }
     }
 
     async printHelper(
@@ -396,8 +412,9 @@ export class BST extends Engine {
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
 
-        if (child === undefined || child === null)
+        if (child === undefined || child === null) {
             throw new Error("Invalid B node in singleRotate");
+        }
 
         await this.pause("rotate.zigzag", child, secondDir, node, firstDir);
         await this.singleRotate(secondDir, child);
@@ -415,8 +432,9 @@ export class BST extends Engine {
         const A = node;
         const B = A.getChild(secondDir);
 
-        if (B === undefined || B === null)
+        if (B === undefined || B === null) {
             throw new Error("Invalid B node in singleRotate");
+        }
 
         const C = B.getChild(firstDir);
 

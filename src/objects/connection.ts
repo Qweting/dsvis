@@ -39,7 +39,9 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         this.stroke({width: strokeWidth});
         this.back();
         this.setBend(bend);
-        if (directed) this._createArrow();
+        if (directed) {
+            this._createArrow();
+        }
         this.update(this.$coords);
         return this;
     }
@@ -65,7 +67,9 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         (this.engine().animate(this, animationDuration > 0) as this).plot(
             this._getPath()
         );
-        if (this.isDirected()) this._redrawArrow(animationDuration);
+        if (this.isDirected()) {
+            this._redrawArrow(animationDuration);
+        }
         return this;
     }
 
@@ -80,8 +84,9 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         const radius = this.$coords.r2;
         const stroke = this.attr("stroke-width");
 
-        if (!marker || typeof stroke !== "number")
+        if (!marker || typeof stroke !== "number") {
             throw Error("Marker must exist and stroke must be a number");
+        }
 
         this.engine()
             .animate(marker, animationDuration > 0)
@@ -101,24 +106,33 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
     }
 
     setStart(start: T, animationDuration: number = 0): this {
-        if (start === this.$start) return this;
+        if (start === this.$start) {
+            return this;
+        }
         this.$start = start;
-        if (start)
+        if (start) {
             this.update({x1: start.cx(), y1: start.cy()}, animationDuration);
+        }
         return this;
     }
 
     setEnd(end: T, animationDuration: number = 0): this {
-        if (end === this.$end) return this;
+        if (end === this.$end) {
+            return this;
+        }
         this.$end = end;
-        if (end) this.update({x2: end.cx(), y2: end.cy()}, animationDuration);
+        if (end) {
+            this.update({x2: end.cx(), y2: end.cy()}, animationDuration);
+        }
         return this;
     }
 
     setHighlight(high: boolean | null): this {
         super.setHighlight(high);
         const marker = this.reference<Element>("marker-end");
-        if (marker) marker.setHighlight(high);
+        if (marker) {
+            marker.setHighlight(high);
+        }
         return this;
     }
 

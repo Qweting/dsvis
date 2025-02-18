@@ -24,8 +24,9 @@ export class BinaryHeap extends Engine {
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
         this.heapArray = this.Svg.dsArray(this.arraySize, xRoot, this.Svg.viewbox().height - yRoot, true);
-        if (Number(this.heapArray.x()) < this.$Svg.margin)
+        if (Number(this.heapArray.x()) < this.$Svg.margin) {
             this.heapArray.x(this.$Svg.margin);
+        }
         this.heapSize = 0;
         if (this.initialValues) {
             this.State.resetting = true;
@@ -43,12 +44,18 @@ export class BinaryHeap extends Engine {
     }
 
     async insert(...values: Array<string>) {
-        for (const val of values) await this.insertOne(val);
+        for (const val of values) {
+            await this.insertOne(val);
+        }
     }
 
     async swap(j: number, k: number, message: string, ...args: Array<string>) {
-        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
-        if (this.heapArray === null) throw new Error("Heap array not initialised");
+        if (this.treeNodes === null) {
+            throw new Error("Tree nodes not initialised");
+        }
+        if (this.heapArray === null) {
+            throw new Error("Heap array not initialised");
+        }
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
         const jLabel = this.Svg.textCircle(jNode.getText(), jNode.cx(), jNode.cy(), this.getObjectSize(), this.getStrokeWidth());
         const kLabel = this.Svg.textCircle(kNode.getText(), kNode.cx(), kNode.cy(), this.getObjectSize(), this.getStrokeWidth());
@@ -64,9 +71,15 @@ export class BinaryHeap extends Engine {
 
 
     async insertOne(value: string) {
-        if (this.heapSize === null) throw new Error("Heap size not initialised");
-        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
-        if (this.heapArray === null) throw new Error("Heap array not initialised");
+        if (this.heapSize === null) {
+            throw new Error("Heap size not initialised");
+        }
+        if (this.treeNodes === null) {
+            throw new Error("Tree nodes not initialised");
+        }
+        if (this.heapArray === null) {
+            throw new Error("Heap array not initialised");
+        }
         if (this.heapSize >= this.arraySize) {
             await this.pause('general.full');
             return;
@@ -128,10 +141,18 @@ export class BinaryHeap extends Engine {
 
 
     async deleteMin() {
-        if (this.heapSize === null) throw new Error("Heap size not initialised");
-        if (this.treeNodes === null) throw new Error("Tree nodes not initialised");
-        if (this.heapArray === null) throw new Error("Heap array not initialised");
-        if (this.treeRoot === null) throw new Error("Tree root not initialised");
+        if (this.heapSize === null) {
+            throw new Error("Heap size not initialised");
+        }
+        if (this.treeNodes === null) {
+            throw new Error("Tree nodes not initialised");
+        }
+        if (this.heapArray === null) {
+            throw new Error("Heap array not initialised");
+        }
+        if (this.treeRoot === null) {
+            throw new Error("Tree root not initialised");
+        }
         if (this.heapSize === 0) {
             await this.pause('general.empty');
             return;
