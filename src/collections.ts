@@ -1,9 +1,9 @@
-import {addReturnSubmit, Engine} from "./engine";
-import {AVL} from "./trees/AVL";
-import {BST} from "./trees/BST";
-import {BTree} from "./trees/BTree";
-import {RedBlack} from "./trees/RedBlack";
-import {SplayTree} from "./trees/SplayTree";
+import { addReturnSubmit, Engine } from "./engine";
+import { AVL } from "./trees/AVL";
+import { BST } from "./trees/BST";
+import { BTree } from "./trees/BTree";
+import { RedBlack } from "./trees/RedBlack";
+import { SplayTree } from "./trees/SplayTree";
 
 const COLLECTIONS = {
     BST: BST,
@@ -106,21 +106,21 @@ function getCollectionsToolbar(container: HTMLElement) {
         "select.insertSelect"
     );
     const insertField =
-    container.querySelector<HTMLInputElement>("input.insertField");
+        container.querySelector<HTMLInputElement>("input.insertField");
     const insertSubmit =
-    container.querySelector<HTMLInputElement>("input.insertSubmit");
+        container.querySelector<HTMLInputElement>("input.insertSubmit");
     const findField =
-    container.querySelector<HTMLInputElement>("input.findField");
+        container.querySelector<HTMLInputElement>("input.findField");
     const findSubmit =
-    container.querySelector<HTMLInputElement>("input.findSubmit");
+        container.querySelector<HTMLInputElement>("input.findSubmit");
     const deleteField =
-    container.querySelector<HTMLInputElement>("input.deleteField");
+        container.querySelector<HTMLInputElement>("input.deleteField");
     const deleteSubmit =
-    container.querySelector<HTMLInputElement>("input.deleteSubmit");
+        container.querySelector<HTMLInputElement>("input.deleteSubmit");
     const printSubmit =
-    container.querySelector<HTMLInputElement>("input.printSubmit");
+        container.querySelector<HTMLInputElement>("input.printSubmit");
     const clearSubmit =
-    container.querySelector<HTMLInputElement>("input.clearSubmit");
+        container.querySelector<HTMLInputElement>("input.clearSubmit");
 
     if (!insertSelect) {
         throw new Error("Missing insert select");

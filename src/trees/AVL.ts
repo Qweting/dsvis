@@ -1,7 +1,7 @@
-import {updateDefault} from "../../src/engine";
-import {AVLNode} from "../../src/objects/avl-node";
-import {HighlightCircle} from "../../src/objects/highlight-circle";
-import {BST, BSTMessages} from "./BST";
+import { updateDefault } from "../../src/engine";
+import { AVLNode } from "../../src/objects/avl-node";
+import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { BST, BSTMessages } from "./BST";
 
 export class AVL extends BST {
     // @ts-expect-error TODO fix message typing
@@ -72,8 +72,8 @@ export class AVL extends BST {
             this.pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
             await this.pause("node.updateHeight");
             const leftHeight = this.getHeight(
-                    node.getLeft() as AVLNode | null | undefined
-                ),
+                node.getLeft() as AVLNode | null | undefined
+            ),
                 rightHeight = this.getHeight(
                     node.getRight() as AVLNode | null | undefined
                 );
@@ -96,8 +96,8 @@ export class AVL extends BST {
 
     async rebalance(node: AVLNode) {
         const leftHeight = this.getHeight(
-                node.getLeft() as AVLNode | null | undefined
-            ),
+            node.getLeft() as AVLNode | null | undefined
+        ),
             rightHeight = this.getHeight(
                 node.getRight() as AVLNode | null | undefined
             );
@@ -109,8 +109,8 @@ export class AVL extends BST {
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
         const childLeft = this.getHeight(
-                child?.getChild(left) as AVLNode | null | undefined
-            ),
+            child?.getChild(left) as AVLNode | null | undefined
+        ),
             childRight = this.getHeight(
                 child?.getChild(right) as AVLNode | null | undefined
             );
@@ -135,11 +135,11 @@ export class AVL extends BST {
 
     async resetHeight(node: AVLNode) {
         const height =
-      1 +
-      Math.max(
-          this.getHeight(node.getLeft() as AVLNode),
-          this.getHeight(node.getRight() as AVLNode)
-      );
+            1 +
+            Math.max(
+                this.getHeight(node.getLeft() as AVLNode),
+                this.getHeight(node.getRight() as AVLNode)
+            );
         if (height !== this.getHeight(node)) {
             node.setHeight(height);
         }

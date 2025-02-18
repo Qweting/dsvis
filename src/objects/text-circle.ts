@@ -1,5 +1,5 @@
-import {Circle, G, Text} from "@svgdotjs/svg.js";
-import {NBSP} from "../../src/engine";
+import { Circle, G, Text } from "@svgdotjs/svg.js";
+import { NBSP } from "../../src/engine";
 
 export class TextCircle extends G {
     $circle: Circle | null = null;
@@ -13,7 +13,7 @@ export class TextCircle extends G {
         strokeWidth: number
     ): this {
         this.$circle = this.circle(size)
-            .stroke({width: strokeWidth})
+            .stroke({ width: strokeWidth })
             .center(0, 0);
         this.$text = this.text(text).center(0, 0);
         if (x && y) {

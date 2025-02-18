@@ -1,5 +1,5 @@
-import {Text} from "@svgdotjs/svg.js";
-import {BinaryNode} from "./binary-node";
+import { Text } from "@svgdotjs/svg.js";
+import { BinaryNode } from "./binary-node";
 
 export class AVLNode extends BinaryNode {
     $height: Text | null = null;

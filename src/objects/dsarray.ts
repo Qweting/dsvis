@@ -1,5 +1,5 @@
-import {G, Text, Rect} from "@svgdotjs/svg.js";
-import {NBSP} from "../../src/engine";
+import { G, Text, Rect } from "@svgdotjs/svg.js";
+import { NBSP } from "../../src/engine";
 
 export class DSArray extends G {
     $horizontal: boolean | null = null;
@@ -43,7 +43,7 @@ export class DSArray extends G {
         const cx = this.$rect.cx(), cy = this.$rect.cy();
         for (let i = 0; i < size; i++) {
             if (!this.$backgrounds[i]) {
-                this.$backgrounds[i] = this.rect(w0, h).stroke({width: stroke}).addClass("background");
+                this.$backgrounds[i] = this.rect(w0, h).stroke({ width: stroke }).addClass("background");
             }
             this.$backgrounds[i].center(cx + w0 * (i - size / 2 + 0.5), cy);
             if (!this.$values[i]) {

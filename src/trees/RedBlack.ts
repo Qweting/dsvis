@@ -1,5 +1,5 @@
-import {BinaryNode} from "src/objects/binary-node";
-import {BST, BSTMessages} from "./BST";
+import { BinaryNode } from "src/objects/binary-node";
+import { BST, BSTMessages } from "./BST";
 
 export class RedBlack extends BST {
     messages = {
@@ -65,7 +65,7 @@ export class RedBlack extends BST {
             parent.setHighlight(true);
             grandparent.setHighlight(true);
             await this.pause("rotate.parent", node, side, rotate, parent),
-            node.setHighlight(false);
+                node.setHighlight(false);
             parent.setHighlight(false);
             grandparent.setHighlight(false);
             node = (await this.singleRotate(rotate, parent)).getChild(
@@ -121,7 +121,7 @@ export class RedBlack extends BST {
     }
 
     async fixDoubleBlack(parent: BinaryNode, left: "left" | "right") {
-    // TODO: Fix variable names
+        // TODO: Fix variable names
         const right = left === "left" ? "right" : "left";
         const rightChild = parent.getChild(right);
         const rightGrandchild = rightChild?.getChild(right);
@@ -240,26 +240,26 @@ const RedBlackMessages = {
             parent: BinaryNode,
             pibling: BinaryNode
         ) => [
-            `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`,
-            "Push blackness down from grandparent",
-        ],
+                `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red`,
+                "Push blackness down from grandparent",
+            ],
         switch: (
             parent: BinaryNode,
             dir: "left" | "right",
             dirChild: BinaryNode
         ) => [
-            `Parent ${parent} is red,`,
-            `${dir} child ${dirChild} and its children are black:`,
-            "Switch colors",
-        ],
+                `Parent ${parent} is red,`,
+                `${dir} child ${dirChild} and its children are black:`,
+                "Switch colors",
+            ],
         childRed: (
             parent: BinaryNode,
             dir: "left" | "right",
             dirChild: BinaryNode
         ) => [
-            `Parent ${parent}, ${dir} child ${dirChild} and its children are black:`,
-            `Color ${dir} child red`,
-        ],
+                `Parent ${parent}, ${dir} child ${dirChild} and its children are black:`,
+                `Color ${dir} child red`,
+            ],
     },
     balancing: {
         parentImbalanced: (parent: BinaryNode) => `Parent ${parent} is imbalanced`,
@@ -271,42 +271,42 @@ const RedBlackMessages = {
             rotate: "left" | "right",
             parent: BinaryNode
         ) => [
-            `Node ${node} is a red ${side} child of a red ${rotate} child`,
-            `Rotate parent ${parent} ${rotate}`,
-        ],
+                `Node ${node} is a red ${side} child of a red ${rotate} child`,
+                `Rotate parent ${parent} ${rotate}`,
+            ],
         grandparent: (
             node: BinaryNode,
             side: "left" | "right",
             grandparent: BinaryNode,
             rotate: "left" | "right"
         ) => [
-            `Node ${node} is a red ${side} child of a red ${side} child`,
-            `Switch colors and rotate grandparent ${grandparent} ${rotate}`,
-        ],
+                `Node ${node} is a red ${side} child of a red ${side} child`,
+                `Switch colors and rotate grandparent ${grandparent} ${rotate}`,
+            ],
         redSibling: (
             parent: BinaryNode,
             right: "left" | "right",
             rightChild: BinaryNode,
             left: "left" | "right"
         ) => [
-            `Parent ${parent} is black, and its ${right} child ${rightChild} is red:`,
-            `Switch colors and rotate ${left}`,
-        ],
+                `Parent ${parent} is black, and its ${right} child ${rightChild} is red:`,
+                `Switch colors and rotate ${left}`,
+            ],
         redDistantChild: (
             right: "left" | "right",
             rightChild: BinaryNode,
             left: "left" | "right"
         ) => [
-            `${right} child ${rightChild} is black, its ${right} child is red:`,
-            `Switch colors and rotate ${left}`,
-        ],
+                `${right} child ${rightChild} is black, its ${right} child is red:`,
+                `Switch colors and rotate ${left}`,
+            ],
         redCloseChild: (
             right: "left" | "right",
             rightChild: BinaryNode,
             left: "left" | "right"
         ) => [
-            `${right} child ${rightChild} is black, its ${left} child is red:`,
-            `Switch colors and rotate child ${right}`,
-        ],
+                `${right} child ${rightChild} is black, its ${left} child is red:`,
+                `Switch colors and rotate child ${right}`,
+            ],
     },
 } as const;

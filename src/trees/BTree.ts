@@ -1,13 +1,13 @@
-import {Text} from "@svgdotjs/svg.js";
-import {HighlightCircle} from "src/objects/highlight-circle";
+import { Text } from "@svgdotjs/svg.js";
+import { HighlightCircle } from "src/objects/highlight-circle";
 import {
     compare,
     Engine,
     EngineToolbarItems,
     parseValues,
 } from "../../src/engine";
-import {BTreeNode} from "../../src/objects/btree-node";
-import {BSTMessages} from "./BST";
+import { BTreeNode } from "../../src/objects/btree-node";
+import { BSTMessages } from "./BST";
 
 type BTreeToolbarItems = EngineToolbarItems & {
     maxDegree: HTMLSelectElement;
@@ -58,7 +58,7 @@ export class BTree extends Engine {
         );
 
         const maxDegree =
-      this.container.querySelector<HTMLSelectElement>("select.maxDegree");
+            this.container.querySelector<HTMLSelectElement>("select.maxDegree");
 
         if (!maxDegree) {
             throw new Error("Could not find max degree select element");
@@ -173,7 +173,7 @@ export class BTree extends Engine {
                 i++;
             }
             const found =
-        i < node.numValues() && compare(value, node.getText(i)) === 0;
+                i < node.numValues() && compare(value, node.getText(i)) === 0;
             pointer.setCenter(
                 node.getCX(i - (found ? 0 : 0.5), this.getObjectSize()),
                 node.cy(),
@@ -184,7 +184,7 @@ export class BTree extends Engine {
                 await this.pause(cmpStr);
                 pointer.remove();
                 node.setHighlight(false);
-                return {success: found, node: node, i: i};
+                return { success: found, node: node, i: i };
             }
 
             if (found) {
@@ -201,7 +201,7 @@ export class BTree extends Engine {
             node = parent.getChild(i);
         }
         pointer.remove();
-        return {success: false, node: parent, i: null};
+        return { success: false, node: parent, i: null };
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -381,7 +381,7 @@ export class BTree extends Engine {
             throw new Error("No info printer");
         }
 
-        const {x, y} = this.Info.printer.bbox();
+        const { x, y } = this.Info.printer.bbox();
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
@@ -568,15 +568,15 @@ export class BTree extends Engine {
         const i = node.getParentIndex() || 0;
         if (
             i > 0 &&
-      parent.getChild(i - 1) !== null &&
-      parent.getChild(i - 1)!.numValues() > this.getMinKeys()
+            parent.getChild(i - 1) !== null &&
+            parent.getChild(i - 1)!.numValues() > this.getMinKeys()
         ) {
             // Steal from left sibling
             await this.stealFromLeft(node, i);
         } else if (
             i < parent.numValues() &&
-      parent.getChild(i + 1) !== null &&
-      parent.getChild(i + 1)!.numValues() > this.getMinKeys()
+            parent.getChild(i + 1) !== null &&
+            parent.getChild(i + 1)!.numValues() > this.getMinKeys()
         ) {
             // Steal from right sibling
             await this.stealFromRight(node, i);
@@ -620,7 +620,7 @@ export class BTree extends Engine {
         sinkingNode.setText(0, parentValue);
         parent.setText(parentIndex, "");
         const sinkingX =
-      (Number(node.x()) + Number(node.width()) + Number(rightSib?.x())) / 2;
+            (Number(node.x()) + Number(node.width()) + Number(rightSib?.x())) / 2;
         sinkingNode.setCenter(sinkingX, node.cy(), this.getAnimationSpeed());
         node.setCenter(
             sinkingX - (this.getObjectSize() + Number(node.width())) / 2,

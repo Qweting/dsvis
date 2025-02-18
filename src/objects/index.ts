@@ -1,14 +1,14 @@
-import {Container, Element, extend, Svg} from "@svgdotjs/svg.js";
-import {Engine} from "../../src/engine";
-import {AVLNode} from "./avl-node";
-import {BinaryNode} from "./binary-node";
-import {BTreeConnection} from "./btree-connection";
-import {BTreeNode} from "./btree-node";
-import {Connection} from "./connection";
-import {DSArray} from "./dsarray";
-import {GraphNode} from "./graph-node";
-import {HighlightCircle} from "./highlight-circle";
-import {TextCircle} from "./text-circle";
+import { Container, Element, extend, Svg } from "@svgdotjs/svg.js";
+import { Engine } from "../../src/engine";
+import { AVLNode } from "./avl-node";
+import { BinaryNode } from "./binary-node";
+import { BTreeConnection } from "./btree-connection";
+import { BTreeNode } from "./btree-node";
+import { Connection } from "./connection";
+import { DSArray } from "./dsarray";
+import { GraphNode } from "./graph-node";
+import { HighlightCircle } from "./highlight-circle";
+import { TextCircle } from "./text-circle";
 
 declare module "@svgdotjs/svg.js" {
     interface Svg {
@@ -206,9 +206,9 @@ extend(Container, {
             .put(new BTreeConnection(start, end, child, numChildren))
             .init(strokeWidth);
     },
-    dsArray: function(size: number, x: number, y: number, horizontal: boolean) {
+    dsArray: function (size: number, x: number, y: number, horizontal: boolean) {
         return (this as Container).put(new DSArray()).init(size, x, y, horizontal);
     },
 });
 
-export {Svg};
+export { Svg };

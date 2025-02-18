@@ -1,7 +1,7 @@
-import {addReturnSubmit, compare, NBSP} from "../../src/engine";
-import {AVLNode} from "../../src/objects/avl-node";
-import {Children} from "../../src/objects/binary-node";
-import {BST} from "../../src/trees/BST";
+import { addReturnSubmit, compare, NBSP } from "../../src/engine";
+import { AVLNode } from "../../src/objects/avl-node";
+import { Children } from "../../src/objects/binary-node";
+import { BST } from "../../src/trees/BST";
 
 export class AVLQuiz extends BST {
     mark: AVLNode | null = null;
@@ -67,13 +67,13 @@ export class AVLQuiz extends BST {
         const isBST = this.isBST();
         const unbalanced = this.isUnbalanced();
         const message =
-      !isBST && unbalanced
-          ? "Tree is not a BST, and it's unbalanced!"
-          : !isBST
-              ? "Tree is not a BST!"
-              : unbalanced
-                  ? "Tree is unbalanced!"
-                  : "Tree is a correct AVL tree";
+            !isBST && unbalanced
+                ? "Tree is not a BST, and it's unbalanced!"
+                : !isBST
+                    ? "Tree is not a BST!"
+                    : unbalanced
+                        ? "Tree is unbalanced!"
+                        : "Tree is a correct AVL tree";
         this.Info.title?.text(message);
         this.Info.body?.text(NBSP);
     }
@@ -119,9 +119,9 @@ export class AVLQuiz extends BST {
 
     async moveChild(direction: Children) {
         const child = this.current?.getChild(direction) as
-      | AVLNode
-      | undefined
-      | null;
+            | AVLNode
+            | undefined
+            | null;
         if (!child) {
             await this.pause(`There is no ${direction} child!`);
             return;
@@ -263,27 +263,27 @@ function initialiseAVLQuiz(containerID: string) {
     const container = AVLEngine.container;
     const tools = AVLEngine.toolbar;
     const insertField =
-    container.querySelector<HTMLInputElement>("input.insertField");
+        container.querySelector<HTMLInputElement>("input.insertField");
     const createLeft =
-    container.querySelector<HTMLInputElement>("input.createLeft");
+        container.querySelector<HTMLInputElement>("input.createLeft");
     const createRight =
-    container.querySelector<HTMLInputElement>("input.createRight");
+        container.querySelector<HTMLInputElement>("input.createRight");
     const moveParent =
-    container.querySelector<HTMLInputElement>("input.moveParent");
+        container.querySelector<HTMLInputElement>("input.moveParent");
     const moveLeft = container.querySelector<HTMLInputElement>("input.moveLeft");
     const moveRight =
-    container.querySelector<HTMLInputElement>("input.moveRight");
+        container.querySelector<HTMLInputElement>("input.moveRight");
     const rotateLeft =
-    container.querySelector<HTMLInputElement>("input.rotateLeft");
+        container.querySelector<HTMLInputElement>("input.rotateLeft");
     const rotateRight =
-    container.querySelector<HTMLInputElement>("input.rotateRight");
+        container.querySelector<HTMLInputElement>("input.rotateRight");
     const markNode = container.querySelector<HTMLInputElement>("input.markNode");
     const copyToMark =
-    container.querySelector<HTMLInputElement>("input.copyToMark");
+        container.querySelector<HTMLInputElement>("input.copyToMark");
     const deleteNode =
-    container.querySelector<HTMLInputElement>("input.deleteNode");
+        container.querySelector<HTMLInputElement>("input.deleteNode");
     const restartQuiz =
-    container.querySelector<HTMLInputElement>("input.restartQuiz");
+        container.querySelector<HTMLInputElement>("input.restartQuiz");
 
     if (!insertField) {
         throw new Error("Could not find insert field");

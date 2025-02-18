@@ -1,5 +1,5 @@
-import {BTreeNode} from "./btree-node";
-import {Connection} from "./connection";
+import { BTreeNode } from "./btree-node";
+import { Connection } from "./connection";
 
 type BTreeConnectionCoordinates = {
     x1: number;

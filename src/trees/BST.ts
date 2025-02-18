@@ -1,12 +1,12 @@
-import {Text} from "@svgdotjs/svg.js";
+import { Text } from "@svgdotjs/svg.js";
 import {
     compare,
     Engine,
     EngineToolbarItems,
     parseValues,
 } from "../../src/engine";
-import {BinaryNode} from "../objects/binary-node";
-import {HighlightCircle} from "../objects/highlight-circle";
+import { BinaryNode } from "../objects/binary-node";
+import { HighlightCircle } from "../objects/highlight-circle";
 
 type BSTToolbarItems = EngineToolbarItems & {
     showNullNodes: HTMLInputElement;
@@ -42,7 +42,7 @@ export class BST extends Engine {
             throw new Error("Could not find show null nodes input");
         }
 
-        return {...toolbar, showNullNodes};
+        return { ...toolbar, showNullNodes };
     }
 
     initialise(initialValues: string[] | null = null): this {
@@ -116,7 +116,7 @@ export class BST extends Engine {
     }> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
-            return {success: false, node: null};
+            return { success: false, node: null };
         }
         await this.pause("find.start", value);
         const found = await this.findHelper(value);
@@ -130,14 +130,14 @@ export class BST extends Engine {
     // TODO: Fix so that we know that we always return a node
     // TODO: Change success to found because we always find something
     async findHelper(value: string | number): Promise<
-    | {
-        success: true;
-        node: BinaryNode;
-    }
-    | {
-        success: false;
-        node: BinaryNode | null;
-    }
+        | {
+            success: true;
+            node: BinaryNode;
+        }
+        | {
+            success: false;
+            node: BinaryNode | null;
+        }
     > {
         let parent: BinaryNode | null = null;
         let node: BinaryNode | null = this.treeRoot;
@@ -153,7 +153,7 @@ export class BST extends Engine {
             if (cmp === 0) {
                 pointer.remove();
                 node.setHighlight(false);
-                return {success: true, node: node};
+                return { success: true, node: node };
             }
             const direction = cmp < 0 ? "left" : "right";
             node.setChildHighlight(direction, true);
@@ -166,7 +166,7 @@ export class BST extends Engine {
             parent.setChildHighlight(direction, false);
         }
         pointer.remove();
-        return {success: false, node: parent};
+        return { success: false, node: parent };
     }
 
     // TODO: Could be changed to only return the success part
@@ -179,7 +179,7 @@ export class BST extends Engine {
             await this.pause("insert.newroot", value);
             this.resizeTree();
             await this.pause(undefined);
-            return {success: true, node: this.treeRoot};
+            return { success: true, node: this.treeRoot };
         }
 
         await this.pause("insert.search", value);
@@ -188,7 +188,7 @@ export class BST extends Engine {
             found.node?.setHighlight(true);
             await this.pause("insert.exists", found.node);
             found.node?.setHighlight(false);
-            return {success: false, node: found.node};
+            return { success: false, node: found.node };
         }
         const child = this.newNode(value);
         const cmp = compare(value, found.node?.getText() || "");
@@ -201,7 +201,7 @@ export class BST extends Engine {
         child.setHighlight(false);
         this.resizeTree();
         await this.pause(undefined);
-        return {success: true, node: child};
+        return { success: true, node: child };
     }
 
     // TODO: update type with separate for success true and false
@@ -221,8 +221,8 @@ export class BST extends Engine {
             await this.pause("delete.notexists", value);
             found.node?.setHighlight(false);
             const direction =
-        compare(value, found.node?.getText() || "") < 0 ? "left" : "right";
-            return {success: false, direction: direction, parent: found.node};
+                compare(value, found.node?.getText() || "") < 0 ? "left" : "right";
+            return { success: false, direction: direction, parent: found.node };
         }
         found.node?.setHighlight(true);
         await this.pause("delete.found", value);
@@ -290,7 +290,7 @@ export class BST extends Engine {
         direction: "left" | "right" | null;
         parent: BinaryNode | null;
     }> {
-    // The node will NOT have two children - this has been taken care of by deleteHelper
+        // The node will NOT have two children - this has been taken care of by deleteHelper
         const child = node?.getLeft() || node?.getRight();
         const parent = node?.getParent();
         if (!parent) {
@@ -304,7 +304,7 @@ export class BST extends Engine {
             node?.remove();
             this.resizeTree();
             await this.pause(undefined);
-            return {success: true, direction: null, parent: null};
+            return { success: true, direction: null, parent: null };
         }
 
         const direction = parent.getLeft() === node ? "left" : "right";
@@ -338,7 +338,7 @@ export class BST extends Engine {
         node?.remove();
         this.resizeTree();
         await this.pause(undefined);
-        return {success: true, direction: direction, parent: parent};
+        return { success: true, direction: direction, parent: parent };
     }
 
     async print(): Promise<void> {
@@ -346,7 +346,7 @@ export class BST extends Engine {
             await this.pause("general.empty");
             return;
         }
-        const {x, y} = this.Info.printer?.bbox() || {x: 0, y: 0};
+        const { x, y } = this.Info.printer?.bbox() || { x: 0, y: 0 };
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
@@ -400,15 +400,15 @@ export class BST extends Engine {
     //  - Double Rotate: Left-Right and Right-Left (also known as Zig-Zag)
 
     async resetHeight(node: unknown) {
-    // BSTs do not store the height in the nodes, so do nothing
-    // This is implemented by, e.g., AVL trees
+        // BSTs do not store the height in the nodes, so do nothing
+        // This is implemented by, e.g., AVL trees
     }
 
     async doubleRotate(
         firstDir: "left" | "right",
         node: BinaryNode
     ): Promise<BinaryNode> {
-    // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
 
@@ -425,8 +425,8 @@ export class BST extends Engine {
         firstDir: "left" | "right",
         node: BinaryNode
     ): Promise<BinaryNode> {
-    // Note: 'left' and 'right' are variables that can have values "left" or "right"!
-    // So, if left==="right", then we rotate right.
+        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+        // So, if left==="right", then we rotate right.
         const secondDir = firstDir === "left" ? "right" : "left";
 
         const A = node;

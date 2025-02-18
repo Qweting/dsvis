@@ -1,9 +1,9 @@
-import {Circle} from "@svgdotjs/svg.js";
+import { Circle } from "@svgdotjs/svg.js";
 
 export class HighlightCircle extends Circle {
     init(x: number, y: number, radius: number, strokeWidth: number) {
         return this.radius(radius)
-            .stroke({width: strokeWidth})
+            .stroke({ width: strokeWidth })
             .center(x, y)
             .addClass("highlight-circle");
     }

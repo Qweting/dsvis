@@ -1,10 +1,10 @@
-import {Path} from "@svgdotjs/svg.js";
-import {Connection} from "./connection";
-import {GraphNode} from "./graph-node";
+import { Path } from "@svgdotjs/svg.js";
+import { Connection } from "./connection";
+import { GraphNode } from "./graph-node";
 
 export type Children = "left" | "right";
 export class BinaryNode extends GraphNode {
-    $incoming: {parent: Connection<BinaryNode> | null} = {
+    $incoming: { parent: Connection<BinaryNode> | null } = {
         parent: null,
     };
     $outgoing: {
@@ -14,11 +14,11 @@ export class BinaryNode extends GraphNode {
             left: null,
             right: null,
         };
-    $nullary: {left: Path | null; right: Path | null} = {
+    $nullary: { left: Path | null; right: Path | null } = {
         left: null,
         right: null,
     };
-    $edgebends = {left: 0.1, right: -0.1};
+    $edgebends = { left: 0.1, right: -0.1 };
     $leftWidth: number = 0;
     $rightWidth: number = 0;
     $width: number = 0;
@@ -35,15 +35,14 @@ export class BinaryNode extends GraphNode {
             nY = 0.8 * d,
             nR = 2 * strokeWidth;
         const nullpath = (s: number) =>
-            `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${
-                -2 * nR
+            `M 0,0 L ${s * nX},${nY} m ${nR},0 a ${nR},${nR} 0 1,0 ${-2 * nR
             },0 a ${nR},${nR} 0 1,0 ${2 * nR},0`;
 
         this.$nullary.left = this.path(nullpath(-1))
-            .stroke({width: strokeWidth})
+            .stroke({ width: strokeWidth })
             .addClass("nullnode");
         this.$nullary.right = this.path(nullpath(1))
-            .stroke({width: strokeWidth})
+            .stroke({ width: strokeWidth })
             .addClass("nullnode");
         return super.init(text, x, y, size, strokeWidth);
     }

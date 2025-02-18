@@ -1,6 +1,6 @@
-import {compare} from "../../src/engine";
-import {BinaryNode} from "../../src/objects/binary-node";
-import {BST, BSTMessages} from "./BST";
+import { compare } from "../../src/engine";
+import { BinaryNode } from "../../src/objects/binary-node";
+import { BST, BSTMessages } from "./BST";
 
 export class SplayTree extends BST {
     // @ts-expect-error TODO: Error because change of delete.root from object to string
@@ -41,13 +41,13 @@ export class SplayTree extends BST {
         parent: BinaryNode | null;
     } | null> {
         if (!this.treeRoot) {
-            return {success: false, direction: null, parent: null};
+            return { success: false, direction: null, parent: null };
         }
 
         await this.find(value);
         if (compare(value, this.treeRoot?.getText()) !== 0) {
             await this.pause("delete.notexists", value);
-            return {success: false, parent: null, direction: null};
+            return { success: false, parent: null, direction: null };
         }
 
         this.treeRoot.setHighlight(true);
@@ -57,14 +57,14 @@ export class SplayTree extends BST {
             const left = this.treeRoot.getLeft() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
             const child =
-        this.treeRoot.getLeft() || (this.treeRoot.getRight() as BinaryNode);
+                this.treeRoot.getLeft() || (this.treeRoot.getRight() as BinaryNode);
             const newRoot = child.setHighlight(true);
             await this.pause("delete.singleChild", right, left);
             this.treeRoot.remove();
             this.treeRoot = newRoot;
             this.resizeTree();
             await this.pause(undefined);
-            return {success: true, parent: this.treeRoot, direction: left};
+            return { success: true, parent: this.treeRoot, direction: left };
         }
 
         const right = this.treeRoot.getRight();
@@ -93,7 +93,7 @@ export class SplayTree extends BST {
         this.treeRoot = largestLeft;
         this.resizeTree();
         await this.pause(undefined);
-        return {success: true, parent: this.treeRoot, direction: null}; // TODO: update direction
+        return { success: true, parent: this.treeRoot, direction: null }; // TODO: update direction
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ export class SplayTree extends BST {
     }
 
     async zigZig(left: "left" | "right", node: BinaryNode) {
-    // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
 
@@ -164,7 +164,7 @@ const SplayTreeMessages = {
             `No ${right} tree, make ${left} tree the root`,
         splayLargest: "Splay largest element in left tree to root",
         connectLeftRight:
-      "Left tree now has no right subtree, connect left and right trees",
+            "Left tree now has no right subtree, connect left and right trees",
     },
     rotate: {
         splayUp: (node: BinaryNode) => `Now splaying ${node} up to the root`,

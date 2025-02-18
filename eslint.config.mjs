@@ -1,5 +1,5 @@
 import tseslint from 'typescript-eslint';
-import stylistic from '@stylistic/eslint-plugin';
+import stylistic from '@stylistic/eslint-plugin-ts';
 
 export default tseslint.config(
     tseslint.configs.recommended,
@@ -21,7 +21,6 @@ export default tseslint.config(
             }],
 
             "@stylistic/array-bracket-spacing": ["warn", "never"],
-            "@stylistic/object-curly-spacing": ["warn", "never"],
 
             "@stylistic/padded-blocks": ["warn", {
                 blocks: "never",
@@ -75,9 +74,8 @@ export default tseslint.config(
             "prefer-rest-params": ["error"],
             "prefer-spread": ["error"],
 
-            "no-unused-vars": ["warn", {
-                args: "none",
-            }],
+            "no-unused-vars": ["off"],
+            "@typescript-eslint/no-unused-vars": ["off"],
 
             "camelcase": ["warn"],
 

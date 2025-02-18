@@ -1,6 +1,6 @@
-import {find, Path} from "@svgdotjs/svg.js";
-import {Connection} from "./connection";
-import {TextCircle} from "./text-circle";
+import { find, Path } from "@svgdotjs/svg.js";
+import { Connection } from "./connection";
+import { TextCircle } from "./text-circle";
 
 export class GraphNode extends TextCircle {
     $incoming: Record<string, Connection<GraphNode> | null> = {};
@@ -187,10 +187,10 @@ export class GraphNode extends TextCircle {
     setCenter(x: number, y: number, animationDuration: number = 0): this {
         super.setCenter(x, y, animationDuration);
         for (const edge of this.getOutgoingEdges()) {
-            edge.update({x1: x, y1: y}, animationDuration);
+            edge.update({ x1: x, y1: y }, animationDuration);
         }
         for (const edge of this.getIncomingEdges()) {
-            edge.update({x2: x, y2: y}, animationDuration);
+            edge.update({ x2: x, y2: y }, animationDuration);
         }
         return this;
     }
@@ -198,7 +198,7 @@ export class GraphNode extends TextCircle {
     setSize(size: number, animationDuration: number = 0): this {
         super.setSize(size, animationDuration);
         for (const edge of this.getIncomingEdges()) {
-            edge.update({r2: size / 2}, animationDuration);
+            edge.update({ r2: size / 2 }, animationDuration);
         }
         return this;
     }

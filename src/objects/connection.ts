@@ -1,6 +1,6 @@
-import {Element, Marker, Path} from "@svgdotjs/svg.js";
-import {BTreeNode} from "./btree-node";
-import {GraphNode} from "./graph-node";
+import { Element, Marker, Path } from "@svgdotjs/svg.js";
+import { BTreeNode } from "./btree-node";
+import { GraphNode } from "./graph-node";
 
 type ConnectionCoordinates = {
     x1: number;
@@ -36,7 +36,7 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
     }
 
     init(strokeWidth: number, bend: number = 0, directed: boolean = false): this {
-        this.stroke({width: strokeWidth});
+        this.stroke({ width: strokeWidth });
         this.back();
         this.setBend(bend);
         if (directed) {
@@ -74,7 +74,7 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
     }
 
     _createArrow(): void {
-        this.marker("end", 5, 4, function(add) {
+        this.marker("end", 5, 4, function (add) {
             add.polygon([0, 0, 5, 2, 0, 4]).addClass("filled");
         });
     }
@@ -90,7 +90,7 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
 
         this.engine()
             .animate(marker, animationDuration > 0)
-            .attr({refX: radius / stroke + 5});
+            .attr({ refX: radius / stroke + 5 });
     }
 
     toString(): string {
@@ -111,7 +111,7 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         }
         this.$start = start;
         if (start) {
-            this.update({x1: start.cx(), y1: start.cy()}, animationDuration);
+            this.update({ x1: start.cx(), y1: start.cy() }, animationDuration);
         }
         return this;
     }
@@ -122,7 +122,7 @@ export class Connection<T extends GraphNode | BTreeNode> extends Path {
         }
         this.$end = end;
         if (end) {
-            this.update({x2: end.cx(), y2: end.cy()}, animationDuration);
+            this.update({ x2: end.cx(), y2: end.cy() }, animationDuration);
         }
         return this;
     }

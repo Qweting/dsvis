@@ -1,5 +1,5 @@
-import {addReturnSubmit, Engine} from "./engine";
-import {BinaryHeap} from "./heaps/BinaryHeap";
+import { addReturnSubmit, Engine } from "./engine";
+import { BinaryHeap } from "./heaps/BinaryHeap";
 
 const PRIOQUEUES = {
     BinaryHeap: BinaryHeap,
@@ -60,13 +60,13 @@ function getPrioQueuesToolbar(container: HTMLElement) {
         "select.insertSelect"
     );
     const insertField =
-    container.querySelector<HTMLInputElement>("input.insertField");
+        container.querySelector<HTMLInputElement>("input.insertField");
     const insertSubmit =
-    container.querySelector<HTMLInputElement>("input.insertSubmit");
+        container.querySelector<HTMLInputElement>("input.insertSubmit");
     const deleteSubmit =
-    container.querySelector<HTMLInputElement>("input.deleteSubmit");
+        container.querySelector<HTMLInputElement>("input.deleteSubmit");
     const clearSubmit =
-    container.querySelector<HTMLInputElement>("input.clearSubmit");
+        container.querySelector<HTMLInputElement>("input.clearSubmit");
 
     if (!insertSelect) {
         throw new Error("Missing insert select");

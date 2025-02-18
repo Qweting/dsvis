@@ -1,5 +1,5 @@
-import {Element, Text} from "@svgdotjs/svg.js";
-import {Svg} from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { Element, Text } from "@svgdotjs/svg.js";
+import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
 export type EngineToolbarItems = {
     animationSpeed: HTMLSelectElement;
@@ -17,7 +17,7 @@ export type EngineToolbarItems = {
 
 type Listeners = "click" | "change"; // TODO: Better naming.
 type Resolve = (value: unknown) => void;
-type Reject = (props: {until?: number; running?: boolean}) => void;
+type Reject = (props: { until?: number; running?: boolean }) => void;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
@@ -28,8 +28,8 @@ export class Engine {
     Svg: Svg;
 
     messages:
-    | Record<string, Record<string, string | ((arg0: string) => string)>>
-    | undefined;
+        | Record<string, Record<string, string | ((arg0: string) => string)>>
+        | undefined;
 
     $Svg = {
         width: 1000,
@@ -41,7 +41,7 @@ export class Engine {
 
     $CookieExpireDays = 30;
     $Cookies = {
-    //TODO: confusing naming
+        //TODO: confusing naming
         animationSpeed: {
             getCookie: (value: string) => {
                 if (this.toolbar.animationSpeed) {
@@ -62,7 +62,7 @@ export class Engine {
 
     container: HTMLElement;
     toolbar: EngineToolbarItems;
-    actions: {oper: string; args: unknown[]; nsteps: number}[] = [];
+    actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     CurrentAction: number = 0; // was = null before, this should work better
     CurrentStep: number = 0; // was = null before, this should work better
     DEBUG = true;
@@ -176,7 +176,7 @@ export class Engine {
         );
 
         const stepForward =
-      this.container.querySelector<HTMLButtonElement>("button.stepForward");
+            this.container.querySelector<HTMLButtonElement>("button.stepForward");
         const stepBackward = this.container.querySelector<HTMLButtonElement>(
             "button.stepBackward"
         );
@@ -184,12 +184,12 @@ export class Engine {
             "button.toggleRunner"
         );
         const fastForward =
-      this.container.querySelector<HTMLButtonElement>("button.fastForward");
+            this.container.querySelector<HTMLButtonElement>("button.fastForward");
         const fastBackward = this.container.querySelector<HTMLButtonElement>(
             "button.fastBackward"
         );
         const objectSize =
-      this.container.querySelector<HTMLSelectElement>("select.objectSize");
+            this.container.querySelector<HTMLSelectElement>("select.objectSize");
         const animationSpeed = this.container.querySelector<HTMLSelectElement>(
             "select.animationSpeed"
         );
@@ -268,7 +268,7 @@ export class Engine {
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {}
+    async resetAlgorithm(): Promise<void> { }
 
     clearCanvas(): void {
         this.Svg.clear();
@@ -330,7 +330,7 @@ export class Engine {
     }
 
     setIdleTitle(): void {
-    // TODO: Perhaps add errors if not found
+        // TODO: Perhaps add errors if not found
         if (this.Info.title !== undefined) {
             this.Info.title.text("Select an action from the menu above");
         }
@@ -344,7 +344,7 @@ export class Engine {
 
     $IdleListeners: Record<
         string,
-        {type: Listeners; condition: () => boolean; handler: () => void}
+        { type: Listeners; condition: () => boolean; handler: () => void }
     > = {
             stepBackward: {
                 type: "click",
@@ -419,15 +419,15 @@ export class Engine {
             stepBackward: {
                 type: "click",
                 handler: (resolve, reject) =>
-                    reject({until: this.CurrentStep - 1, running: false}),
+                    reject({ until: this.CurrentStep - 1, running: false }),
             },
             fastBackward: {
                 type: "click",
-                handler: (resolve, reject) => reject({until: 0}),
+                handler: (resolve, reject) => reject({ until: 0 }),
             },
             objectSize: {
                 type: "change",
-                handler: (resolve, reject) => reject({until: this.CurrentStep}),
+                handler: (resolve, reject) => reject({ until: this.CurrentStep }),
             },
         };
 
@@ -436,7 +436,7 @@ export class Engine {
 
     disableWhenRunning(disabled: boolean): void {
         for (const elem of this.container.querySelectorAll<
-      HTMLInputElement | HTMLSelectElement
+            HTMLInputElement | HTMLSelectElement
         >(".disableWhenRunning")) {
             elem.disabled = disabled;
         }
@@ -544,7 +544,7 @@ export class Engine {
         until = 0
     ): Promise<void> {
         await this.reset();
-        this.actions.push({oper: operation, args: args, nsteps: until});
+        this.actions.push({ oper: operation, args: args, nsteps: until });
         if (this.DEBUG) {
             console.log(
                 `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
@@ -565,9 +565,9 @@ export class Engine {
         } catch (reason) {
             if (
                 typeof reason !== "object" ||
-        reason === null || // Added line to help checks below
-        "until" in reason === false || // Added line to help checks below
-        typeof reason.until !== "number" // Changed to be able to assign to until which is a number
+                reason === null || // Added line to help checks below
+                "until" in reason === false || // Added line to help checks below
+                typeof reason.until !== "number" // Changed to be able to assign to until which is a number
             ) {
                 console.error(reason);
                 this.resetListeners(false);
@@ -587,9 +587,9 @@ export class Engine {
             }
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                (operation = action.oper),
-                (args = action.args),
-                (until = action.nsteps);
+                operation = action.oper;
+                args = action.args;
+                until = action.nsteps;
             }
             if (until > 0) {
                 this.execute(operation, args, until);
@@ -608,9 +608,8 @@ export class Engine {
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
             let message = messageArr.join(" ");
-            message = `${
-                message.charAt(0).toUpperCase() + message.substring(1)
-            } ${action.args.join(", ")}`;
+            message = `${message.charAt(0).toUpperCase() + message.substring(1)
+                } ${action.args.join(", ")}`;
             if (this.DEBUG) {
                 console.log(
                     `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
@@ -621,7 +620,7 @@ export class Engine {
             if (
                 !(
                     action.oper in this &&
-          typeof this[action.oper as keyof Engine] === "function"
+                    typeof this[action.oper as keyof Engine] === "function"
                 )
             ) {
                 throw new Error("Cannot call action that does not exist");
@@ -638,8 +637,7 @@ export class Engine {
         const title = this.getMessage(message, ...args);
         if (this.DEBUG) {
             console.log(
-                `${
-                    this.CurrentStep
+                `${this.CurrentStep
                 }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
                     this.actions
                 )}`
@@ -839,40 +837,40 @@ export function addReturnSubmit(
     action?: () => void
 ): void {
     allowed =
-    allowed === "int"
-        ? "0-9"
-        : allowed === "int+"
-            ? "0-9 "
-            : allowed === "float"
-                ? "-.0-9"
-                : allowed === "float+"
-                    ? "-.0-9 "
-                    : allowed === "ALPHA"
-                        ? "A-Z"
-                        : allowed === "ALPHA+"
-                            ? "A-Z "
-                            : allowed === "alpha"
-                                ? "a-zA-Z"
-                                : allowed === "alpha+"
-                                    ? "a-zA-Z "
-                                    : allowed === "ALPHANUM"
-                                        ? "A-Z0-9"
-                                        : allowed === "ALPHANUM+"
-                                            ? "A-Z0-9 "
-                                            : allowed === "alphanum"
-                                                ? "a-zA-Z0-9"
-                                                : allowed === "alphanum+"
-                                                    ? "a-zA-Z0-9 "
-                                                    : allowed;
+        allowed === "int"
+            ? "0-9"
+            : allowed === "int+"
+                ? "0-9 "
+                : allowed === "float"
+                    ? "-.0-9"
+                    : allowed === "float+"
+                        ? "-.0-9 "
+                        : allowed === "ALPHA"
+                            ? "A-Z"
+                            : allowed === "ALPHA+"
+                                ? "A-Z "
+                                : allowed === "alpha"
+                                    ? "a-zA-Z"
+                                    : allowed === "alpha+"
+                                        ? "a-zA-Z "
+                                        : allowed === "ALPHANUM"
+                                            ? "A-Z0-9"
+                                            : allowed === "ALPHANUM+"
+                                                ? "A-Z0-9 "
+                                                : allowed === "alphanum"
+                                                    ? "a-zA-Z0-9"
+                                                    : allowed === "alphanum+"
+                                                        ? "a-zA-Z0-9 "
+                                                        : allowed;
 
     const regex = new RegExp(`[^${allowed}]`, "g");
 
     const transform: (s: string) => string =
-    allowed === allowed.toUpperCase()
-        ? (s) => s.toUpperCase()
-        : allowed === allowed.toLowerCase()
-            ? (s) => s.toLowerCase()
-            : (s) => s;
+        allowed === allowed.toUpperCase()
+            ? (s) => s.toUpperCase()
+            : allowed === allowed.toLowerCase()
+                ? (s) => s.toLowerCase()
+                : (s) => s;
 
     // Idea taken from here: https://stackoverflow.com/a/14719818
     field.oninput = (event) => {
@@ -907,9 +905,9 @@ export function updateDefault(
             obj[key] = defaultObj[key];
         } else if (
             typeof obj[key] === "object" &&
-      obj[key] !== null &&
-      typeof defaultObj[key] === "object" &&
-      defaultObj[key] !== null
+            obj[key] !== null &&
+            typeof defaultObj[key] === "object" &&
+            defaultObj[key] !== null
         ) {
             updateDefault(obj[key], defaultObj[key], override);
         } else if (override) {
@@ -936,7 +934,7 @@ export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
         b = "";
     }
     if (isNaN(Number(a)) === isNaN(Number(b))) {
-    // a and b are (1) both numbers or (2) both non-numbers
+        // a and b are (1) both numbers or (2) both non-numbers
         if (!isNaN(Number(a))) {
             // a and b are both numbers
             a = Number(a);
@@ -944,8 +942,8 @@ export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
         }
         return a === b ? 0 : a < b ? -1 : 1;
     } else {
-    // a and b are of different types
-    // let's say that numbers are smaller than non-numbers
+        // a and b are of different types
+        // let's say that numbers are smaller than non-numbers
         return isNaN(Number(a)) ? 1 : -1;
     }
 }

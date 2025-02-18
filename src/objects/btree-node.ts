@@ -1,6 +1,6 @@
-import {G, Line, Rect, Text} from "@svgdotjs/svg.js";
-import {NBSP} from "../../src/engine";
-import {BTreeConnection} from "./btree-connection";
+import { G, Line, Rect, Text } from "@svgdotjs/svg.js";
+import { NBSP } from "../../src/engine";
+import { BTreeConnection } from "./btree-connection";
 
 export class BTreeNode extends G {
     $parent: BTreeConnection | null = null;
@@ -121,7 +121,7 @@ export class BTreeNode extends G {
             stroke = strokeWidth;
         if (!this.$rect) {
             this.$rect = this.rect(w0 * nvalues, h)
-                .stroke({width: stroke})
+                .stroke({ width: stroke })
                 .center(0, 0);
         }
         this.$rect.width(w0 * Math.max(0.5, nvalues)).radius(h / 4);
@@ -147,7 +147,7 @@ export class BTreeNode extends G {
             const n = (this.$children.length = nvalues + 1);
             for (let i = 0; i < n; i++) {
                 // @ts-expect-error TODO: i and n not on base object and can therefor not be passed in
-                this.$children[i]?.update({i: i, n: n});
+                this.$children[i]?.update({ i: i, n: n });
             }
         }
 
@@ -211,7 +211,7 @@ export class BTreeNode extends G {
     getChildren(): BTreeNode[] {
         return (
             this.$children?.map((e) => e?.getEnd()).filter((e) => e !== undefined) ||
-      []
+            []
         );
     }
 
@@ -330,9 +330,9 @@ export class BTreeNode extends G {
     setCenter(x: number, y: number, animationDuration: number = 0): this {
         super.setCenter(x, y, animationDuration);
         this.$children?.forEach((child) => {
-            child?.update({x1: x, y1: y}, animationDuration);
+            child?.update({ x1: x, y1: y }, animationDuration);
         });
-        this.$parent?.update({x2: x, y2: y}, animationDuration);
+        this.$parent?.update({ x2: x, y2: y }, animationDuration);
         return this;
     }
 
