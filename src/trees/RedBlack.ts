@@ -64,8 +64,8 @@ export class RedBlack extends BST {
             node.setHighlight(true);
             parent.setHighlight(true);
             grandparent.setHighlight(true);
-            await this.pause("rotate.parent", node, side, rotate, parent),
-                node.setHighlight(false);
+            await this.pause("rotate.parent", node, side, rotate, parent);
+            node.setHighlight(false);
             parent.setHighlight(false);
             grandparent.setHighlight(false);
             node = (await this.singleRotate(rotate, parent)).getChild(
@@ -84,11 +84,11 @@ export class RedBlack extends BST {
 
         node.setHighlight(true);
         parent.setHighlight(true);
-        grandparent?.setHighlight(true);
+        grandparent.setHighlight(true);
         await this.pause("rotate.grandparent", node, side, grandparent, rotate);
         node.setHighlight(false);
         parent.setHighlight(false);
-        grandparent?.setHighlight(false);
+        grandparent.setHighlight(false);
         this.colorBlack(parent);
         this.colorRed(grandparent);
         await this.singleRotate(rotate, grandparent as BinaryNode);
@@ -126,11 +126,18 @@ export class RedBlack extends BST {
         const rightChild = parent.getChild(right);
         const rightGrandchild = rightChild?.getChild(right);
         const leftGrandchild = rightChild?.getChild(left);
+
+        if (!rightChild || !leftGrandchild || !rightGrandchild) {
+            throw new Error(
+                "Missing right child, left grand child or right grand child"
+            );
+        }
+
         parent.setHighlight(true);
         await this.pause("balancing.parentImbalanced", parent);
 
         // Sibling is red
-        if (rightChild && this.isRed(rightChild)) {
+        if (this.isRed(rightChild)) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
             await this.pause(
@@ -151,19 +158,19 @@ export class RedBlack extends BST {
         }
 
         // Sibling's distant child is red
-        if (rightGrandchild && this.isRed(rightGrandchild)) {
+        if (this.isRed(rightGrandchild)) {
             parent.setChildHighlight(right, true);
-            rightChild?.setChildHighlight(right, true);
+            rightChild.setChildHighlight(right, true);
             rightGrandchild.setHighlight(true);
             await this.pause("rotate.redDistantChild", right, rightChild, left);
             parent.setChildHighlight(right, false);
-            rightChild?.setChildHighlight(right, false);
+            rightChild.setChildHighlight(right, false);
             rightGrandchild.setHighlight(false);
 
             if (this.isBlack(parent)) {
-                this.colorBlack(rightChild as BinaryNode);
+                this.colorBlack(rightChild);
             } else {
-                this.colorRed(rightChild as BinaryNode);
+                this.colorRed(rightChild);
             }
             this.colorBlack(parent);
             this.colorBlack(rightGrandchild);
@@ -172,7 +179,7 @@ export class RedBlack extends BST {
         }
 
         // Sibling's close child is red
-        if (rightChild && leftGrandchild && this.isRed(leftGrandchild)) {
+        if (this.isRed(leftGrandchild)) {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(left, true);
             leftGrandchild.setHighlight(true);
@@ -191,24 +198,24 @@ export class RedBlack extends BST {
         // Parent is red
         if (this.isRed(parent)) {
             parent.setChildHighlight(right, true);
-            rightChild?.setHighlight(true);
+            rightChild.setHighlight(true);
             await this.pause("color.switch", parent, right, rightChild);
             parent.setChildHighlight(right, false);
-            rightChild?.setHighlight(false);
+            rightChild.setHighlight(false);
 
             this.colorBlack(parent);
-            this.colorRed(rightChild as BinaryNode);
+            this.colorRed(rightChild);
             return;
         }
 
         // All are black
         parent.setChildHighlight(right, true);
-        rightChild?.setHighlight(true);
+        rightChild.setHighlight(true);
         await this.pause("color.childRed", parent, right, rightChild);
         parent.setChildHighlight(right, false);
-        rightChild?.setHighlight(false);
+        rightChild.setHighlight(false);
 
-        this.colorRed(rightChild as BinaryNode);
+        this.colorRed(rightChild);
         const grandparent = parent.getParent();
         if (grandparent) {
             const direction =

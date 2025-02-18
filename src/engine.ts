@@ -31,6 +31,9 @@ export interface MessagesObject {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
+// Non-breaking space:
+export const NBSP = "\u00A0";
+
 export class Engine {
     // Default variable names start with $
 
@@ -82,16 +85,11 @@ export class Engine {
         animating: false,
     };
 
-    Info: {
-        title: Text | undefined;
-        body: Text | undefined;
-        printer: Text | undefined;
-        status: Text | undefined;
-    } = {
-        title: undefined,
-        body: undefined,
-        printer: undefined,
-        status: undefined,
+    info: {
+        title: Text;
+        body: Text;
+        printer: Text;
+        status: Text;
     };
 
     EventListeners: Record<string, Partial<Record<Listeners, () => void>>> = {
@@ -178,6 +176,34 @@ export class Engine {
         if (this.DEBUG) {
             this.Svg.addClass("debug");
         }
+
+        this.info = this.getInfoTexts();
+    }
+
+    getInfoTexts() {
+        const margin = this.$Svg.margin;
+        const h = this.Svg.viewbox().height;
+
+        const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
+        const body = this.Svg.text(NBSP)
+            .addClass("message")
+            .x(margin)
+            .y(2 * margin);
+        const printer = this.Svg.text(NBSP)
+            .addClass("printer")
+            .x(margin)
+            .cy(h - 2 * margin);
+        const status = this.Svg.text(NBSP)
+            .addClass("status-report")
+            .x(margin)
+            .cy(h - margin);
+
+        return {
+            title,
+            body,
+            printer,
+            status,
+        };
     }
 
     getToolbar(): EngineToolbarItems {
@@ -293,6 +319,7 @@ export class Engine {
 
     clearCanvas(): void {
         this.Svg.clear();
+
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
         if (this.DEBUG) {
@@ -303,23 +330,8 @@ export class Engine {
                 this.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
             }
         }
-        const margin = this.$Svg.margin;
-        this.Info.title = this.Svg.text(NBSP)
-            .addClass("title")
-            .x(margin)
-            .y(margin);
-        this.Info.body = this.Svg.text(NBSP)
-            .addClass("message")
-            .x(margin)
-            .y(2 * margin);
-        this.Info.printer = this.Svg.text(NBSP)
-            .addClass("printer")
-            .x(margin)
-            .cy(h - 2 * margin);
-        this.Info.status = this.Svg.text(NBSP)
-            .addClass("status-report")
-            .x(margin)
-            .cy(h - margin);
+
+        this.info = this.getInfoTexts();
         this.updateCSSVariables();
     }
 
@@ -334,10 +346,7 @@ export class Engine {
     }
 
     setStatus(status: "running" | "paused" | "inactive", timeout = 10): void {
-        const currentStatus = this.Info.status;
-        if (currentStatus === undefined) {
-            return;
-        }
+        const currentStatus = this.info.status;
 
         setTimeout(() => {
             if (status === "running") {
@@ -360,13 +369,8 @@ export class Engine {
     }
 
     setIdleTitle(): void {
-        // TODO: Perhaps add errors if not found
-        if (this.Info.title !== undefined) {
-            this.Info.title.text("Select an action from the menu above");
-        }
-        if (this.Info.body !== undefined) {
-            this.Info.body.text(NBSP);
-        }
+        this.info.title.text("Select an action from the menu above");
+        this.info.body.text(NBSP);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -659,7 +663,7 @@ export class Engine {
                     )}`
                 );
             }
-            this.Info.title?.text(message);
+            this.info.title.text(message);
             await this.pause("");
             if (
                 !(
@@ -691,8 +695,8 @@ export class Engine {
         if (this.State.resetting) {
             return null;
         }
-        if (title !== null && this.Info.body !== undefined) {
-            this.Info.body.text(title);
+        if (title !== null) {
+            this.info.body.text(title);
         }
         return new Promise((resolve, reject) => {
             const action = this.actions[this.CurrentAction];
@@ -970,9 +974,6 @@ export function modulo(n: number, d: number): number {
     const rem = n % d;
     return rem < 0 ? rem + d : rem;
 }
-
-// Non-breaking space:
-export const NBSP = "\u00A0";
 
 export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
     // We use non-breaking space as a proxy for the empty string,

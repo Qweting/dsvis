@@ -74,8 +74,8 @@ export class AVLQuiz extends BST {
                 : unbalanced
                 ? "Tree is unbalanced!"
                 : "Tree is a correct AVL tree";
-        this.Info.title?.text(message);
-        this.Info.body?.text(NBSP);
+        this.info.title.text(message);
+        this.info.body.text(NBSP);
     }
 
     newNode(text: string) {

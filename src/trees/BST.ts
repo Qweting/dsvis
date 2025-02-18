@@ -352,7 +352,7 @@ export class BST extends Engine {
             await this.pause("general.empty");
             return;
         }
-        const { x, y } = this.Info.printer?.bbox() || { x: 0, y: 0 };
+        const { x, y } = this.info.printer.bbox();
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
