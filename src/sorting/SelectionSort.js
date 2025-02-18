@@ -58,6 +58,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
 
     async sort() {
+        await this.pause('general.finished');
         if (this.sortSize <= 1) {
             await this.pause('general.empty');
             return;
@@ -69,7 +70,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
                 this.heapArray.setIndexHighlight(j, true);
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(minIndex));
                 if (this.heapArray.getValue(j) < this.heapArray.getValue(minIndex)) {
-                    await this.pause('sort.foundMin', this.heapArray.setIndexHighlight(minIndex, false));
+                    await this.pause('sort.foundNewMin', this.heapArray.setIndexHighlight(minIndex, false));
                     minIndex = j;
                 } else {
                     this.heapArray.setIndexHighlight(j, false);
@@ -95,18 +96,14 @@ DSVis.BinaryHeap.messages = {
     },
     insert: {
         value: (value) => `Insert value: ${value}`,
-        shiftUp: "Shift the value upwards",
-        stopShift: (parentValue) => `The parent ${parentValue} is not larger: stop here`,
-        shiftAgain: (parentValue) => `The parent ${parentValue} is larger`,
     },
     sort: {
         compare: (a, b) => `Compare ${a} and ${b}`,
         swap: (a, b) => `Swap ${a} and ${b}`,
-        foundMin:(a) => `Found a smaller value ${a}`,
+        foundNewMin:(a) => `Found a smaller value ${a}`,
     },
     swap: {
         swap: (a, b) => `Swap ${a} and ${b}`,
-        lastToFirst: (val) => `Swap in the last heap value to the first position: ${val}`,
     },
 };
 

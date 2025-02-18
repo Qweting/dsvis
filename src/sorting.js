@@ -41,6 +41,6 @@ function initialisePrioQueues(containerID) {
     });
     DSVis.addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
-    tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", tools.sort));
+    tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", tools.sortSubmit));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
 }
