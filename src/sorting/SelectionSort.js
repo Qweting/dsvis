@@ -28,7 +28,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
     async swap(j, k, message, ...args) {
         this.heapArray.swap(j, k, true);
-        await this.pause(message, ...args);
+        this.heapArray.setIndexHighlight(j, true);
     }
 
     async insertOne(value) {
@@ -58,7 +58,6 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
 
     async sort() {
-        await this.pause('general.finished');
         if (this.sortSize <= 1) {
             await this.pause('general.empty');
             return;
@@ -66,26 +65,44 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
         for (let i = 0; i < this.sortSize - 1; i++) {
             let minIndex = i;
+
+            // Find the index of the minimum element in the unsorted part of the array
             for (let j = i + 1; j < this.sortSize; j++) {
                 this.heapArray.setIndexHighlight(j, true);
+                this.heapArray.setIndexHighlight(minIndex, true);
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(minIndex));
                 if (this.heapArray.getValue(j) < this.heapArray.getValue(minIndex)) {
-                    await this.pause('sort.foundNewMin', this.heapArray.setIndexHighlight(minIndex, false));
+                    this.heapArray.setIndexHighlight(minIndex, false);
                     minIndex = j;
+                    await this.pause('sort.foundNewMin', this.heapArray.getValue(minIndex));
                 } else {
                     this.heapArray.setIndexHighlight(j, false);
                 }
+                this.heapArray.setIndexHighlight(j, false);
+                this.heapArray.setIndexHighlight(minIndex, false);
             }
-
+            // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {
                 await this.swap(i, minIndex, 'sort.swap', this.heapArray.getValue(i), this.heapArray.getValue(minIndex));
             }
+            // Highlight the sorted part of the array
+            this.heapArray.setIndexHighlight(i, true);
         }
-
+        this.heapArray.setIndexHighlight(this.sortSize-1, true);
         await this.pause('general.finished');
+
+        // Reset the highlights
+        for (let i = 0; i < this.sortSize; i++) {
+            this.heapArray.setIndexHighlight(i, false);
+        }
     }
 
+    
+
 };
+
+
+
 
 
 DSVis.BinaryHeap.messages = {
@@ -101,9 +118,6 @@ DSVis.BinaryHeap.messages = {
         compare: (a, b) => `Compare ${a} and ${b}`,
         swap: (a, b) => `Swap ${a} and ${b}`,
         foundNewMin:(a) => `Found a smaller value ${a}`,
-    },
-    swap: {
-        swap: (a, b) => `Swap ${a} and ${b}`,
     },
 };
 
