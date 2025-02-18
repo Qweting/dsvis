@@ -29,6 +29,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
     async swap(j, k, message, ...args) {
         this.heapArray.swap(j, k, true);
         this.heapArray.setIndexHighlight(j, true);
+        await this.pause(message, ...args);
     }
 
     async insertOne(value) {
@@ -105,7 +106,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
 
 
-DSVis.BinaryHeap.messages = {
+DSVis.SelectionSort.messages = {
     general: {
         empty: "Heap is empty!",
         full: "Heap is full!",
