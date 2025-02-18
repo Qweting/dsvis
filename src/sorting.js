@@ -32,7 +32,7 @@ function initialisePrioQueues(containerID) {
     tools.insertSelect = container.querySelector(".insertSelect");
     tools.insertField = container.querySelector(".insertField");
     tools.insertSubmit = container.querySelector(".insertSubmit");
-    tools.deleteSubmit = container.querySelector(".deleteSubmit");
+    tools.sortSubmit = container.querySelector(".sortSubmit");
     tools.clearSubmit = container.querySelector(".clearSubmit");
 
     tools.insertSelect.addEventListener("change", () => {
@@ -41,6 +41,6 @@ function initialisePrioQueues(containerID) {
     });
     DSVis.addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
-    tools.deleteSubmit.addEventListener("click", () => PQEngine.submit("sort", tools.sort));
+    tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", tools.sort));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
 }
