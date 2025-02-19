@@ -29,7 +29,7 @@ declare module "@svgdotjs/svg.js" {
         highlightCircle(
             x: number,
             y: number,
-            radius: number,
+            size: number,
             strokeWidth: number
         ): HighlightCircle;
         textCircle(
@@ -132,10 +132,10 @@ extend(Element, {
 });
 
 extend(Container, {
-    highlightCircle(x: number, y: number, radius: number, strokeWidth: number) {
+    highlightCircle(x: number, y: number, size: number, strokeWidth: number) {
         return (this as Container)
             .put(new HighlightCircle())
-            .init(x, y, radius, strokeWidth);
+            .init(x, y, size, strokeWidth);
     },
     textCircle(
         text: string,
