@@ -36,6 +36,17 @@ function initialiseCollections(containerID: string) {
         throw new Error("Could not find algo selector");
     }
 
+    let algo = new URL(window.location.href).searchParams.get("algorithm");
+    if (!(algo && /^[\w.]+$/.test(algo) && algo in COLLECTIONS)) {
+        algo = "";
+    }
+    const algoClass = algo as keyof typeof COLLECTIONS | "";
+    algoSelector.value = algo;
+
+    const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
+    const CollectionEngine = new Collection(containerID);
+    CollectionEngine.initialise();
+
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
@@ -55,17 +66,6 @@ function initialiseCollections(containerID: string) {
         window.history.replaceState("", "", url);
         window.location.reload();
     });
-
-    let algo = new URL(window.location.href).searchParams.get("algorithm");
-    if (!(algo && /^[\w.]+$/.test(algo) && algo in COLLECTIONS)) {
-        algo = "";
-    }
-    const algoClass = algo as keyof typeof COLLECTIONS | "";
-    algoSelector.value = algo;
-
-    const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
-    const CollectionEngine = new Collection(containerID);
-    CollectionEngine.initialise();
 
     const toolbar = getCollectionsToolbar(CollectionEngine.container);
 

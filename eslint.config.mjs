@@ -23,7 +23,8 @@ export default tseslint.config(
             "no-unmodified-loop-condition": ["error"],
             "no-unreachable-loop": ["error"],
 
-            "no-use-before-define": ["error", {
+            "no-use-before-define": "off",
+            "@typescript-eslint/no-use-before-define":["error", {
                 classes: false,
                 functions: false,
             }],
@@ -43,7 +44,8 @@ export default tseslint.config(
             }],
 
             "default-param-last": ["warn"],
-            "no-shadow": ["warn"],
+            "no-shadow": "off",
+            "@typescript-eslint/no-shadow": "warn",
             "prefer-template": ["warn"],
 
             "curly": ["error", "all"],

@@ -16,6 +16,18 @@ function initialisePrioQueues(containerID: string) {
         throw new Error("Could not find algo selector");
     }
 
+    let algo = new URL(window.location.href).searchParams.get("algorithm");
+    if (!(algo && /^[\w.]+$/.test(algo) && algo in PRIOQUEUES)) {
+        algo = "";
+    }
+
+    const algoClass = algo as keyof typeof PRIOQUEUES | "";
+    algoSelector.value = algo;
+
+    const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Engine;
+    const PQEngine = new PrioQueue(containerID);
+    PQEngine.initialise();
+
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
@@ -35,18 +47,6 @@ function initialisePrioQueues(containerID: string) {
         window.history.replaceState("", "", url);
         window.location.reload();
     });
-
-    let algo = new URL(window.location.href).searchParams.get("algorithm");
-    if (!(algo && /^[\w.]+$/.test(algo) && algo in PRIOQUEUES)) {
-        algo = "";
-    }
-
-    const algoClass = algo as keyof typeof PRIOQUEUES | "";
-    algoSelector.value = algo;
-
-    const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Engine;
-    const PQEngine = new PrioQueue(containerID);
-    PQEngine.initialise();
 
     const container = PQEngine.container;
     const tools = getPrioQueuesToolbar(container);

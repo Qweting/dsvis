@@ -262,7 +262,9 @@ export class BinaryNode extends GraphNode {
         }
         binaryDirs.map((c) => {
             const child = this.$outgoing[c]?.getEnd();
-            if (!child) return;
+            if (!child) {
+                return;
+            }
             if (child.$incoming.parent?.getStart() !== this) {
                 console.error(`${c} child mismatch`);
             }
