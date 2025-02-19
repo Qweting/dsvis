@@ -6,13 +6,17 @@ const binaryDirs = ["left", "right"] as const;
 type BinaryDir = (typeof binaryDirs)[number];
 
 export type Children = "left" | "right";
-export class BinaryNode extends GraphNode {
-    $incoming: { parent: Connection<BinaryNode> | null } = {
+
+export class BinaryNode<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Node extends BinaryNode<Node> = any
+> extends GraphNode<BinaryNode> {
+    $incoming: { parent: Connection<Node> | null } = {
         parent: null,
     };
     $outgoing: {
-        left: Connection<BinaryNode> | null;
-        right: Connection<BinaryNode> | null;
+        left: Connection<Node> | null;
+        right: Connection<Node> | null;
     } = {
         left: null,
         right: null,
@@ -60,43 +64,45 @@ export class BinaryNode extends GraphNode {
         return this.$edgebends[c];
     }
 
-    getParent(): BinaryNode | null {
+    getParent(): Node | null {
         return this.$incoming.parent?.getStart() || null;
     }
 
-    getLeft(): BinaryNode | null {
+    getLeft(): Node | null {
         return this.$outgoing.left?.getEnd() || null;
     }
 
-    getRight(): BinaryNode | null {
+    getRight(): Node | null {
         return this.$outgoing.right?.getEnd() || null;
     }
 
-    getChild(c: Children): BinaryNode | null {
+    getChild(c: Children): Node | null {
         return this.$outgoing[c]?.getEnd() || null;
     }
 
-    getSibling(): BinaryNode | null {
+    getSibling(): Node | null {
         const parent = this.getParent();
         if (!parent) {
             return null;
         }
-        return this === parent.getLeft() ? parent.getRight() : parent.getLeft();
+        return (this as unknown as Node) === parent.getLeft()
+            ? parent.getRight()
+            : parent.getLeft();
     }
 
-    getParentEdge(): Connection<BinaryNode> | null {
+    getParentEdge(): Connection<Node> | null {
         return this.$incoming.parent;
     }
 
-    getLeftEdge(): Connection<BinaryNode> | null {
+    getLeftEdge(): Connection<Node> | null {
         return this.$outgoing.left;
     }
 
-    getRightEdge(): Connection<BinaryNode> | null {
+    getRightEdge(): Connection<Node> | null {
         return this.$outgoing.right;
     }
 
-    getChildEdge(c: Children): Connection<BinaryNode> | null {
+    getChildEdge(c: Children): Connection<Node> | null {
         return this.$outgoing[c];
     }
 
@@ -105,15 +111,15 @@ export class BinaryNode extends GraphNode {
     }
 
     isLeftChild(): boolean {
-        return this === this.getParent()?.getLeft();
+        return (this as unknown as Node) === this.getParent()?.getLeft();
     }
 
     isRightChild(): boolean {
-        return this === this.getParent()?.getRight();
+        return (this as unknown as Node) === this.getParent()?.getRight();
     }
 
     isChild(c: Children): boolean {
-        return this === this.getParent()?.getChild(c);
+        return (this as unknown as Node) === this.getParent()?.getChild(c);
     }
 
     setLeft(child: BinaryNode, strokeWidth: number): this {
@@ -243,7 +249,7 @@ export class BinaryNode extends GraphNode {
         const parent = this.$incoming.parent?.getStart();
         if (parent) {
             const c = this.isLeftChild() ? "left" : "right";
-            if (parent.$outgoing[c]?.getEnd() !== this) {
+            if (parent.$outgoing[c]?.getEnd() !== (this as unknown as Node)) {
                 console.error("Parent mismatch");
             }
             let n = 0;
@@ -265,7 +271,9 @@ export class BinaryNode extends GraphNode {
             if (!child) {
                 return;
             }
-            if (child.$incoming.parent?.getStart() !== this) {
+            if (
+                child.$incoming.parent?.getStart() !== (this as unknown as Node)
+            ) {
                 console.error(`${c} child mismatch`);
             }
             let n = 0;

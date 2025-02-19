@@ -2,9 +2,10 @@ import { find, Path, Rect } from "@svgdotjs/svg.js";
 import { Connection } from "./connection";
 import { TextCircle } from "./text-circle";
 
-export class GraphNode extends TextCircle {
-    $incoming: Record<string, Connection<GraphNode> | null> = {};
-    $outgoing: Record<string, Connection<GraphNode> | null> = {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class GraphNode<Node extends GraphNode<Node> = any> extends TextCircle {
+    $incoming: Record<string, Connection<Node> | null> = {};
+    $outgoing: Record<string, Connection<Node> | null> = {};
     $nullary: Record<string, Path | null> = {};
     $rect: Rect;
 
@@ -29,56 +30,61 @@ export class GraphNode extends TextCircle {
         return true;
     }
 
-    getIncoming(inKey: string): Connection<GraphNode> | null {
+    getIncoming(inKey: string): Connection<Node> | null {
         return this.$incoming[inKey];
     }
 
-    getOutgoing(outKey: string): Connection<GraphNode> | null {
+    getOutgoing(outKey: string): Connection<Node> | null {
         return this.$outgoing[outKey];
     }
 
-    getIncomingEdges(): Connection<GraphNode>[] {
+    getIncomingEdges(): Connection<Node>[] {
         return Object.values(this.$incoming).filter((e) => e !== null);
     }
 
-    getOutgoingEdges(): Connection<GraphNode>[] {
+    getOutgoingEdges(): Connection<Node>[] {
         return Object.values(this.$outgoing).filter((e) => e !== null);
     }
 
-    getPredecessors(): GraphNode[] {
+    getPredecessors(): Node[] {
         return Object.values(this.$incoming)
             .map((e) => e?.getStart())
             .filter((e) => e !== undefined);
     }
 
-    getSuccessors(): GraphNode[] {
+    getSuccessors(): Node[] {
         return Object.values(this.$outgoing)
             .map((e) => e?.getEnd())
             .filter((e) => e !== undefined);
     }
 
-    getPredecessor(inKey: string): GraphNode | null {
+    getPredecessor(inKey: string): Node | null {
         return this.$incoming[inKey]?.getStart() || null;
     }
 
-    getSuccessor(outKey: string): GraphNode | null {
+    getSuccessor(outKey: string): Node | null {
         return this.$outgoing[outKey]?.getEnd() || null;
     }
 
     setPredecessor(
         inKey: string,
         outKey: string,
-        predecessor: GraphNode,
+        predecessor: Node,
         strokeWidth: number
     ): this {
-        predecessor.setSuccessor(outKey, inKey, this, strokeWidth);
+        predecessor.setSuccessor(
+            outKey,
+            inKey,
+            this as unknown as Node,
+            strokeWidth
+        );
         return this;
     }
 
     setSuccessor(
         outKey: string,
         inKey: string,
-        successor: GraphNode | null,
+        successor: Node | null,
         strokeWidth: number
     ): this {
         const outEdge = this.$outgoing[outKey];
@@ -104,8 +110,8 @@ export class GraphNode extends TextCircle {
                 }
                 inEdge.remove();
             }
-            const edge = this.root().connection(
-                this,
+            const edge = this.root().connection<Node>(
+                this as unknown as Node,
                 successor,
                 strokeWidth,
                 this.getBend(outKey),

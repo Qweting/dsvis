@@ -63,11 +63,11 @@ export const BSTMessages = {
     },
 };
 
-export class BST extends Engine {
+export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     messages: MessagesObject = BSTMessages;
 
     initialValues: (string | number)[] = [];
-    treeRoot: BinaryNode | null = null;
+    treeRoot: Node | null = null;
 
     toolbar!: BSTToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
@@ -162,7 +162,7 @@ export class BST extends Engine {
 
     async find(value: string | number): Promise<{
         success: boolean;
-        node: BinaryNode | null;
+        node: Node | null;
     }> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
@@ -182,15 +182,15 @@ export class BST extends Engine {
     async findHelper(value: string | number): Promise<
         | {
               success: true;
-              node: BinaryNode;
+              node: Node;
           }
         | {
               success: false;
-              node: BinaryNode | null;
+              node: Node | null;
           }
     > {
-        let parent: BinaryNode | null = null;
-        let node: BinaryNode | null = this.treeRoot;
+        let parent: Node | null = null;
+        let node: Node | null = this.treeRoot;
         const pointer = this.Svg.highlightCircle(
             node?.cx() || 0,
             node?.cy() || 0,
@@ -226,10 +226,10 @@ export class BST extends Engine {
     // TODO: Could be changed to only return the success part
     async insertOne(value: string): Promise<{
         success: boolean;
-        node: BinaryNode | null;
+        node: Node | null;
     }> {
         if (!this.treeRoot) {
-            this.treeRoot = this.newNode(value);
+            this.treeRoot = this.newNode(value) as Node;
             await this.pause("insert.newroot", value);
             this.resizeTree();
             await this.pause(undefined);
@@ -244,7 +244,7 @@ export class BST extends Engine {
             found.node?.setHighlight(false);
             return { success: false, node: found.node };
         }
-        const child = this.newNode(value);
+        const child = this.newNode(value) as Node;
         const cmp = compare(value, found.node?.getText() || "");
         const direction = cmp < 0 ? "left" : "right";
         found.node?.setChild(direction, child, this.getStrokeWidth());
@@ -262,7 +262,7 @@ export class BST extends Engine {
     async delete(value: string | number): Promise<{
         success: boolean;
         direction: "left" | "right" | null;
-        parent: BinaryNode | null;
+        parent: Node | null;
     } | null> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
@@ -285,10 +285,10 @@ export class BST extends Engine {
         return await this.deleteHelper(found.node);
     }
 
-    async deleteHelper(node: BinaryNode | null): Promise<{
+    async deleteHelper(node: Node | null): Promise<{
         success: boolean;
         direction: "left" | "right" | null;
-        parent: BinaryNode | null;
+        parent: Node | null;
     }> {
         if (!(node?.getLeft() && node?.getRight())) {
             return await this.deleteNode(node);
@@ -341,10 +341,10 @@ export class BST extends Engine {
         return await this.deleteNode(predecessor);
     }
 
-    async deleteNode(node: BinaryNode | null | undefined): Promise<{
+    async deleteNode(node: Node | null | undefined): Promise<{
         success: boolean;
         direction: "left" | "right" | null;
-        parent: BinaryNode | null;
+        parent: Node | null;
     }> {
         // The node will NOT have two children - this has been taken care of by deleteHelper
         const child = node?.getLeft() || node?.getRight();
@@ -420,7 +420,7 @@ export class BST extends Engine {
     }
 
     async printHelper(
-        node: BinaryNode,
+        node: Node,
         pointer: HighlightCircle,
         printed: Text[]
     ): Promise<void> {
@@ -460,10 +460,7 @@ export class BST extends Engine {
         // This is implemented by, e.g., AVL trees
     }
 
-    async doubleRotate<Node extends BinaryNode>(
-        firstDir: "left" | "right",
-        node: Node
-    ): Promise<Node> {
+    async doubleRotate(firstDir: "left" | "right", node: Node): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
@@ -477,10 +474,7 @@ export class BST extends Engine {
         return await this.singleRotate(firstDir, node);
     }
 
-    async singleRotate<Node extends BinaryNode>(
-        firstDir: "left" | "right",
-        node: Node
-    ): Promise<Node> {
+    async singleRotate(firstDir: "left" | "right", node: Node): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         // So, if left==="right", then we rotate right.
         const secondDir = firstDir === "left" ? "right" : "left";

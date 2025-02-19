@@ -3,10 +3,9 @@ import { AVLNode } from "../../src/objects/avl-node";
 import { Children } from "../../src/objects/binary-node";
 import { BST } from "../../src/trees/BST";
 
-export class AVLQuiz extends BST {
+export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
-    treeRoot: AVLNode | null = null;
 
     async resetAlgorithm() {
         await super.resetAlgorithm();

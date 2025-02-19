@@ -1,7 +1,7 @@
 import { Text } from "@svgdotjs/svg.js";
-import { BinaryNode, Children } from "./binary-node";
+import { BinaryNode } from "./binary-node";
 
-export class AVLNode extends BinaryNode {
+export class AVLNode extends BinaryNode<AVLNode> {
     $height: Text;
 
     constructor(text: string, size: number, strokeWidth: number) {
@@ -48,22 +48,5 @@ export class AVLNode extends BinaryNode {
     setHeightHighlight(high: boolean | null): this {
         this.$height.setHighlight(high);
         return this;
-    }
-
-    // Retyping of functions
-    getParent(): AVLNode | null {
-        return super.getParent() as AVLNode | null;
-    }
-
-    getChild(c: Children): AVLNode | null {
-        return super.getChild(c) as AVLNode | null;
-    }
-
-    getLeft(): AVLNode | null {
-        return super.getLeft() as AVLNode | null;
-    }
-
-    getRight(): AVLNode | null {
-        return super.getRight() as AVLNode | null;
     }
 }
