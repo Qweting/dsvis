@@ -6,9 +6,11 @@ import { BST } from "../../src/trees/BST";
 export class AVLQuiz extends BST {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
+    treeRoot: AVLNode | null = null;
+
     async resetAlgorithm() {
         await super.resetAlgorithm();
-        await this.setCurrent(this.treeRoot as AVLNode | null, false);
+        await this.setCurrent(this.treeRoot, false);
         this.mark = null;
     }
 
@@ -19,7 +21,7 @@ export class AVLQuiz extends BST {
     isBST() {
         try {
             this._validateBST(
-                this.treeRoot as AVLNode | null,
+                this.treeRoot,
                 "" //Number.MIN_SAFE_INTEGER
             );
         } catch (error) {
@@ -37,7 +39,7 @@ export class AVLQuiz extends BST {
         if (!node) {
             return min;
         }
-        const left = node.getLeft() as AVLNode | null;
+        const left = node.getLeft();
         if (left) {
             min = this._validateBST(left, min);
         }
@@ -45,7 +47,7 @@ export class AVLQuiz extends BST {
             throw new Error(`Order mismatch: ${min} > ${node.getText()}`);
         }
         min = node.getText();
-        const right = node.getRight() as AVLNode | null;
+        const right = node.getRight();
         if (right) {
             min = this._validateBST(right, min);
         }
@@ -109,7 +111,7 @@ export class AVLQuiz extends BST {
     }
 
     async moveParent() {
-        const parent = this.current?.getParent() as AVLNode | null;
+        const parent = this.current?.getParent();
         if (!parent) {
             await this.pause("The root node doesn't have a parent!");
             return;
@@ -118,10 +120,7 @@ export class AVLQuiz extends BST {
     }
 
     async moveChild(direction: Children) {
-        const child = this.current?.getChild(direction) as
-            | AVLNode
-            | undefined
-            | null;
+        const child = this.current?.getChild(direction);
         if (!child) {
             await this.pause(`There is no ${direction} child!`);
             return;
@@ -210,7 +209,7 @@ export class AVLQuiz extends BST {
             await this.pause("Not a leaf node!");
             return;
         }
-        const parent = this.current.getParent() as AVLNode | null;
+        const parent = this.current.getParent();
         if (!parent) {
             await this.pause("Cannot remove the root!");
             return;
@@ -234,29 +233,23 @@ export class AVLQuiz extends BST {
             );
             return;
         }
-        const node = (await this.singleRotate(
-            direction,
-            this.current
-        )) as AVLNode;
+        const node = await this.singleRotate(direction, this.current);
         await this.setCurrent(node, false);
         await this.pause("Updating heights");
         this.updateHeights();
     }
 
     updateHeights() {
-        this.updateHeightsHelper(this.treeRoot as AVLNode | null);
+        this.updateHeightsHelper(this.treeRoot);
     }
 
     updateHeightsHelper(node: AVLNode | null): number {
         if (!node) {
             return 0;
         }
-        const leftHeight = this.updateHeightsHelper(
-            node.getLeft() as AVLNode | null
-        );
-        const rightHeight = this.updateHeightsHelper(
-            node.getRight() as AVLNode | null
-        );
+        const leftHeight = this.updateHeightsHelper(node.getLeft());
+        const rightHeight = this.updateHeightsHelper(node.getRight());
+
         const height = 1 + Math.max(leftHeight, rightHeight);
         node.setHeight(height);
         const unbalanced = Math.abs(leftHeight - rightHeight) > 1;

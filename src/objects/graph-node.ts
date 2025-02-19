@@ -78,7 +78,7 @@ export class GraphNode extends TextCircle {
     setSuccessor(
         outKey: string,
         inKey: string,
-        successor: GraphNode,
+        successor: GraphNode | null,
         strokeWidth: number
     ): this {
         const outEdge = this.$outgoing[outKey];

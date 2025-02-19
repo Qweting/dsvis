@@ -124,7 +124,7 @@ export class BinaryNode extends GraphNode {
         return this.setChild("right", child, strokeWidth);
     }
 
-    setChild(c: Children, child: BinaryNode, strokeWidth: number): this {
+    setChild(c: Children, child: BinaryNode | null, strokeWidth: number): this {
         return this.setSuccessor(c, "parent", child, strokeWidth);
     }
 

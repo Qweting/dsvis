@@ -460,10 +460,10 @@ export class BST extends Engine {
         // This is implemented by, e.g., AVL trees
     }
 
-    async doubleRotate(
+    async doubleRotate<Node extends BinaryNode>(
         firstDir: "left" | "right",
-        node: BinaryNode
-    ): Promise<BinaryNode> {
+        node: Node
+    ): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
@@ -477,22 +477,22 @@ export class BST extends Engine {
         return await this.singleRotate(firstDir, node);
     }
 
-    async singleRotate(
+    async singleRotate<Node extends BinaryNode>(
         firstDir: "left" | "right",
-        node: BinaryNode
-    ): Promise<BinaryNode> {
+        node: Node
+    ): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         // So, if left==="right", then we rotate right.
         const secondDir = firstDir === "left" ? "right" : "left";
 
         const A = node;
-        const B = A.getChild(secondDir);
+        const B = A.getChild(secondDir) as Node | null;
 
         if (B === undefined || B === null) {
             throw new Error("Invalid B node in singleRotate");
         }
 
-        const C = B.getChild(firstDir);
+        const C = B.getChild(firstDir) as Node | null;
 
         A.setChildHighlight(secondDir, true);
         B?.setHighlight(true);
@@ -505,7 +505,7 @@ export class BST extends Engine {
         } else {
             this.treeRoot = B;
         }
-        A.setChild(secondDir, C as BinaryNode, this.getStrokeWidth());
+        A.setChild(secondDir, C, this.getStrokeWidth());
         B.setChild(firstDir, A, this.getStrokeWidth());
 
         B.setChildHighlight(firstDir, true);

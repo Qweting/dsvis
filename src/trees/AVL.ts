@@ -25,7 +25,7 @@ export class AVL extends BST {
         );
     }
 
-    getHeight(node: AVLNode | null) {
+    getHeight(node: AVLNode | null | undefined) {
         return node ? node.getHeight() : 0;
     }
 
@@ -33,26 +33,29 @@ export class AVL extends BST {
         success: boolean;
         node: AVLNode | null;
     }> {
-        const result = await super.insertOne(value);
-        if (result.success && result.node) {
-            (result.node as AVLNode).updateHeightPosition();
-            await this.updateHeights(result.node as AVLNode, undefined);
-            await this.updateHeightPositions();
-        }
-        return result as {
+        const result = (await super.insertOne(value)) as {
             success: boolean;
             node: AVLNode | null;
         };
+
+        if (result.success && result.node) {
+            result.node.updateHeightPosition();
+            await this.updateHeights(result.node, undefined);
+            await this.updateHeightPositions();
+        }
+        return result;
     }
 
     async delete(value: string | number) {
-        const result = await super.delete(value);
+        const result = (await super.delete(value)) as {
+            success: boolean;
+            direction: "left" | "right" | null;
+            parent: AVLNode | null;
+        } | null;
+
         if (result?.success) {
             if (result.parent) {
-                await this.updateHeights(
-                    result.parent as AVLNode,
-                    result.direction
-                );
+                await this.updateHeights(result.parent, result.direction);
             }
             await this.updateHeightPositions();
         }
@@ -88,8 +91,8 @@ export class AVL extends BST {
                 this.getAnimationSpeed()
             );
             await this.pause("node.updateHeight");
-            const leftHeight = this.getHeight(node.getLeft() as AVLNode | null),
-                rightHeight = this.getHeight(node.getRight() as AVLNode | null);
+            const leftHeight = this.getHeight(node.getLeft()),
+                rightHeight = this.getHeight(node.getRight());
 
             const height = 1 + Math.max(leftHeight, rightHeight);
 
@@ -101,32 +104,32 @@ export class AVL extends BST {
             }
 
             node = await this.rebalance(node);
-            node = node.getParent() as AVLNode | null;
+            node = node.getParent();
         }
         this.pointer.remove();
     }
 
     async rebalance(node: AVLNode) {
-        const leftHeight = this.getHeight(node.getLeft() as AVLNode | null),
-            rightHeight = this.getHeight(node.getRight() as AVLNode | null);
+        const leftHeight = this.getHeight(node.getLeft());
+        const rightHeight = this.getHeight(node.getRight());
+
         if (Math.abs(leftHeight - rightHeight) <= 1) {
             return node;
         }
+
         await this.pause("node.unbalanced");
+
         const left = leftHeight < rightHeight ? "left" : "right";
         const right = left === "left" ? "right" : "left";
+
         const child = node.getChild(right);
-        const childLeft = this.getHeight(
-                child?.getChild(left) as AVLNode | null
-            ),
-            childRight = this.getHeight(
-                child?.getChild(right) as AVLNode | null
-            );
+        const childLeft = this.getHeight(child?.getChild(left)),
+            childRight = this.getHeight(child?.getChild(right));
         this.pointer?.hide();
         if (childLeft <= childRight) {
-            node = (await this.singleRotate(left, node)) as AVLNode;
+            node = await this.singleRotate(left, node);
         } else {
-            node = (await this.doubleRotate(left, node)) as AVLNode;
+            node = await this.doubleRotate(left, node);
         }
         this.pointer = this.Svg.highlightCircle(
             node.cx(),
@@ -145,9 +148,10 @@ export class AVL extends BST {
         const height =
             1 +
             Math.max(
-                this.getHeight(node.getLeft() as AVLNode),
-                this.getHeight(node.getRight() as AVLNode)
+                this.getHeight(node.getLeft()),
+                this.getHeight(node.getRight())
             );
+
         if (height !== this.getHeight(node)) {
             node.setHeight(height);
         }
