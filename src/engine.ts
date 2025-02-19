@@ -868,12 +868,28 @@ export function parseValues(
     return values.map((v) => normalizeNumber(v));
 }
 
+type AllowedCharacters =
+    | "int"
+    | "int+"
+    | "float"
+    | "float+"
+    | "ALPHA"
+    | "ALPHA+"
+    | "alpha"
+    | "alpha+"
+    | "ALPHANUM"
+    | "ALPHANUM+"
+    | "alphanum"
+    | "alphanum+";
+
+// Adds "return-to-submit" functionality to a text input field - performs action when the user presses Enter
+// Additionally restricts input to the defined allowed characters (with + meaning spaces are allowed)
 export function addReturnSubmit(
     field: HTMLInputElement,
-    allowed: string,
+    allowed: AllowedCharacters,
     action?: () => void
 ): void {
-    allowed =
+    const allowedCharacters =
         allowed === "int"
             ? "0-9"
             : allowed === "int+"
@@ -899,36 +915,41 @@ export function addReturnSubmit(
             : allowed === "alphanum+"
             ? "a-zA-Z0-9 "
             : allowed;
+    const isAllowed = new RegExp(`[^${allowedCharacters}]`, "g");
 
-    const regex = new RegExp(`[^${allowed}]`, "g");
-
-    const transform: (s: string) => string =
-        allowed === allowed.toUpperCase()
-            ? (s) => s.toUpperCase()
-            : allowed === allowed.toLowerCase()
-            ? (s) => s.toLowerCase()
-            : (s) => s;
+    // Transform case of text input to match allowed
+    function matchAllowedCase(s: string): string {
+        if (allowed === allowed.toUpperCase()) {
+            return s.toUpperCase();
+        } else if (allowed === allowed.toLowerCase()) {
+            return s.toLowerCase();
+        }
+        return s;
+    }
 
     // Idea taken from here: https://stackoverflow.com/a/14719818
-    field.oninput = (event) => {
+    // Block unwanted characters from being typed
+    field.oninput = (_) => {
         let pos = field.selectionStart || 0; // Correct to add 0?
-        let value = transform(field.value);
-        if (regex.test(value)) {
-            value = value.replace(regex, "");
+        let value = matchAllowedCase(field.value);
+        if (isAllowed.test(value)) {
+            value = value.replace(isAllowed, "");
             pos--;
         }
         field.value = value;
         field.setSelectionRange(pos, pos);
     };
 
-    if (action) {
-        field.onkeydown = (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                action();
-            }
-        };
+    // Perform action when Enter is pressed
+    if (!action) {
+        return;
     }
+    field.onkeydown = (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            action();
+        }
+    };
 }
 
 // Merges all keys from defaultObject into object
