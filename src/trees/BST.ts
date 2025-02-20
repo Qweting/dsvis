@@ -6,6 +6,7 @@ import {
     MessagesObject,
     parseValues,
 } from "../../src/engine";
+import { TextCircle } from "../../src/objects/text-circle";
 import { BinaryNode } from "../objects/binary-node";
 import { HighlightCircle } from "../objects/highlight-circle";
 
@@ -135,12 +136,9 @@ export class BST extends Engine {
     }
 
     newNode(text: string): BinaryNode {
-        return this.Svg.binaryNode(
-            text,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        return this.Svg.put(
+            new BinaryNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     resizeTree(): this {
@@ -191,7 +189,7 @@ export class BST extends Engine {
     > {
         let parent: BinaryNode | null = null;
         let node: BinaryNode | null = this.treeRoot;
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             node?.cx() || 0,
             node?.cy() || 0,
             this.getObjectSize(),
@@ -293,7 +291,7 @@ export class BST extends Engine {
         if (!(node?.getLeft() && node?.getRight())) {
             return await this.deleteNode(node);
         }
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
             this.getObjectSize(),
@@ -321,13 +319,13 @@ export class BST extends Engine {
         predecessor?.setHighlight(true);
         pointer.remove();
         const newText = predecessor?.getText();
-        const moving = this.Svg.textCircle(
-            newText || "",
-            predecessor?.cx() || 0,
-            predecessor?.cy() || 0,
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const moving = this.Svg.put(
+            new TextCircle(
+                newText || "",
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(predecessor?.cx() || 0, predecessor?.cy() || 0);
         moving.addClass("unfilled");
         moving.setHighlight(true);
         await this.pause("delete.predecessor.replace", node, predecessor);
@@ -406,7 +404,7 @@ export class BST extends Engine {
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             ...this.getNodeStart(),
             this.getObjectSize(),
             this.getStrokeWidth()

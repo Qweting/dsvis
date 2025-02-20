@@ -1,6 +1,8 @@
 import { addReturnSubmit, compare, NBSP } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
 import { Children } from "../../src/objects/binary-node";
+import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { TextCircle } from "../../src/objects/text-circle";
 import { BST } from "../../src/trees/BST";
 
 export class AVLQuiz extends BST {
@@ -81,18 +83,15 @@ export class AVLQuiz extends BST {
     }
 
     newNode(text: string) {
-        return this.Svg.avlNode(
-            text,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        return this.Svg.put(
+            new AVLNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     async setCurrent(node: AVLNode | null, animate: boolean) {
         this.current?.setHighlight(false);
         if (animate && this.current && node) {
-            const cursor = this.Svg.highlightCircle(
+            const cursor = this.Svg.put(new HighlightCircle()).init(
                 this.current.cx(),
                 this.current.cy(),
                 this.getObjectSize(),
@@ -148,13 +147,13 @@ export class AVLQuiz extends BST {
             return;
         }
 
-        const moving = this.Svg.textCircle(
-            this.current.getText(),
-            this.current.cx(),
-            this.current.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const moving = this.Svg.put(
+            new TextCircle(
+                this.current.getText(),
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(this.current.cx(), this.current.cy());
         moving.setHighlight(true);
         await this.pause(
             `Replace the value of ${this.mark} with ${this.current}`

@@ -1,6 +1,7 @@
 import { compare, Engine, MessagesObject } from "../../src/engine";
 import { BinaryNode, Children } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
+import { TextCircle } from "../../src/objects/text-circle";
 
 export const BinaryHeapMessages = {
     general: {
@@ -53,13 +54,9 @@ export class BinaryHeap extends Engine {
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
-        this.heapArray = this.Svg.dsArray(
-            this.arraySize,
-            xRoot,
-            this.Svg.viewbox().height - yRoot,
-            this.getObjectSize(),
-            true
-        );
+        this.heapArray = this.Svg.put(
+            new DSArray(this.arraySize, this.getObjectSize(), true)
+        ).init(this.arraySize, xRoot, this.Svg.viewbox().height - yRoot);
         if (Number(this.heapArray.x()) < this.$Svg.margin) {
             this.heapArray.x(this.$Svg.margin);
         }
@@ -96,20 +93,21 @@ export class BinaryHeap extends Engine {
         }
         const jNode = this.treeNodes[j],
             kNode = this.treeNodes[k];
-        const jLabel = this.Svg.textCircle(
-            jNode.getText(),
-            jNode.cx(),
-            jNode.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
-        const kLabel = this.Svg.textCircle(
-            kNode.getText(),
-            kNode.cx(),
-            kNode.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+
+        const jLabel = this.Svg.put(
+            new TextCircle(
+                jNode.getText(),
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(jNode.cx(), jNode.cy());
+        const kLabel = this.Svg.put(
+            new TextCircle(
+                kNode.getText(),
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(kNode.cx(), kNode.cy());
         jLabel.setCenter(kLabel.cx(), kLabel.cy(), this.getAnimationSpeed());
         kLabel.setCenter(jLabel.cx(), jLabel.cy(), this.getAnimationSpeed());
         this.heapArray.swap(j, k, true);
@@ -138,18 +136,13 @@ export class BinaryHeap extends Engine {
         let currentIndex = this.heapSize;
         let parentIndex = Math.floor((currentIndex - 1) / 2);
         let parentNode = this.treeNodes[parentIndex];
-        const arrayLabel = this.Svg.textCircle(
-            value,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
-        let treeNode = this.Svg.binaryNode(
-            value,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const arrayLabel = this.Svg.put(
+            new TextCircle(value, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
+        let treeNode = this.Svg.put(
+            new BinaryNode(value, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
+
         this.treeNodes[currentIndex] = treeNode;
         await this.pause("insert.value", value);
 
@@ -231,13 +224,13 @@ export class BinaryHeap extends Engine {
         this.heapSize--;
         const minValue = this.heapArray.getValue(0);
 
-        const arrayLabel = this.Svg.textCircle(
-            minValue,
-            this.heapArray.getCX(0),
-            this.heapArray.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const arrayLabel = this.Svg.put(
+            new TextCircle(
+                minValue,
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(this.heapArray.getCX(0), this.heapArray.cy());
         if (this.heapSize === 0) {
             await this.pause("delete.root", minValue);
             this.heapArray.setValue(0, "");
@@ -257,13 +250,13 @@ export class BinaryHeap extends Engine {
             return;
         }
 
-        const treeLabel = this.Svg.textCircle(
-            minValue,
-            this.treeRoot.cx(),
-            this.treeRoot.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const treeLabel = this.Svg.put(
+            new TextCircle(
+                minValue,
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(this.treeRoot.cx(), this.treeRoot.cy());
         await this.pause("remove.minValue", minValue);
         this.heapArray.setValue(0, "");
         this.treeRoot.setText(null);

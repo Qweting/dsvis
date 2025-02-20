@@ -17,12 +17,9 @@ export class AVL extends BST {
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
-        return this.Svg.avlNode(
-            text,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        return this.Svg.put(
+            new AVLNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     getHeight(node: AVLNode | null | undefined) {
@@ -75,7 +72,7 @@ export class AVL extends BST {
         fromchild: "left" | "right" | undefined | null
     ) {
         const child = (fromchild && startNode.getChild(fromchild)) || startNode;
-        this.pointer = this.Svg.highlightCircle(
+        this.pointer = this.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),
             this.getObjectSize(),
@@ -131,7 +128,7 @@ export class AVL extends BST {
         } else {
             node = await this.doubleRotate(left, node);
         }
-        this.pointer = this.Svg.highlightCircle(
+        this.pointer = this.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
             this.getObjectSize(),
