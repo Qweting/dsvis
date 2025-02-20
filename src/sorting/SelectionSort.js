@@ -6,6 +6,7 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
     initialise(initialValues = null) {
         this.initialValues = initialValues;
         super.initialise();
+        
     }
 
     async resetAlgorithm() {
@@ -20,10 +21,12 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
             await this.insert(...this.initialValues);
             this.State.resetting = false;
         }
+        
     }
 
     async insert(...values) {
         for (const val of values) await this.insertOne(val);
+        
     }
 
     async swap(j, k, message, ...args) {
@@ -69,18 +72,18 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
             // Find the index of the minimum element in the unsorted part of the array
             for (let j = i + 1; j < this.sortSize; j++) {
-                this.heapArray.setIndexHighlight(j, true);
-                this.heapArray.setIndexHighlight(minIndex, true);
+                this.heapArray.setBlueHighlight(j, true);
+                this.heapArray.setBlueHighlight(minIndex, true);
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(minIndex));
                 if (this.heapArray.getValue(j) < this.heapArray.getValue(minIndex)) {
-                    this.heapArray.setIndexHighlight(minIndex, false);
+                    this.heapArray.setBlueHighlight(minIndex, false);
                     minIndex = j;
                     await this.pause('sort.foundNewMin', this.heapArray.getValue(minIndex));
                 } else {
-                    this.heapArray.setIndexHighlight(j, false);
+                    this.heapArray.setBlueHighlight(j, false);
                 }
-                this.heapArray.setIndexHighlight(j, false);
-                this.heapArray.setIndexHighlight(minIndex, false);
+                this.heapArray.setBlueHighlight(j, false);
+                this.heapArray.setBlueHighlight(minIndex, false);
             }
             // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {

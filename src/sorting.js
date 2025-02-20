@@ -19,6 +19,9 @@ function initialisePrioQueues(containerID) {
         window.location.reload();
     });
 
+
+    
+
     let algoClass = new URL(window.location).searchParams.get("algorithm");
     if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DSVis))
         algoClass = "";
@@ -34,13 +37,19 @@ function initialisePrioQueues(containerID) {
     tools.insertSubmit = container.querySelector(".insertSubmit");
     tools.sortSubmit = container.querySelector(".sortSubmit");
     tools.clearSubmit = container.querySelector(".clearSubmit");
+    tools.psuedoCode = container.querySelector(".psuedoCode");
+
+
 
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
     });
+
+    
     DSVis.addReturnSubmit(tools.insertField, "ALPHANUM+", () => PQEngine.submit("insert", tools.insertField));
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
     tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", " "));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
 }
+
