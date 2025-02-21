@@ -130,5 +130,28 @@ SVG.DSArray = class DSArray extends SVG.G {
         return this;
     }
 
+    addArrow(index, arrowId="arrow") {
+        const arrowSize = 10;
+        const arrowOffset = 10;
+
+        const x = this.getCX(index);
+        const y = this.cy() - this.engine().getObjectSize() / 2 - arrowOffset;
+    
+        const arrow = this.polyline([
+            [x, y], 
+            [x - arrowSize, y - arrowSize], 
+            [x + arrowSize, y - arrowSize], 
+            [x, y] 
+        ]).fill('none').stroke({ width: 2, color: '#000' }).id(arrowId);
+    
+        this.add(arrow);
+    }
+
+    removeArrow(arrowId) {
+        const arrow = this.findOne(`#${arrowId}`);
+        if (arrow) {
+            arrow.remove();
+        }
+    }
 };
 
