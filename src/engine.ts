@@ -15,7 +15,7 @@ export type EngineToolbarItems = {
     fastBackward: HTMLButtonElement;
 };
 
-type Listeners = "click" | "change"; // TODO: Better naming.
+type ListenerType = "click" | "change";
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
 
@@ -86,13 +86,14 @@ export class Engine {
         status: Text;
     };
 
-    EventListeners: Record<string, Partial<Record<Listeners, () => void>>> = {
-        stepForward: {},
-        stepBackward: {},
-        fastForward: {},
-        fastBackward: {},
-        toggleRunner: {},
-    };
+    EventListeners: Record<string, Partial<Record<ListenerType, () => void>>> =
+        {
+            stepForward: {},
+            stepBackward: {},
+            fastForward: {},
+            fastBackward: {},
+            toggleRunner: {},
+        };
 
     getAnimationSpeed(): number {
         if (this.toolbar.animationSpeed) {
@@ -363,7 +364,7 @@ export class Engine {
 
     $IdleListeners: Record<
         string,
-        { type: Listeners; condition: () => boolean; handler: () => void }
+        { type: ListenerType; condition: () => boolean; handler: () => void }
     > = {
         stepBackward: {
             type: "click",
@@ -405,7 +406,7 @@ export class Engine {
     $AsyncListeners: Record<
         string,
         {
-            type: Listeners;
+            type: ListenerType;
             handler: (resolve: Resolve, reject: Reject) => void;
         }
     > = {
@@ -498,7 +499,7 @@ export class Engine {
         }
     }
 
-    addListener(id: string, type: Listeners, handler: () => void): void {
+    addListener(id: string, type: ListenerType, handler: () => void): void {
         const listeners = this.EventListeners;
         if (!listeners[id]) {
             listeners[id] = {};
@@ -534,7 +535,7 @@ export class Engine {
             for (const type in listeners[id]) {
                 elem.removeEventListener(
                     type,
-                    listeners[id][type as Listeners]!
+                    listeners[id][type as ListenerType]!
                 );
             } // ! because we know that the type exists
             listeners[id] = {};
