@@ -7,29 +7,25 @@ import LinkedList from "./LinkedList.js"
 
 
 DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
-    arraySize = 24;
-    nodeArray = []
-    intialValues;
+    maxListSize = 10; // Limit the size of the list to maintain readability
+    intialValues; // Only used for hard-coded values
+    linkedList; // The linked list object
+    nodeArray = [] 
 
 
 
     initialise(intialValues = null) { //initialValue is not used.
         this.intialValues = intialValues;
-        this.head = null;
-        this.size = 0;
-        this.LinkedList = new LinkedList();
+        this.linkedList = new LinkedList();
         super.initialise();
     }
     
-
-
-
-
+    // Reset the algorithm to its initial state
     async resetAlgorithm() {
         await super.resetAlgorithm();
 
         // Reset the linked list by creating a new instance
-        this.LinkedList = new LinkedList();
+        this.linkedList = new LinkedList();
         this.size = 0;
 
         // If initial values are provided, insert them into the animated list
@@ -40,16 +36,11 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         }
     }
 
-
-
-
-
-    //Resets the heap to its original state. 
     async insert(...values) {
         for(const val of values) await this.insertOne(val);
     }
     
-    async objectNode(value) {
+    async newNode(value) {
         const rectWidth = 100; //width of rectangle
         const rectHeight = 50; //height of rectangle
         const x = 250, y = 250;
@@ -61,14 +52,8 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         
         const grp = this.SVG.group();//container holding the rectangle and text
         
-        
-        // const elementRect = this.SVG.rect(rectWidth, rectHeight).cx(x).cy(y); //create the rectangle and "center it" (we need to find a better way of doing this)
-        // const nextRect = this.SVG.rect(rectWidth/2, rectHeight).cx(x+75).cy(y); //create the rectangle and "center it" (we need to find a better way of doing this)
         const elementRect = grp.rect(rectWidth, rectHeight); //create the rectangle and "center it" (we need to find a better way of doing this)
         const nextRect = grp.rect(rectWidth/2, rectHeight).move(rectWidth+1,0); //create the rectangle and "center it" (we need to find a better way of doing this)
-        
-        
-        
         const textElement = this.SVG.text(value)
             .font({ size: rectHeight * 0.6 })  //set font size relative to rectangle height
             .center(elementRect.cx(), elementRect.cy());      //center text in the rectangle
@@ -103,52 +88,57 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         // Add the arrow to the SVG
         this.SVG.add(grp); //add the container to the svg
 
-        /* for (let i = 0; i < grp.size; i++) {
-            grp.index(grp.get(i)).setHighlight(true);
-            console.log(grp.index(grp.get(i)));
-        } */
-        
-        const elementRectIndex = grp.index(elementRect);
-        const nextRectIndex = grp.index(nextRect);
-        const textElementIndex = grp.index(textElement);
-        const arrowLineIndex = grp.index(arrowLine);
-        const arrowMarkerIndex = grp.index(arrowMarker);
-
-
-        //console.log(index);
-        grp.get(elementRectIndex).setHighlight(true);
-        grp.get(nextRectIndex).setHighlight(true);
-        grp.get(textElementIndex).setHighlight(true);
-        grp.get(arrowLineIndex).setHighlight(true);
-        grp.get(arrowMarkerIndex).setHighlight(true);
+        for (let i = 0; i < grp.children().length; i++) {
+            grp.get(i).setHighlight(true);
+        }
 
 
         // Animate movement of the group and arrow
         await this.pause('insert.head', value);
         grp.animate(1000).move(100, 100);
-
-        // await this.pause('insert.head', value);
-        // grp.animate(1000).move(100, 100); //animate and move the group container
     }
 
 
     //Previous method calls on this method
     async insertOne(value){
-        if((this.LinkedList.size) === this.arraySize) {
+        if((this.linkedList.size) === this.arraySize) {
             await this.pause('general.full');
         }
 
-
-        if (this.LinkedList.size === 0) {
-            this.LinkedList.add(value);
+        if (this.linkedList.size === 0) {
+            this.linkedList.add(value);
             this.objectNode(value);
         } else {
-            this.LinkedList.add(value);
+            this.linkedList.add(value);
             this.objectNode(value);
         }
 
     }
 
+     // Visualization logic for inserting a node to the front
+     async insertFront(value) {
+        
+     }
+ 
+     // Visualization logic for inserting a node to the back
+     async insertBack(value) {
+         
+     }
+ 
+     // Visualization logic for inserting a node to a specific index
+     async insertAt(value, index) {
+         
+     }
+ 
+     // Visualization logic for deleting a node
+     async deleteAnimate(value) {
+         
+     }
+     
+     // Visualization logic for finding a node
+     async findAnimate(value) {
+ 
+     }
 
 
 }
