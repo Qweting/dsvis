@@ -72,16 +72,28 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
             // Find the index of the minimum element in the unsorted part of the array
             for (let j = i + 1; j < this.sortSize; j++) {
+
+                // Highlight the current element and the minimum element
                 this.heapArray.setBlueHighlight(j, true);
                 this.heapArray.setBlueHighlight(minIndex, true);
+
+                // Message: Compare the current element with the minimum element
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(minIndex));
+
+
                 if (this.heapArray.getValue(j) < this.heapArray.getValue(minIndex)) {
+                    // Unhighlight the previous minimum element
                     this.heapArray.setBlueHighlight(minIndex, false);
+
                     minIndex = j;
+
+                    // Message: Found a new minimum element
                     await this.pause('sort.foundNewMin', this.heapArray.getValue(minIndex));
                 } else {
+                    // Unhighlight the current element
                     this.heapArray.setBlueHighlight(j, false);
                 }
+                // Unhighlight the minimum element and the current element
                 this.heapArray.setBlueHighlight(j, false);
                 this.heapArray.setBlueHighlight(minIndex, false);
             }
