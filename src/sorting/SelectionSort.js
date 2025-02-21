@@ -111,8 +111,8 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
 DSVis.SelectionSort.messages = {
     general: {
-        empty: "Heap is empty!",
-        full: "Heap is full!",
+        empty: "Array is empty!",
+        full: "Array is full!",
         finished: "Finished",
     },
     insert: {
