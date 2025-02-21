@@ -93,7 +93,7 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
                 this.heapArray.setIndexHighlight(j-1, true);
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(j-1));
 
-                if (this.heapArray.getValue(j) > this.heapArray.getValue(j-1)){
+                if (DSVis.compare( this.heapArray.getValue(j), this.heapArray.getValue(j-1)) >= 0){
                     await this.pause('sort.smallerLeft', this.heapArray.getValue(j-1), this.heapArray.getValue(j));
                     this.heapArray.setIndexHighlight(j, false);
                     this.heapArray.setIndexHighlight(j-1, false);
