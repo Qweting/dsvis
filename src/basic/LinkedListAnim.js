@@ -103,20 +103,33 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         // Add the arrow to the SVG
         this.SVG.add(grp); //add the container to the svg
 
-        for (let i = 0; i < grp.size; i++) {
+        /* for (let i = 0; i < grp.size; i++) {
             grp.index(grp.get(i)).setHighlight(true);
             console.log(grp.index(grp.get(i)));
-        }
-            
+        } */
+        
+        const elementRectIndex = grp.index(elementRect);
+        const nextRectIndex = grp.index(nextRect);
+        const textElementIndex = grp.index(textElement);
+        const arrowLineIndex = grp.index(arrowLine);
+        const arrowMarkerIndex = grp.index(arrowMarker);
 
 
-            // Animate movement of the group and arrow
-            await this.pause('insert.head', value);
-            grp.animate(1000).move(100, 100);
+        //console.log(index);
+        grp.get(elementRectIndex).setHighlight(true);
+        grp.get(nextRectIndex).setHighlight(true);
+        grp.get(textElementIndex).setHighlight(true);
+        grp.get(arrowLineIndex).setHighlight(true);
+        grp.get(arrowMarkerIndex).setHighlight(true);
 
-            // await this.pause('insert.head', value);
-            // grp.animate(1000).move(100, 100); //animate and move the group container
-        }
+
+        // Animate movement of the group and arrow
+        await this.pause('insert.head', value);
+        grp.animate(1000).move(100, 100);
+
+        // await this.pause('insert.head', value);
+        // grp.animate(1000).move(100, 100); //animate and move the group container
+    }
 
 
     //Previous method calls on this method
