@@ -39,15 +39,53 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
     }
 
     async insert(...values) {
-        for (const val of values) await this.insertOne(val);
+        for (const val of values) // await this.insertOne(val);
         this.linkedList.printList();
     }
 
+    // 
     async insertOne(value) {
         if (this.linkedList.size >= this.maxListSize) {
             await this.pause('general.full');
             return;
         }
+
+        if (!this.treeRoot) {
+            this.treeRoot = this.newNode(value);
+            await this.pause('insert.newroot', value);
+            this.resizeTree();
+            await this.pause();
+            return {success: true, node: this.treeRoot};
+        }
+    }
+
+    // Visualization logic for inserting a node to the front
+    async insertFront(value) {
+        
+    }
+
+    // Visualization logic for inserting a node to the back
+    async insertBack(value) {
+        
+    }
+
+    // Visualization logic for inserting a node to a specific index
+    async insertAt(value, index) {
+        
+    }
+
+    // Visualization logic for deleting a node
+    async deleteAnimate(value) {
+        
+    }
+    
+    // Visualization logic for finding a node
+    async findAnimate(value) {
+
+    }
+
+    newNode(text) {
+        return this.SVG.binaryNode(text, ...this.getNodeStart());
     }
 }
 
