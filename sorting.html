@@ -9,6 +9,7 @@
 <script type="text/javascript" src="src/objects/dsarray.js"></script>
 <script type="text/javascript" src="src/sorting.js"></script>
 <script type="text/javascript" src="src/sorting/SelectionSort.js"></script>
+<script type="text/javascript" src="src/sorting/MergeSort.js"></script>
 </head>
 
 <body onload="initialisePrioQueues('#prioqueuesContainer')">
@@ -26,6 +27,7 @@
     <option disabled value="">&mdash; Please choose a data structure &mdash;</option>
     <hr/>
     <option value="SelectionSort">Selection sort</option>
+    <option value="MergeSort">Merge sort</option>
   </select>
 </h2>
 
@@ -83,6 +85,17 @@
         <option value="28">Medium</option>
         <option value="40" selected>Large</option>
         <option value="50">Huge</option>
+      </select>
+    </label>
+  </span>
+  <span class="formgroup">
+    <label>Scroll speed:
+      <select id="scrollSpeed">
+        <option value="1">Slowest</option>
+        <option value="2" selected>Slow</option>
+        <option value="5">Medium</option>
+        <option value="10" >Fast</option>
+        <option value="20">Fastest</option>
       </select>
     </label>
   </span>

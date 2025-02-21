@@ -9,6 +9,10 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
         
     }
 
+    async drawViewbox(right, down) {
+        this.SVG.viewbox(right, down, this.$Svg.width, this.$Svg.height);
+    }
+
     async resetAlgorithm() {
         await super.resetAlgorithm();
         const [xRoot, yRoot] = this.getTreeRoot();

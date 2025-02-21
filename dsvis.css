@@ -287,7 +287,7 @@ svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
 	margin-right: 50%;
 }
 
-
+/*Highlights*/
 svg .highlightblue, svg .highlightblue > * {
     stroke: #04D9FF;
 }
@@ -296,4 +296,6 @@ svg .highlightblue.filled, svg text.highlightblue, svg .highlightblue > .filled,
 	stroke: none;
 	fill: #04D9FF;
 }
+
+
 
