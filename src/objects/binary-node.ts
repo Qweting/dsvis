@@ -2,10 +2,10 @@ import { Path } from "@svgdotjs/svg.js";
 import { Connection } from "./connection";
 import { GraphNode } from "./graph-node";
 
-const binaryDirs = ["left", "right"] as const;
-type BinaryDir = (typeof binaryDirs)[number];
+export const binaryDirs = ["left", "right"] as const;
 
-export type Children = "left" | "right";
+export type BinaryDir = (typeof binaryDirs)[number];
+
 export class BinaryNode extends GraphNode {
     $incoming: { parent: Connection<BinaryNode> | null } = {
         parent: null,
@@ -38,7 +38,11 @@ export class BinaryNode extends GraphNode {
         return super.init(x, y);
     }
 
-    getNullPath(side: Children, objectSize: number, strokeWidth: number): Path {
+    getNullPath(
+        side: BinaryDir,
+        objectSize: number,
+        strokeWidth: number
+    ): Path {
         const s = side === "left" ? -1 : 1;
 
         const nX = 0.5 * objectSize;
@@ -56,7 +60,7 @@ export class BinaryNode extends GraphNode {
             .addClass("nullnode");
     }
 
-    getBend(c: Children): number {
+    getBend(c: BinaryDir): number {
         return this.$edgebends[c];
     }
 
@@ -72,7 +76,7 @@ export class BinaryNode extends GraphNode {
         return this.$outgoing.right?.getEnd() || null;
     }
 
-    getChild(c: Children): BinaryNode | null {
+    getChild(c: BinaryDir): BinaryNode | null {
         return this.$outgoing[c]?.getEnd() || null;
     }
 
@@ -96,7 +100,7 @@ export class BinaryNode extends GraphNode {
         return this.$outgoing.right;
     }
 
-    getChildEdge(c: Children): Connection<BinaryNode> | null {
+    getChildEdge(c: BinaryDir): Connection<BinaryNode> | null {
         return this.$outgoing[c];
     }
 
@@ -112,7 +116,7 @@ export class BinaryNode extends GraphNode {
         return this === this.getParent()?.getRight();
     }
 
-    isChild(c: Children): boolean {
+    isChild(c: BinaryDir): boolean {
         return this === this.getParent()?.getChild(c);
     }
 
@@ -124,7 +128,11 @@ export class BinaryNode extends GraphNode {
         return this.setChild("right", child, strokeWidth);
     }
 
-    setChild(c: Children, child: BinaryNode | null, strokeWidth: number): this {
+    setChild(
+        c: BinaryDir,
+        child: BinaryNode | null,
+        strokeWidth: number
+    ): this {
         return this.setSuccessor(c, "parent", child, strokeWidth);
     }
 
@@ -136,7 +144,7 @@ export class BinaryNode extends GraphNode {
         return this.setParent("right", parent, strokeWidth);
     }
 
-    setParent(c: Children, parent: BinaryNode, strokeWidth: number): this {
+    setParent(c: BinaryDir, parent: BinaryNode, strokeWidth: number): this {
         parent.setChild(c, this, strokeWidth);
         return this;
     }
@@ -153,7 +161,7 @@ export class BinaryNode extends GraphNode {
         return this.setChildHighlight("left", high);
     }
 
-    setChildHighlight(c: Children, high: boolean | null): this {
+    setChildHighlight(c: BinaryDir, high: boolean | null): this {
         return this.setOutgoingHighlight(c, high);
     }
 

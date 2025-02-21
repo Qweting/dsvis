@@ -6,7 +6,7 @@ import {
     MessagesObject,
     parseValues,
 } from "../../src/engine";
-import { BinaryNode } from "../objects/binary-node";
+import { BinaryDir, BinaryNode } from "../objects/binary-node";
 import { HighlightCircle } from "../objects/highlight-circle";
 
 type BSTToolbarItems = EngineToolbarItems & {
@@ -21,13 +21,13 @@ export const BSTMessages = {
         start: (value: string) => `Searching for ${value}`,
         found: (value: string) => `Found ${value}`,
         notfound: (value: string) => `Did not find ${value}`,
-        look: (direction: "left" | "right") => `Look into ${direction} child`,
+        look: (direction: BinaryDir) => `Look into ${direction} child`,
     },
     insert: {
         newroot: (value: string) => `Create a new tree root ${value}`,
         search: (value: string) => `Searching for node to insert ${value}`,
         exists: (node: string) => `There is already a node ${node}`,
-        child: (value: string, direction: "left" | "right") =>
+        child: (value: string, direction: BinaryDir) =>
             `Insert ${value} as ${direction} child`,
     },
     delete: {
@@ -52,13 +52,12 @@ export const BSTMessages = {
         leaf: (node: string) => `Remove leaf node ${node}`,
     },
     rotate: {
-        single: (node: string, dir: "left" | "right") =>
-            `Rotate ${node} ${dir}`,
+        single: (node: string, dir: BinaryDir) => `Rotate ${node} ${dir}`,
         zigzag: (
             child: string,
-            dir1: "left" | "right",
+            dir1: BinaryDir,
             node: string,
-            dir2: "left" | "right"
+            dir2: BinaryDir
         ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
     },
 };
@@ -261,7 +260,7 @@ export class BST extends Engine {
     // TODO: update type with separate for success true and false
     async delete(value: string | number): Promise<{
         success: boolean;
-        direction: "left" | "right" | null;
+        direction: BinaryDir | null;
         parent: BinaryNode | null;
     } | null> {
         if (!this.treeRoot) {
@@ -287,7 +286,7 @@ export class BST extends Engine {
 
     async deleteHelper(node: BinaryNode | null): Promise<{
         success: boolean;
-        direction: "left" | "right" | null;
+        direction: BinaryDir | null;
         parent: BinaryNode | null;
     }> {
         if (!(node?.getLeft() && node?.getRight())) {
@@ -343,7 +342,7 @@ export class BST extends Engine {
 
     async deleteNode(node: BinaryNode | null | undefined): Promise<{
         success: boolean;
-        direction: "left" | "right" | null;
+        direction: BinaryDir | null;
         parent: BinaryNode | null;
     }> {
         // The node will NOT have two children - this has been taken care of by deleteHelper
@@ -461,7 +460,7 @@ export class BST extends Engine {
     }
 
     async doubleRotate<Node extends BinaryNode>(
-        firstDir: "left" | "right",
+        firstDir: BinaryDir,
         node: Node
     ): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
@@ -478,7 +477,7 @@ export class BST extends Engine {
     }
 
     async singleRotate<Node extends BinaryNode>(
-        firstDir: "left" | "right",
+        firstDir: BinaryDir,
         node: Node
     ): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!

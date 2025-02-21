@@ -1,6 +1,6 @@
-import { BinaryNode } from "../../src/objects/binary-node";
-import { BST, BSTMessages } from "./BST";
 import { MessagesObject, updateDefault } from "../../src/engine";
+import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
+import { BST, BSTMessages } from "./BST";
 
 const RedBlackMessages = {
     color: {
@@ -13,17 +13,9 @@ const RedBlackMessages = {
             pibling: BinaryNode
         ) =>
             `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red\nPush blackness down from grandparent`,
-        switch: (
-            parent: BinaryNode,
-            dir: "left" | "right",
-            dirChild: BinaryNode
-        ) =>
+        switch: (parent: BinaryNode, dir: BinaryDir, dirChild: BinaryNode) =>
             `Parent ${parent} is red,\n${dir} child ${dirChild} and its children are black:\nSwitch colors`,
-        childRed: (
-            parent: BinaryNode,
-            dir: "left" | "right",
-            dirChild: BinaryNode
-        ) =>
+        childRed: (parent: BinaryNode, dir: BinaryDir, dirChild: BinaryNode) =>
             `Parent ${parent}, ${dir} child ${dirChild} and its children are black:\nColor ${dir} child red`,
     },
     balancing: {
@@ -33,35 +25,35 @@ const RedBlackMessages = {
     rotate: {
         parent: (
             node: BinaryNode,
-            side: "left" | "right",
-            rotate: "left" | "right",
+            side: BinaryDir,
+            rotate: BinaryDir,
             parent: BinaryNode
         ) =>
             `Node ${node} is a red ${side} child of a red ${rotate} child\nRotate parent ${parent} ${rotate}`,
         grandparent: (
             node: BinaryNode,
-            side: "left" | "right",
+            side: BinaryDir,
             grandparent: BinaryNode,
-            rotate: "left" | "right"
+            rotate: BinaryDir
         ) =>
             `Node ${node} is a red ${side} child of a red ${side} child\nSwitch colors and rotate grandparent ${grandparent} ${rotate}`,
         redSibling: (
             parent: BinaryNode,
-            right: "left" | "right",
+            right: BinaryDir,
             rightChild: BinaryNode,
-            left: "left" | "right"
+            left: BinaryDir
         ) =>
             `Parent ${parent} is black, and its ${right} child ${rightChild} is red:\nSwitch colors and rotate ${left}`,
         redDistantChild: (
-            right: "left" | "right",
+            right: BinaryDir,
             rightChild: BinaryNode,
-            left: "left" | "right"
+            left: BinaryDir
         ) =>
             `${right} child ${rightChild} is black, its ${right} child is red:\nSwitch colors and rotate ${left}`,
         redCloseChild: (
-            right: "left" | "right",
+            right: BinaryDir,
             rightChild: BinaryNode,
-            left: "left" | "right"
+            left: BinaryDir
         ) =>
             `${right} child ${rightChild} is black, its ${left} child is red:\nSwitch colors and rotate child ${right}`,
     },
@@ -117,8 +109,8 @@ export class RedBlack extends BST {
             return;
         }
 
-        let side: "left" | "right" = node.isLeftChild() ? "left" : "right";
-        let rotate: "left" | "right" = parent.isLeftChild() ? "left" : "right";
+        let side: BinaryDir = node.isLeftChild() ? "left" : "right";
+        let rotate: BinaryDir = parent.isLeftChild() ? "left" : "right";
         if (side !== rotate) {
             node.setHighlight(true);
             parent.setHighlight(true);
@@ -167,7 +159,7 @@ export class RedBlack extends BST {
         return result;
     }
 
-    async fixDeleteImbalance(parent: BinaryNode, dir: "left" | "right") {
+    async fixDeleteImbalance(parent: BinaryNode, dir: BinaryDir) {
         const child = parent.getChild(dir);
         if (child && this.isRed(child)) {
             this.colorBlack(child);
@@ -179,7 +171,7 @@ export class RedBlack extends BST {
         }
     }
 
-    async fixDoubleBlack(parent: BinaryNode, left: "left" | "right") {
+    async fixDoubleBlack(parent: BinaryNode, left: BinaryDir) {
         // TODO: Fix variable names
         const right = left === "left" ? "right" : "left";
         const rightChild = parent.getChild(right);

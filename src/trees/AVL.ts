@@ -1,5 +1,6 @@
 import { MessagesObject, updateDefault } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
+import { BinaryDir } from "../../src/objects/binary-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
@@ -49,7 +50,7 @@ export class AVL extends BST {
     async delete(value: string | number) {
         const result = (await super.delete(value)) as {
             success: boolean;
-            direction: "left" | "right" | null;
+            direction: BinaryDir | null;
             parent: AVLNode | null;
         } | null;
 
@@ -72,7 +73,7 @@ export class AVL extends BST {
 
     async updateHeights(
         startNode: AVLNode,
-        fromchild: "left" | "right" | undefined | null
+        fromchild: BinaryDir | undefined | null
     ) {
         const child = (fromchild && startNode.getChild(fromchild)) || startNode;
         this.pointer = this.Svg.highlightCircle(

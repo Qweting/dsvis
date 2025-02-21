@@ -1,5 +1,5 @@
 import { compare, Engine, MessagesObject } from "../../src/engine";
-import { BinaryNode, Children } from "../../src/objects/binary-node";
+import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
 
 export const BinaryHeapMessages = {
@@ -290,7 +290,7 @@ export class BinaryHeap extends Engine {
             }
 
             await this.pause("delete.shiftDown");
-            let direction: Children = "left";
+            let direction: BinaryDir = "left";
             let childValue = this.heapArray.getValue(childIndex);
             if (
                 childIndex + 1 < this.heapSize &&

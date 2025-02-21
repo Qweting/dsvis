@@ -1,6 +1,6 @@
 import { addReturnSubmit, compare, NBSP } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
-import { Children } from "../../src/objects/binary-node";
+import { BinaryDir } from "../../src/objects/binary-node";
 import { BST } from "../../src/trees/BST";
 
 export class AVLQuiz extends BST {
@@ -119,7 +119,7 @@ export class AVLQuiz extends BST {
         await this.setCurrent(parent, true);
     }
 
-    async moveChild(direction: Children) {
+    async moveChild(direction: BinaryDir) {
         const child = this.current?.getChild(direction);
         if (!child) {
             await this.pause(`There is no ${direction} child!`);
@@ -177,7 +177,7 @@ export class AVLQuiz extends BST {
         await this.insertBelow("right", value);
     }
 
-    async insertBelow(direction: Children, value: string) {
+    async insertBelow(direction: BinaryDir, value: string) {
         if (!this.current) {
             throw new Error("There is no current node");
             return;
@@ -221,7 +221,7 @@ export class AVLQuiz extends BST {
         this.updateHeights();
     }
 
-    async rotateCurrent(direction: Children) {
+    async rotateCurrent(direction: BinaryDir) {
         if (!this.current) {
             throw new Error("Can not rotate a node that is null");
         }

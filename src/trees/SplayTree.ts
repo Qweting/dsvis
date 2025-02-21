@@ -1,11 +1,11 @@
 import { compare, MessagesObject, updateDefault } from "../../src/engine";
-import { BinaryNode } from "../../src/objects/binary-node";
+import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
 const SplayTreeMessages = {
     delete: {
         root: "Remove root, leaving left and right trees",
-        singleChild: (right: "left" | "right", left: "left" | "right") =>
+        singleChild: (right: BinaryDir, left: BinaryDir) =>
             `No ${right} tree, make ${left} tree the root`,
         splayLargest: "Splay largest element in left tree to root",
         connectLeftRight:
@@ -13,7 +13,7 @@ const SplayTreeMessages = {
     },
     rotate: {
         splayUp: (node: BinaryNode) => `Now splaying ${node} up to the root`,
-        zigzig: (node: BinaryNode, left: "left" | "right", child: BinaryNode) =>
+        zigzig: (node: BinaryNode, left: BinaryDir, child: BinaryNode) =>
             `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
     },
 };
@@ -41,7 +41,7 @@ export class SplayTree extends BST {
 
     async delete(value: string): Promise<{
         success: boolean;
-        direction: "left" | "right" | null;
+        direction: BinaryDir | null;
         parent: BinaryNode | null;
     } | null> {
         if (!this.treeRoot) {
@@ -147,7 +147,7 @@ export class SplayTree extends BST {
         }
     }
 
-    async zigZig(left: "left" | "right", node: BinaryNode) {
+    async zigZig(left: BinaryDir, node: BinaryNode) {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         const right = left === "left" ? "right" : "left";
         const child = node.getChild(right);
