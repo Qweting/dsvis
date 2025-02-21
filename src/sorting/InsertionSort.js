@@ -8,6 +8,10 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
         super.initialise();
     }
 
+    async drawViewbox(right, down) {
+        this.SVG.viewbox(right, down, this.$Svg.width, this.$Svg.height);
+    }
+
     async resetAlgorithm() {
         await super.resetAlgorithm();
         const [xRoot, yRoot] = this.getTreeRoot();
