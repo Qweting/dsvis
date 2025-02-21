@@ -6,6 +6,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 let PQEngine = null;
+right = 0;
+down = 0;
+scrollSpeed = 5;
 
 function initialisePrioQueues(containerID) {
     const algoSelector = document.querySelector(`${containerID} .algorithmSelector`);
@@ -19,8 +22,7 @@ function initialisePrioQueues(containerID) {
         window.location.reload();
     });
 
-
-    
+       
 
     let algoClass = new URL(window.location).searchParams.get("algorithm");
     if (!(algoClass && /^[\w.]+$/.test(algoClass) && algoClass in DSVis))
@@ -38,8 +40,7 @@ function initialisePrioQueues(containerID) {
     tools.sortSubmit = container.querySelector(".sortSubmit");
     tools.clearSubmit = container.querySelector(".clearSubmit");
     tools.psuedoCode = container.querySelector(".psuedoCode");
-
-
+    
 
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
@@ -51,5 +52,29 @@ function initialisePrioQueues(containerID) {
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
     tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", " "));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
+    
+    
+    addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {goDown(true);}
+        else if (event.key === "ArrowUp") {goDown(false);}
+        else if (event.key === "ArrowRight") {goRight(true);}
+        else if (event.key === "ArrowLeft") {goRight(false);}
+    });
 }
 
+function goRight(goingRight) {
+    if(goingRight) {
+    this.right+=scrollSpeed;
+    } else if (this.right > 0) {
+        this.right-=scrollSpeed;
+    }
+    PQEngine.drawViewbox(right, down)
+}
+function goDown(goingDown) {
+    if(goingDown) {
+    this.down+=scrollSpeed;
+    } else if (this.down > 0) {
+        this.down-=scrollSpeed;
+    }
+    PQEngine.drawViewbox(right, down)
+}
