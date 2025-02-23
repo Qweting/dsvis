@@ -104,13 +104,14 @@ export class GraphNode extends TextCircle {
                 }
                 inEdge.remove();
             }
-            const edge = this.root().connection(
-                this,
-                successor,
-                strokeWidth,
-                this.getBend(outKey),
-                this.getDirected(outKey)
-            );
+
+            const edge = this.root()
+                .put(new Connection(this, successor))
+                .init(
+                    strokeWidth,
+                    this.getBend(outKey),
+                    this.getDirected(outKey)
+                );
 
             this.$outgoing[outKey] = edge;
             successor.$incoming[inKey] = edge;

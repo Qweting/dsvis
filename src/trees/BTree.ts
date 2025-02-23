@@ -1,5 +1,4 @@
 import { Text } from "@svgdotjs/svg.js";
-import { HighlightCircle } from "src/objects/highlight-circle";
 import {
     compare,
     Engine,
@@ -9,6 +8,7 @@ import {
     updateDefault,
 } from "../../src/engine";
 import { BTreeNode } from "../../src/objects/btree-node";
+import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BSTMessages } from "./BST";
 
 type BTreeToolbarItems = EngineToolbarItems & {
@@ -167,7 +167,7 @@ export class BTree extends Engine {
     async findHelper(value: number | string, findLeaf = false) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             ...this.getNodeStart(),
             this.getObjectSize(),
             this.getStrokeWidth()
@@ -234,7 +234,7 @@ export class BTree extends Engine {
         if (this.treeRoot) {
             await this.insertBottomup(value);
         } else {
-            this.treeRoot = this.Svg.bTreeNode(
+            this.treeRoot = this.Svg.put(new BTreeNode()).init(
                 true,
                 1,
                 ...this.getNodeStart(),
@@ -300,7 +300,7 @@ export class BTree extends Engine {
         const risingValue = node.getText(this.getSplitIndex());
         const rightSplit = this.getSplitIndex() + 1;
         const risingX = node.getCX(rightSplit - 1, this.getObjectSize());
-        const risingNode = this.Svg.bTreeNode(
+        const risingNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             risingX,
@@ -316,7 +316,7 @@ export class BTree extends Engine {
             rightSplit + rightValues / 2 - 0.5,
             this.getObjectSize()
         );
-        const rightNode = this.Svg.bTreeNode(
+        const rightNode = this.Svg.put(new BTreeNode()).init(
             node.isLeaf(),
             rightValues,
             rightX,
@@ -404,7 +404,7 @@ export class BTree extends Engine {
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             ...this.getNodeStart(),
             this.getObjectSize(),
             this.getStrokeWidth()
@@ -525,7 +525,7 @@ export class BTree extends Engine {
 
     async deleteNonleaf(node: BTreeNode, i: number) {
         node.addClass("marked");
-        const pointer = this.Svg.highlightCircle(
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             node.getCX(i, this.getObjectSize()),
             node.cy(),
             this.getObjectSize(),
@@ -548,7 +548,7 @@ export class BTree extends Engine {
             maxNode = maxNode?.getRight() || null;
         }
         const maxValue = maxNode.getText(j);
-        const risingNode = this.Svg.bTreeNode(
+        const risingNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             maxNode.getCX(j, this.getObjectSize()),
@@ -629,7 +629,7 @@ export class BTree extends Engine {
         rightSib?.setHighlight(true);
         await this.pause("node.mergeRight", node, parentValue, rightSib);
 
-        const sinkingNode = this.Svg.bTreeNode(
+        const sinkingNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             parent.getCX(parentIndex, this.getObjectSize()),
@@ -706,7 +706,7 @@ export class BTree extends Engine {
         const rightValue = rightSib.getText(0);
         await this.pause("node.steal.right", node, leftValue, rightValue);
 
-        const leftNode = this.Svg.bTreeNode(
+        const leftNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             parent?.getCX(parentIndex, this.getObjectSize()),
@@ -716,7 +716,7 @@ export class BTree extends Engine {
         );
         leftNode.setText(0, leftValue || "");
         leftNode.setHighlight(true);
-        const rightNode = this.Svg.bTreeNode(
+        const rightNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             rightSib?.getCX(0, this.getObjectSize()),
@@ -787,7 +787,7 @@ export class BTree extends Engine {
         const leftValue = leftSib.getText(leftSib.numValues() - 1);
         await this.pause("node.steal.left", node, leftValue, rightValue);
 
-        const rightNode = this.Svg.bTreeNode(
+        const rightNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             parent.getCX(parentIndex, this.getObjectSize()),
@@ -797,7 +797,7 @@ export class BTree extends Engine {
         );
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
-        const leftNode = this.Svg.bTreeNode(
+        const leftNode = this.Svg.put(new BTreeNode()).init(
             false,
             1,
             leftSib.getCX(leftSib.numValues() - 1, this.getObjectSize()),

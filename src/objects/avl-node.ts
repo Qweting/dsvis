@@ -10,7 +10,8 @@ export class AVLNode extends BinaryNode {
     }
     init(x: number, y: number): this {
         const size = this.getSize();
-        this.$height.center(-0.6 * size, -0.5 * size);
+        this.$height.center(-0.6 * size, -0.45 * size);
+
         return super.init(x, y);
     }
 

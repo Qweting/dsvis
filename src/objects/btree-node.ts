@@ -311,13 +311,9 @@ export class BTreeNode extends G {
                 child.$parent.remove();
             }
 
-            const edge = this.root().bTreeConnection(
-                this,
-                child,
-                i,
-                this.numChildren(),
-                strokeWidth
-            );
+            const edge = this.root()
+                .put(new BTreeConnection(this, child, i, this.numChildren()))
+                .init(strokeWidth);
 
             this.$children[i] = edge;
             child.$parent = edge;

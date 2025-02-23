@@ -1,14 +1,5 @@
-import { Container, Element, extend, Svg } from "@svgdotjs/svg.js";
+import { Element, extend, Svg } from "@svgdotjs/svg.js";
 import { Engine } from "../../src/engine";
-import { AVLNode } from "./avl-node";
-import { BinaryNode } from "./binary-node";
-import { BTreeConnection } from "./btree-connection";
-import { BTreeNode } from "./btree-node";
-import { Connection } from "./connection";
-import { DSArray } from "./dsarray";
-import { GraphNode } from "./graph-node";
-import { HighlightCircle } from "./highlight-circle";
-import { TextCircle } from "./text-circle";
 
 declare module "@svgdotjs/svg.js" {
     interface Svg {
@@ -26,69 +17,6 @@ declare module "@svgdotjs/svg.js" {
 
     interface Container {
         put<T extends Element>(element: T, i?: number): T;
-        highlightCircle(
-            x: number,
-            y: number,
-            size: number,
-            strokeWidth: number
-        ): HighlightCircle;
-        textCircle(
-            text: string,
-            x: number,
-            y: number,
-            size: number,
-            strokeWidth: number
-        ): TextCircle;
-        graphNode(
-            text: string,
-            x: number,
-            y: number,
-            size: number,
-            strokeWidth: number
-        ): GraphNode;
-        binaryNode(
-            text: string,
-            x: number,
-            y: number,
-            size: number,
-            strokeWidth: number
-        ): BinaryNode;
-        avlNode(
-            text: string,
-            x: number,
-            y: number,
-            size: number,
-            strokeWidth: number
-        ): AVLNode;
-        connection<T extends GraphNode>(
-            start: T,
-            end: T,
-            strokeWidth: number,
-            bend?: number,
-            directed?: boolean
-        ): Connection<T>;
-        bTreeNode(
-            leaf: boolean,
-            nvalues: number,
-            x: number,
-            y: number,
-            objectSize: number,
-            strokeWidth: number
-        ): BTreeNode;
-        bTreeConnection(
-            start: BTreeNode,
-            end: BTreeNode,
-            child: number,
-            numChildren: number,
-            strokeWidth: number
-        ): BTreeConnection;
-        dsArray(
-            size: number,
-            x: number,
-            y: number,
-            objectSize: number,
-            horizontal: boolean
-        ): DSArray;
     }
 }
 
@@ -128,103 +56,6 @@ extend(Element, {
     },
     engine() {
         return (this as Element).root().$engine;
-    },
-});
-
-extend(Container, {
-    highlightCircle(x: number, y: number, size: number, strokeWidth: number) {
-        return (this as Container)
-            .put(new HighlightCircle())
-            .init(x, y, size, strokeWidth);
-    },
-    textCircle(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new TextCircle(text, size, strokeWidth))
-            .init(x, y);
-    },
-    graphNode(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new GraphNode(text, size, strokeWidth))
-            .init(x, y);
-    },
-    binaryNode(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new BinaryNode(text, size, strokeWidth))
-            .init(x, y);
-    },
-    avlNode(
-        text: string,
-        x: number,
-        y: number,
-        size: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new AVLNode(text, size, strokeWidth))
-            .init(x, y);
-    },
-    connection<T extends GraphNode>(
-        start: T,
-        end: T,
-        strokeWidth: number,
-        bend?: number,
-        directed?: boolean
-    ) {
-        return (this as Container)
-            .put(new Connection<T>(start, end))
-            .init(strokeWidth, bend, directed);
-    },
-    bTreeNode(
-        leaf: boolean,
-        nvalues: number,
-        x: number,
-        y: number,
-        objectSize: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new BTreeNode())
-            .init(leaf, nvalues, x, y, objectSize, strokeWidth);
-    },
-    bTreeConnection(
-        start: BTreeNode,
-        end: BTreeNode,
-        child: number,
-        numChildren: number,
-        strokeWidth: number
-    ) {
-        return (this as Container)
-            .put(new BTreeConnection(start, end, child, numChildren))
-            .init(strokeWidth);
-    },
-    dsArray(
-        size: number,
-        x: number,
-        y: number,
-        objectSize: number,
-        horizontal: boolean
-    ) {
-        return (this as Container)
-            .put(new DSArray(size, objectSize, horizontal))
-            .init(size, x, y);
     },
 });
 
