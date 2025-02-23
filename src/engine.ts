@@ -51,7 +51,7 @@ export class Engine {
 
     Svg: Svg;
 
-    messages: MessagesObject | undefined;
+    messages: MessagesObject = {};
 
     $Svg = {
         width: 1000,
@@ -684,7 +684,7 @@ export class Engine {
         if (this.state.resetting) {
             return null;
         }
-        if (title !== null) {
+        if (title !== undefined) {
             this.info.body.text(title);
         }
         return new Promise((resolve, reject) => {
@@ -711,22 +711,19 @@ export class Engine {
         });
     }
 
-    // TODO: Fix type of title and update return type
-    getMessage(message: string | undefined, ...args: unknown[]) {
-        if (Array.isArray(message)) {
-            [message, ...args] = [...message, ...args];
-        } // TODO: is this used??
+    getMessage(
+        message: string | undefined,
+        ...args: unknown[]
+    ): string | undefined {
         if (typeof message !== "string") {
             if (args.length > 0) {
                 console.error("Unknown message:", message, ...args);
             }
-            return message;
+            return undefined;
         }
-        if (!message) {
-            return args.join("\n");
-        }
-        // @ts-expect-error this.constructor.messages dont know what it is
-        let title = this.messages || this.constructor.messages || {};
+
+        let title: MessagesObject[string] = this.messages;
+
         const keys = message.split(".");
         if (!(keys[0] in title)) {
             return [message, ...args].join("\n");
@@ -741,10 +738,7 @@ export class Engine {
         if (typeof title === "function") {
             title = title(...args);
         }
-        if (Array.isArray(title)) {
-            title = title.join("\n");
-        }
-        if (typeof title === "object") {
+        if (typeof title !== "string") {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
