@@ -102,9 +102,9 @@ export class BTree extends Engine {
         await super.resetAlgorithm();
         this.treeRoot = null;
         if (this.initialValues) {
-            this.State.resetting = true;
+            this.state.resetting = true;
             await this.insert(...this.initialValues);
-            this.State.resetting = false;
+            this.state.resetting = false;
         }
     }
 
@@ -133,7 +133,7 @@ export class BTree extends Engine {
     }
 
     resizeTree(svgMargin: number, nodeSpacing: number) {
-        const animate = !this.State.resetting;
+        const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             svgMargin,

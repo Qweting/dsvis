@@ -1,5 +1,6 @@
 import { MessagesObject, updateDefault } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
+import { BinaryDir } from "../../src/objects/binary-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
@@ -40,17 +41,18 @@ export class AVL extends BST {
             await this.updateHeights(result.node, undefined);
             await this.updateHeightPositions();
         }
+
         return result;
     }
 
     async delete(value: string | number) {
         const result = (await super.delete(value)) as {
             success: boolean;
-            direction: "left" | "right" | null;
+            direction: BinaryDir | null;
             parent: AVLNode | null;
         } | null;
 
-        if (result?.success) {
+        if (result && result.success) {
             if (result.parent) {
                 await this.updateHeights(result.parent, result.direction);
             }
@@ -69,7 +71,7 @@ export class AVL extends BST {
 
     async updateHeights(
         startNode: AVLNode,
-        fromchild: "left" | "right" | undefined | null
+        fromchild: BinaryDir | undefined | null
     ) {
         const child = (fromchild && startNode.getChild(fromchild)) || startNode;
         this.pointer = this.Svg.put(new HighlightCircle()).init(
@@ -88,9 +90,9 @@ export class AVL extends BST {
                 this.getAnimationSpeed()
             );
             await this.pause("node.updateHeight");
-            const leftHeight = this.getHeight(node.getLeft()),
-                rightHeight = this.getHeight(node.getRight());
 
+            const leftHeight = this.getHeight(node.getLeft());
+            const rightHeight = this.getHeight(node.getRight());
             const height = 1 + Math.max(leftHeight, rightHeight);
 
             if (height !== this.getHeight(node)) {
@@ -103,6 +105,7 @@ export class AVL extends BST {
             node = await this.rebalance(node);
             node = node.getParent();
         }
+
         this.pointer.remove();
     }
 
@@ -120,14 +123,17 @@ export class AVL extends BST {
         const right = left === "left" ? "right" : "left";
 
         const child = node.getChild(right);
-        const childLeft = this.getHeight(child?.getChild(left)),
-            childRight = this.getHeight(child?.getChild(right));
+        const childLeft = this.getHeight(child?.getChild(left));
+        const childRight = this.getHeight(child?.getChild(right));
+
         this.pointer?.hide();
+
         if (childLeft <= childRight) {
             node = await this.singleRotate(left, node);
         } else {
             node = await this.doubleRotate(left, node);
         }
+
         this.pointer = this.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
@@ -135,6 +141,7 @@ export class AVL extends BST {
             this.getStrokeWidth()
         );
         await this.pause("node.balanced");
+
         return node;
     }
 
@@ -142,12 +149,9 @@ export class AVL extends BST {
     // Rotate the tree
 
     async resetHeight(node: AVLNode) {
-        const height =
-            1 +
-            Math.max(
-                this.getHeight(node.getLeft()),
-                this.getHeight(node.getRight())
-            );
+        const leftHeight = this.getHeight(node.getLeft());
+        const rightHeight = this.getHeight(node.getRight());
+        const height = 1 + Math.max(leftHeight, rightHeight);
 
         if (height !== this.getHeight(node)) {
             node.setHeight(height);

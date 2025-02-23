@@ -1,5 +1,5 @@
 import { compare, Engine, MessagesObject } from "../../src/engine";
-import { BinaryNode, Children } from "../../src/objects/binary-node";
+import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
 import { TextCircle } from "../../src/objects/text-circle";
 
@@ -62,14 +62,14 @@ export class BinaryHeap extends Engine {
         }
         this.heapSize = 0;
         if (this.initialValues) {
-            this.State.resetting = true;
+            this.state.resetting = true;
             await this.insert(...this.initialValues);
-            this.State.resetting = false;
+            this.state.resetting = false;
         }
     }
 
     resizeTree() {
-        const animate = !this.State.resetting;
+        const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
@@ -283,7 +283,7 @@ export class BinaryHeap extends Engine {
             }
 
             await this.pause("delete.shiftDown");
-            let direction: Children = "left";
+            let direction: BinaryDir = "left";
             let childValue = this.heapArray.getValue(childIndex);
             if (
                 childIndex + 1 < this.heapSize &&

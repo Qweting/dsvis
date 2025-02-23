@@ -1,5 +1,5 @@
 import { Text } from "@svgdotjs/svg.js";
-import { BinaryNode, Children } from "./binary-node";
+import { BinaryDir, BinaryNode } from "./binary-node";
 
 export class AVLNode extends BinaryNode {
     $height: Text;
@@ -56,7 +56,7 @@ export class AVLNode extends BinaryNode {
         return super.getParent() as AVLNode | null;
     }
 
-    getChild(c: Children): AVLNode | null {
+    getChild(c: BinaryDir): AVLNode | null {
         return super.getChild(c) as AVLNode | null;
     }
 
