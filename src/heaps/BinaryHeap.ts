@@ -65,14 +65,14 @@ export class BinaryHeap extends Engine {
         }
         this.heapSize = 0;
         if (this.initialValues) {
-            this.State.resetting = true;
+            this.state.resetting = true;
             await this.insert(...this.initialValues);
-            this.State.resetting = false;
+            this.state.resetting = false;
         }
     }
 
     resizeTree() {
-        const animate = !this.State.resetting;
+        const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,

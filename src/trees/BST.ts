@@ -103,10 +103,10 @@ export class BST extends Engine {
         this.treeRoot = null;
 
         if (this.initialValues) {
-            this.State.resetting = true;
+            this.state.resetting = true;
             // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
             await this.insert(...this.initialValues);
-            this.State.resetting = false;
+            this.state.resetting = false;
         }
     }
 
@@ -145,7 +145,7 @@ export class BST extends Engine {
     }
 
     resizeTree(): this {
-        const animate = !this.State.resetting;
+        const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
