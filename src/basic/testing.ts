@@ -1,4 +1,4 @@
-import LinkedList from "./LinkedList.js"
+import LinkedList from "./LinkedList"
 
 // creating an object for the
 // Linkedlist class
@@ -8,8 +8,8 @@ let ll = new LinkedList();
 // returns true
 console.log(ll.isEmpty());
 
-// adding element to the list
-ll.add(10);
+// insertBacking element to the list
+ll.insertBack(10);
 
 // prints 10
 ll.printList();
@@ -17,11 +17,11 @@ ll.printList();
 // returns 1
 console.log(ll.size_of_list());
 
-// adding more elements to the list
-ll.add(20);
-ll.add(30);
-ll.add(40);
-ll.add(50);
+// insert more elements to the list
+ll.insertBack(20);
+ll.insertBack(30);
+ll.insertBack(40);
+ll.insertBack(50);
 
 // returns 10 20 30 40 50
 ll.printList();
@@ -45,7 +45,7 @@ ll.printList();
 console.log("is List Empty ? " + ll.isEmpty());
 
 // remove 3rd element from the list
-console.log(ll.removeFrom(3));
+console.log(ll.removeAt(3));
 
 // prints 10 20 60 40
 ll.printList();
