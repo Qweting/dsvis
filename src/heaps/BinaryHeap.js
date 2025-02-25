@@ -1,23 +1,37 @@
-
 ///////////////////////////////////////////////////////////////////////////////
 // Import and export information used by the Javascript linter ESLint:
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * BinaryHeap class that extends DSVis.Engine for heap visualization
+ * Implements a binary heap data structure with visualization capabilities
+ */
 DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
+    /** Maximum size of the heap array */
     arraySize = 28;
+    /** Initial values to populate the heap */
     initialValues;
 
+    /**
+     * Initializes the binary heap
+     * @param {Array} initialValues - Optional array of initial values to insert
+     */
     initialise(initialValues = null) {
         this.initialValues = initialValues;
         super.initialise();
     }
 
+    /**
+     * Resets the heap to its initial state
+     * Creates visualization elements and populates initial values if provided
+     */
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
+        // Create visual array representation
         this.heapArray = this.SVG.dsArray(this.arraySize, xRoot, this.SVG.viewbox().height - yRoot);
         if (this.heapArray.x() < this.$Svg.margin)
             this.heapArray.x(this.$Svg.margin);
@@ -29,15 +43,30 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         }
     }
 
+    /**
+     * Resizes the tree visualization
+     * @param {boolean} animate - Whether to animate the resize
+     */
     resizeTree() {
         const animate = !this.State.resetting;
         this.treeRoot?.resize(...this.getTreeRoot(), animate);
     }
 
+    /**
+     * Inserts multiple values into the heap
+     * @param {...*} values - Values to insert
+     */
     async insert(...values) {
         for (const val of values) await this.insertOne(val);
     }
 
+    /**
+     * Swaps two nodes in the heap with visualization
+     * @param {number} j - First node index
+     * @param {number} k - Second node index
+     * @param {string} message - Message to display during animation
+     * @param {...*} args - Additional arguments for the message
+     */
     async swap(j, k, message, ...args) {
         const jNode = this.treeNodes[j], kNode = this.treeNodes[k];
         const jLabel = this.SVG.textCircle(jNode.getText(), jNode.cx(), jNode.cy());
@@ -52,7 +81,10 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         kLabel.remove();
     }
 
-
+    /**
+     * Inserts a single value into the heap
+     * @param {*} value - Value to insert
+     */
     async insertOne(value) {
         if (this.heapSize >= this.arraySize) {
             await this.pause('general.full');
@@ -195,6 +227,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             currentIndex = childIndex;
             currentNode = childNode;
         }
+        
 
         await this.pause();
         arrayLabel.remove();

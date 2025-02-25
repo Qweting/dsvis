@@ -6,6 +6,7 @@ class Node {
         this.next = null
     }
 }
+
 // linkedlist class
 export default class LinkedList {
     constructor() {
@@ -153,6 +154,7 @@ export default class LinkedList {
     // gives the size of the list
     size_of_list() {
         console.log(this.size);
+        return this.size;
     }
 
 
@@ -169,3 +171,7 @@ export default class LinkedList {
 
 }
 
+<<<<<<< HEAD
+=======
+// exports = LinkedList;
+>>>>>>> b565e21 (merging basic structure with typescript)

@@ -3,6 +3,7 @@
 /* globals DSVis */
 ///////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
 import LinkedList from "./LinkedList.js"
 
 
@@ -11,21 +12,48 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
     intialValues; // Only used for hard-coded values
     linkedList; // The linked list object
     nodeArray = [] 
+=======
+import linkedList from './LinkedList.js'
+
+
+
+DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
+    arraySize = 24;
+    nodeArray = []
+    intialValues;
+>>>>>>> b565e21 (merging basic structure with typescript)
 
 
 
     initialise(intialValues = null) { //initialValue is not used.
         this.intialValues = intialValues;
+<<<<<<< HEAD
         this.linkedList = new LinkedList();
         super.initialise();
     }
     
     // Reset the algorithm to its initial state
+=======
+        this.head = null;
+        this.size = 0;
+        this.linkedlist = new linkedList();
+        super.initialise();
+    }
+    
+
+
+
+
+>>>>>>> b565e21 (merging basic structure with typescript)
     async resetAlgorithm() {
         await super.resetAlgorithm();
 
         // Reset the linked list by creating a new instance
+<<<<<<< HEAD
         this.linkedList = new LinkedList();
+=======
+        this.linkedlist = new linkedList();
+>>>>>>> b565e21 (merging basic structure with typescript)
         this.size = 0;
 
         // If initial values are provided, insert them into the animated list
@@ -36,6 +64,7 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         }
     }
 
+<<<<<<< HEAD
     async insert(...values) {
         for(const val of values) await this.insertOne(val);
     }
@@ -97,10 +126,21 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         await this.pause('insert.head', value);
         grp.animate(1000).move(100, 100);
     }
+=======
+
+
+
+
+    //Resets the heap to its original state. 
+    async insert(...values) {
+        for(const val of values) await this.insertOne(val);
+    }
+>>>>>>> b565e21 (merging basic structure with typescript)
 
 
     //Previous method calls on this method
     async insertOne(value){
+<<<<<<< HEAD
         if((this.linkedList.size) === this.arraySize) {
             await this.pause('general.full');
         }
@@ -111,10 +151,53 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
         } else {
             this.linkedList.add(value);
             this.objectNode(value);
+=======
+        if((this.linkedlist.size) === this.arraySize) {
+            await this.pause('general.full');
+        }
+
+
+        if (this.linkedlist.size === 0) {
+            this.linkedlist.add(value);
+
+            const rectWidth = 100; //width of rectangle
+            const rectHeight = 50; //height of rectangle
+            const x = 250, y = 250;
+
+            // Create the rectangle
+            const rect = this.SVG.rect(rectWidth, rectHeight).cx(x).cy(y); //create the rectangle and "center it" (we need to find a better way of doing this)
+            this.SVG.add(rect); //add it to SVG (as a child?)
+
+            const divider= this.SVG.rect(rectWidth/2, rectHeight).cx(x+75).cy(y); //create the rectangle and "center it" (we need to find a better way of doing this)
+            this.SVG.add(divider);
+
+            //create the text, dynamically adjusting font size
+            const text = this.SVG.text(value)
+                .font({ size: rectHeight * 0.6 })  //set font size relative to rectangle height
+                .center(rect.cx(), rect.cy());      //center text in the rectangle
+
+            this.SVG.add(text); //add it again to svg
+            // this.nextNode();
+
+            await this.pause('insert.head', value);
+
+            //move both to (100, 100)
+            //this is the animation part of the code, the second call makes sure the text is always centered (is there a better approach?)
+            rect.animate(1000).move(100, 100);
+            divider.animate(1000).move(200, 100);
+            text.animate(1000).center(100 + rectWidth / 2, 100 + rectHeight / 2);
+            //ideally, we should group together the text and the rectangle (or a container for the node, like the arrow etc)
+            //and then add that do the SVG.
+
+        } else {
+            // const arrayLabel = this.SVG.textCircle(value, ...this.getNodeStart()); //create a circle with the value
+
+>>>>>>> b565e21 (merging basic structure with typescript)
         }
 
     }
 
+<<<<<<< HEAD
      // Visualization logic for inserting a node to the front
      async insertFront(value) {
         
@@ -139,6 +222,8 @@ DSVis.LinkedListAnim = class LinkedListAnim extends DSVis.Engine {
      async findAnimate(value) {
  
      }
+=======
+>>>>>>> b565e21 (merging basic structure with typescript)
 
 
 }

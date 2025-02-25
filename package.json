@@ -1,0 +1,17 @@
+{
+  "name": "dsvis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Qweting/dsvis.git"
+  },
+  "private": true,
+  "dependencies": {
+    "basic": "^2.0.3"
+  }
+}
