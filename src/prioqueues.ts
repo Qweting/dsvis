@@ -1,5 +1,6 @@
 import { addReturnSubmit, Engine } from "./engine";
 import { BinaryHeap } from "./heaps/BinaryHeap";
+import { PrioQueueToolbar } from "./toolbars/prioqueue-toolbar";
 
 const PRIOQUEUES = {
     BinaryHeap: BinaryHeap,
@@ -48,61 +49,22 @@ function initialisePrioQueues(containerID: string) {
         window.location.reload();
     });
 
-    const container = PQEngine.container;
-    const tools = getPrioQueuesToolbar(container);
+    const toolbar = new PrioQueueToolbar(PQEngine.container);
 
-    tools.insertSelect.addEventListener("change", () => {
-        tools.insertField.value = tools.insertSelect.value;
-        tools.insertSelect.value = "";
+    toolbar.insertSelect.addEventListener("change", () => {
+        toolbar.insertField.value = toolbar.insertSelect.value;
+        toolbar.insertSelect.value = "";
     });
-    addReturnSubmit(tools.insertField, "ALPHANUM+", () =>
-        PQEngine.submit("insert", tools.insertField)
+    addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
+        PQEngine.submit("insert", toolbar.insertField)
     );
-    tools.insertSubmit.addEventListener("click", () =>
-        PQEngine.submit("insert", tools.insertField)
+    toolbar.insertSubmit.addEventListener("click", () =>
+        PQEngine.submit("insert", toolbar.insertField)
     );
-    tools.deleteSubmit.addEventListener("click", () =>
+    toolbar.deleteSubmit.addEventListener("click", () =>
         PQEngine.submit("deleteMin", null)
     );
-    tools.clearSubmit.addEventListener("click", () =>
+    toolbar.clearSubmit.addEventListener("click", () =>
         PQEngine.confirmResetAll()
     );
-}
-
-function getPrioQueuesToolbar(container: HTMLElement) {
-    const insertSelect = container.querySelector<HTMLSelectElement>(
-        "select.insertSelect"
-    );
-    const insertField =
-        container.querySelector<HTMLInputElement>("input.insertField");
-    const insertSubmit =
-        container.querySelector<HTMLInputElement>("input.insertSubmit");
-    const deleteSubmit =
-        container.querySelector<HTMLInputElement>("input.deleteSubmit");
-    const clearSubmit =
-        container.querySelector<HTMLInputElement>("input.clearSubmit");
-
-    if (!insertSelect) {
-        throw new Error("Missing insert select");
-    }
-    if (!insertField) {
-        throw new Error("Missing insert field");
-    }
-    if (!insertSubmit) {
-        throw new Error("Missing insert submit");
-    }
-    if (!deleteSubmit) {
-        throw new Error("Missing delete submit");
-    }
-    if (!clearSubmit) {
-        throw new Error("Missing clear submit");
-    }
-
-    return {
-        insertSelect,
-        insertField,
-        insertSubmit,
-        deleteSubmit,
-        clearSubmit,
-    };
 }

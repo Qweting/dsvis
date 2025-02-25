@@ -1,4 +1,5 @@
 import { addReturnSubmit, Engine } from "./engine";
+import { CollectionToolbar } from "./toolbars/collection-toolbar";
 import { AVL } from "./trees/AVL";
 import { BST } from "./trees/BST";
 import { BTree } from "./trees/BTree";
@@ -55,7 +56,7 @@ function initialiseCollections(containerID: string) {
         window.location.reload();
     });
 
-    const toolbar = getCollectionsToolbar(CollectionEngine.container);
+    const toolbar = new CollectionToolbar(CollectionEngine.container);
 
     toolbar.insertSelect.addEventListener("change", () => {
         toolbar.insertField.value = toolbar.insertSelect.value;
@@ -90,66 +91,4 @@ function initialiseCollections(containerID: string) {
     toolbar.clearSubmit.addEventListener("click", () =>
         CollectionEngine.confirmResetAll()
     );
-}
-
-function getCollectionsToolbar(container: HTMLElement) {
-    const insertSelect = container.querySelector<HTMLSelectElement>(
-        "select.insertSelect"
-    );
-    const insertField =
-        container.querySelector<HTMLInputElement>("input.insertField");
-    const insertSubmit =
-        container.querySelector<HTMLInputElement>("input.insertSubmit");
-    const findField =
-        container.querySelector<HTMLInputElement>("input.findField");
-    const findSubmit =
-        container.querySelector<HTMLInputElement>("input.findSubmit");
-    const deleteField =
-        container.querySelector<HTMLInputElement>("input.deleteField");
-    const deleteSubmit =
-        container.querySelector<HTMLInputElement>("input.deleteSubmit");
-    const printSubmit =
-        container.querySelector<HTMLInputElement>("input.printSubmit");
-    const clearSubmit =
-        container.querySelector<HTMLInputElement>("input.clearSubmit");
-
-    if (!insertSelect) {
-        throw new Error("Missing insert select");
-    }
-    if (!insertField) {
-        throw new Error("Missing insert field");
-    }
-    if (!insertSubmit) {
-        throw new Error("Missing insert submit");
-    }
-    if (!findField) {
-        throw new Error("Missing find field");
-    }
-    if (!findSubmit) {
-        throw new Error("Missing find submit");
-    }
-    if (!deleteField) {
-        throw new Error("Missing delete field");
-    }
-    if (!deleteSubmit) {
-        throw new Error("Missing delete submit");
-    }
-    if (!printSubmit) {
-        throw new Error("Missing print submit");
-    }
-    if (!clearSubmit) {
-        throw new Error("Missing clear submit");
-    }
-
-    return {
-        insertSelect,
-        insertField,
-        insertSubmit,
-        findField,
-        findSubmit,
-        deleteField,
-        deleteSubmit,
-        printSubmit,
-        clearSubmit,
-    };
 }

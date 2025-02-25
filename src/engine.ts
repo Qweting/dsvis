@@ -1,19 +1,6 @@
 import { Element, Text } from "@svgdotjs/svg.js";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
-
-export type EngineToolbarItems = {
-    animationSpeed: HTMLSelectElement;
-    objectSize: HTMLSelectElement;
-
-    generalControls: HTMLFieldSetElement;
-    algorithmControls: HTMLFieldSetElement;
-
-    stepForward: HTMLButtonElement;
-    stepBackward: HTMLButtonElement;
-    toggleRunner: HTMLButtonElement;
-    fastForward: HTMLButtonElement;
-    fastBackward: HTMLButtonElement;
-};
+import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
 type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
@@ -78,7 +65,7 @@ export class Engine {
     };
 
     container: HTMLElement;
-    toolbar: EngineToolbarItems;
+    toolbar: EngineToolbar;
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     currentAction: number = 0; // was = null before, this should work better
     currentStep: number = 0; // was = null before, this should work better
@@ -108,19 +95,11 @@ export class Engine {
     };
 
     getAnimationSpeed(): number {
-        if (this.toolbar.animationSpeed) {
-            return parseInt(this.toolbar.animationSpeed?.value);
-        }
-
-        return this.$Svg.animationSpeed;
+        return parseInt(this.toolbar.animationSpeed.value);
     }
 
     getObjectSize(): number {
-        if (this.toolbar.objectSize) {
-            return parseInt(this.toolbar.objectSize?.value);
-        }
-
-        return this.$Svg.objectSize;
+        return parseInt(this.toolbar.objectSize.value);
     }
 
     getNodeSpacing(): number {
@@ -156,7 +135,7 @@ export class Engine {
         }
 
         this.container = container;
-        this.toolbar = this.getToolbar();
+        this.toolbar = new EngineToolbar(container);
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -201,83 +180,6 @@ export class Engine {
             body,
             printer,
             status,
-        };
-    }
-
-    getToolbar(): EngineToolbarItems {
-        const generalControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.generalControls"
-            );
-        const algorithmControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.algorithmControls"
-            );
-
-        const stepForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.stepForward"
-            );
-        const stepBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.stepBackward"
-        );
-        const toggleRunner = this.container.querySelector<HTMLButtonElement>(
-            "button.toggleRunner"
-        );
-        const fastForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.fastForward"
-            );
-        const fastBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.fastBackward"
-        );
-        const objectSize =
-            this.container.querySelector<HTMLSelectElement>(
-                "select.objectSize"
-            );
-        const animationSpeed = this.container.querySelector<HTMLSelectElement>(
-            "select.animationSpeed"
-        );
-
-        if (!generalControls) {
-            throw new Error("Missing general controls fieldset");
-        }
-        if (!algorithmControls) {
-            throw new Error("Missing algorithm controls fieldset");
-        }
-
-        if (!stepForward) {
-            throw new Error("Missing step forward button");
-        }
-        if (!stepBackward) {
-            throw new Error("Missing step backward button");
-        }
-        if (!toggleRunner) {
-            throw new Error("Missing toggle runner button");
-        }
-        if (!fastForward) {
-            throw new Error("Missing fast forward button");
-        }
-        if (!fastBackward) {
-            throw new Error("Missing fast backward button");
-        }
-        if (!objectSize) {
-            throw new Error("Missing object size select");
-        }
-        if (!animationSpeed) {
-            throw new Error("Missing animation speed select");
-        }
-
-        return {
-            generalControls,
-            algorithmControls,
-            stepForward,
-            stepBackward,
-            toggleRunner,
-            fastForward,
-            fastBackward,
-            objectSize,
-            animationSpeed,
         };
     }
 
@@ -769,16 +671,11 @@ export class Engine {
     }
 
     isRunning(): boolean {
-        return (
-            this.toolbar.toggleRunner?.classList.contains("selected") || false
-        );
+        return this.toolbar.toggleRunner.classList.contains("selected");
     }
 
     setRunning(running: boolean): this {
-        const classes = this.toolbar.toggleRunner?.classList;
-        if (classes === undefined) {
-            throw new Error("Can not access toggleRunner");
-        }
+        const classes = this.toolbar.toggleRunner.classList;
         if (running) {
             classes.add("selected");
         } else {

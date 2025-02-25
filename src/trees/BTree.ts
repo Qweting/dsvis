@@ -2,18 +2,14 @@ import { Text } from "@svgdotjs/svg.js";
 import {
     compare,
     Engine,
-    EngineToolbarItems,
     MessagesObject,
     parseValues,
     updateDefault,
 } from "../../src/engine";
 import { BTreeNode } from "../../src/objects/btree-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
-
-type BTreeToolbarItems = EngineToolbarItems & {
-    maxDegree: HTMLSelectElement;
-};
 
 const BTreeMessages = {
     find: {
@@ -58,39 +54,12 @@ export class BTree extends Engine {
 
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
 
-    toolbar!: BTreeToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
+    toolbar: BTreeToolbar;
 
     constructor(containerSelector: string) {
         super(containerSelector);
-    }
 
-    getToolbar(): BTreeToolbarItems {
-        const toolbar = super.getToolbar();
-
-        toolbar.algorithmControls.insertAdjacentHTML(
-            "beforeend",
-            `<span class="formgroup"><label>
-        Max degree:
-        <select class="maxDegree disableWhenRunning">
-          <option value="3">2/3-tree</option>
-          <option value="4">2/3/4-tree</option>
-          <option value="5">Max degree 5</option>
-          <option value="6">Max degree 6</option>
-        </select>
-      </label></span>`
-        );
-
-        const maxDegree =
-            this.container.querySelector<HTMLSelectElement>("select.maxDegree");
-
-        if (!maxDegree) {
-            throw new Error("Could not find max degree select element");
-        }
-
-        return {
-            ...toolbar,
-            maxDegree,
-        };
+        this.toolbar = new BTreeToolbar(this.container);
     }
 
     initialise(initialValues = null) {
@@ -111,13 +80,13 @@ export class BTree extends Engine {
     initToolbar() {
         super.initToolbar();
 
-        this.toolbar.maxDegree?.addEventListener("change", () =>
+        this.toolbar.maxDegree.addEventListener("change", () =>
             this.confirmResetAll()
         );
     }
 
     getMaxDegree() {
-        return parseInt(this.toolbar.maxDegree?.value || "0");
+        return parseInt(this.toolbar.maxDegree.value);
     }
 
     getMaxKeys() {
