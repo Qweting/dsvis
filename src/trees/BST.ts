@@ -6,7 +6,8 @@ import {
     MessagesObject,
     parseValues,
 } from "../../src/engine";
-import { BinaryNode } from "../objects/binary-node";
+import { TextCircle } from "../../src/objects/text-circle";
+import { BinaryDir, BinaryNode } from "../objects/binary-node";
 import { HighlightCircle } from "../objects/highlight-circle";
 
 type BSTToolbarItems = EngineToolbarItems & {
@@ -21,13 +22,13 @@ export const BSTMessages = {
         start: (value: string) => `Searching for ${value}`,
         found: (value: string) => `Found ${value}`,
         notfound: (value: string) => `Did not find ${value}`,
-        look: (direction: "left" | "right") => `Look into ${direction} child`,
+        look: (direction: BinaryDir) => `Look into ${direction} child`,
     },
     insert: {
         newroot: (value: string) => `Create a new tree root ${value}`,
         search: (value: string) => `Searching for node to insert ${value}`,
         exists: (node: string) => `There is already a node ${node}`,
-        child: (value: string, direction: "left" | "right") =>
+        child: (value: string, direction: BinaryDir) =>
             `Insert ${value} as ${direction} child`,
     },
     delete: {
@@ -52,23 +53,20 @@ export const BSTMessages = {
         leaf: (node: string) => `Remove leaf node ${node}`,
     },
     rotate: {
-        single: (node: string, dir: "left" | "right") =>
-            `Rotate ${node} ${dir}`,
+        single: (node: string, dir: BinaryDir) => `Rotate ${node} ${dir}`,
         zigzag: (
             child: string,
-            dir1: "left" | "right",
+            dir1: BinaryDir,
             node: string,
-            dir2: "left" | "right"
+            dir2: BinaryDir
         ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
     },
 };
 
 export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     messages: MessagesObject = BSTMessages;
-
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
-
     toolbar!: BSTToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
     constructor(containerSelector: string) {
@@ -104,11 +102,12 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     async resetAlgorithm(): Promise<void> {
         await super.resetAlgorithm();
         this.treeRoot = null;
+
         if (this.initialValues) {
-            this.State.resetting = true;
+            this.state.resetting = true;
             // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
             await this.insert(...this.initialValues);
-            this.State.resetting = false;
+            this.state.resetting = false;
         }
     }
 
@@ -118,14 +117,17 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         this.toolbar.showNullNodes.addEventListener("change", () =>
             this.toggleNullNodes(null)
         );
+
         this.toggleNullNodes(true);
     }
 
     toggleNullNodes(show: boolean | null): this {
-        if (show == null) {
+        if (show === null) {
             show = this.toolbar.showNullNodes.checked;
         }
+
         this.toolbar.showNullNodes.checked = show;
+
         if (show) {
             this.Svg.addClass("shownullnodes");
         } else {
@@ -135,22 +137,20 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     }
 
     newNode(text: string): BinaryNode {
-        return this.Svg.binaryNode(
-            text,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        return this.Svg.put(
+            new BinaryNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     resizeTree(): this {
-        const animate = !this.State.resetting;
+        const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
             this.getNodeSpacing(),
             animate ? this.$Svg.animationSpeed : 0
         );
+
         return this;
     }
 
@@ -168,35 +168,34 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
             await this.pause("general.empty");
             return { success: false, node: null };
         }
+
         await this.pause("find.start", value);
         const found = await this.findHelper(value);
-        found.node?.setHighlight(true);
+
+        found.node.setHighlight(true);
         const path = found.success ? "find.found" : "find.notfound";
         await this.pause(path, value);
-        found.node?.setHighlight(false);
+        found.node.setHighlight(false);
+
         return found;
     }
 
-    // TODO: Fix so that we know that we always return a node
-    // TODO: Change success to found because we always find something
-    async findHelper(value: string | number): Promise<
-        | {
-              success: true;
-              node: Node;
-          }
-        | {
-              success: false;
-              node: Node | null;
-          }
-    > {
-        let parent: Node | null = null;
+    async findHelper(value: string | number) {
+        if (!this.treeRoot) {
+            throw new Error(
+                "Expected root node to exist when find helper was called"
+            );
+        }
+
+        let parent: Node = this.treeRoot;
         let node: Node | null = this.treeRoot;
-        const pointer = this.Svg.highlightCircle(
-            node?.cx() || 0,
-            node?.cy() || 0,
+        const pointer = this.Svg.put(new HighlightCircle()).init(
+            this.treeRoot.cx(),
+            this.treeRoot.cy(),
             this.getObjectSize(),
             this.getStrokeWidth()
         );
+
         while (node) {
             node.setHighlight(true);
             const cmp = compare(value, node.getText());
@@ -205,6 +204,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
                 node.setHighlight(false);
                 return { success: true, node: node };
             }
+
             const direction = cmp < 0 ? "left" : "right";
             node.setChildHighlight(direction, true);
             parent = node;
@@ -216,14 +216,15 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
                     this.getAnimationSpeed()
                 );
             }
+
             await this.pause("find.look", direction);
             parent.setChildHighlight(direction, false);
         }
+
         pointer.remove();
         return { success: false, node: parent };
     }
 
-    // TODO: Could be changed to only return the success part
     async insertOne(value: string): Promise<{
         success: boolean;
         node: Node | null;
@@ -239,116 +240,128 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         await this.pause("insert.search", value);
         const found = await this.findHelper(value);
         if (found.success) {
-            found.node?.setHighlight(true);
+            found.node.setHighlight(true);
             await this.pause("insert.exists", found.node);
-            found.node?.setHighlight(false);
+            found.node.setHighlight(false);
             return { success: false, node: found.node };
         }
+
         const child = this.newNode(value) as Node;
-        const cmp = compare(value, found.node?.getText() || "");
+        const cmp = compare(value, found.node.getText());
         const direction = cmp < 0 ? "left" : "right";
-        found.node?.setChild(direction, child, this.getStrokeWidth());
+
+        found.node.setChild(direction, child, this.getStrokeWidth());
         child.setHighlight(true);
-        found.node?.setChildHighlight(direction, true);
+        found.node.setChildHighlight(direction, true);
         await this.pause("insert.child", value, direction);
-        found.node?.setChildHighlight(direction, false);
+        found.node.setChildHighlight(direction, false);
         child.setHighlight(false);
+
         this.resizeTree();
         await this.pause(undefined);
+
         return { success: true, node: child };
     }
 
     // TODO: update type with separate for success true and false
     async delete(value: string | number): Promise<{
         success: boolean;
-        direction: "left" | "right" | null;
+        direction: BinaryDir | null;
         parent: Node | null;
     } | null> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return null;
         }
+
         await this.pause("delete.search", value);
         const found = await this.findHelper(value);
         if (!found.success) {
-            found.node?.setHighlight(true);
+            found.node.setHighlight(true);
             await this.pause("delete.notexists", value);
-            found.node?.setHighlight(false);
+            found.node.setHighlight(false);
             const direction =
-                compare(value, found.node?.getText() || "") < 0
-                    ? "left"
-                    : "right";
+                compare(value, found.node.getText()) < 0 ? "left" : "right";
             return { success: false, direction: direction, parent: found.node };
         }
-        found.node?.setHighlight(true);
+
+        found.node.setHighlight(true);
         await this.pause("delete.found", value);
         return await this.deleteHelper(found.node);
     }
 
-    async deleteHelper(node: Node | null): Promise<{
-        success: boolean;
-        direction: "left" | "right" | null;
-        parent: Node | null;
-    }> {
+    async deleteHelper(node: Node) {
         if (!(node?.getLeft() && node?.getRight())) {
             return await this.deleteNode(node);
         }
-        const pointer = this.Svg.highlightCircle(
+
+        // Below we know that we have both left and right children
+
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
             this.getObjectSize(),
             this.getStrokeWidth()
         );
+
         node.setHighlight(false);
         node.addClass("marked");
         await this.pause("delete.predecessor.search", node);
 
-        let predecessor = node.getLeft();
+        let predecessor = node.getLeft()!;
         while (true) {
-            predecessor?.setParentHighlight(true);
+            predecessor.setParentHighlight(true);
             pointer.setCenter(
-                predecessor?.cx() || 0,
-                predecessor?.cy() || 0,
+                predecessor.cx(),
+                predecessor.cy(),
                 this.getAnimationSpeed()
             );
             await this.pause(undefined);
-            predecessor?.setParentHighlight(false);
-            if (!predecessor?.getRight()) {
+            predecessor.setParentHighlight(false);
+            if (!predecessor.getRight()) {
                 break;
             }
-            predecessor = predecessor.getRight();
+
+            predecessor = predecessor.getRight()!;
         }
-        predecessor?.setHighlight(true);
+
+        predecessor.setHighlight(true);
         pointer.remove();
-        const newText = predecessor?.getText();
-        const moving = this.Svg.textCircle(
-            newText || "",
-            predecessor?.cx() || 0,
-            predecessor?.cy() || 0,
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const newText = predecessor.getText();
+        const moving = this.Svg.put(
+            new TextCircle(newText, this.getObjectSize(), this.getStrokeWidth())
+        ).init(predecessor.cx(), predecessor.cy());
         moving.addClass("unfilled");
         moving.setHighlight(true);
         await this.pause("delete.predecessor.replace", node, predecessor);
+
         moving.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
         node.setText("");
         await this.pause(undefined);
-        node.setText(newText || "");
+
+        node.setText(newText);
         moving.remove();
         node.removeClass("marked");
         await this.pause("delete.predecessor.delete", predecessor);
+
         return await this.deleteNode(predecessor);
     }
 
-    async deleteNode(node: Node | null | undefined): Promise<{
-        success: boolean;
-        direction: "left" | "right" | null;
+    async deleteNode(node: Node): Promise<{
+        success: true;
+        direction: BinaryDir | null;
         parent: Node | null;
     }> {
         // The node will NOT have two children - this has been taken care of by deleteHelper
-        const child = node?.getLeft() || node?.getRight();
-        const parent = node?.getParent();
+        if (node.getLeft() && node.getRight()) {
+            throw new Error(
+                "Expected node to only have one or zero children when delete node was called"
+            );
+        }
+
+        const child = node.getLeft() || node.getRight();
+        const parent = node.getParent();
+
         if (!parent) {
             if (!child) {
                 this.treeRoot = null;
@@ -357,43 +370,51 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
                 this.treeRoot = child;
                 await this.pause("delete.root.onechild", child, node);
             }
-            node?.remove();
+
+            node.remove();
             this.resizeTree();
             await this.pause(undefined);
+
             return { success: true, direction: null, parent: null };
         }
 
         const direction = parent.getLeft() === node ? "left" : "right";
+
         if (child) {
-            node?.setHighlight(false);
+            node.setHighlight(false);
+
             if (child === parent.getLeft()?.getLeft()) {
-                node?.dmoveCenter(
+                node.dmoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
                 );
             }
+
             if (child === parent.getRight()?.getRight()) {
-                node?.dmoveCenter(
+                node.dmoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
                 );
             }
+
             parent.setChild(direction, child, this.getStrokeWidth());
             child.setHighlight(true);
             parent.setChildHighlight(direction, true);
             await this.pause("delete.redirect", parent, child);
             parent.setChildHighlight(direction, false);
             child.setHighlight(false);
-            node?.setHighlight(true);
+            node.setHighlight(true);
             await this.pause("delete.node", node);
         } else {
             await this.pause("delete.leaf", node);
         }
-        node?.remove();
+
+        node.remove();
         this.resizeTree();
         await this.pause(undefined);
+
         return { success: true, direction: direction, parent: parent };
     }
 
@@ -402,18 +423,25 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
             await this.pause("general.empty");
             return;
         }
+
         const { x, y } = this.info.printer.bbox();
+
         const printed = [
             this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
-        const pointer = this.Svg.highlightCircle(
+
+        const pointer = this.Svg.put(new HighlightCircle()).init(
             ...this.getNodeStart(),
             this.getObjectSize(),
             this.getStrokeWidth()
         );
+
         await this.printHelper(this.treeRoot, pointer, printed);
+
         pointer.remove();
+
         await this.pause(undefined);
+
         for (const lbl of printed) {
             lbl.remove();
         }
@@ -426,23 +454,27 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     ): Promise<void> {
         pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
         await this.pause(undefined);
+
         if (node.getLeft()) {
             await this.printHelper(node.getLeft()!, pointer, printed); // ! Because checked above
             pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
             await this.pause(undefined);
         }
+
         const lbl = this.Svg.text(node.getText()).center(node.cx(), node.cy());
         await this.pause(undefined);
+
         const last = printed[printed.length - 1];
         const spacing = this.getNodeSpacing() / 2;
         this.animate(lbl)
             .cy(last.cy())
             .x(last.bbox().x2 + spacing);
+
         printed.push(lbl);
         await this.pause(undefined);
+
         if (node.getRight()) {
             await this.printHelper(node.getRight()!, pointer, printed);
-            this.animate(pointer); // Temporary until we find a way to animate setCenter
             pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
             await this.pause(undefined);
         }
@@ -460,8 +492,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         // This is implemented by, e.g., AVL trees
     }
 
-    async doubleRotate(firstDir: "left" | "right", node: Node): Promise<Node> {
-        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
+    async doubleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
 
@@ -474,7 +505,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return await this.singleRotate(firstDir, node);
     }
 
-    async singleRotate(firstDir: "left" | "right", node: Node): Promise<Node> {
+    async singleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         // So, if left==="right", then we rotate right.
         const secondDir = firstDir === "left" ? "right" : "left";
@@ -489,16 +520,17 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         const C = B.getChild(firstDir) as Node | null;
 
         A.setChildHighlight(secondDir, true);
-        B?.setHighlight(true);
+        B.setHighlight(true);
         await this.pause("rotate.single", A, firstDir);
 
         const parent = A.getParent();
         if (parent) {
             const direction = parent.getLeft() === A ? "left" : "right";
-            B?.setParent(direction, parent, this.getStrokeWidth());
+            B.setParent(direction, parent, this.getStrokeWidth());
         } else {
             this.treeRoot = B;
         }
+
         A.setChild(secondDir, C, this.getStrokeWidth());
         B.setChild(firstDir, A, this.getStrokeWidth());
 
@@ -512,6 +544,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         A.setHighlight(false);
         await this.resetHeight(A);
         await this.resetHeight(B);
+
         return B;
     }
 }

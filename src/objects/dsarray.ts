@@ -20,10 +20,7 @@ export class DSArray extends G {
     init(size: number, x: number, y: number) {
         this.setSize(size);
         this.clear();
-
-        if (x && y) {
-            this.center(x, y);
-        }
+        this.center(x, y);
         return this;
     }
 

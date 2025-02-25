@@ -14,9 +14,8 @@ export class TextCircle extends G {
     init(x: number, y: number): this {
         this.$circle.center(0, 0);
         this.$text.center(0, 0);
-        if (x && y) {
-            this.center(x, y);
-        }
+        this.center(x, y);
+
         return this;
     }
 

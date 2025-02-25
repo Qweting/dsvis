@@ -1,6 +1,8 @@
 import { addReturnSubmit, compare, NBSP } from "../../src/engine";
 import { AVLNode } from "../../src/objects/avl-node";
-import { Children } from "../../src/objects/binary-node";
+import { BinaryDir } from "../../src/objects/binary-node";
+import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { TextCircle } from "../../src/objects/text-circle";
 import { BST } from "../../src/trees/BST";
 
 export class AVLQuiz extends BST<AVLNode> {
@@ -80,18 +82,15 @@ export class AVLQuiz extends BST<AVLNode> {
     }
 
     newNode(text: string) {
-        return this.Svg.avlNode(
-            text,
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        return this.Svg.put(
+            new AVLNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     async setCurrent(node: AVLNode | null, animate: boolean) {
         this.current?.setHighlight(false);
         if (animate && this.current && node) {
-            const cursor = this.Svg.highlightCircle(
+            const cursor = this.Svg.put(new HighlightCircle()).init(
                 this.current.cx(),
                 this.current.cy(),
                 this.getObjectSize(),
@@ -118,7 +117,7 @@ export class AVLQuiz extends BST<AVLNode> {
         await this.setCurrent(parent, true);
     }
 
-    async moveChild(direction: Children) {
+    async moveChild(direction: BinaryDir) {
         const child = this.current?.getChild(direction);
         if (!child) {
             await this.pause(`There is no ${direction} child!`);
@@ -147,13 +146,13 @@ export class AVLQuiz extends BST<AVLNode> {
             return;
         }
 
-        const moving = this.Svg.textCircle(
-            this.current.getText(),
-            this.current.cx(),
-            this.current.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
-        );
+        const moving = this.Svg.put(
+            new TextCircle(
+                this.current.getText(),
+                this.getObjectSize(),
+                this.getStrokeWidth()
+            )
+        ).init(this.current.cx(), this.current.cy());
         moving.setHighlight(true);
         await this.pause(
             `Replace the value of ${this.mark} with ${this.current}`
@@ -176,7 +175,7 @@ export class AVLQuiz extends BST<AVLNode> {
         await this.insertBelow("right", value);
     }
 
-    async insertBelow(direction: Children, value: string) {
+    async insertBelow(direction: BinaryDir, value: string) {
         if (!this.current) {
             throw new Error("There is no current node");
             return;
@@ -220,7 +219,7 @@ export class AVLQuiz extends BST<AVLNode> {
         this.updateHeights();
     }
 
-    async rotateCurrent(direction: Children) {
+    async rotateCurrent(direction: BinaryDir) {
         if (!this.current) {
             throw new Error("Can not rotate a node that is null");
         }

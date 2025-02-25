@@ -15,9 +15,22 @@ export type EngineToolbarItems = {
     fastBackward: HTMLButtonElement;
 };
 
-type Listeners = "click" | "change"; // TODO: Better naming.
+type ListenerType = "click" | "change";
+type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
+type IdleListeners = Record<
+    string,
+    { type: ListenerType; condition: () => boolean; handler: () => void }
+>;
+type AsyncListeners = Record<
+    string,
+    {
+        type: ListenerType;
+        handler: (resolve: Resolve, reject: Reject) => void;
+    }
+>;
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
+type Status = "running" | "paused" | "inactive";
 
 export interface MessagesObject {
     [key: string]:
@@ -38,7 +51,7 @@ export class Engine {
 
     Svg: Svg;
 
-    messages: MessagesObject | undefined;
+    messages: MessagesObject = {};
 
     $Svg = {
         width: 1000,
@@ -67,11 +80,11 @@ export class Engine {
     container: HTMLElement;
     toolbar: EngineToolbarItems;
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
-    CurrentAction: number = 0; // was = null before, this should work better
-    CurrentStep: number = 0; // was = null before, this should work better
+    currentAction: number = 0; // was = null before, this should work better
+    currentStep: number = 0; // was = null before, this should work better
     DEBUG = true;
 
-    State: {
+    state: {
         resetting: boolean;
         animating: boolean;
     } = {
@@ -86,7 +99,7 @@ export class Engine {
         status: Text;
     };
 
-    EventListeners: Record<string, Partial<Record<Listeners, () => void>>> = {
+    eventListeners: EventListeners = {
         stepForward: {},
         stepBackward: {},
         fastForward: {},
@@ -330,7 +343,7 @@ export class Engine {
         );
     }
 
-    setStatus(status: "running" | "paused" | "inactive", timeout = 10): void {
+    setStatus(status: Status, timeout = 10): void {
         const currentStatus = this.info.status;
 
         setTimeout(() => {
@@ -361,10 +374,7 @@ export class Engine {
     ///////////////////////////////////////////////////////////////////////////////
     // The default listeners
 
-    $IdleListeners: Record<
-        string,
-        { type: Listeners; condition: () => boolean; handler: () => void }
-    > = {
+    $IdleListeners: IdleListeners = {
         stepBackward: {
             type: "click",
             condition: () => this.actions.length > 0,
@@ -402,13 +412,7 @@ export class Engine {
     };
 
     // TODO: Fix some nice type for this
-    $AsyncListeners: Record<
-        string,
-        {
-            type: Listeners;
-            handler: (resolve: Resolve, reject: Reject) => void;
-        }
-    > = {
+    $AsyncListeners: AsyncListeners = {
         stepForward: {
             type: "click",
             handler: (resolve, reject) => {
@@ -419,7 +423,7 @@ export class Engine {
         fastForward: {
             type: "click",
             handler: (resolve, reject) => {
-                this.actions[this.CurrentAction].nsteps =
+                this.actions[this.currentAction].nsteps =
                     Number.MAX_SAFE_INTEGER;
                 this.fastForward(resolve, reject);
             },
@@ -431,7 +435,7 @@ export class Engine {
                 if (this.isRunning()) {
                     this.stepForward(resolve, reject);
                 } else {
-                    this.CurrentStep++;
+                    this.currentStep++;
                     resolve(undefined);
                 }
             },
@@ -439,7 +443,7 @@ export class Engine {
         stepBackward: {
             type: "click",
             handler: (resolve, reject) =>
-                reject({ until: this.CurrentStep - 1, running: false }),
+                reject({ until: this.currentStep - 1, running: false }),
         },
         fastBackward: {
             type: "click",
@@ -447,7 +451,7 @@ export class Engine {
         },
         objectSize: {
             type: "change",
-            handler: (resolve, reject) => reject({ until: this.CurrentStep }),
+            handler: (resolve, reject) => reject({ until: this.currentStep }),
         },
     };
 
@@ -498,8 +502,8 @@ export class Engine {
         }
     }
 
-    addListener(id: string, type: Listeners, handler: () => void): void {
-        const listeners = this.EventListeners;
+    addListener(id: string, type: ListenerType, handler: () => void): void {
+        const listeners = this.eventListeners;
         if (!listeners[id]) {
             listeners[id] = {};
         }
@@ -519,7 +523,7 @@ export class Engine {
     }
 
     removeAllListeners(): void {
-        const listeners = this.EventListeners;
+        const listeners = this.eventListeners;
 
         for (const id in listeners) {
             const elem = this.toolbar[id as keyof typeof this.toolbar];
@@ -534,7 +538,7 @@ export class Engine {
             for (const type in listeners[id]) {
                 elem.removeEventListener(
                     type,
-                    listeners[id][type as Listeners]!
+                    listeners[id][type as ListenerType]!
                 );
             } // ! because we know that the type exists
             listeners[id] = {};
@@ -583,10 +587,10 @@ export class Engine {
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].nsteps =
-                this.CurrentStep || 0; // TODO: Not sure if this is correct
+                this.currentStep || 0; // TODO: Not sure if this is correct
             if (this.DEBUG) {
                 console.log(
-                    `DONE / ${this.CurrentStep}: ${JSON.stringify(
+                    `DONE / ${this.currentStep}: ${JSON.stringify(
                         this.actions
                     )}`
                 );
@@ -610,7 +614,7 @@ export class Engine {
             until = reason.until;
             if (this.DEBUG) {
                 console.log(
-                    `RERUN ${until} / ${this.CurrentStep}: ${JSON.stringify(
+                    `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
                         this.actions
                     )}`
                 );
@@ -633,8 +637,8 @@ export class Engine {
         for (let nAction = 0; nAction < this.actions.length; nAction++) {
             this.resetListeners(true);
             const action = this.actions[nAction];
-            this.CurrentAction = nAction;
-            this.CurrentStep = 0;
+            this.currentAction = nAction;
+            this.currentStep = 0;
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
             let message = messageArr.join(" ");
@@ -671,21 +675,21 @@ export class Engine {
         if (this.DEBUG) {
             console.log(
                 `${
-                    this.CurrentStep
+                    this.currentStep
                 }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
                     this.actions
                 )}`
             );
         }
-        if (this.State.resetting) {
+        if (this.state.resetting) {
             return null;
         }
-        if (title !== null) {
+        if (title !== undefined) {
             this.info.body.text(title);
         }
         return new Promise((resolve, reject) => {
-            const action = this.actions[this.CurrentAction];
-            if (action.nsteps != null && this.CurrentStep < action.nsteps) {
+            const action = this.actions[this.currentAction];
+            if (action.nsteps != null && this.currentStep < action.nsteps) {
                 this.fastForward(resolve, reject);
             } else {
                 let runnerTimer: NodeJS.Timeout | undefined = undefined;
@@ -707,22 +711,19 @@ export class Engine {
         });
     }
 
-    // TODO: Fix type of title and update return type
-    getMessage(message: string | undefined, ...args: unknown[]) {
-        if (Array.isArray(message)) {
-            [message, ...args] = [...message, ...args];
-        } // TODO: is this used??
+    getMessage(
+        message: string | undefined,
+        ...args: unknown[]
+    ): string | undefined {
         if (typeof message !== "string") {
             if (args.length > 0) {
                 console.error("Unknown message:", message, ...args);
             }
-            return message;
+            return undefined;
         }
-        if (!message) {
-            return args.join("\n");
-        }
-        // @ts-expect-error this.constructor.messages dont know what it is
-        let title = this.messages || this.constructor.messages || {};
+
+        let title: MessagesObject[string] = this.messages;
+
         const keys = message.split(".");
         if (!(keys[0] in title)) {
             return [message, ...args].join("\n");
@@ -737,10 +738,7 @@ export class Engine {
         if (typeof title === "function") {
             title = title(...args);
         }
-        if (Array.isArray(title)) {
-            title = title.join("\n");
-        }
-        if (typeof title === "object") {
+        if (typeof title !== "string") {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
@@ -751,18 +749,18 @@ export class Engine {
     }
 
     stepForward(resolve: Resolve, reject: Reject): void {
-        this.CurrentStep++;
-        this.State.animating = true;
+        this.currentStep++;
+        this.state.animating = true;
         resolve(undefined);
     }
 
     fastForward(resolve: Resolve, reject: Reject): void {
-        const action = this.actions[this.CurrentAction];
-        if (this.CurrentStep >= action.nsteps) {
-            action.nsteps = this.CurrentStep;
+        const action = this.actions[this.currentAction];
+        if (this.currentStep >= action.nsteps) {
+            action.nsteps = this.currentStep;
         }
-        this.CurrentStep++;
-        this.State.animating = false;
+        this.currentStep++;
+        this.state.animating = false;
         if (this.DEBUG) {
             setTimeout(resolve, 10);
         } else {
@@ -834,11 +832,8 @@ export class Engine {
         }
     }
 
-    // TODO: Fix to match the new layout of basic objects
-    // Will not work right now
-    // TODO: Fix to work with generic objects
     animate(elem: Element, animate = true) {
-        if (this.State.animating && animate) {
+        if (this.state.animating && animate) {
             this.setStatus("running");
             this.setStatus("paused", this.getAnimationSpeed());
             return elem.animate(this.getAnimationSpeed(), 0, "now");
@@ -868,12 +863,28 @@ export function parseValues(
     return values.map((v) => normalizeNumber(v));
 }
 
+type AllowedCharacters =
+    | "int"
+    | "int+"
+    | "float"
+    | "float+"
+    | "ALPHA"
+    | "ALPHA+"
+    | "alpha"
+    | "alpha+"
+    | "ALPHANUM"
+    | "ALPHANUM+"
+    | "alphanum"
+    | "alphanum+";
+
+// Adds "return-to-submit" functionality to a text input field - performs action when the user presses Enter
+// Additionally restricts input to the defined allowed characters (with + meaning spaces are allowed)
 export function addReturnSubmit(
     field: HTMLInputElement,
-    allowed: string,
+    allowed: AllowedCharacters,
     action?: () => void
 ): void {
-    allowed =
+    const allowedCharacters =
         allowed === "int"
             ? "0-9"
             : allowed === "int+"
@@ -899,36 +910,41 @@ export function addReturnSubmit(
             : allowed === "alphanum+"
             ? "a-zA-Z0-9 "
             : allowed;
+    const isAllowed = new RegExp(`[^${allowedCharacters}]`, "g");
 
-    const regex = new RegExp(`[^${allowed}]`, "g");
-
-    const transform: (s: string) => string =
-        allowed === allowed.toUpperCase()
-            ? (s) => s.toUpperCase()
-            : allowed === allowed.toLowerCase()
-            ? (s) => s.toLowerCase()
-            : (s) => s;
+    // Transform case of text input to match allowed
+    function matchAllowedCase(s: string): string {
+        if (allowed === allowed.toUpperCase()) {
+            return s.toUpperCase();
+        } else if (allowed === allowed.toLowerCase()) {
+            return s.toLowerCase();
+        }
+        return s;
+    }
 
     // Idea taken from here: https://stackoverflow.com/a/14719818
-    field.oninput = (event) => {
-        let pos = field.selectionStart || 0; // Correct to add 0?
-        let value = transform(field.value);
-        if (regex.test(value)) {
-            value = value.replace(regex, "");
+    // Block unwanted characters from being typed
+    field.oninput = (_) => {
+        let pos = field.selectionStart || 0;
+        let value = matchAllowedCase(field.value);
+        if (isAllowed.test(value)) {
+            value = value.replace(isAllowed, "");
             pos--;
         }
         field.value = value;
         field.setSelectionRange(pos, pos);
     };
 
-    if (action) {
-        field.onkeydown = (event) => {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                action();
-            }
-        };
+    // Perform action when Enter is pressed
+    if (!action) {
+        return;
     }
+    field.onkeydown = (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            action();
+        }
+    };
 }
 
 // Merges all keys from defaultObject into object

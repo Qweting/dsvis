@@ -5,7 +5,7 @@ import { BTree } from "./trees/BTree";
 import { RedBlack } from "./trees/RedBlack";
 import { SplayTree } from "./trees/SplayTree";
 
-const COLLECTIONS = {
+const COLLECTIONS_CLASSES = {
     BST: BST,
     AVL: AVL,
     RedBlack: RedBlack,
@@ -13,44 +13,32 @@ const COLLECTIONS = {
     BTree: BTree,
 } as const;
 
-type CollectionToolbarItems = {
-    insertSelect: HTMLSelectElement;
-    insertField: HTMLInputElement;
-    insertSubmit: HTMLInputElement;
-    findField: HTMLInputElement;
-    findSubmit: HTMLInputElement;
-    deleteField: HTMLInputElement;
-    deleteSubmit: HTMLInputElement;
-    printSubmit: HTMLInputElement;
-    clearSubmit: HTMLInputElement;
-};
-
 initialiseCollections("#collectionsContainer");
 
 function initialiseCollections(containerID: string) {
     const algoSelector = document.querySelector<HTMLSelectElement>(
         `${containerID} select.algorithmSelector`
     );
-
     if (!algoSelector) {
         throw new Error("Could not find algo selector");
     }
 
+    // Get algorithm class from URL (blank if not found)
     let algo = new URL(window.location.href).searchParams.get("algorithm");
-    if (!(algo && /^[\w.]+$/.test(algo) && algo in COLLECTIONS)) {
+    if (!algo || !(algo in COLLECTIONS_CLASSES)) {
         algo = "";
     }
-    const algoClass = algo as keyof typeof COLLECTIONS | "";
+    const algoClass = algo as keyof typeof COLLECTIONS_CLASSES | "";
     algoSelector.value = algo;
 
-    const Collection = algoClass ? COLLECTIONS[algoClass] : Engine;
+    const Collection = algoClass ? COLLECTIONS_CLASSES[algoClass] : Engine;
     const CollectionEngine = new Collection(containerID);
     CollectionEngine.initialise();
 
     algoSelector.addEventListener("change", () => {
         const searchParams = new URLSearchParams();
 
-        if (algoSelector.value in COLLECTIONS) {
+        if (algoSelector.value in COLLECTIONS_CLASSES) {
             searchParams.set("algorithm", algoSelector.value);
         } else {
             searchParams.delete("algorithm");
@@ -77,7 +65,6 @@ function initialiseCollections(containerID: string) {
     addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
         CollectionEngine.submit("insert", toolbar.insertField)
     );
-
     toolbar.insertSubmit.addEventListener("click", () => {
         CollectionEngine.submit("insert", toolbar.insertField);
     });
@@ -88,15 +75,18 @@ function initialiseCollections(containerID: string) {
     toolbar.findSubmit.addEventListener("click", () =>
         CollectionEngine.submit("find", toolbar.findField)
     );
+
     addReturnSubmit(toolbar.deleteField, "ALPHANUM", () =>
         CollectionEngine.submit("delete", toolbar.deleteField)
     );
     toolbar.deleteSubmit.addEventListener("click", () =>
         CollectionEngine.submit("delete", toolbar.deleteField)
     );
+
     toolbar.printSubmit.addEventListener("click", () =>
         CollectionEngine.submit("print", toolbar.printSubmit)
     );
+
     toolbar.clearSubmit.addEventListener("click", () =>
         CollectionEngine.confirmResetAll()
     );
