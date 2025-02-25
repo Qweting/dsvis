@@ -142,8 +142,8 @@ SVG.DSArray = class DSArray extends SVG.G {
             [x - arrowSize, y - arrowSize], 
             [x + arrowSize, y - arrowSize], 
             [x, y] 
-        ]).fill('none').stroke({ width: 2, color: '#000' }).id(arrowId);
-    
+        ]).fill('none').stroke({ width: 2, color: "#000" }).id(arrowId);
+
         this.add(arrow);
     }
 
@@ -151,6 +151,16 @@ SVG.DSArray = class DSArray extends SVG.G {
         const arrow = this.findOne(`#${arrowId}`);
         if (arrow) {
             arrow.remove();
+        }
+    }
+
+    moveArrow(arrowId, indexTo) {
+        const arrow = this.findOne(`#${arrowId}`);
+        const element = this.$backgrounds[indexTo];
+        const x = this.getCX(indexTo)
+
+        if (arrow) {
+            this.engine().animate(arrow, true).cx(x);
         }
     }
 };

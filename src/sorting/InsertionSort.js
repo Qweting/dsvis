@@ -62,23 +62,6 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
     }
 
 
-    // let index = 0;
-
-    //     //Loop through the list
-    //     while (index < list.length) {
-    //         let x = list[index];
-    //         let j = index;
-    //         //Move the element back as long as it's smaller than the preceeding element
-    //         while (j > 0 && list[j-1] > x){
-    //             list[j] = list[j-1];
-    //             j -= 1;
-    //         }
-    //         list[j] = x;
-    //         index += 1;
-    //     }
-    //     return list;
-
-
     async sort() {
 
         
@@ -90,12 +73,14 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
         for (let i=1; i < this.sortSize; i++) {
             let j = i;
             
+            
             while (j > 0) {
     
 
                 this.heapArray.setIndexHighlight(j, true);
                 this.heapArray.setIndexHighlight(j-1, true);
                 await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(j-1));
+                
 
                 if (DSVis.compare( this.heapArray.getValue(j), this.heapArray.getValue(j-1)) >= 0){
                     await this.pause('sort.smallerLeft', this.heapArray.getValue(j-1), this.heapArray.getValue(j));
@@ -105,12 +90,15 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
                 }
                 
                 await this.swap(j, j-1, 'sort.swap', this.heapArray.getValue(j), this.heapArray.getValue(j-1));
-            
+                
+
                 this.heapArray.setIndexHighlight(j, false);
                 this.heapArray.setIndexHighlight(j-1, false);
                 j -= 1;
                 
+                
             }
+            
         }
         
 
