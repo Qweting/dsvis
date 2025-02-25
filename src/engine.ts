@@ -1,5 +1,6 @@
-import { Element, Text } from "@svgdotjs/svg.js";
+import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
+import { Info, InfoStatus } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
@@ -18,7 +19,6 @@ type AsyncListeners = Record<
 >;
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
-type Status = "running" | "paused" | "inactive";
 
 export interface MessagesObject {
     [key: string]:
@@ -64,12 +64,7 @@ export class Engine {
         animating: false,
     };
 
-    info: {
-        title: Text;
-        body: Text;
-        printer: Text;
-        status: Text;
-    };
+    info: Info;
 
     eventListeners: EventListeners = {
         stepForward: {},
@@ -144,33 +139,7 @@ export class Engine {
             this.Svg.addClass("debug");
         }
 
-        this.info = this.getInfoTexts();
-    }
-
-    getInfoTexts() {
-        const margin = this.$Svg.margin;
-        const h = this.Svg.viewbox().height;
-
-        const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
-        const body = this.Svg.text(NBSP)
-            .addClass("message")
-            .x(margin)
-            .y(2 * margin);
-        const printer = this.Svg.text(NBSP)
-            .addClass("printer")
-            .x(margin)
-            .cy(h - 2 * margin);
-        const status = this.Svg.text(NBSP)
-            .addClass("status-report")
-            .x(margin)
-            .cy(h - margin);
-
-        return {
-            title,
-            body,
-            printer,
-            status,
-        };
+        this.info = new Info(this.Svg, this.$Svg.margin);
     }
 
     initialise(): void {
@@ -221,7 +190,7 @@ export class Engine {
             }
         }
 
-        this.info = this.getInfoTexts();
+        this.info.reset();
         this.updateCSSVariables();
     }
 
@@ -235,32 +204,15 @@ export class Engine {
         );
     }
 
-    setStatus(status: Status, timeout = 10): void {
-        const currentStatus = this.info.status;
-
+    setStatus(status: InfoStatus, timeout = 10): void {
         setTimeout(() => {
-            if (status === "running") {
-                currentStatus
-                    .text("Animating")
-                    .removeClass("paused")
-                    .addClass("running");
-            } else if (status === "paused") {
-                currentStatus
-                    .text("Paused")
-                    .addClass("paused")
-                    .removeClass("running");
-            } else {
-                currentStatus
-                    .text("Idle")
-                    .removeClass("paused")
-                    .removeClass("running");
-            }
+            this.info.setStatus(status);
         }, timeout);
     }
 
     setIdleTitle(): void {
-        this.info.title.text("Select an action from the menu above");
-        this.info.body.text(NBSP);
+        this.info.setTitle("Select an action from the menu above");
+        this.info.setBody(NBSP);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -544,7 +496,7 @@ export class Engine {
                     )}`
                 );
             }
-            this.info.title.text(message);
+            this.info.setTitle(message);
             await this.pause("");
             if (
                 !(
@@ -577,7 +529,7 @@ export class Engine {
             return null;
         }
         if (title !== undefined) {
-            this.info.body.text(title);
+            this.info.setBody(title);
         }
         return new Promise((resolve, reject) => {
             const action = this.actions[this.currentAction];
