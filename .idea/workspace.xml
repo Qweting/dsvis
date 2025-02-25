@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7e4ddeb9-96f0-4672-bb56-09d678023797" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/collections.html" beforeDir="false" afterPath="$PROJECT_DIR$/collections.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prioqueues.html" beforeDir="false" afterPath="$PROJECT_DIR$/prioqueues.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/basic/LinkedList.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/basic/LinkedList.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/basic/LinkedListAnim.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/basic/LinkedListAnim.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heaps/BinaryHeap.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/heaps/BinaryHeap.js" afterDir="false" />
-    </list>
+    <list default="true" id="7e4ddeb9-96f0-4672-bb56-09d678023797" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
