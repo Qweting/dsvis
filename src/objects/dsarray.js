@@ -130,7 +130,7 @@ SVG.DSArray = class DSArray extends SVG.G {
         return this;
     }
 
-    addArrow(index, arrowId="arrow") {
+    addArrow(index, arrowId="arrow", arrowColor) {
         const arrowSize = 10;
         const arrowOffset = 10;
 
@@ -142,7 +142,7 @@ SVG.DSArray = class DSArray extends SVG.G {
             [x - arrowSize, y - arrowSize], 
             [x + arrowSize, y - arrowSize], 
             [x, y] 
-        ]).fill('none').stroke({ width: 2, color: '#000' }).id(arrowId);
+        ]).fill('none').stroke({ width: 2, color: arrowColor }).id(arrowId);
     
         this.add(arrow);
     }
