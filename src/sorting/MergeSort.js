@@ -105,6 +105,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 mergeArray2.setValue(k, arr.getValue(k+mid));
             }
             this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            await this.pause();
+            mergeArray1.center(CX-arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            mergeArray2.center(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             console.log(arr.getCX(0));
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
             //this.mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
