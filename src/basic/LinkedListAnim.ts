@@ -1,7 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
-// Import and export information used by the Javascript linter ESLint:
-/* globals DSVis */
-///////////////////////////////////////////////////////////////////////////////
+import { Text } from "@svgdotjs/svg.js";
+import {
+    compare,
+    Engine,
+    EngineToolbarItems,
+    MessagesObject,
+    parseValues,
+} from "../../src/engine";
 
 import LinkedList from "./LinkedList.js"
 

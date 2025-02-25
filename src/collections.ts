@@ -4,6 +4,7 @@ import { BST } from "./trees/BST";
 import { BTree } from "./trees/BTree";
 import { RedBlack } from "./trees/RedBlack";
 import { SplayTree } from "./trees/SplayTree";
+import { LinkedListAnim } from "./basic/LinkedListAnim";
 
 const COLLECTIONS_CLASSES = {
     BST: BST,
@@ -11,6 +12,7 @@ const COLLECTIONS_CLASSES = {
     RedBlack: RedBlack,
     SplayTree: SplayTree,
     BTree: BTree,
+    LinkedListAnim: LinkedListAnim,
 } as const;
 
 initialiseCollections("#collectionsContainer");
