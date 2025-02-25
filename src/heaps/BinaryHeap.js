@@ -11,6 +11,16 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
     initialise(initialValues = null) {
         this.initialValues = initialValues;
         super.initialise();
+        this.Toolbar.algorithmControls.insertAdjacentHTML("beforeend", `
+            <span class="formgroup"><label>
+                Type of Heap: <select class="heapType disableWhenRunning">
+                    <option value="4">Min-Heap</option>
+                    <option value="5">Max-Heap</option>
+                </select>
+            </label></span>`,
+        );
+        this.Toolbar.heapType = this.Container.querySelector(".heapType");
+        this.Toolbar.heapType.addEventListener("change", () => this.confirmResetAll());
     }
 
     async resetAlgorithm() {
@@ -93,7 +103,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
             const direction = (currentIndex - 1) / 2 === parentIndex ? "left" : "right";
             parentNode.setChildHighlight(direction, true);
             const cmp = DSVis.compare(value, parentValue);
-            if (cmp >= 0) {
+            if (cmp >= 0 && this.Toolbar.heapType.value === "4" || cmp <= 0 && this.Toolbar.heapType.value === "5") {
                 await this.pause('insert.stopShift', parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(parentIndex, false);
@@ -121,7 +131,7 @@ DSVis.BinaryHeap = class BinaryHeap extends DSVis.Engine {
         }
         this.heapSize--;
         const minValue = this.heapArray.getValue(0);
-
+        
         const arrayLabel = this.SVG.textCircle(minValue, this.heapArray.getCX(0), this.heapArray.cy());
         if (this.heapSize === 0) {
             await this.pause('delete.root', minValue);

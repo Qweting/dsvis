@@ -19,17 +19,13 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         await super.resetAlgorithm();
         
         const [xRoot, yRoot] = this.getTreeRoot();
-        
-        if((xRoot-3*xRoot/4*this.getObjectSize()/28) < 0){this.compensate = this.arraySize*6+3*xRoot/4*this.getObjectSize()/28-xRoot}
-        else{this.compensate = 0}
-        
-        this.heapArray = this.SVG.dsArray(this.arraySize, xRoot+this.compensate, yRoot+this.$Svg.margin*4);
-        this.mergeArray1 = this.SVG.dsArray(this.arraySize/2, xRoot+xRoot/2*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*4*this.getObjectSize()/28+this.$Svg.margin*4);
+        this.heapArray = this.SVG.dsArray(1, xRoot, yRoot+this.$Svg.margin*4);
+        /*this.mergeArray1 = this.SVG.dsArray(this.arraySize/2, xRoot+xRoot/2*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*4*this.getObjectSize()/28+this.$Svg.margin*4);
         this.mergeArray2 = this.SVG.dsArray(this.arraySize/2, xRoot-xRoot/2*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*4*this.getObjectSize()/28+this.$Svg.margin*4);
         this.mergeArray3 = this.SVG.dsArray(this.arraySize/4, xRoot-xRoot/4*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*8*this.getObjectSize()/28+this.$Svg.margin*4);
         this.mergeArray4 = this.SVG.dsArray(this.arraySize/4, xRoot+xRoot/4*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*8*this.getObjectSize()/28+this.$Svg.margin*4);
         this.mergeArray5 = this.SVG.dsArray(this.arraySize/4, xRoot-3*xRoot/4*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*8*this.getObjectSize()/28+this.$Svg.margin*4);
-        this.mergeArray6 = this.SVG.dsArray(this.arraySize/4, xRoot+3*xRoot/4*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*8*this.getObjectSize()/28+this.$Svg.margin*4);
+        this.mergeArray6 = this.SVG.dsArray(this.arraySize/4, xRoot+3*xRoot/4*this.getObjectSize()/28+this.compensate, yRoot+this.$Svg.margin*8*this.getObjectSize()/28+this.$Svg.margin*4);*/
         
         if (this.heapArray.x() < this.$Svg.margin)
             this.heapArray.x(this.$Svg.margin);
@@ -43,8 +39,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
     }
 
     async insert(...values) {
-        for (const val of values) await this.insertOne(val);
-        
+        this.heapArray.setSize(this.heapArray.getSize() + values.length);
+        this.heapArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
+        for (const val of values) await this.insertOne(val); 
     }
 
     async swap(j, k, message, ...args) {
@@ -77,7 +74,50 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
 
         this.heapArray.setIndexHighlight(currentIndex, false);
     }
+
+    async sort() {
+        if (this.sortSize <= 1) {
+            await this.pause('general.empty');
+            return;
+        }
+        this.heapArray.setSize(this.heapArray.getSize() - 1);
+        this.heapArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
+        this.mergeSort(this.heapArray, 0, this.heapArray.getSize(), 1);
+    }
+    async mergeSort(arr, left, right, iteration) {
+        if (left >= right){
+            return;}
+    
+        const mid = Math.floor(left + (right - left) / 2);
+        const [xCenter,yCenter] = this.getTreeRoot();
+        const baseY = this.$Svg.margin*4;
+        const CX = arr.getCX(0);
+        console.log(CX);
+        if(arr.getSize() > 2){
+            const mergeArray1 = this.SVG.dsArray(mid-left, CX, arr.cy());
+            for(let k = 0; k < mid; k++){
+                mergeArray1.setValue(k, arr.getValue(k));
+            }
+            this.animate(mergeArray1).cx(CX-arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            
+            const mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(mid), arr.cy());
+            for(let k = 0; k+mid < right; k++){
+                mergeArray2.setValue(k, arr.getValue(k+mid));
+            }
+            this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            console.log(arr.getCX(0));
+            await this.mergeSort(mergeArray1, left, mid, iteration+1);
+            //this.mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
+        }
+        this.merge(arr, left, mid, right);
+    }
+
+    async merge(array,left,mid,right) {
+       return;
+    }
 }
+
 
 
     DSVis.MergeSort.messages = {
