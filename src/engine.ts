@@ -1,4 +1,5 @@
 import { Element, Text } from "@svgdotjs/svg.js";
+import { Cookies } from "./cookies";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
@@ -47,23 +48,7 @@ export class Engine {
         objectSize: 40,
         animationSpeed: 1000, // milliseconds per step
     };
-
-    $COOKIE_EXPIRE_DAYS = 30;
-    $cookies = {
-        animationSpeed: {
-            setCookie: (value: string) => {
-                this.toolbar.animationSpeed.value = value;
-            },
-            getCookie: () => this.getAnimationSpeed(),
-        },
-        objectSize: {
-            setCookie: (value: string) => {
-                this.toolbar.objectSize.value = value;
-            },
-            getCookie: () => this.getObjectSize(),
-        },
-    };
-
+    cookies: Cookies;
     container: HTMLElement;
     toolbar: EngineToolbar;
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
@@ -136,6 +121,11 @@ export class Engine {
 
         this.container = container;
         this.toolbar = new EngineToolbar(container);
+
+        this.cookies = new Cookies({
+            objectSize: this.toolbar.objectSize,
+            animationSpeed: this.toolbar.animationSpeed,
+        });
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -695,35 +685,11 @@ export class Engine {
         if (this.DEBUG) {
             console.log("Loading cookies", document.cookie);
         }
-        const allCookies = document.cookie.split(";");
-        Object.entries(this.$cookies).map(([cookieName, cookieValue]) => {
-            allCookies.map((cookie) => {
-                const splitCookie = cookie.split("=");
-                if (splitCookie.length !== 2) {
-                    throw new Error("Invalid cookie format");
-                }
-                const [documentCookieName, documentCookieValue] = splitCookie;
-                if (documentCookieName.trim() === cookieName) {
-                    const value = decodeURIComponent(documentCookieValue);
-                    cookieValue.setCookie(value);
-                }
-            });
-        });
+        this.cookies.load();
     }
 
     saveCookies(): void {
-        let expires = "";
-        if (this.$COOKIE_EXPIRE_DAYS > 0) {
-            const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
-            expires = `;expires=${exdate.toUTCString()}`;
-        }
-
-        Object.entries(this.$cookies).map(([cookieName, value]) => {
-            const cookieValue = encodeURIComponent(value.getCookie());
-            document.cookie = `${cookieName}=${cookieValue}${expires}`;
-        });
-
+        this.cookies.save();
         if (this.DEBUG) {
             console.log("Setting cookies", document.cookie);
         }
