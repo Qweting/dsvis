@@ -1,7 +1,6 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
 import { Info, InfoStatus } from "./info";
-import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 import { View } from "./view";
 

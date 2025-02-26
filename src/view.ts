@@ -1,5 +1,5 @@
-import { Svg } from "@svgdotjs/svg.js";
 import { Engine } from "./engine";
+import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
 export class View {
     Svg: Svg;
