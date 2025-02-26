@@ -3,6 +3,7 @@ import { Cookies } from "./cookies";
 import { Info, InfoStatus } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { View } from "./view";
 
 type ListenerType = "click" | "change";
 type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
@@ -35,9 +36,7 @@ export interface MessagesObject {
 export const NBSP = "\u00A0";
 
 export class Engine {
-    // Default variable names start with $
-
-    Svg: Svg;
+    view: View;
 
     messages: MessagesObject = {};
 
@@ -74,36 +73,6 @@ export class Engine {
         toggleRunner: {},
     };
 
-    getAnimationSpeed(): number {
-        return parseInt(this.toolbar.animationSpeed.value);
-    }
-
-    getObjectSize(): number {
-        return parseInt(this.toolbar.objectSize.value);
-    }
-
-    getNodeSpacing(): number {
-        return this.getObjectSize();
-    }
-
-    getStrokeWidth(): number {
-        return this.getObjectSize() / 12;
-    }
-
-    getNodeStart(): [number, number] {
-        return [
-            this.$Svg.margin + this.getObjectSize() / 2,
-            this.$Svg.margin * 4,
-        ];
-    }
-
-    getTreeRoot(): [number, number] {
-        return [
-            this.Svg.viewbox().width / 2,
-            2 * this.$Svg.margin + this.getObjectSize() / 2,
-        ];
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
@@ -127,19 +96,17 @@ export class Engine {
             throw new Error("No svg element found");
         }
 
-        this.Svg = new Svg(svgContainer);
-        this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
-        this.Svg.$engine = this;
+        this.view = new View(svgContainer, this);
 
         const debugParam = new URLSearchParams(window.location.href).get(
             "debug"
         );
         this.DEBUG = Boolean(debugParam || false);
         if (this.DEBUG) {
-            this.Svg.addClass("debug");
+            this.view.Svg.addClass("debug");
         }
 
-        this.info = new Info(this.Svg, this.$Svg.margin);
+        this.info = new Info(this.view.Svg, this.$Svg.margin);
     }
 
     initialise(): void {
@@ -177,16 +144,16 @@ export class Engine {
     async resetAlgorithm(): Promise<void> {}
 
     clearCanvas(): void {
-        this.Svg.clear();
+        this.view.Svg.clear();
 
-        const w = this.Svg.viewbox().width;
-        const h = this.Svg.viewbox().height;
+        const w = this.view.Svg.viewbox().width;
+        const h = this.view.Svg.viewbox().height;
         if (this.DEBUG) {
             for (let x = 1; x < w / 100; x++) {
-                this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
+                this.view.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }
             for (let y = 1; y < h / 100; y++) {
-                this.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
+                this.view.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
             }
         }
 
@@ -196,7 +163,7 @@ export class Engine {
 
     updateCSSVariables(): void {
         const relativeSize = Math.round(
-            (100 * this.getObjectSize()) / this.$Svg.objectSize
+            (100 * this.view.getObjectSize()) / this.$Svg.objectSize
         );
         document.documentElement.style.setProperty(
             "--node-font-size",
@@ -548,7 +515,7 @@ export class Engine {
                     this.setStatus("running");
                     runnerTimer = setTimeout(
                         () => this.stepForward(resolve, reject),
-                        this.getAnimationSpeed() * 1.1
+                        this.view.getAnimationSpeed() * 1.1
                     );
                 }
             }
@@ -650,8 +617,8 @@ export class Engine {
     animate(elem: Element, animate = true) {
         if (this.state.animating && animate) {
             this.setStatus("running");
-            this.setStatus("paused", this.getAnimationSpeed());
-            return elem.animate(this.getAnimationSpeed(), 0, "now");
+            this.setStatus("paused", this.view.getAnimationSpeed());
+            return elem.animate(this.view.getAnimationSpeed(), 0, "now");
         } else {
             return elem;
         }

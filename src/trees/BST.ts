@@ -102,25 +102,29 @@ export class BST extends Engine {
         this.toolbar.showNullNodes.checked = show;
 
         if (show) {
-            this.Svg.addClass("shownullnodes");
+            this.view.Svg.addClass("shownullnodes");
         } else {
-            this.Svg.removeClass("shownullnodes");
+            this.view.Svg.removeClass("shownullnodes");
         }
         return this;
     }
 
     newNode(text: string): BinaryNode {
-        return this.Svg.put(
-            new BinaryNode(text, this.getObjectSize(), this.getStrokeWidth())
-        ).init(...this.getNodeStart());
+        return this.view.Svg.put(
+            new BinaryNode(
+                text,
+                this.view.getObjectSize(),
+                this.view.getStrokeWidth()
+            )
+        ).init(...this.view.getNodeStart());
     }
 
     resizeTree(): this {
         const animate = !this.state.resetting;
         this.treeRoot?.resize(
-            ...this.getTreeRoot(),
+            ...this.view.getTreeRoot(),
             this.$Svg.margin,
-            this.getNodeSpacing(),
+            this.view.getNodeSpacing(),
             animate ? this.$Svg.animationSpeed : 0
         );
 
@@ -162,11 +166,11 @@ export class BST extends Engine {
 
         let parent: BinaryNode = this.treeRoot;
         let node: BinaryNode | null = this.treeRoot;
-        const pointer = this.Svg.put(new HighlightCircle()).init(
+        const pointer = this.view.Svg.put(new HighlightCircle()).init(
             this.treeRoot.cx(),
             this.treeRoot.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
+            this.view.getObjectSize(),
+            this.view.getStrokeWidth()
         );
 
         while (node) {
@@ -186,7 +190,7 @@ export class BST extends Engine {
                 pointer.setCenter(
                     node.cx(),
                     node.cy(),
-                    this.getAnimationSpeed()
+                    this.view.getAnimationSpeed()
                 );
             }
 
@@ -223,7 +227,7 @@ export class BST extends Engine {
         const cmp = compare(value, found.node.getText());
         const direction = cmp < 0 ? "left" : "right";
 
-        found.node.setChild(direction, child, this.getStrokeWidth());
+        found.node.setChild(direction, child, this.view.getStrokeWidth());
         child.setHighlight(true);
         found.node.setChildHighlight(direction, true);
         await this.pause("insert.child", value, direction);
@@ -270,11 +274,11 @@ export class BST extends Engine {
 
         // Below we know that we have both left and right children
 
-        const pointer = this.Svg.put(new HighlightCircle()).init(
+        const pointer = this.view.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
+            this.view.getObjectSize(),
+            this.view.getStrokeWidth()
         );
 
         node.setHighlight(false);
@@ -287,7 +291,7 @@ export class BST extends Engine {
             pointer.setCenter(
                 predecessor.cx(),
                 predecessor.cy(),
-                this.getAnimationSpeed()
+                this.view.getAnimationSpeed()
             );
             await this.pause(undefined);
             predecessor.setParentHighlight(false);
@@ -301,14 +305,18 @@ export class BST extends Engine {
         predecessor.setHighlight(true);
         pointer.remove();
         const newText = predecessor.getText();
-        const moving = this.Svg.put(
-            new TextCircle(newText, this.getObjectSize(), this.getStrokeWidth())
+        const moving = this.view.Svg.put(
+            new TextCircle(
+                newText,
+                this.view.getObjectSize(),
+                this.view.getStrokeWidth()
+            )
         ).init(predecessor.cx(), predecessor.cy());
         moving.addClass("unfilled");
         moving.setHighlight(true);
         await this.pause("delete.predecessor.replace", node, predecessor);
 
-        moving.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+        moving.setCenter(node.cx(), node.cy(), this.view.getAnimationSpeed());
         node.setText("");
         await this.pause(undefined);
 
@@ -360,7 +368,7 @@ export class BST extends Engine {
                 node.dmoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
-                    this.getAnimationSpeed()
+                    this.view.getAnimationSpeed()
                 );
             }
 
@@ -368,11 +376,11 @@ export class BST extends Engine {
                 node.dmoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
-                    this.getAnimationSpeed()
+                    this.view.getAnimationSpeed()
                 );
             }
 
-            parent.setChild(direction, child, this.getStrokeWidth());
+            parent.setChild(direction, child, this.view.getStrokeWidth());
             child.setHighlight(true);
             parent.setChildHighlight(direction, true);
             await this.pause("delete.redirect", parent, child);
@@ -400,13 +408,13 @@ export class BST extends Engine {
         const { x, y } = this.info.printer.bbox();
 
         const printed = [
-            this.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
+            this.view.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
         ];
 
-        const pointer = this.Svg.put(new HighlightCircle()).init(
-            ...this.getNodeStart(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
+        const pointer = this.view.Svg.put(new HighlightCircle()).init(
+            ...this.view.getNodeStart(),
+            this.view.getObjectSize(),
+            this.view.getStrokeWidth()
         );
 
         await this.printHelper(this.treeRoot, pointer, printed);
@@ -425,20 +433,27 @@ export class BST extends Engine {
         pointer: HighlightCircle,
         printed: Text[]
     ): Promise<void> {
-        pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+        pointer.setCenter(node.cx(), node.cy(), this.view.getAnimationSpeed());
         await this.pause(undefined);
 
         if (node.getLeft()) {
             await this.printHelper(node.getLeft()!, pointer, printed); // ! Because checked above
-            pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+            pointer.setCenter(
+                node.cx(),
+                node.cy(),
+                this.view.getAnimationSpeed()
+            );
             await this.pause(undefined);
         }
 
-        const lbl = this.Svg.text(node.getText()).center(node.cx(), node.cy());
+        const lbl = this.view.Svg.text(node.getText()).center(
+            node.cx(),
+            node.cy()
+        );
         await this.pause(undefined);
 
         const last = printed[printed.length - 1];
-        const spacing = this.getNodeSpacing() / 2;
+        const spacing = this.view.getNodeSpacing() / 2;
         this.animate(lbl)
             .cy(last.cy())
             .x(last.bbox().x2 + spacing);
@@ -448,7 +463,11 @@ export class BST extends Engine {
 
         if (node.getRight()) {
             await this.printHelper(node.getRight()!, pointer, printed);
-            pointer.setCenter(node.cx(), node.cy(), this.getAnimationSpeed());
+            pointer.setCenter(
+                node.cx(),
+                node.cy(),
+                this.view.getAnimationSpeed()
+            );
             await this.pause(undefined);
         }
     }
@@ -505,13 +524,13 @@ export class BST extends Engine {
         const parent = A.getParent();
         if (parent) {
             const direction = parent.getLeft() === A ? "left" : "right";
-            B.setParent(direction, parent, this.getStrokeWidth());
+            B.setParent(direction, parent, this.view.getStrokeWidth());
         } else {
             this.treeRoot = B;
         }
 
-        A.setChild(secondDir, C, this.getStrokeWidth());
-        B.setChild(firstDir, A, this.getStrokeWidth());
+        A.setChild(secondDir, C, this.view.getStrokeWidth());
+        B.setChild(firstDir, A, this.view.getStrokeWidth());
 
         B.setChildHighlight(firstDir, true);
         A.setHighlight(true);

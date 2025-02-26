@@ -18,9 +18,13 @@ export class AVL extends BST {
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
-        return this.Svg.put(
-            new AVLNode(text, this.getObjectSize(), this.getStrokeWidth())
-        ).init(...this.getNodeStart());
+        return this.view.Svg.put(
+            new AVLNode(
+                text,
+                this.view.getObjectSize(),
+                this.view.getStrokeWidth()
+            )
+        ).init(...this.view.getNodeStart());
     }
 
     getHeight(node: AVLNode | null | undefined) {
@@ -62,7 +66,7 @@ export class AVL extends BST {
     }
 
     async updateHeightPositions() {
-        this.Svg.find("g").forEach((node) => {
+        this.view.Svg.find("g").forEach((node) => {
             if (node instanceof AVLNode) {
                 node.updateHeightPosition();
             }
@@ -74,11 +78,11 @@ export class AVL extends BST {
         fromchild: BinaryDir | undefined | null
     ) {
         const child = (fromchild && startNode.getChild(fromchild)) || startNode;
-        this.pointer = this.Svg.put(new HighlightCircle()).init(
+        this.pointer = this.view.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
+            this.view.getObjectSize(),
+            this.view.getStrokeWidth()
         );
 
         let node: AVLNode | null = startNode;
@@ -87,7 +91,7 @@ export class AVL extends BST {
             this.pointer.setCenter(
                 node.cx(),
                 node.cy(),
-                this.getAnimationSpeed()
+                this.view.getAnimationSpeed()
             );
             await this.pause("node.updateHeight");
 
@@ -134,11 +138,11 @@ export class AVL extends BST {
             node = await this.doubleRotate(left, node);
         }
 
-        this.pointer = this.Svg.put(new HighlightCircle()).init(
+        this.pointer = this.view.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
-            this.getObjectSize(),
-            this.getStrokeWidth()
+            this.view.getObjectSize(),
+            this.view.getStrokeWidth()
         );
         await this.pause("node.balanced");
 

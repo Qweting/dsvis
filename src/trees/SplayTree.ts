@@ -94,7 +94,7 @@ export class SplayTree extends BST {
         largestLeft.setHighlight(true);
         await this.pause(undefined);
         largestLeft.setHighlight(false);
-        largestLeft.setRight(right as BinaryNode, this.getStrokeWidth());
+        largestLeft.setRight(right as BinaryNode, this.view.getStrokeWidth());
         this.treeRoot = largestLeft;
         this.resizeTree();
         await this.pause(undefined);
