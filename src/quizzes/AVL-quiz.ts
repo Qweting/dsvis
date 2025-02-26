@@ -5,9 +5,10 @@ import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { TextCircle } from "../../src/objects/text-circle";
 import { BST } from "../../src/trees/BST";
 
-export class AVLQuiz extends BST<AVLNode> {
+export class AVLQuiz extends BST {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
+    treeRoot: AVLNode | null = null;
 
     async resetAlgorithm() {
         await super.resetAlgorithm();

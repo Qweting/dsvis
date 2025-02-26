@@ -12,8 +12,9 @@ export const AVLmessages = {
     },
 };
 
-export class AVL extends BST<AVLNode> {
+export class AVL extends BST {
     messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
+    treeRoot: AVLNode | null = null;
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
@@ -26,8 +27,14 @@ export class AVL extends BST<AVLNode> {
         return node ? node.getHeight() : 0;
     }
 
-    async insertOne(value: string) {
-        const result = await super.insertOne(value);
+    async insertOne(value: string): Promise<{
+        success: boolean;
+        node: AVLNode | null;
+    }> {
+        const result = (await super.insertOne(value)) as {
+            success: boolean;
+            node: AVLNode | null;
+        };
 
         if (result.success && result.node) {
             result.node.updateHeightPosition();
@@ -39,7 +46,11 @@ export class AVL extends BST<AVLNode> {
     }
 
     async delete(value: string | number) {
-        const result = await super.delete(value);
+        const result = (await super.delete(value)) as {
+            success: boolean;
+            direction: BinaryDir | null;
+            parent: AVLNode | null;
+        } | null;
 
         if (result && result.success) {
             if (result.parent) {
@@ -47,7 +58,6 @@ export class AVL extends BST<AVLNode> {
             }
             await this.updateHeightPositions();
         }
-
         return result;
     }
 
