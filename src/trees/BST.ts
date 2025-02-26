@@ -1,18 +1,9 @@
 import { Text } from "@svgdotjs/svg.js";
-import {
-    compare,
-    Engine,
-    EngineToolbarItems,
-    MessagesObject,
-    parseValues,
-} from "../../src/engine";
+import { compare, Engine, MessagesObject, parseValues } from "../../src/engine";
 import { TextCircle } from "../../src/objects/text-circle";
+import { BSTToolbar } from "../../src/toolbars/BST-toolbar";
 import { BinaryDir, BinaryNode } from "../objects/binary-node";
 import { HighlightCircle } from "../objects/highlight-circle";
-
-type BSTToolbarItems = EngineToolbarItems & {
-    showNullNodes: HTMLInputElement;
-};
 
 export const BSTMessages = {
     general: {
@@ -67,30 +58,12 @@ export class BST extends Engine {
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: BinaryNode | null = null;
-    toolbar!: BSTToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
+    toolbar!: BSTToolbar; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
     constructor(containerSelector: string) {
         super(containerSelector);
-    }
 
-    getToolbar(): BSTToolbarItems {
-        const toolbar = super.getToolbar();
-
-        toolbar.generalControls.insertAdjacentHTML(
-            "beforeend",
-            `<span class="formgroup"><label>
-        <input class="showNullNodes" type="checkbox"/> Show null nodes
-       </label></span>`
-        );
-        const showNullNodes = this.container.querySelector<HTMLInputElement>(
-            "input.showNullNodes"
-        );
-
-        if (!showNullNodes) {
-            throw new Error("Could not find show null nodes input");
-        }
-
-        return { ...toolbar, showNullNodes };
+        this.toolbar = new BSTToolbar(this.container);
     }
 
     initialise(initialValues: string[] | null = null): this {

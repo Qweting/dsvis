@@ -1,19 +1,8 @@
-import { Element, Text } from "@svgdotjs/svg.js";
+import { Element } from "@svgdotjs/svg.js";
+import { Cookies } from "./cookies";
+import { Info, InfoStatus } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
-
-export type EngineToolbarItems = {
-    animationSpeed: HTMLSelectElement;
-    objectSize: HTMLSelectElement;
-
-    generalControls: HTMLFieldSetElement;
-    algorithmControls: HTMLFieldSetElement;
-
-    stepForward: HTMLButtonElement;
-    stepBackward: HTMLButtonElement;
-    toggleRunner: HTMLButtonElement;
-    fastForward: HTMLButtonElement;
-    fastBackward: HTMLButtonElement;
-};
+import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
 type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
@@ -30,7 +19,6 @@ type AsyncListeners = Record<
 >;
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
-type Status = "running" | "paused" | "inactive";
 
 export interface MessagesObject {
     [key: string]:
@@ -60,25 +48,9 @@ export class Engine {
         objectSize: 40,
         animationSpeed: 1000, // milliseconds per step
     };
-
-    $COOKIE_EXPIRE_DAYS = 30;
-    $cookies = {
-        animationSpeed: {
-            setCookie: (value: string) => {
-                this.toolbar.animationSpeed.value = value;
-            },
-            getCookie: () => this.getAnimationSpeed(),
-        },
-        objectSize: {
-            setCookie: (value: string) => {
-                this.toolbar.objectSize.value = value;
-            },
-            getCookie: () => this.getObjectSize(),
-        },
-    };
-
+    cookies: Cookies;
     container: HTMLElement;
-    toolbar: EngineToolbarItems;
+    toolbar: EngineToolbar;
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     currentAction: number = 0; // was = null before, this should work better
     currentStep: number = 0; // was = null before, this should work better
@@ -92,12 +64,7 @@ export class Engine {
         animating: false,
     };
 
-    info: {
-        title: Text;
-        body: Text;
-        printer: Text;
-        status: Text;
-    };
+    info: Info;
 
     eventListeners: EventListeners = {
         stepForward: {},
@@ -108,19 +75,11 @@ export class Engine {
     };
 
     getAnimationSpeed(): number {
-        if (this.toolbar.animationSpeed) {
-            return parseInt(this.toolbar.animationSpeed?.value);
-        }
-
-        return this.$Svg.animationSpeed;
+        return parseInt(this.toolbar.animationSpeed.value);
     }
 
     getObjectSize(): number {
-        if (this.toolbar.objectSize) {
-            return parseInt(this.toolbar.objectSize?.value);
-        }
-
-        return this.$Svg.objectSize;
+        return parseInt(this.toolbar.objectSize.value);
     }
 
     getNodeSpacing(): number {
@@ -156,7 +115,12 @@ export class Engine {
         }
 
         this.container = container;
-        this.toolbar = this.getToolbar();
+        this.toolbar = new EngineToolbar(container);
+
+        this.cookies = new Cookies({
+            objectSize: this.toolbar.objectSize,
+            animationSpeed: this.toolbar.animationSpeed,
+        });
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -175,110 +139,7 @@ export class Engine {
             this.Svg.addClass("debug");
         }
 
-        this.info = this.getInfoTexts();
-    }
-
-    getInfoTexts() {
-        const margin = this.$Svg.margin;
-        const h = this.Svg.viewbox().height;
-
-        const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
-        const body = this.Svg.text(NBSP)
-            .addClass("message")
-            .x(margin)
-            .y(2 * margin);
-        const printer = this.Svg.text(NBSP)
-            .addClass("printer")
-            .x(margin)
-            .cy(h - 2 * margin);
-        const status = this.Svg.text(NBSP)
-            .addClass("status-report")
-            .x(margin)
-            .cy(h - margin);
-
-        return {
-            title,
-            body,
-            printer,
-            status,
-        };
-    }
-
-    getToolbar(): EngineToolbarItems {
-        const generalControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.generalControls"
-            );
-        const algorithmControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.algorithmControls"
-            );
-
-        const stepForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.stepForward"
-            );
-        const stepBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.stepBackward"
-        );
-        const toggleRunner = this.container.querySelector<HTMLButtonElement>(
-            "button.toggleRunner"
-        );
-        const fastForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.fastForward"
-            );
-        const fastBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.fastBackward"
-        );
-        const objectSize =
-            this.container.querySelector<HTMLSelectElement>(
-                "select.objectSize"
-            );
-        const animationSpeed = this.container.querySelector<HTMLSelectElement>(
-            "select.animationSpeed"
-        );
-
-        if (!generalControls) {
-            throw new Error("Missing general controls fieldset");
-        }
-        if (!algorithmControls) {
-            throw new Error("Missing algorithm controls fieldset");
-        }
-
-        if (!stepForward) {
-            throw new Error("Missing step forward button");
-        }
-        if (!stepBackward) {
-            throw new Error("Missing step backward button");
-        }
-        if (!toggleRunner) {
-            throw new Error("Missing toggle runner button");
-        }
-        if (!fastForward) {
-            throw new Error("Missing fast forward button");
-        }
-        if (!fastBackward) {
-            throw new Error("Missing fast backward button");
-        }
-        if (!objectSize) {
-            throw new Error("Missing object size select");
-        }
-        if (!animationSpeed) {
-            throw new Error("Missing animation speed select");
-        }
-
-        return {
-            generalControls,
-            algorithmControls,
-            stepForward,
-            stepBackward,
-            toggleRunner,
-            fastForward,
-            fastBackward,
-            objectSize,
-            animationSpeed,
-        };
+        this.info = new Info(this.Svg, this.$Svg.margin);
     }
 
     initialise(): void {
@@ -329,7 +190,7 @@ export class Engine {
             }
         }
 
-        this.info = this.getInfoTexts();
+        this.info.reset();
         this.updateCSSVariables();
     }
 
@@ -343,32 +204,15 @@ export class Engine {
         );
     }
 
-    setStatus(status: Status, timeout = 10): void {
-        const currentStatus = this.info.status;
-
+    setStatus(status: InfoStatus, timeout = 10): void {
         setTimeout(() => {
-            if (status === "running") {
-                currentStatus
-                    .text("Animating")
-                    .removeClass("paused")
-                    .addClass("running");
-            } else if (status === "paused") {
-                currentStatus
-                    .text("Paused")
-                    .addClass("paused")
-                    .removeClass("running");
-            } else {
-                currentStatus
-                    .text("Idle")
-                    .removeClass("paused")
-                    .removeClass("running");
-            }
+            this.info.setStatus(status);
         }, timeout);
     }
 
     setIdleTitle(): void {
-        this.info.title.text("Select an action from the menu above");
-        this.info.body.text(NBSP);
+        this.info.setTitle("Select an action from the menu above");
+        this.info.setBody(NBSP);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -652,7 +496,7 @@ export class Engine {
                     )}`
                 );
             }
-            this.info.title.text(message);
+            this.info.setTitle(message);
             await this.pause("");
             if (
                 !(
@@ -685,7 +529,7 @@ export class Engine {
             return null;
         }
         if (title !== undefined) {
-            this.info.body.text(title);
+            this.info.setBody(title);
         }
         return new Promise((resolve, reject) => {
             const action = this.actions[this.currentAction];
@@ -769,16 +613,11 @@ export class Engine {
     }
 
     isRunning(): boolean {
-        return (
-            this.toolbar.toggleRunner?.classList.contains("selected") || false
-        );
+        return this.toolbar.toggleRunner.classList.contains("selected");
     }
 
     setRunning(running: boolean): this {
-        const classes = this.toolbar.toggleRunner?.classList;
-        if (classes === undefined) {
-            throw new Error("Can not access toggleRunner");
-        }
+        const classes = this.toolbar.toggleRunner.classList;
         if (running) {
             classes.add("selected");
         } else {
@@ -798,35 +637,11 @@ export class Engine {
         if (this.DEBUG) {
             console.log("Loading cookies", document.cookie);
         }
-        const allCookies = document.cookie.split(";");
-        Object.entries(this.$cookies).map(([cookieName, cookieValue]) => {
-            allCookies.map((cookie) => {
-                const splitCookie = cookie.split("=");
-                if (splitCookie.length !== 2) {
-                    throw new Error("Invalid cookie format");
-                }
-                const [documentCookieName, documentCookieValue] = splitCookie;
-                if (documentCookieName.trim() === cookieName) {
-                    const value = decodeURIComponent(documentCookieValue);
-                    cookieValue.setCookie(value);
-                }
-            });
-        });
+        this.cookies.load();
     }
 
     saveCookies(): void {
-        let expires = "";
-        if (this.$COOKIE_EXPIRE_DAYS > 0) {
-            const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
-            expires = `;expires=${exdate.toUTCString()}`;
-        }
-
-        Object.entries(this.$cookies).map(([cookieName, value]) => {
-            const cookieValue = encodeURIComponent(value.getCookie());
-            document.cookie = `${cookieName}=${cookieValue}${expires}`;
-        });
-
+        this.cookies.save();
         if (this.DEBUG) {
             console.log("Setting cookies", document.cookie);
         }
