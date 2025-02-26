@@ -14,13 +14,32 @@ interface NodeArray {
     node: G;
 }
 
+export const LinkedListMessages = {
+    general: {
+        empty: "List is empty!",
+        full: "List is full!",
+        finished: "Finished",
+    },
+    find: {
+        start: (element: string | number) => `Searching for ${element}`,
+        found: (element: string | number) => `Found ${element}`,
+        notfound: (element: string | number) => `Did not find ${element}`,
+        look: (NextNode: string | number) => `Look into ${NextNode}`,
+    },
+    insert: {
+        element: (element: string | number) => `Insert element: ${element}`,
+        head: (element: string | number) => `List is empty, insert ${element} as head`,
+    },
+    delete: {},
+};
+
 export class LinkedListAnim extends Engine {
     maxListSize: number = 10; // Limit the size of the list to maintain readability
-    initialValues: any[] | null = null; // Only used for hard-coded values
+    initialValues: string[] | null = null; // Only used for hard-coded values
     linkedList: LinkedList<string | number> = new LinkedList(); // Linked list instance
     nodeArray: NodeArray[] = [];
 
-    initialise(initialValues: any[] | null = null): void {
+    initialise(initialValues: string[] | null = null): void {
         this.initialValues = initialValues;
         this.linkedList = new LinkedList();
         super.initialise();
@@ -35,9 +54,9 @@ export class LinkedListAnim extends Engine {
 
         // If initial values are provided, insert them into the animated list
         if (this.initialValues) {
-            (this.insert as any).resetting = true;
+            this.state.resetting = true;
             await this.insert(...this.initialValues);
-            (this.insert as any).resetting = false;
+            this.state.resetting = false;
         }
     }
 
@@ -82,7 +101,7 @@ export class LinkedListAnim extends Engine {
 
         this.Svg.add(grp);
 
-        grp.children().forEach(child => (child as any).setHighlight(true));
+        grp.children().forEach(child => child.setHighlight(true));
 
         await this.pause('insert.head', value);
         grp.animate(1000).move(100, 100);
@@ -122,24 +141,3 @@ export class LinkedListAnim extends Engine {
         // Implementation goes here
     }
 }
-
-(LinkedListAnim as any).messages = {
-    general: {
-        empty: "List is empty!",
-        full: "List is full!",
-        finished: "Finished",
-    },
-    find: {
-        start: (element: string | number) => `Searching for ${element}`,
-        found: (element: string | number) => `Found ${element}`,
-        notfound: (element: string | number) => `Did not find ${element}`,
-        look: (NextNode: string | number) => `Look into ${NextNode}`,
-    },
-    insert: {
-        element: (element: string | number) => `Insert element: ${element}`,
-        head: (element: string | number) => `List is empty, insert ${element} as head`,
-    },
-    delete: {},
-};
-
-export default LinkedListAnim;
