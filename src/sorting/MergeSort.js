@@ -44,9 +44,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         for (const val of values) await this.insertOne(val); 
     }
 
-    async swap(j, k, message, ...args) {
-        this.heapArray.swap(j, k, true);
-        this.heapArray.setIndexHighlight(j, true);
+    async swap(arr, j, k, message, ...args) {
+        arr.swap(j, k, true);
+        arr.setIndexHighlight(j, true);
         await this.pause(message, ...args);
     }
 
@@ -106,17 +106,52 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
             }
             this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             await this.pause();
-            mergeArray1.center(CX-arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            mergeArray2.center(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            console.log(arr.getCX(0));
+            //await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
+            await this.pause();
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
             //this.mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
+            
+            await this.pause();
+            await this.merge(arr, mergeArray1, mergeArray2);
         }
-        this.merge(arr, left, mid, right);
+        else if(arr.getSize() == 2){
+            await this.pause();
+            if(arr.getValue(0) > arr.getValue(1)){
+                await this.swap(arr, 0, 1, 'sort.swap', arr.getValue(0), arr.getValue(1));
+            }
+        }
     }
 
-    async merge(array,left,mid,right) {
+    async merge(array, subarray1, subarray2) {
+        let i
+        for(i = 0; i < subarray1.getSize(); i++){
+            console.log("I: " + i);
+            console.log("Subarray1: " + subarray1.getValue(i));
+            console.log("Subarray2: " + subarray2.getValue(i));
+            if(subarray1.getValue(i) < subarray2.getValue(i)){
+                console.log("Subarray1: " + subarray1.getValue(i));
+                array.setValue(i, subarray1.getValue(i));
+                console.log("Subarray1: " + subarray1.getValues());
+                let v1 = subarray1.getValues();
+                subarray1.setSize(subarray1.getSize()-1);
+                subarray1.setValues(v1.slice(1));
+            }
+            else{
+                console.log("Subarray2: " + subarray2.getValue(i));
+                array.setValue(i, subarray2.getValue(i));
+                console.log("Subarray2: " + subarray2.getValues());
+                let v2 = subarray2.getValues();
+                subarray2.setSize(subarray2.getSize()-1);
+                subarray2.setValues(v2.slice(1));
+            }
+        }
+        /*if(i < subarray2.getSize()-1){
+            console.log("Subarray2 extra: " + subarray2.getValue(i+1));
+            console.log("Subarray2: " + subarray2.getValues());
+            array.setValue(i+1, subarray2.getValue(i+1));
+            let v2 = subarray2.getValues();
+            subarray2.setSize(0);
+        }*/
        return;
     }
 }
