@@ -10,9 +10,9 @@ const statusText = {
 } as const satisfies Record<InfoStatus, string>;
 
 const statusClass = {
-    running: "Animating",
-    paused: "Paused",
-    inactive: "Idle",
+    running: "running",
+    paused: "paused",
+    inactive: "",
 } as const satisfies Record<InfoStatus, string>;
 
 export class Info {
