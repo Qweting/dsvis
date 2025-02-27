@@ -1,4 +1,5 @@
 import { Engine } from "./engine";
+import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -28,16 +29,18 @@ type Reject = (props: { until?: number; running?: boolean }) => void;
 
 export class EventListeners {
     engine: Engine;
+    toolbar: EngineToolbar;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
 
     constructor(engine: Engine) {
         this.engine = engine;
+        this.toolbar = engine.toolbar;
 
         this.idleListeners.push(
             {
-                element: this.engine.toolbar.stepBackward,
+                element: this.toolbar.stepBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -51,7 +54,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.engine.toolbar.fastBackward,
+                element: this.toolbar.fastBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -69,7 +72,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.engine.toolbar.objectSize,
+                element: this.toolbar.objectSize,
                 type: "change",
                 condition: () => true,
                 handler: () => {
@@ -89,7 +92,7 @@ export class EventListeners {
 
         this.asyncListeners.push(
             {
-                element: this.engine.toolbar.stepForward,
+                element: this.toolbar.stepForward,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.setRunning(false);
@@ -97,7 +100,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.engine.toolbar.fastForward,
+                element: this.toolbar.fastForward,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.actions[this.engine.currentAction].nsteps =
@@ -106,7 +109,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.engine.toolbar.toggleRunner,
+                element: this.toolbar.toggleRunner,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.toggleRunner();
@@ -119,7 +122,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.engine.toolbar.stepBackward,
+                element: this.toolbar.stepBackward,
                 type: "click",
                 handler: (resolve, reject) =>
                     reject({
@@ -128,12 +131,12 @@ export class EventListeners {
                     }),
             },
             {
-                element: this.engine.toolbar.fastBackward,
+                element: this.toolbar.fastBackward,
                 type: "click",
                 handler: (resolve, reject) => reject({ until: 0 }),
             },
             {
-                element: this.engine.toolbar.objectSize,
+                element: this.toolbar.objectSize,
                 type: "change",
                 handler: (resolve, reject) =>
                     reject({ until: this.engine.currentStep }),
