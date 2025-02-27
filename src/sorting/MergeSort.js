@@ -92,7 +92,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         const [xCenter,yCenter] = this.getTreeRoot();
         const baseY = this.$Svg.margin*4;
         const CX = arr.getCX(0);
-        console.log(CX);
+        
         if(arr.getSize() > 2){
             const mergeArray1 = this.SVG.dsArray(mid-left, CX, arr.cy());
             for(let k = 0; k < mid; k++){
@@ -106,11 +106,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
             }
             this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             await this.pause();
-            //await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
+            await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
             await this.pause();
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
-            //this.mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate, yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            
             await this.pause();
             await this.merge(arr, mergeArray1, mergeArray2);
         }
@@ -124,35 +122,21 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
 
     async merge(array, subarray1, subarray2) {
         let i
-        for(i = 0; i < subarray1.getSize(); i++){
-            console.log("I: " + i);
-            console.log("Subarray1: " + subarray1.getValue(i));
-            console.log("Subarray2: " + subarray2.getValue(i));
-            if(subarray1.getValue(i) < subarray2.getValue(i)){
-                console.log("Subarray1: " + subarray1.getValue(i));
-                array.setValue(i, subarray1.getValue(i));
-                console.log("Subarray1: " + subarray1.getValues());
-                let v1 = subarray1.getValues();
-                subarray1.setSize(subarray1.getSize()-1);
-                subarray1.setValues(v1.slice(1));
+        let a1i = 0;
+        let a2i = 0;
+        for(i = 0; i < array.getSize(); i++){
+            if(a2i >= subarray2.getSize() || (a1i < subarray1.getSize() && subarray1.getValue(a1i) < subarray2.getValue(a2i))){
+                array.setValue(i, subarray1.getValue(a1i));
+                console.log("Subarray1: " + subarray1.getValue(a1i));
+                a1i++;
             }
             else{
-                console.log("Subarray2: " + subarray2.getValue(i));
-                array.setValue(i, subarray2.getValue(i));
-                console.log("Subarray2: " + subarray2.getValues());
-                let v2 = subarray2.getValues();
-                subarray2.setSize(subarray2.getSize()-1);
-                subarray2.setValues(v2.slice(1));
+                console.log("Subarray2: " + subarray2.getValue(a2i));
+                array.setValue(i, subarray2.getValue(a2i));
+                a2i++;
             }
         }
-        /*if(i < subarray2.getSize()-1){
-            console.log("Subarray2 extra: " + subarray2.getValue(i+1));
-            console.log("Subarray2: " + subarray2.getValues());
-            array.setValue(i+1, subarray2.getValue(i+1));
-            let v2 = subarray2.getValues();
-            subarray2.setSize(0);
-        }*/
-       return;
+       return array;
     }
 }
 
