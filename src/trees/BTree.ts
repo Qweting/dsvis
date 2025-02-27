@@ -212,7 +212,7 @@ export class BTree extends Engine {
             );
             this.treeRoot.setText(0, String(value));
             await this.pause("insert.newroot", value);
-            this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
             await this.pause(undefined);
         }
     }
@@ -237,7 +237,7 @@ export class BTree extends Engine {
                 this.view.getObjectSize(),
                 this.view.getStrokeWidth()
             );
-            this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
             await this.pause(
                 "insert.nth",
                 value,
@@ -344,12 +344,12 @@ export class BTree extends Engine {
                 this.view.getStrokeWidth()
             );
             risingNode.remove();
-            this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
             return parent;
         }
 
         this.treeRoot = risingNode;
-        this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         this.treeRoot.setHighlight(false);
         node.setHighlight(false);
         rightNode.setHighlight(false);
@@ -487,7 +487,7 @@ export class BTree extends Engine {
                 : this.treeRoot.getLeft();
             this.treeRoot.remove();
             this.treeRoot = newRoot;
-            this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         }
     }
 
@@ -503,7 +503,7 @@ export class BTree extends Engine {
             this.view.getObjectSize(),
             this.view.getStrokeWidth()
         );
-        this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         node.setHighlight(false);
         await this.repairAfterDelete(node);
     }
@@ -671,7 +671,7 @@ export class BTree extends Engine {
         );
         sinkingNode.remove();
         rightSib?.remove();
-        this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);
@@ -754,7 +754,7 @@ export class BTree extends Engine {
         );
         parent.setText(parentIndex, rightValue);
         node.setText(node.numValues() - 1, leftValue);
-        this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);
@@ -841,7 +841,7 @@ export class BTree extends Engine {
         );
         parent.setText(parentIndex, leftValue);
         node.setText(0, rightValue);
-        this.resizeTree(this.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);

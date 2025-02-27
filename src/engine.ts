@@ -35,19 +35,12 @@ export interface MessagesObject {
 export const NBSP = "\u00A0";
 
 export class Engine {
+    container: HTMLElement;
     view: View;
 
     messages: MessagesObject = {};
 
-    $Svg = {
-        width: 1000,
-        height: 600,
-        margin: 30,
-        objectSize: 40,
-        animationSpeed: 1000, // milliseconds per step
-    };
     cookies: Cookies;
-    container: HTMLElement;
     toolbar: EngineToolbar;
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     currentAction: number = 0; // was = null before, this should work better
@@ -105,7 +98,7 @@ export class Engine {
             this.view.Svg.addClass("debug");
         }
 
-        this.info = new Info(this.view.Svg, this.$Svg.margin);
+        this.info = new Info(this.view.Svg, this.view.$Svg.margin);
     }
 
     initialise(): void {
@@ -135,40 +128,13 @@ export class Engine {
     }
 
     async reset(): Promise<void> {
-        this.clearCanvas();
+        this.view.clear();
+        this.info.reset();
         await this.resetAlgorithm();
         this.resetListeners(false);
     }
 
     async resetAlgorithm(): Promise<void> {}
-
-    clearCanvas(): void {
-        this.view.Svg.clear();
-
-        const w = this.view.Svg.viewbox().width;
-        const h = this.view.Svg.viewbox().height;
-        if (this.DEBUG) {
-            for (let x = 1; x < w / 100; x++) {
-                this.view.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
-            }
-            for (let y = 1; y < h / 100; y++) {
-                this.view.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
-            }
-        }
-
-        this.info.reset();
-        this.updateCSSVariables();
-    }
-
-    updateCSSVariables(): void {
-        const relativeSize = Math.round(
-            (100 * this.view.getObjectSize()) / this.$Svg.objectSize
-        );
-        document.documentElement.style.setProperty(
-            "--node-font-size",
-            `${relativeSize}%`
-        );
-    }
 
     setStatus(status: InfoStatus, timeout = 10): void {
         setTimeout(() => {

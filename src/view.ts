@@ -12,11 +12,44 @@ export class View {
         animationSpeed: 1000, // milliseconds per step
     };
 
+    // Todo: make debug global
+    DEBUG: boolean = false;
+
     constructor(svgContainer: SVGSVGElement, engine: Engine) {
         this.Svg = new Svg(svgContainer);
-        this.Svg.viewbox(0, 0, engine.$Svg.width, engine.$Svg.height);
+        this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = engine;
     }
+
+    clear() {
+        this.Svg.clear();
+
+        const w = this.Svg.viewbox().width;
+        const h = this.Svg.viewbox().height;
+        if (this.DEBUG) {
+            for (let x = 1; x < w / 100; x++) {
+                this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
+            }
+            for (let y = 1; y < h / 100; y++) {
+                this.Svg.line(0, y * 100, w, y * 100).addClass("gridline");
+            }
+        }
+
+        this.updateCSSVariables();
+    }
+
+    updateCSSVariables() {
+        const relativeSize = Math.round(
+            (100 * this.getObjectSize()) / this.$Svg.objectSize
+        );
+        document.documentElement.style.setProperty(
+            "--node-font-size",
+            `${relativeSize}%`
+        );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Animation constants
 
     getAnimationSpeed(): number {
         return parseInt(this.Svg.$engine.toolbar.animationSpeed.value);

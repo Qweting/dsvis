@@ -123,9 +123,9 @@ export class BST extends Engine {
         const animate = !this.state.resetting;
         this.treeRoot?.resize(
             ...this.view.getTreeRoot(),
-            this.$Svg.margin,
+            this.view.$Svg.margin,
             this.view.getNodeSpacing(),
-            animate ? this.$Svg.animationSpeed : 0
+            animate ? this.view.$Svg.animationSpeed : 0
         );
 
         return this;
