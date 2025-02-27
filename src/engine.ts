@@ -204,6 +204,11 @@ export class Engine {
         );
     }
 
+    setIdleTitle(): void {
+        this.info.setTitle("Select an action from the menu above");
+        this.info.setBody(NBSP);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     // The default listeners
 
@@ -314,7 +319,7 @@ export class Engine {
         }
 
         this.disableWhenRunning(false);
-        this.info.setIdleTitle();
+        this.setIdleTitle();
         this.info.setStatus("inactive");
         for (const id in this.$IdleListeners) {
             const listener = this.$IdleListeners[id];
