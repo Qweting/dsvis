@@ -1,5 +1,6 @@
 import { Svg as SvgElement, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "./engine";
+import { Canvas } from "./canvas";
 
 export type InfoStatus = "running" | "paused" | "inactive";
 
@@ -7,13 +8,13 @@ const statusText = {
     running: "Animating",
     paused: "Paused",
     inactive: "Idle",
-} as const satisfies Record<InfoStatus, string>;
+};
 
 const statusClass = {
     running: "Animating",
     paused: "Paused",
     inactive: "Idle",
-} as const satisfies Record<InfoStatus, string>;
+};
 
 export class Info {
     private Svg: SvgElement;
@@ -22,9 +23,10 @@ export class Info {
     printer: Text;
     status: Text;
 
-    constructor(Svg: SvgElement, margin: number) {
-        this.Svg = Svg;
+    constructor(canvas: Canvas) {
+        this.Svg = canvas.Svg;
         const height = this.Svg.viewbox().height;
+        const margin = canvas.$Svg.margin;
 
         const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
         const body = this.Svg.text(NBSP)
@@ -54,11 +56,18 @@ export class Info {
         this.body.text(text || NBSP);
     }
 
-    setStatus(status: InfoStatus) {
-        this.status
-            .text(statusText[status] || NBSP)
-            .removeClass("paused running")
-            .addClass(statusClass[status]);
+    setStatus(status: InfoStatus, timeout = 10): void {
+        setTimeout(() => {
+            this.status
+                .text(statusText[status] || NBSP)
+                .removeClass("paused running")
+                .addClass(statusClass[status]);
+        }, timeout);
+    }
+
+    setIdleTitle(): void {
+        this.setTitle("Select an action from the menu above");
+        this.setBody(NBSP);
     }
 
     reset() {
