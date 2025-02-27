@@ -204,17 +204,6 @@ export class Engine {
         );
     }
 
-    setStatus(status: InfoStatus, timeout = 10): void {
-        setTimeout(() => {
-            this.info.setStatus(status);
-        }, timeout);
-    }
-
-    setIdleTitle(): void {
-        this.info.setTitle("Select an action from the menu above");
-        this.info.setBody(NBSP);
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
     // The default listeners
 
@@ -320,13 +309,13 @@ export class Engine {
         this.addListener("toggleRunner", "click", () => this.toggleRunner());
         if (isRunning) {
             this.disableWhenRunning(true);
-            this.setStatus("paused");
+            this.info.setStatus("paused");
             return;
         }
 
         this.disableWhenRunning(false);
-        this.setIdleTitle();
-        this.setStatus("inactive");
+        this.info.setIdleTitle();
+        this.info.setStatus("inactive");
         for (const id in this.$IdleListeners) {
             const listener = this.$IdleListeners[id];
             if (listener.condition()) {
@@ -545,7 +534,7 @@ export class Engine {
                     });
                 }
                 if (this.isRunning()) {
-                    this.setStatus("running");
+                    this.info.setStatus("running");
                     runnerTimer = setTimeout(
                         () => this.stepForward(resolve, reject),
                         this.getAnimationSpeed() * 1.1
@@ -649,8 +638,8 @@ export class Engine {
 
     animate(elem: Element, animate = true) {
         if (this.state.animating && animate) {
-            this.setStatus("running");
-            this.setStatus("paused", this.getAnimationSpeed());
+            this.info.setStatus("running");
+            this.info.setStatus("paused", this.getAnimationSpeed());
             return elem.animate(this.getAnimationSpeed(), 0, "now");
         } else {
             return elem;
