@@ -30,7 +30,12 @@ export const LinkedListMessages = {
         element: (element: string | number) => `Insert element: ${element}`,
         head: (element: string | number) => `List is empty, insert ${element} as head`,
     },
-    delete: {},
+    delete: {
+        search: (value: string) => `Searching for node to delete ${value}`,
+        notexists: (value: string) => `There is no node ${value}`,
+        found: (value: string) => `Found node ${value} to delete`,
+        adjust: "Adjusting link",
+    },
 };
 
 export class LinkedListAnim extends Engine {
