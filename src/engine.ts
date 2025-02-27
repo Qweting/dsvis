@@ -1,22 +1,10 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
-import { Info, InfoStatus } from "./info";
+import { EventListeners } from "./event-listeners";
+import { Info } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
-type ListenerType = "click" | "change";
-type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
-type IdleListeners = Record<
-    string,
-    { type: ListenerType; condition: () => boolean; handler: () => void }
->;
-type AsyncListeners = Record<
-    string,
-    {
-        type: ListenerType;
-        handler: (resolve: Resolve, reject: Reject) => void;
-    }
->;
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
 
@@ -66,13 +54,7 @@ export class Engine {
 
     info: Info;
 
-    eventListeners: EventListeners = {
-        stepForward: {},
-        stepBackward: {},
-        fastForward: {},
-        fastBackward: {},
-        toggleRunner: {},
-    };
+    eventListeners: EventListeners;
 
     getAnimationSpeed(): number {
         return parseInt(this.toolbar.animationSpeed.value);
@@ -140,6 +122,7 @@ export class Engine {
         }
 
         this.info = new Info(this.Svg, this.$Svg.margin);
+        this.eventListeners = new EventListeners(this);
     }
 
     initialise(): void {
@@ -210,90 +193,6 @@ export class Engine {
     }
 
     ///////////////////////////////////////////////////////////////////////////////
-    // The default listeners
-
-    $IdleListeners: IdleListeners = {
-        stepBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.setRunning(false);
-                const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
-                this.execute(action.oper, action.args, action.nsteps - 1);
-            },
-        },
-        fastBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.actions.pop();
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!;
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-        objectSize: {
-            type: "change",
-            condition: () => true,
-            handler: () => {
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-    };
-
-    // TODO: Fix some nice type for this
-    $AsyncListeners: AsyncListeners = {
-        stepForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.setRunning(false);
-                this.stepForward(resolve, reject);
-            },
-        },
-        fastForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.actions[this.currentAction].nsteps =
-                    Number.MAX_SAFE_INTEGER;
-                this.fastForward(resolve, reject);
-            },
-        },
-        toggleRunner: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.toggleRunner();
-                if (this.isRunning()) {
-                    this.stepForward(resolve, reject);
-                } else {
-                    this.currentStep++;
-                    resolve(undefined);
-                }
-            },
-        },
-        stepBackward: {
-            type: "click",
-            handler: (resolve, reject) =>
-                reject({ until: this.currentStep - 1, running: false }),
-        },
-        fastBackward: {
-            type: "click",
-            handler: (resolve, reject) => reject({ until: 0 }),
-        },
-        objectSize: {
-            type: "change",
-            handler: (resolve, reject) => reject({ until: this.currentStep }),
-        },
-    };
-
-    ///////////////////////////////////////////////////////////////////////////////
     // Updating listeners
 
     disableWhenRunning(disabled: boolean): void {
@@ -306,12 +205,14 @@ export class Engine {
 
     resetListeners(isRunning: boolean): void {
         this.saveCookies();
-        this.removeAllListeners();
+        this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
             this.disableWhenRunning(true);
             return;
         }
-        this.addListener("toggleRunner", "click", () => this.toggleRunner());
+        this.eventListeners.addListener("toggleRunner", "click", () =>
+            this.toggleRunner()
+        );
         if (isRunning) {
             this.disableWhenRunning(true);
             this.info.setStatus("paused");
@@ -321,66 +222,7 @@ export class Engine {
         this.disableWhenRunning(false);
         this.setIdleTitle();
         this.info.setStatus("inactive");
-        for (const id in this.$IdleListeners) {
-            const listener = this.$IdleListeners[id];
-            if (listener.condition()) {
-                if (this.DEBUG) {
-                    this.addListener(id, listener.type, () => {
-                        console.log(
-                            `${id} ${listener.type}: ${JSON.stringify(
-                                this.actions
-                            )}`
-                        );
-                        listener.handler();
-                    });
-                } else {
-                    this.addListener(id, listener.type, listener.handler);
-                }
-            }
-        }
-    }
-
-    addListener(id: string, type: ListenerType, handler: () => void): void {
-        const listeners = this.eventListeners;
-        if (!listeners[id]) {
-            listeners[id] = {};
-        }
-        const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-        if (!elem) {
-            throw new Error("Could not find element to add listener to");
-        }
-
-        const oldHandler = listeners[id][type];
-        if (oldHandler) {
-            elem.removeEventListener(type, oldHandler);
-        }
-        listeners[id][type] = handler;
-        elem.addEventListener(type, handler);
-        elem.disabled = false;
-    }
-
-    removeAllListeners(): void {
-        const listeners = this.eventListeners;
-
-        for (const id in listeners) {
-            const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-            if (!elem) {
-                throw new Error(
-                    "Could not find element to remove listener from"
-                );
-            }
-
-            elem.disabled = true;
-            for (const type in listeners[id]) {
-                elem.removeEventListener(
-                    type,
-                    listeners[id][type as ListenerType]!
-                );
-            } // ! because we know that the type exists
-            listeners[id] = {};
-        }
+        this.eventListeners.addIdleListeners();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -531,13 +373,11 @@ export class Engine {
                 this.fastForward(resolve, reject);
             } else {
                 let runnerTimer: NodeJS.Timeout | undefined = undefined;
-                for (const id in this.$AsyncListeners) {
-                    const listener = this.$AsyncListeners[id];
-                    this.addListener(id, listener.type, () => {
-                        clearTimeout(runnerTimer);
-                        listener.handler(resolve, reject);
-                    });
-                }
+                this.eventListeners.addAsyncListeners(
+                    resolve,
+                    reject,
+                    runnerTimer
+                );
                 if (this.isRunning()) {
                     this.info.setStatus("running");
                     runnerTimer = setTimeout(
