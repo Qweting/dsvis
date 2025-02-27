@@ -2,7 +2,7 @@ import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
 import { Info, InfoStatus } from "./info";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
-import { View } from "./view";
+import { Canvas } from "./canvas";
 
 type ListenerType = "click" | "change";
 type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
@@ -36,7 +36,7 @@ export const NBSP = "\u00A0";
 
 export class Engine {
     container: HTMLElement;
-    view: View;
+    canvas: Canvas;
 
     messages: MessagesObject = {};
 
@@ -88,17 +88,17 @@ export class Engine {
             throw new Error("No svg element found");
         }
 
-        this.view = new View(svgContainer, this);
+        this.canvas = new Canvas(svgContainer, this);
 
         const debugParam = new URLSearchParams(window.location.href).get(
             "debug"
         );
         this.DEBUG = Boolean(debugParam || false);
         if (this.DEBUG) {
-            this.view.Svg.addClass("debug");
+            this.canvas.Svg.addClass("debug");
         }
 
-        this.info = new Info(this.view.Svg, this.view.$Svg.margin);
+        this.info = new Info(this.canvas.Svg, this.canvas.$Svg.margin);
     }
 
     initialise(): void {
@@ -128,7 +128,7 @@ export class Engine {
     }
 
     async reset(): Promise<void> {
-        this.view.clear();
+        this.canvas.clear();
         this.info.reset();
         await this.resetAlgorithm();
         this.resetListeners(false);
@@ -480,7 +480,7 @@ export class Engine {
                     this.setStatus("running");
                     runnerTimer = setTimeout(
                         () => this.stepForward(resolve, reject),
-                        this.view.getAnimationSpeed() * 1.1
+                        this.canvas.getAnimationSpeed() * 1.1
                     );
                 }
             }
@@ -582,8 +582,8 @@ export class Engine {
     animate(elem: Element, animate = true) {
         if (this.state.animating && animate) {
             this.setStatus("running");
-            this.setStatus("paused", this.view.getAnimationSpeed());
-            return elem.animate(this.view.getAnimationSpeed(), 0, "now");
+            this.setStatus("paused", this.canvas.getAnimationSpeed());
+            return elem.animate(this.canvas.getAnimationSpeed(), 0, "now");
         } else {
             return elem;
         }

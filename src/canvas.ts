@@ -1,7 +1,7 @@
 import { Engine } from "./engine";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
-export class View {
+export class Canvas {
     Svg: Svg;
 
     $Svg = {

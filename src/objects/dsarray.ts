@@ -27,7 +27,8 @@ export class DSArray extends G {
     getCX(i: number): number {
         return (
             this.cx() +
-            this.engine().view.getObjectSize() * (i - this.getSize() / 2 + 0.5)
+            this.engine().canvas.getObjectSize() *
+                (i - this.getSize() / 2 + 0.5)
         );
     }
 
@@ -41,9 +42,9 @@ export class DSArray extends G {
             this.$values.pop()?.remove();
             this.$indices.pop()?.remove();
         }
-        const w0 = this.engine().view.getObjectSize();
-        const h = this.engine().view.getObjectSize();
-        const stroke = this.engine().view.getStrokeWidth();
+        const w0 = this.engine().canvas.getObjectSize();
+        const h = this.engine().canvas.getObjectSize();
+        const stroke = this.engine().canvas.getStrokeWidth();
         this.$rect.width(w0 * size);
         const cx = this.$rect.cx(),
             cy = this.$rect.cy();

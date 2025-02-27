@@ -18,13 +18,13 @@ export class AVL extends BST {
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
-        return this.view.Svg.put(
+        return this.canvas.Svg.put(
             new AVLNode(
                 text,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
-        ).init(...this.view.getNodeStart());
+        ).init(...this.canvas.getNodeStart());
     }
 
     getHeight(node: AVLNode | null | undefined) {
@@ -66,7 +66,7 @@ export class AVL extends BST {
     }
 
     async updateHeightPositions() {
-        this.view.Svg.find("g").forEach((node) => {
+        this.canvas.Svg.find("g").forEach((node) => {
             if (node instanceof AVLNode) {
                 node.updateHeightPosition();
             }
@@ -78,11 +78,11 @@ export class AVL extends BST {
         fromchild: BinaryDir | undefined | null
     ) {
         const child = (fromchild && startNode.getChild(fromchild)) || startNode;
-        this.pointer = this.view.Svg.put(new HighlightCircle()).init(
+        this.pointer = this.canvas.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
 
         let node: AVLNode | null = startNode;
@@ -91,7 +91,7 @@ export class AVL extends BST {
             this.pointer.setCenter(
                 node.cx(),
                 node.cy(),
-                this.view.getAnimationSpeed()
+                this.canvas.getAnimationSpeed()
             );
             await this.pause("node.updateHeight");
 
@@ -138,11 +138,11 @@ export class AVL extends BST {
             node = await this.doubleRotate(left, node);
         }
 
-        this.pointer = this.view.Svg.put(new HighlightCircle()).init(
+        this.pointer = this.canvas.Svg.put(new HighlightCircle()).init(
             node.cx(),
             node.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         await this.pause("node.balanced");
 

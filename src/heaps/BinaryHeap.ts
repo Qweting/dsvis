@@ -53,12 +53,12 @@ export class BinaryHeap extends Engine {
         await super.resetAlgorithm();
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
-        const [xRoot, yRoot] = this.view.getTreeRoot();
-        this.heapArray = this.view.Svg.put(
-            new DSArray(this.arraySize, this.view.getObjectSize(), true)
-        ).init(this.arraySize, xRoot, this.view.Svg.viewbox().height - yRoot);
-        if (Number(this.heapArray.x()) < this.view.$Svg.margin) {
-            this.heapArray.x(this.view.$Svg.margin);
+        const [xRoot, yRoot] = this.canvas.getTreeRoot();
+        this.heapArray = this.canvas.Svg.put(
+            new DSArray(this.arraySize, this.canvas.getObjectSize(), true)
+        ).init(this.arraySize, xRoot, this.canvas.Svg.viewbox().height - yRoot);
+        if (Number(this.heapArray.x()) < this.canvas.$Svg.margin) {
+            this.heapArray.x(this.canvas.$Svg.margin);
         }
         this.heapSize = 0;
         if (this.initialValues) {
@@ -71,10 +71,10 @@ export class BinaryHeap extends Engine {
     resizeTree() {
         const animate = !this.state.resetting;
         this.treeRoot?.resize(
-            ...this.view.getTreeRoot(),
-            this.view.$Svg.margin,
-            this.view.getNodeSpacing(),
-            animate ? this.view.getAnimationSpeed() : 0
+            ...this.canvas.getTreeRoot(),
+            this.canvas.$Svg.margin,
+            this.canvas.getNodeSpacing(),
+            animate ? this.canvas.getAnimationSpeed() : 0
         );
     }
 
@@ -94,29 +94,29 @@ export class BinaryHeap extends Engine {
         const jNode = this.treeNodes[j],
             kNode = this.treeNodes[k];
 
-        const jLabel = this.view.Svg.put(
+        const jLabel = this.canvas.Svg.put(
             new TextCircle(
                 jNode.getText(),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
         ).init(jNode.cx(), jNode.cy());
-        const kLabel = this.view.Svg.put(
+        const kLabel = this.canvas.Svg.put(
             new TextCircle(
                 kNode.getText(),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
         ).init(kNode.cx(), kNode.cy());
         jLabel.setCenter(
             kLabel.cx(),
             kLabel.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         kLabel.setCenter(
             jLabel.cx(),
             jLabel.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         this.heapArray.swap(j, k, true);
         await this.pause(message, ...args);
@@ -144,20 +144,20 @@ export class BinaryHeap extends Engine {
         let currentIndex = this.heapSize;
         let parentIndex = Math.floor((currentIndex - 1) / 2);
         let parentNode = this.treeNodes[parentIndex];
-        const arrayLabel = this.view.Svg.put(
+        const arrayLabel = this.canvas.Svg.put(
             new TextCircle(
                 value,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
-        ).init(...this.view.getNodeStart());
-        let treeNode = this.view.Svg.put(
+        ).init(...this.canvas.getNodeStart());
+        let treeNode = this.canvas.Svg.put(
             new BinaryNode(
                 value,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
-        ).init(...this.view.getNodeStart());
+        ).init(...this.canvas.getNodeStart());
 
         this.treeNodes[currentIndex] = treeNode;
         await this.pause("insert.value", value);
@@ -165,7 +165,7 @@ export class BinaryHeap extends Engine {
         arrayLabel.setCenter(
             this.heapArray.getCX(currentIndex),
             this.heapArray.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         if (currentIndex === 0) {
             this.treeRoot = treeNode;
@@ -175,7 +175,7 @@ export class BinaryHeap extends Engine {
             parentNode.setChild(
                 direction,
                 treeNode,
-                this.view.getStrokeWidth()
+                this.canvas.getStrokeWidth()
             );
         }
         this.resizeTree();
@@ -244,23 +244,23 @@ export class BinaryHeap extends Engine {
         this.heapSize--;
         const minValue = this.heapArray.getValue(0);
 
-        const arrayLabel = this.view.Svg.put(
+        const arrayLabel = this.canvas.Svg.put(
             new TextCircle(
                 minValue,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
         ).init(this.heapArray.getCX(0), this.heapArray.cy());
         if (this.heapSize === 0) {
             await this.pause("delete.root", minValue);
             this.heapArray.setValue(0, "");
             arrayLabel.setCenter(
-                ...this.view.getNodeStart(),
-                this.view.getAnimationSpeed()
+                ...this.canvas.getNodeStart(),
+                this.canvas.getAnimationSpeed()
             );
             this.treeRoot.setCenter(
-                ...this.view.getNodeStart(),
-                this.view.getAnimationSpeed()
+                ...this.canvas.getNodeStart(),
+                this.canvas.getAnimationSpeed()
             );
             await this.pause(undefined);
             arrayLabel.remove();
@@ -270,23 +270,23 @@ export class BinaryHeap extends Engine {
             return;
         }
 
-        const treeLabel = this.view.Svg.put(
+        const treeLabel = this.canvas.Svg.put(
             new TextCircle(
                 minValue,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
         ).init(this.treeRoot.cx(), this.treeRoot.cy());
         await this.pause("remove.minValue", minValue);
         this.heapArray.setValue(0, "");
         this.treeRoot.setText(null);
         arrayLabel.setCenter(
-            ...this.view.getNodeStart(),
-            this.view.getAnimationSpeed()
+            ...this.canvas.getNodeStart(),
+            this.canvas.getAnimationSpeed()
         );
         treeLabel.setCenter(
-            ...this.view.getNodeStart(),
-            this.view.getAnimationSpeed()
+            ...this.canvas.getNodeStart(),
+            this.canvas.getAnimationSpeed()
         );
         const currentValue = this.heapArray.getValue(this.heapSize);
         await this.pause(undefined);

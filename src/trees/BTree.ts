@@ -104,10 +104,10 @@ export class BTree extends Engine {
     resizeTree(svgMargin: number, nodeSpacing: number) {
         const animate = !this.state.resetting;
         this.treeRoot?.resize(
-            ...this.view.getTreeRoot(),
+            ...this.canvas.getTreeRoot(),
             svgMargin,
             nodeSpacing,
-            animate ? this.view.getAnimationSpeed() : 0
+            animate ? this.canvas.getAnimationSpeed() : 0
         );
     }
 
@@ -136,16 +136,16 @@ export class BTree extends Engine {
     async findHelper(value: number | string, findLeaf = false) {
         let parent = null;
         let node = this.treeRoot;
-        const pointer = this.view.Svg.put(new HighlightCircle()).init(
-            ...this.view.getNodeStart(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+        const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
+            ...this.canvas.getNodeStart(),
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         while (node) {
             pointer.setCenter(
-                node.getCX(0, this.view.getObjectSize()),
+                node.getCX(0, this.canvas.getObjectSize()),
                 node.cy(),
-                this.view.getAnimationSpeed()
+                this.canvas.getAnimationSpeed()
             );
             node.setHighlight(true);
             await this.pause(undefined);
@@ -167,9 +167,9 @@ export class BTree extends Engine {
             const found =
                 i < node.numValues() && compare(value, node.getText(i)) === 0;
             pointer.setCenter(
-                node.getCX(i - (found ? 0 : 0.5), this.view.getObjectSize()),
+                node.getCX(i - (found ? 0 : 0.5), this.canvas.getObjectSize()),
                 node.cy(),
-                this.view.getAnimationSpeed()
+                this.canvas.getAnimationSpeed()
             );
 
             if (node.isLeaf() || (found && !findLeaf)) {
@@ -203,16 +203,19 @@ export class BTree extends Engine {
         if (this.treeRoot) {
             await this.insertBottomup(value);
         } else {
-            this.treeRoot = this.view.Svg.put(new BTreeNode()).init(
+            this.treeRoot = this.canvas.Svg.put(new BTreeNode()).init(
                 true,
                 1,
-                ...this.view.getNodeStart(),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                ...this.canvas.getNodeStart(),
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             );
             this.treeRoot.setText(0, String(value));
             await this.pause("insert.newroot", value);
-            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(
+                this.canvas.$Svg.margin,
+                this.canvas.getNodeSpacing()
+            );
             await this.pause(undefined);
         }
     }
@@ -234,10 +237,13 @@ export class BTree extends Engine {
             node.insertValue(
                 found.i || 0,
                 String(value),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             );
-            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(
+                this.canvas.$Svg.margin,
+                this.canvas.getNodeSpacing()
+            );
             await this.pause(
                 "insert.nth",
                 value,
@@ -268,14 +274,14 @@ export class BTree extends Engine {
 
         const risingValue = node.getText(this.getSplitIndex());
         const rightSplit = this.getSplitIndex() + 1;
-        const risingX = node.getCX(rightSplit - 1, this.view.getObjectSize());
-        const risingNode = this.view.Svg.put(new BTreeNode()).init(
+        const risingX = node.getCX(rightSplit - 1, this.canvas.getObjectSize());
+        const risingNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
             risingX,
             node.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         risingNode.setHighlight(true);
         risingNode.setText(0, risingValue);
@@ -283,15 +289,15 @@ export class BTree extends Engine {
         const rightValues = node.numValues() - rightSplit;
         const rightX = node.getCX(
             rightSplit + rightValues / 2 - 0.5,
-            this.view.getObjectSize()
+            this.canvas.getObjectSize()
         );
-        const rightNode = this.view.Svg.put(new BTreeNode()).init(
+        const rightNode = this.canvas.Svg.put(new BTreeNode()).init(
             node.isLeaf(),
             rightValues,
             rightX,
             node.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         rightNode.setHighlight(true);
         for (let i = rightSplit; i < node.numValues(); i++) {
@@ -304,29 +310,29 @@ export class BTree extends Engine {
                 rightNode.setChild(
                     j,
                     node.getChild(i),
-                    this.view.getStrokeWidth()
+                    this.canvas.getStrokeWidth()
                 );
             }
         }
         node.setNumValues(
             this.getSplitIndex(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
-        risingNode.setChild(0, node, this.view.getStrokeWidth());
-        risingNode.setChild(1, rightNode, this.view.getStrokeWidth());
+        risingNode.setChild(0, node, this.canvas.getStrokeWidth());
+        risingNode.setChild(1, rightNode, this.canvas.getStrokeWidth());
 
         if (parent && parentIndex !== null) {
             parent.setChild(
                 parentIndex,
                 risingNode,
-                this.view.getStrokeWidth()
+                this.canvas.getStrokeWidth()
             );
             await this.pause(undefined);
             risingNode.setCenter(
-                parent.getCX(parentIndex - 0.5, this.view.getObjectSize()),
+                parent.getCX(parentIndex - 0.5, this.canvas.getObjectSize()),
                 parent.cy(),
-                this.view.getAnimationSpeed()
+                this.canvas.getAnimationSpeed()
             );
             node.setHighlight(false);
             rightNode.setHighlight(false);
@@ -334,22 +340,25 @@ export class BTree extends Engine {
             parent.insertValue(
                 parentIndex,
                 risingValue,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             );
-            parent.setChild(parentIndex, node, this.view.getStrokeWidth());
+            parent.setChild(parentIndex, node, this.canvas.getStrokeWidth());
             parent.setChild(
                 parentIndex + 1,
                 rightNode,
-                this.view.getStrokeWidth()
+                this.canvas.getStrokeWidth()
             );
             risingNode.remove();
-            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(
+                this.canvas.$Svg.margin,
+                this.canvas.getNodeSpacing()
+            );
             return parent;
         }
 
         this.treeRoot = risingNode;
-        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.canvas.$Svg.margin, this.canvas.getNodeSpacing());
         this.treeRoot.setHighlight(false);
         node.setHighlight(false);
         rightNode.setHighlight(false);
@@ -383,12 +392,15 @@ export class BTree extends Engine {
 
         const { x, y } = this.info.printer.bbox();
         const printed = [
-            this.view.Svg.text("Printed nodes: ").addClass("printer").x(x).y(y),
+            this.canvas.Svg.text("Printed nodes: ")
+                .addClass("printer")
+                .x(x)
+                .y(y),
         ];
-        const pointer = this.view.Svg.put(new HighlightCircle()).init(
-            ...this.view.getNodeStart(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+        const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
+            ...this.canvas.getNodeStart(),
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         await this.printHelper(this.treeRoot, pointer, printed);
         pointer.remove();
@@ -406,33 +418,33 @@ export class BTree extends Engine {
         if (node.isLeaf()) {
             for (let i = 0; i < node.numValues(); i++) {
                 pointer.setCenter(
-                    node.getCX(i, this.view.getObjectSize()),
+                    node.getCX(i, this.canvas.getObjectSize()),
                     node.cy(),
-                    this.view.getAnimationSpeed()
+                    this.canvas.getAnimationSpeed()
                 );
                 await this.printOneLabel(node, i, printed);
             }
         } else {
             for (let i = 0; i < node.numChildren(); i++) {
                 pointer.setCenter(
-                    node.getCX(i - 0.5, this.view.getObjectSize()),
+                    node.getCX(i - 0.5, this.canvas.getObjectSize()),
                     Number(node.y()) + Number(node.height()),
-                    this.view.getAnimationSpeed()
+                    this.canvas.getAnimationSpeed()
                 );
                 await this.pause(undefined);
                 await this.printHelper(node.getChild(i)!, pointer, printed);
                 if (i < node.numValues()) {
                     pointer.setCenter(
-                        node.getCX(i, this.view.getObjectSize()),
+                        node.getCX(i, this.canvas.getObjectSize()),
                         node.cy(),
-                        this.view.getAnimationSpeed()
+                        this.canvas.getAnimationSpeed()
                     );
                     await this.printOneLabel(node, i, printed);
                 } else {
                     pointer.setCenter(
-                        node.getCX(i - 0.5, this.view.getObjectSize()),
+                        node.getCX(i - 0.5, this.canvas.getObjectSize()),
                         node.cy(),
-                        this.view.getAnimationSpeed()
+                        this.canvas.getAnimationSpeed()
                     );
                     await this.pause(undefined);
                 }
@@ -441,13 +453,13 @@ export class BTree extends Engine {
     }
 
     async printOneLabel(node: BTreeNode, i: number, printed: Text[]) {
-        const lbl = this.view.Svg.text(node.getText(i)).center(
-            node.getCX(i, this.view.getObjectSize()),
+        const lbl = this.canvas.Svg.text(node.getText(i)).center(
+            node.getCX(i, this.canvas.getObjectSize()),
             node.cy()
         );
         await this.pause(undefined);
         const last = printed[printed.length - 1];
-        const spacing = this.view.getNodeSpacing() / 2;
+        const spacing = this.canvas.getNodeSpacing() / 2;
         this.animate(lbl)
             .cy(last.cy())
             .x(last.bbox().x2 + spacing);
@@ -487,7 +499,10 @@ export class BTree extends Engine {
                 : this.treeRoot.getLeft();
             this.treeRoot.remove();
             this.treeRoot = newRoot;
-            this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+            this.resizeTree(
+                this.canvas.$Svg.margin,
+                this.canvas.getNodeSpacing()
+            );
         }
     }
 
@@ -500,21 +515,21 @@ export class BTree extends Engine {
         );
         node.deleteValue(
             i,
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
-        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.canvas.$Svg.margin, this.canvas.getNodeSpacing());
         node.setHighlight(false);
         await this.repairAfterDelete(node);
     }
 
     async deleteNonleaf(node: BTreeNode, i: number) {
         node.addClass("marked");
-        const pointer = this.view.Svg.put(new HighlightCircle()).init(
-            node.getCX(i, this.view.getObjectSize()),
+        const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
+            node.getCX(i, this.canvas.getObjectSize()),
             node.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         await this.pause("find.predecessor", node.getText(i));
         let maxNode = node.getChild(i);
@@ -522,9 +537,9 @@ export class BTree extends Engine {
         while (true) {
             j = (maxNode?.numValues() || 0) - 1;
             pointer.setCenter(
-                maxNode?.getCX(j, this.view.getObjectSize()) || 0,
+                maxNode?.getCX(j, this.canvas.getObjectSize()) || 0,
                 maxNode?.cy() || 0,
-                this.view.getAnimationSpeed()
+                this.canvas.getAnimationSpeed()
             );
             await this.pause(undefined);
             if (maxNode?.isLeaf()) {
@@ -533,22 +548,22 @@ export class BTree extends Engine {
             maxNode = maxNode?.getRight() || null;
         }
         const maxValue = maxNode.getText(j);
-        const risingNode = this.view.Svg.put(new BTreeNode()).init(
+        const risingNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            maxNode.getCX(j, this.view.getObjectSize()),
+            maxNode.getCX(j, this.canvas.getObjectSize()),
             maxNode.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         risingNode.setHighlight(true);
         risingNode.setText(0, maxValue);
         await this.pause("delete.replace", node.getText(i), maxValue);
         pointer.remove();
         risingNode.setCenter(
-            node.getCX(i, this.view.getObjectSize()),
+            node.getCX(i, this.canvas.getObjectSize()),
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         node.setText(i, "");
         await this.pause(undefined);
@@ -614,13 +629,13 @@ export class BTree extends Engine {
         rightSib?.setHighlight(true);
         await this.pause("node.mergeRight", node, parentValue, rightSib);
 
-        const sinkingNode = this.view.Svg.put(new BTreeNode()).init(
+        const sinkingNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            parent.getCX(parentIndex, this.view.getObjectSize()),
+            parent.getCX(parentIndex, this.canvas.getObjectSize()),
             parent.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         sinkingNode.setHighlight(true);
         sinkingNode.setText(0, parentValue);
@@ -631,18 +646,18 @@ export class BTree extends Engine {
         sinkingNode.setCenter(
             sinkingX,
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         node.setCenter(
-            sinkingX - (this.view.getObjectSize() + Number(node.width())) / 2,
+            sinkingX - (this.canvas.getObjectSize() + Number(node.width())) / 2,
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         rightSib?.setCenter(
             sinkingX +
-                (this.view.getObjectSize() + Number(rightSib.width())) / 2,
+                (this.canvas.getObjectSize() + Number(rightSib.width())) / 2,
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         await this.pause(undefined);
 
@@ -650,8 +665,8 @@ export class BTree extends Engine {
         const textsToInsert = [parentValue].concat(rightSib?.getTexts() || []);
         node.setNumValues(
             nodeSize + textsToInsert.length,
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         for (let i = 0; i < textsToInsert.length; i++) {
             node.setText(nodeSize + i, textsToInsert[i]);
@@ -659,19 +674,19 @@ export class BTree extends Engine {
                 node.setChild(
                     nodeSize + i + 1,
                     rightSib?.getChild(i) as BTreeNode,
-                    this.view.getStrokeWidth()
+                    this.canvas.getStrokeWidth()
                 );
             }
         }
         parent.deleteValue(
             parentIndex,
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth(),
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth(),
             false
         );
         sinkingNode.remove();
         rightSib?.remove();
-        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.canvas.$Svg.margin, this.canvas.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);
@@ -696,23 +711,23 @@ export class BTree extends Engine {
         const rightValue = rightSib.getText(0);
         await this.pause("node.steal.right", node, leftValue, rightValue);
 
-        const leftNode = this.view.Svg.put(new BTreeNode()).init(
+        const leftNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            parent?.getCX(parentIndex, this.view.getObjectSize()),
+            parent?.getCX(parentIndex, this.canvas.getObjectSize()),
             parent?.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         leftNode.setText(0, leftValue || "");
         leftNode.setHighlight(true);
-        const rightNode = this.view.Svg.put(new BTreeNode()).init(
+        const rightNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            rightSib?.getCX(0, this.view.getObjectSize()),
+            rightSib?.getCX(0, this.canvas.getObjectSize()),
             rightSib?.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         rightNode.setText(0, rightValue || "");
         rightNode.setHighlight(true);
@@ -720,27 +735,27 @@ export class BTree extends Engine {
         node.insertValue(
             node.numValues(),
             "",
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         parent.setText(parentIndex, "");
         rightSib.setText(0, "");
 
         leftNode.setCenter(
-            node.getCX(node.numValues() - 1, this.view.getObjectSize()),
+            node.getCX(node.numValues() - 1, this.canvas.getObjectSize()),
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         rightNode.setCenter(
-            parent.getCX(parentIndex, this.view.getObjectSize()),
+            parent.getCX(parentIndex, this.canvas.getObjectSize()),
             parent.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         if (!node.isLeaf()) {
             node.setChild(
                 node.numChildren() - 1,
                 rightSib.getChild(0),
-                this.view.getStrokeWidth()
+                this.canvas.getStrokeWidth()
             );
         }
         await this.pause(undefined);
@@ -749,12 +764,12 @@ export class BTree extends Engine {
         rightNode.remove();
         rightSib.deleteValue(
             0,
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         parent.setText(parentIndex, rightValue);
         node.setText(node.numValues() - 1, leftValue);
-        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.canvas.$Svg.margin, this.canvas.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);
@@ -781,23 +796,23 @@ export class BTree extends Engine {
         const leftValue = leftSib.getText(leftSib.numValues() - 1);
         await this.pause("node.steal.left", node, leftValue, rightValue);
 
-        const rightNode = this.view.Svg.put(new BTreeNode()).init(
+        const rightNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            parent.getCX(parentIndex, this.view.getObjectSize()),
+            parent.getCX(parentIndex, this.canvas.getObjectSize()),
             parent.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         rightNode.setText(0, rightValue);
         rightNode.setHighlight(true);
-        const leftNode = this.view.Svg.put(new BTreeNode()).init(
+        const leftNode = this.canvas.Svg.put(new BTreeNode()).init(
             false,
             1,
-            leftSib.getCX(leftSib.numValues() - 1, this.view.getObjectSize()),
+            leftSib.getCX(leftSib.numValues() - 1, this.canvas.getObjectSize()),
             leftSib.cy(),
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth()
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth()
         );
         leftNode.setText(0, leftValue);
         leftNode.setHighlight(true);
@@ -805,28 +820,28 @@ export class BTree extends Engine {
         node.insertValue(
             0,
             "",
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth(),
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth(),
             true
         );
         parent.setText(parentIndex, "");
         leftSib.setText(leftSib.numValues() - 1, "");
 
         rightNode.setCenter(
-            node.getCX(0, this.view.getObjectSize()),
+            node.getCX(0, this.canvas.getObjectSize()),
             node.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         leftNode.setCenter(
-            parent.getCX(parentIndex, this.view.getObjectSize()),
+            parent.getCX(parentIndex, this.canvas.getObjectSize()),
             parent.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         if (!node.isLeaf()) {
             node.setChild(
                 0,
                 leftSib.getChild(leftSib.numChildren() - 1),
-                this.view.getStrokeWidth()
+                this.canvas.getStrokeWidth()
             );
         }
         await this.pause(undefined);
@@ -835,13 +850,13 @@ export class BTree extends Engine {
         leftNode.remove();
         leftSib.deleteValue(
             leftSib.numValues() - 1,
-            this.view.getObjectSize(),
-            this.view.getStrokeWidth(),
+            this.canvas.getObjectSize(),
+            this.canvas.getStrokeWidth(),
             false
         );
         parent.setText(parentIndex, leftValue);
         node.setText(0, rightValue);
-        this.resizeTree(this.view.$Svg.margin, this.view.getNodeSpacing());
+        this.resizeTree(this.canvas.$Svg.margin, this.canvas.getNodeSpacing());
         await this.pause(undefined);
         node.setHighlight(false);
         parent.setHighlight(false);

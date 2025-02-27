@@ -58,7 +58,7 @@ export class AVLQuiz extends BST {
     }
 
     isUnbalanced() {
-        for (const node of this.view.Svg.find("g")) {
+        for (const node of this.canvas.Svg.find("g")) {
             if (node instanceof AVLNode) {
                 if (node.getHeightHighlight()) {
                     return true;
@@ -84,28 +84,28 @@ export class AVLQuiz extends BST {
     }
 
     newNode(text: string) {
-        return this.view.Svg.put(
+        return this.canvas.Svg.put(
             new AVLNode(
                 text,
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
-        ).init(...this.view.getNodeStart());
+        ).init(...this.canvas.getNodeStart());
     }
 
     async setCurrent(node: AVLNode | null, animate: boolean) {
         this.current?.setHighlight(false);
         if (animate && this.current && node) {
-            const cursor = this.view.Svg.put(new HighlightCircle()).init(
+            const cursor = this.canvas.Svg.put(new HighlightCircle()).init(
                 this.current.cx(),
                 this.current.cy(),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             );
             cursor.setCenter(
                 node.cx(),
                 node.cy(),
-                animate ? this.view.getAnimationSpeed() : 0
+                animate ? this.canvas.getAnimationSpeed() : 0
             );
             await this.pause(undefined);
             cursor.remove();
@@ -152,11 +152,11 @@ export class AVLQuiz extends BST {
             return;
         }
 
-        const moving = this.view.Svg.put(
+        const moving = this.canvas.Svg.put(
             new TextCircle(
                 this.current.getText(),
-                this.view.getObjectSize(),
-                this.view.getStrokeWidth()
+                this.canvas.getObjectSize(),
+                this.canvas.getStrokeWidth()
             )
         ).init(this.current.cx(), this.current.cy());
         moving.setHighlight(true);
@@ -166,7 +166,7 @@ export class AVLQuiz extends BST {
         moving.setCenter(
             this.mark.cx(),
             this.mark.cy(),
-            this.view.getAnimationSpeed()
+            this.canvas.getAnimationSpeed()
         );
         await this.pause(undefined);
         this.mark.setText(this.current.getText());
@@ -191,7 +191,7 @@ export class AVLQuiz extends BST {
             return;
         }
         const child = this.newNode(value);
-        this.current.setChild(direction, child, this.view.getStrokeWidth());
+        this.current.setChild(direction, child, this.canvas.getStrokeWidth());
         child.setHighlight(true);
         this.current.setChildHighlight(direction, true);
         await this.pause(`Insert ${value} as ${direction} child`);
