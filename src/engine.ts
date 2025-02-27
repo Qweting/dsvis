@@ -210,8 +210,10 @@ export class Engine {
             this.disableWhenRunning(true);
             return;
         }
-        this.eventListeners.addListener("toggleRunner", "click", () =>
-            this.toggleRunner()
+        this.eventListeners.addListener(
+            this.toolbar.toggleRunner,
+            "click",
+            () => this.toggleRunner()
         );
         if (isRunning) {
             this.disableWhenRunning(true);

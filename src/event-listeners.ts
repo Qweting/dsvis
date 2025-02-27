@@ -1,20 +1,25 @@
 import { Engine } from "./engine";
 
 type ListenerType = "click" | "change";
-type IdleListeners = Record<
-    string,
-    { type: ListenerType; condition: () => boolean; handler: () => void }
->;
-type AsyncListeners = Record<
-    string,
-    {
-        type: ListenerType;
-        handler: (resolve: Resolve, reject: Reject) => void;
-    }
->;
+type AllowedElements =
+    | HTMLSelectElement
+    | HTMLButtonElement
+    | HTMLFieldSetElement;
+type IdleListener = {
+    element: AllowedElements;
+    type: ListenerType;
+    condition: () => boolean;
+    handler: () => void;
+};
 
-type EventListenersObj = Record<
-    string,
+type AsyncListener = {
+    element: AllowedElements;
+    type: ListenerType;
+    handler: (resolve: Resolve, reject: Reject) => void;
+};
+
+type EventListenersMap = Map<
+    AllowedElements,
     Partial<Record<ListenerType, () => void>>
 >;
 
@@ -23,110 +28,117 @@ type Reject = (props: { until?: number; running?: boolean }) => void;
 
 export class EventListeners {
     engine: Engine;
-
-    eventListeners: EventListenersObj = {
-        stepForward: {},
-        stepBackward: {},
-        fastForward: {},
-        fastBackward: {},
-        toggleRunner: {},
-    };
-
-    $IdleListeners: IdleListeners = {
-        stepBackward: {
-            type: "click",
-            condition: () => this.engine.actions.length > 0,
-            handler: () => {
-                this.engine.setRunning(false);
-                const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
-                this.engine.execute(
-                    action.oper,
-                    action.args,
-                    action.nsteps - 1
-                );
-            },
-        },
-        fastBackward: {
-            type: "click",
-            condition: () => this.engine.actions.length > 0,
-            handler: () => {
-                this.engine.actions.pop();
-                if (this.engine.actions.length > 0) {
-                    const action = this.engine.actions.pop()!;
-                    this.engine.execute(
-                        action.oper,
-                        action.args,
-                        action.nsteps
-                    );
-                } else {
-                    this.engine.reset();
-                }
-            },
-        },
-        objectSize: {
-            type: "change",
-            condition: () => true,
-            handler: () => {
-                if (this.engine.actions.length > 0) {
-                    const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                    this.engine.execute(
-                        action.oper,
-                        action.args,
-                        action.nsteps
-                    );
-                } else {
-                    this.engine.reset();
-                }
-            },
-        },
-    };
-
-    $AsyncListeners: AsyncListeners = {
-        stepForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.engine.setRunning(false);
-                this.engine.stepForward(resolve, reject);
-            },
-        },
-        fastForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.engine.actions[this.engine.currentAction].nsteps =
-                    Number.MAX_SAFE_INTEGER;
-                this.engine.fastForward(resolve, reject);
-            },
-        },
-        toggleRunner: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.engine.toggleRunner();
-                if (this.engine.isRunning()) {
-                    this.engine.stepForward(resolve, reject);
-                } else {
-                    this.engine.currentStep++;
-                    resolve(undefined);
-                }
-            },
-        },
-        stepBackward: {
-            type: "click",
-            handler: (resolve, reject) =>
-                reject({ until: this.engine.currentStep - 1, running: false }),
-        },
-        fastBackward: {
-            type: "click",
-            handler: (resolve, reject) => reject({ until: 0 }),
-        },
-        objectSize: {
-            type: "change",
-            handler: (resolve, reject) =>
-                reject({ until: this.engine.currentStep }),
-        },
-    };
+    activeListeners: EventListenersMap = new Map();
+    idleListeners: IdleListener[] = [];
+    asyncListeners: AsyncListener[] = [];
 
     constructor(engine: Engine) {
         this.engine = engine;
+
+        this.idleListeners.push(
+            {
+                element: this.engine.toolbar.stepBackward,
+                type: "click",
+                condition: () => this.engine.actions.length > 0,
+                handler: () => {
+                    this.engine.setRunning(false);
+                    const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
+                    this.engine.execute(
+                        action.oper,
+                        action.args,
+                        action.nsteps - 1
+                    );
+                },
+            },
+            {
+                element: this.engine.toolbar.fastBackward,
+                type: "click",
+                condition: () => this.engine.actions.length > 0,
+                handler: () => {
+                    this.engine.actions.pop();
+                    if (this.engine.actions.length > 0) {
+                        const action = this.engine.actions.pop()!;
+                        this.engine.execute(
+                            action.oper,
+                            action.args,
+                            action.nsteps
+                        );
+                    } else {
+                        this.engine.reset();
+                    }
+                },
+            },
+            {
+                element: this.engine.toolbar.objectSize,
+                type: "change",
+                condition: () => true,
+                handler: () => {
+                    if (this.engine.actions.length > 0) {
+                        const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
+                        this.engine.execute(
+                            action.oper,
+                            action.args,
+                            action.nsteps
+                        );
+                    } else {
+                        this.engine.reset();
+                    }
+                },
+            }
+        );
+
+        this.asyncListeners.push(
+            {
+                element: this.engine.toolbar.stepForward,
+                type: "click",
+                handler: (resolve, reject) => {
+                    this.engine.setRunning(false);
+                    this.engine.stepForward(resolve, reject);
+                },
+            },
+            {
+                element: this.engine.toolbar.fastForward,
+                type: "click",
+                handler: (resolve, reject) => {
+                    this.engine.actions[this.engine.currentAction].nsteps =
+                        Number.MAX_SAFE_INTEGER;
+                    this.engine.fastForward(resolve, reject);
+                },
+            },
+            {
+                element: this.engine.toolbar.toggleRunner,
+                type: "click",
+                handler: (resolve, reject) => {
+                    this.engine.toggleRunner();
+                    if (this.engine.isRunning()) {
+                        this.engine.stepForward(resolve, reject);
+                    } else {
+                        this.engine.currentStep++;
+                        resolve(undefined);
+                    }
+                },
+            },
+            {
+                element: this.engine.toolbar.stepBackward,
+                type: "click",
+                handler: (resolve, reject) =>
+                    reject({
+                        until: this.engine.currentStep - 1,
+                        running: false,
+                    }),
+            },
+            {
+                element: this.engine.toolbar.fastBackward,
+                type: "click",
+                handler: (resolve, reject) => reject({ until: 0 }),
+            },
+            {
+                element: this.engine.toolbar.objectSize,
+                type: "change",
+                handler: (resolve, reject) =>
+                    reject({ until: this.engine.currentStep }),
+            }
+        );
     }
 
     addAsyncListeners(
@@ -134,77 +146,65 @@ export class EventListeners {
         reject: Reject,
         runnerTimer: NodeJS.Timeout | undefined
     ): void {
-        for (const id in this.$AsyncListeners) {
-            const listener = this.$AsyncListeners[id];
-            this.addListener(id, listener.type, () => {
+        this.asyncListeners.forEach((listener) => {
+            this.addListener(listener.element, listener.type, () => {
                 clearTimeout(runnerTimer);
                 listener.handler(resolve, reject);
             });
-        }
+        });
     }
 
     addIdleListeners(): void {
-        for (const id in this.$IdleListeners) {
-            const listener = this.$IdleListeners[id];
-            if (listener.condition()) {
-                if (this.engine.DEBUG) {
-                    this.addListener(id, listener.type, () => {
-                        console.log(
-                            `${id} ${listener.type}: ${JSON.stringify(
-                                this.engine.actions
-                            )}`
-                        );
-                        listener.handler();
-                    });
-                } else {
-                    this.addListener(id, listener.type, listener.handler);
-                }
+        this.idleListeners.forEach((listener) => {
+            if (this.engine.DEBUG) {
+                this.addListener(listener.element, listener.type, () => {
+                    console.log(
+                        listener.element,
+                        `${listener.type}: ${JSON.stringify(
+                            this.engine.actions
+                        )}`
+                    );
+                    listener.handler();
+                });
+            } else {
+                this.addListener(
+                    listener.element,
+                    listener.type,
+                    listener.handler
+                );
             }
-        }
+        });
     }
 
-    addListener(id: string, type: ListenerType, handler: () => void): void {
-        const listeners = this.eventListeners;
-        if (!listeners[id]) {
-            listeners[id] = {};
+    addListener(
+        element: AllowedElements,
+        type: ListenerType,
+        handler: () => void
+    ): void {
+        const listeners = this.activeListeners;
+        if (!listeners.has(element)) {
+            listeners.set(element, {});
         }
-        const elem =
-            this.engine.toolbar[id as keyof typeof this.engine.toolbar];
-
-        if (!elem) {
-            throw new Error("Could not find element to add listener to");
-        }
-
-        const oldHandler = listeners[id][type];
+        const listener = listeners.get(element)!;
+        const oldHandler = listener[type];
         if (oldHandler) {
-            elem.removeEventListener(type, oldHandler);
+            element.removeEventListener(type, oldHandler);
         }
-        listeners[id][type] = handler;
-        elem.addEventListener(type, handler);
-        elem.disabled = false;
+        listener[type] = handler;
+        element.addEventListener(type, handler);
+        element.disabled = false;
     }
 
     removeAllListeners(): void {
-        const listeners = this.eventListeners;
-
-        for (const id in listeners) {
-            const elem =
-                this.engine.toolbar[id as keyof typeof this.engine.toolbar];
-
-            if (!elem) {
-                throw new Error(
-                    "Could not find element to remove listener from"
-                );
-            }
-
-            elem.disabled = true;
-            for (const type in listeners[id]) {
-                elem.removeEventListener(
+        this.activeListeners.forEach((listener, element) => {
+            element.disabled = true;
+            for (const type in listener) {
+                element.removeEventListener(
                     type,
-                    listeners[id][type as ListenerType]! // ! because we know that the type exists
+                    listener[type as ListenerType]! // ! because we know that the type exists
                 );
             }
-            listeners[id] = {};
-        }
+        });
+        this.activeListeners.clear();
     }
 }
