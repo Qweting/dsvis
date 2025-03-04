@@ -102,10 +102,13 @@ export class Engine {
         this.container = container;
         this.toolbar = new EngineToolbar(container);
 
-        this.cookies = new Cookies({
-            objectSize: this.toolbar.objectSize,
-            animationSpeed: this.toolbar.animationSpeed,
-        });
+        this.cookies = new Cookies(
+            {
+                objectSize: this.toolbar.objectSize,
+                animationSpeed: this.toolbar.animationSpeed,
+            },
+            this.debug
+        );
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -131,13 +134,13 @@ export class Engine {
 
     initToolbar(): void {
         this.toolbar.animationSpeed.addEventListener("change", () =>
-            this.saveCookies()
+            this.cookies.save()
         );
     }
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        this.loadCookies();
+        this.cookies.load();
         await this.reset();
     }
 
@@ -202,7 +205,7 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
-        this.saveCookies();
+        this.cookies.save();
         this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
             this.disableWhenRunning(true);
@@ -452,19 +455,6 @@ export class Engine {
 
     toggleRunner(): this {
         return this.setRunning(!this.isRunning());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Cookies
-
-    loadCookies(): void {
-        this.debug.log("Loading cookies", document.cookie);
-        this.cookies.load();
-    }
-
-    saveCookies(): void {
-        this.cookies.save();
-        this.debug.log("Setting cookies", document.cookie);
     }
 
     animate(elem: Element, animate = true) {
