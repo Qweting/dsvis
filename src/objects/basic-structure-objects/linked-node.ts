@@ -1,9 +1,5 @@
 import {
-<<<<<<< HEAD
-    Text, G, Marker, Svg, Rect
-=======
     Text, G, Marker, Svg, Rect,
->>>>>>> b5293ce (added some stuff to the LinkedNode.ts (tests are missing))
 } from "@svgdotjs/svg.js";
 
 export class LinkedNode extends G{
@@ -15,23 +11,8 @@ export class LinkedNode extends G{
     private _textElement: Text; 
     private _nextElementRect: Rect; 
 
-    private elementRect: Rect;
-    private nextRect: Rect;
-    private textElement: Text;
-
     constructor(value: string | number, objectSize: number) {
         super();
-<<<<<<< HEAD
-        this.value = value;
-        this.rectWidth = 2*objectSize;
-        this.rectHeight = objectSize;
-
-        this.elementRect = this.rect(this.rectWidth, this.rectHeight);
-        this.nextRect = this.rect(this.rectWidth / 2, this.rectHeight).move(this.rectWidth + 1, 0);
-        this.textElement = this.text(String(value))
-            .font({ size: this.rectHeight * 0.6 })
-            .center(this.elementRect.cx(), this.elementRect.cy());
-=======
         this._value = value;
         this._rectWidth = 2*objectSize;
         this._rectHeight = objectSize;
@@ -41,7 +22,6 @@ export class LinkedNode extends G{
         this._textElement = this.text(String(value)) //initializing the text element for current node (value)
             .font({ size: this._rectHeight * 0.6 })
             .center(this._elementRect.cx(), this._elementRect.cy());
->>>>>>> b5293ce (added some stuff to the LinkedNode.ts (tests are missing))
     }
 
     get value(): string | number {
