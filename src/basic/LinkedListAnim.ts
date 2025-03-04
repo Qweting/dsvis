@@ -8,6 +8,7 @@ import {
 } from "../engine";
 
 import LinkedList from "./LinkedList";
+import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
 
 interface NodeArray {
     value: string | number;
@@ -72,7 +73,7 @@ export class LinkedListAnim extends Engine {
     }
 
     async newNode(value: string | number): Promise<void> {
-        const rectWidth = 100; // Width of rectangle
+        /* const rectWidth = 100; // Width of rectangle
         const rectHeight = 50; // Height of rectangle
 
         // const grp: G = this.SVG.group(); // Container holding the rectangle and text
@@ -86,14 +87,18 @@ export class LinkedListAnim extends Engine {
 
         grp.add(elementRect);
         grp.add(nextRect);
-        grp.add(textElement);
+        grp.add(textElement); */
+
+        const grp = new LinkedNode(value, this.getObjectSize())
+
+
         grp.move(this.$Svg.width / 4, this.$Svg.height / 2);
 
-        const startX = Number(grp.x()) + rectWidth + (rectWidth / 4);
-        const startY = Number(grp.y()) + rectHeight / 2;        const endX = startX + 50;
-        const endY = startY;
+        //const startX = Number(grp.x()) + rectWidth + (rectWidth / 4);
+        //const startY = Number(grp.y()) + rectHeight / 2;        const endX = startX + 50;
+        //const endY = startY;
 
-        const arrowMarker: Marker = this.Svg.marker(10, 10, (add) => {
+        /* const arrowMarker: Marker = this.Svg.marker(10, 10, (add) => {
             add.path('M0,0 L10,5 L0,10 Z');
         }).ref(1, 5);
 
@@ -102,7 +107,7 @@ export class LinkedListAnim extends Engine {
             .marker('end', arrowMarker);
 
         grp.add(arrowLine);
-        grp.add(arrowMarker);
+        grp.add(arrowMarker); */
 
         this.Svg.add(grp);
 
