@@ -1,5 +1,6 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
+import { Debug } from "./debug";
 import { EventListeners } from "./event-listeners";
 import { Info } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
@@ -42,7 +43,7 @@ export class Engine {
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     currentAction: number = 0; // was = null before, this should work better
     currentStep: number = 0; // was = null before, this should work better
-    DEBUG = true;
+    debug: Debug;
 
     state: {
         resetting: boolean;
@@ -90,6 +91,8 @@ export class Engine {
     // Inititalisation
 
     constructor(containerSelector: string) {
+        this.debug = new Debug();
+
         const container =
             document.querySelector<HTMLElement>(containerSelector);
         if (!container) {
@@ -112,12 +115,7 @@ export class Engine {
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = this;
-
-        const debugParam = new URLSearchParams(window.location.href).get(
-            "debug"
-        );
-        this.DEBUG = Boolean(debugParam || false);
-        if (this.DEBUG) {
+        if (this.debug.isEnabled()) {
             this.Svg.addClass("debug");
         }
 
@@ -164,7 +162,7 @@ export class Engine {
 
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
-        if (this.DEBUG) {
+        if (this.debug.isEnabled()) {
             for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }
@@ -258,25 +256,20 @@ export class Engine {
     ): Promise<void> {
         await this.reset();
         this.actions.push({ oper: operation, args: args, nsteps: until });
-        if (this.DEBUG) {
-            console.log(
-                `EXEC ${until}: ${operation} ${args.join(
-                    ", "
-                )}, ${JSON.stringify(this.actions)}`
-            );
-        }
+        this.debug.log(
+            `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
+                this.actions
+            )}`
+        );
 
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].nsteps =
                 this.currentStep || 0; // TODO: Not sure if this is correct
-            if (this.DEBUG) {
-                console.log(
-                    `DONE / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
+            );
+
             this.resetListeners(false);
         } catch (reason) {
             if (
@@ -294,13 +287,12 @@ export class Engine {
                 this.setRunning(reason.running);
             }
             until = reason.until;
-            if (this.DEBUG) {
-                console.log(
-                    `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
+                    this.actions
+                )}`
+            );
+
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                 operation = action.oper;
@@ -327,13 +319,10 @@ export class Engine {
             message = `${
                 message.charAt(0).toUpperCase() + message.substring(1)
             } ${action.args.join(", ")}`;
-            if (this.DEBUG) {
-                console.log(
-                    `CALL ${nAction}: ${message}, ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
+            );
+
             this.info.setTitle(message);
             await this.pause("");
             if (
@@ -354,15 +343,14 @@ export class Engine {
         ...args: unknown[]
     ): Promise<unknown> | null {
         const title = this.getMessage(message, ...args);
-        if (this.DEBUG) {
-            console.log(
-                `${
-                    this.currentStep
-                }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
-                    this.actions
-                )}`
-            );
-        }
+        this.debug.log(
+            `${
+                this.currentStep
+            }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
+                this.actions
+            )}`
+        );
+
         if (this.state.resetting) {
             return null;
         }
@@ -441,7 +429,7 @@ export class Engine {
         }
         this.currentStep++;
         this.state.animating = false;
-        if (this.DEBUG) {
+        if (this.debug.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);
@@ -470,17 +458,13 @@ export class Engine {
     // Cookies
 
     loadCookies(): void {
-        if (this.DEBUG) {
-            console.log("Loading cookies", document.cookie);
-        }
+        this.debug.log("Loading cookies", document.cookie);
         this.cookies.load();
     }
 
     saveCookies(): void {
         this.cookies.save();
-        if (this.DEBUG) {
-            console.log("Setting cookies", document.cookie);
-        }
+        this.debug.log("Setting cookies", document.cookie);
     }
 
     animate(elem: Element, animate = true) {

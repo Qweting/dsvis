@@ -1,3 +1,4 @@
+import { Debug } from "./debug";
 import { Engine } from "./engine";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
@@ -30,6 +31,7 @@ type Reject = (props: { until?: number; running?: boolean }) => void;
 export class EventListeners {
     engine: Engine;
     toolbar: EngineToolbar;
+    debug: Debug;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
@@ -37,6 +39,7 @@ export class EventListeners {
     constructor(engine: Engine) {
         this.engine = engine;
         this.toolbar = engine.toolbar;
+        this.debug = engine.debug;
 
         this.idleListeners.push(
             {
@@ -159,23 +162,13 @@ export class EventListeners {
 
     addIdleListeners(): void {
         this.idleListeners.forEach((listener) => {
-            if (this.engine.DEBUG) {
-                this.addListener(listener.element, listener.type, () => {
-                    console.log(
-                        listener.element,
-                        `${listener.type}: ${JSON.stringify(
-                            this.engine.actions
-                        )}`
-                    );
-                    listener.handler();
-                });
-            } else {
-                this.addListener(
+            this.addListener(listener.element, listener.type, () => {
+                this.debug.log(
                     listener.element,
-                    listener.type,
-                    listener.handler
+                    `${listener.type}: ${JSON.stringify(this.engine.actions)}`
                 );
-            }
+                listener.handler();
+            });
         });
     }
 
