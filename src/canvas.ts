@@ -13,12 +13,16 @@ export class Canvas {
     };
 
     // Todo: make debug global
-    DEBUG: boolean = false;
+    debug: boolean;
 
     constructor(svgContainer: SVGSVGElement, engine: Engine) {
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = engine;
+        this.debug = engine.debug.isEnabled();
+        if (this.debug) {
+            this.Svg.addClass("debug");
+        }
     }
 
     clear() {
@@ -26,7 +30,7 @@ export class Canvas {
 
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
-        if (this.DEBUG) {
+        if (this.debug) {
             for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }

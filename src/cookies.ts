@@ -1,3 +1,5 @@
+import { Debug } from "./debug";
+
 interface CookieObject {
     [key: string]: HTMLSelectElement;
 }
@@ -5,14 +7,18 @@ interface CookieObject {
 export class Cookies {
     private $COOKIE_EXPIRE_DAYS = 30;
     private cookies: CookieObject;
+    private debug: Debug;
 
-    constructor(cookies: CookieObject) {
-        this.cookies = cookies;
+    constructor(initialCookies: CookieObject, debug: Debug) {
+        this.cookies = initialCookies;
+        this.debug = debug;
         this.load();
     }
 
     load(): void {
-        const allCookies = document.cookie.split(";");
+        this.debug.log("Loading cookies", document.cookie);
+
+        const allCookies = document.cookie.split("; ");
         allCookies.map((cookie) => {
             const splitCookie = cookie.split("=");
             if (splitCookie.length !== 2) {
@@ -38,5 +44,7 @@ export class Cookies {
             const cookieValue = encodeURIComponent(cookieField.value);
             document.cookie = `${cookieName}=${cookieValue}${expires}`;
         });
+
+        this.debug.log("Setting cookies", document.cookie);
     }
 }

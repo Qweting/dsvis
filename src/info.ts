@@ -8,13 +8,13 @@ const statusText = {
     running: "Animating",
     paused: "Paused",
     inactive: "Idle",
-};
+} as const satisfies Record<InfoStatus, string>;
 
 const statusClass = {
-    running: "Animating",
-    paused: "Paused",
-    inactive: "Idle",
-};
+    running: "running",
+    paused: "paused",
+    inactive: "",
+} as const satisfies Record<InfoStatus, string>;
 
 export class Info {
     private Svg: SvgElement;
@@ -63,11 +63,6 @@ export class Info {
                 .removeClass("paused running")
                 .addClass(statusClass[status]);
         }, timeout);
-    }
-
-    setIdleTitle(): void {
-        this.setTitle("Select an action from the menu above");
-        this.setBody(NBSP);
     }
 
     reset() {

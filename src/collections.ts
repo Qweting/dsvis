@@ -1,4 +1,5 @@
-import { addReturnSubmit, Engine } from "./engine";
+import { Engine } from "./engine";
+import { addReturnSubmit } from "./helpers";
 import { CollectionToolbar } from "./toolbars/collection-toolbar";
 import { AVL } from "./trees/AVL";
 import { BST } from "./trees/BST";
@@ -45,7 +46,7 @@ function initialiseCollections(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (CollectionEngine.DEBUG) {
+        if (CollectionEngine.debug.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");

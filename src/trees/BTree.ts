@@ -1,11 +1,6 @@
 import { Text } from "@svgdotjs/svg.js";
-import {
-    compare,
-    Engine,
-    MessagesObject,
-    parseValues,
-    updateDefault,
-} from "../../src/engine";
+import { Engine, MessagesObject } from "../../src/engine";
+import { compare, parseValues, updateDefault } from "../../src/helpers";
 import { BTreeNode } from "../../src/objects/btree-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";

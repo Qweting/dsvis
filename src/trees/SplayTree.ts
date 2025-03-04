@@ -1,4 +1,5 @@
-import { compare, MessagesObject, updateDefault } from "../../src/engine";
+import { MessagesObject } from "../../src/engine";
+import { compare, updateDefault } from "../../src/helpers";
 import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 

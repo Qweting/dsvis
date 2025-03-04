@@ -1,4 +1,5 @@
-import { MessagesObject, updateDefault } from "../../src/engine";
+import { MessagesObject } from "../../src/engine";
+import { updateDefault } from "../../src/helpers";
 import { AVLNode } from "../../src/objects/avl-node";
 import { BinaryDir } from "../../src/objects/binary-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";

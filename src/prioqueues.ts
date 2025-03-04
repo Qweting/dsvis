@@ -1,5 +1,6 @@
-import { addReturnSubmit, Engine } from "./engine";
+import { Engine } from "./engine";
 import { BinaryHeap } from "./heaps/BinaryHeap";
+import { addReturnSubmit } from "./helpers";
 import { PrioQueueToolbar } from "./toolbars/prioqueue-toolbar";
 
 const PRIOQUEUES = {
@@ -38,7 +39,7 @@ function initialisePrioQueues(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (PQEngine.DEBUG) {
+        if (PQEngine.debug.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");

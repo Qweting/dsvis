@@ -1,22 +1,13 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
-import { Info, InfoStatus } from "./info";
+import { Debug } from "./debug";
+import { EventListeners } from "./event-listeners";
+import { parseValues } from "./helpers";
+import { Info } from "./info";
+import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 import { Canvas } from "./canvas";
 
-type ListenerType = "click" | "change";
-type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
-type IdleListeners = Record<
-    string,
-    { type: ListenerType; condition: () => boolean; handler: () => void }
->;
-type AsyncListeners = Record<
-    string,
-    {
-        type: ListenerType;
-        handler: (resolve: Resolve, reject: Reject) => void;
-    }
->;
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
 
@@ -45,7 +36,7 @@ export class Engine {
     actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
     currentAction: number = 0; // was = null before, this should work better
     currentStep: number = 0; // was = null before, this should work better
-    DEBUG = true;
+    debug: Debug;
 
     state: {
         resetting: boolean;
@@ -57,18 +48,14 @@ export class Engine {
 
     info: Info;
 
-    eventListeners: EventListeners = {
-        stepForward: {},
-        stepBackward: {},
-        fastForward: {},
-        fastBackward: {},
-        toggleRunner: {},
-    };
+    eventListeners: EventListeners;
 
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
     constructor(containerSelector: string) {
+        this.debug = new Debug();
+
         const container =
             document.querySelector<HTMLElement>(containerSelector);
         if (!container) {
@@ -78,10 +65,13 @@ export class Engine {
         this.container = container;
         this.toolbar = new EngineToolbar(container);
 
-        this.cookies = new Cookies({
-            objectSize: this.toolbar.objectSize,
-            animationSpeed: this.toolbar.animationSpeed,
-        });
+        this.cookies = new Cookies(
+            {
+                objectSize: this.toolbar.objectSize,
+                animationSpeed: this.toolbar.animationSpeed,
+            },
+            this.debug
+        );
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -90,15 +80,8 @@ export class Engine {
 
         this.canvas = new Canvas(svgContainer, this);
 
-        const debugParam = new URLSearchParams(window.location.href).get(
-            "debug"
-        );
-        this.DEBUG = Boolean(debugParam || false);
-        if (this.DEBUG) {
-            this.canvas.Svg.addClass("debug");
-        }
-
         this.info = new Info(this.canvas);
+        this.eventListeners = new EventListeners(this);
     }
 
     initialise(): void {
@@ -109,13 +92,13 @@ export class Engine {
 
     initToolbar(): void {
         this.toolbar.animationSpeed.addEventListener("change", () =>
-            this.saveCookies()
+            this.cookies.save()
         );
     }
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        this.loadCookies();
+        this.cookies.load();
         await this.reset();
     }
 
@@ -136,89 +119,10 @@ export class Engine {
 
     async resetAlgorithm(): Promise<void> {}
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // The default listeners
-
-    $IdleListeners: IdleListeners = {
-        stepBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.setRunning(false);
-                const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
-                this.execute(action.oper, action.args, action.nsteps - 1);
-            },
-        },
-        fastBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.actions.pop();
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!;
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-        objectSize: {
-            type: "change",
-            condition: () => true,
-            handler: () => {
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-    };
-
-    // TODO: Fix some nice type for this
-    $AsyncListeners: AsyncListeners = {
-        stepForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.setRunning(false);
-                this.stepForward(resolve, reject);
-            },
-        },
-        fastForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.actions[this.currentAction].nsteps =
-                    Number.MAX_SAFE_INTEGER;
-                this.fastForward(resolve, reject);
-            },
-        },
-        toggleRunner: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.toggleRunner();
-                if (this.isRunning()) {
-                    this.stepForward(resolve, reject);
-                } else {
-                    this.currentStep++;
-                    resolve(undefined);
-                }
-            },
-        },
-        stepBackward: {
-            type: "click",
-            handler: (resolve, reject) =>
-                reject({ until: this.currentStep - 1, running: false }),
-        },
-        fastBackward: {
-            type: "click",
-            handler: (resolve, reject) => reject({ until: 0 }),
-        },
-        objectSize: {
-            type: "change",
-            handler: (resolve, reject) => reject({ until: this.currentStep }),
-        },
-    };
+    setIdleTitle(): void {
+        this.info.setTitle("Select an action from the menu above");
+        this.info.setBody(NBSP);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Updating listeners
@@ -232,13 +136,17 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
-        this.saveCookies();
-        this.removeAllListeners();
+        this.cookies.save();
+        this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
             this.disableWhenRunning(true);
             return;
         }
-        this.addListener("toggleRunner", "click", () => this.toggleRunner());
+        this.eventListeners.addListener(
+            this.toolbar.toggleRunner,
+            "click",
+            () => this.toggleRunner()
+        );
         if (isRunning) {
             this.disableWhenRunning(true);
             this.info.setStatus("paused");
@@ -246,68 +154,9 @@ export class Engine {
         }
 
         this.disableWhenRunning(false);
-        this.info.setIdleTitle();
+        this.setIdleTitle();
         this.info.setStatus("inactive");
-        for (const id in this.$IdleListeners) {
-            const listener = this.$IdleListeners[id];
-            if (listener.condition()) {
-                if (this.DEBUG) {
-                    this.addListener(id, listener.type, () => {
-                        console.log(
-                            `${id} ${listener.type}: ${JSON.stringify(
-                                this.actions
-                            )}`
-                        );
-                        listener.handler();
-                    });
-                } else {
-                    this.addListener(id, listener.type, listener.handler);
-                }
-            }
-        }
-    }
-
-    addListener(id: string, type: ListenerType, handler: () => void): void {
-        const listeners = this.eventListeners;
-        if (!listeners[id]) {
-            listeners[id] = {};
-        }
-        const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-        if (!elem) {
-            throw new Error("Could not find element to add listener to");
-        }
-
-        const oldHandler = listeners[id][type];
-        if (oldHandler) {
-            elem.removeEventListener(type, oldHandler);
-        }
-        listeners[id][type] = handler;
-        elem.addEventListener(type, handler);
-        elem.disabled = false;
-    }
-
-    removeAllListeners(): void {
-        const listeners = this.eventListeners;
-
-        for (const id in listeners) {
-            const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-            if (!elem) {
-                throw new Error(
-                    "Could not find element to remove listener from"
-                );
-            }
-
-            elem.disabled = true;
-            for (const type in listeners[id]) {
-                elem.removeEventListener(
-                    type,
-                    listeners[id][type as ListenerType]!
-                );
-            } // ! because we know that the type exists
-            listeners[id] = {};
-        }
+        this.eventListeners.addIdleListeners();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -341,25 +190,20 @@ export class Engine {
     ): Promise<void> {
         await this.reset();
         this.actions.push({ oper: operation, args: args, nsteps: until });
-        if (this.DEBUG) {
-            console.log(
-                `EXEC ${until}: ${operation} ${args.join(
-                    ", "
-                )}, ${JSON.stringify(this.actions)}`
-            );
-        }
+        this.debug.log(
+            `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
+                this.actions
+            )}`
+        );
 
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].nsteps =
                 this.currentStep || 0; // TODO: Not sure if this is correct
-            if (this.DEBUG) {
-                console.log(
-                    `DONE / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
+            );
+
             this.resetListeners(false);
         } catch (reason) {
             if (
@@ -377,13 +221,12 @@ export class Engine {
                 this.setRunning(reason.running);
             }
             until = reason.until;
-            if (this.DEBUG) {
-                console.log(
-                    `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
+                    this.actions
+                )}`
+            );
+
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                 operation = action.oper;
@@ -410,13 +253,10 @@ export class Engine {
             message = `${
                 message.charAt(0).toUpperCase() + message.substring(1)
             } ${action.args.join(", ")}`;
-            if (this.DEBUG) {
-                console.log(
-                    `CALL ${nAction}: ${message}, ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debug.log(
+                `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
+            );
+
             this.info.setTitle(message);
             await this.pause("");
             if (
@@ -437,15 +277,14 @@ export class Engine {
         ...args: unknown[]
     ): Promise<unknown> | null {
         const title = this.getMessage(message, ...args);
-        if (this.DEBUG) {
-            console.log(
-                `${
-                    this.currentStep
-                }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
-                    this.actions
-                )}`
-            );
-        }
+        this.debug.log(
+            `${
+                this.currentStep
+            }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
+                this.actions
+            )}`
+        );
+
         if (this.state.resetting) {
             return null;
         }
@@ -458,13 +297,11 @@ export class Engine {
                 this.fastForward(resolve, reject);
             } else {
                 let runnerTimer: NodeJS.Timeout | undefined = undefined;
-                for (const id in this.$AsyncListeners) {
-                    const listener = this.$AsyncListeners[id];
-                    this.addListener(id, listener.type, () => {
-                        clearTimeout(runnerTimer);
-                        listener.handler(resolve, reject);
-                    });
-                }
+                this.eventListeners.addAsyncListeners(
+                    resolve,
+                    reject,
+                    runnerTimer
+                );
                 if (this.isRunning()) {
                     this.info.setStatus("running");
                     runnerTimer = setTimeout(
@@ -526,7 +363,7 @@ export class Engine {
         }
         this.currentStep++;
         this.state.animating = false;
-        if (this.DEBUG) {
+        if (this.debug.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);
@@ -551,23 +388,6 @@ export class Engine {
         return this.setRunning(!this.isRunning());
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // Cookies
-
-    loadCookies(): void {
-        if (this.DEBUG) {
-            console.log("Loading cookies", document.cookie);
-        }
-        this.cookies.load();
-    }
-
-    saveCookies(): void {
-        this.cookies.save();
-        if (this.DEBUG) {
-            console.log("Setting cookies", document.cookie);
-        }
-    }
-
     animate(elem: Element, animate = true) {
         if (this.state.animating && animate) {
             this.info.setStatus("running");
@@ -576,162 +396,5 @@ export class Engine {
         } else {
             return elem;
         }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Helper functions
-
-export function normalizeNumber(input: string): string | number {
-    input = input.trim();
-    return input === "" || isNaN(Number(input)) ? input : Number(input);
-}
-
-export function parseValues(
-    values: string | string[] | null | undefined
-): (string | number)[] {
-    if (!values) {
-        return [];
-    }
-    if (typeof values === "string") {
-        values = values.trim().split(/\s+/);
-    }
-    return values.map((v) => normalizeNumber(v));
-}
-
-type AllowedCharacters =
-    | "int"
-    | "int+"
-    | "float"
-    | "float+"
-    | "ALPHA"
-    | "ALPHA+"
-    | "alpha"
-    | "alpha+"
-    | "ALPHANUM"
-    | "ALPHANUM+"
-    | "alphanum"
-    | "alphanum+";
-
-// Adds "return-to-submit" functionality to a text input field - performs action when the user presses Enter
-// Additionally restricts input to the defined allowed characters (with + meaning spaces are allowed)
-export function addReturnSubmit(
-    field: HTMLInputElement,
-    allowed: AllowedCharacters,
-    action?: () => void
-): void {
-    const allowedCharacters =
-        allowed === "int"
-            ? "0-9"
-            : allowed === "int+"
-            ? "0-9 "
-            : allowed === "float"
-            ? "-.0-9"
-            : allowed === "float+"
-            ? "-.0-9 "
-            : allowed === "ALPHA"
-            ? "A-Z"
-            : allowed === "ALPHA+"
-            ? "A-Z "
-            : allowed === "alpha"
-            ? "a-zA-Z"
-            : allowed === "alpha+"
-            ? "a-zA-Z "
-            : allowed === "ALPHANUM"
-            ? "A-Z0-9"
-            : allowed === "ALPHANUM+"
-            ? "A-Z0-9 "
-            : allowed === "alphanum"
-            ? "a-zA-Z0-9"
-            : allowed === "alphanum+"
-            ? "a-zA-Z0-9 "
-            : allowed;
-    const isAllowed = new RegExp(`[^${allowedCharacters}]`, "g");
-
-    // Transform case of text input to match allowed
-    function matchAllowedCase(s: string): string {
-        if (allowed === allowed.toUpperCase()) {
-            return s.toUpperCase();
-        } else if (allowed === allowed.toLowerCase()) {
-            return s.toLowerCase();
-        }
-        return s;
-    }
-
-    // Idea taken from here: https://stackoverflow.com/a/14719818
-    // Block unwanted characters from being typed
-    field.oninput = (_) => {
-        let pos = field.selectionStart || 0;
-        let value = matchAllowedCase(field.value);
-        if (isAllowed.test(value)) {
-            value = value.replace(isAllowed, "");
-            pos--;
-        }
-        field.value = value;
-        field.setSelectionRange(pos, pos);
-    };
-
-    // Perform action when Enter is pressed
-    if (!action) {
-        return;
-    }
-    field.onkeydown = (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            action();
-        }
-    };
-}
-
-// Merges all keys from defaultObject into object
-// Set override to true to overwrite existing keys
-export function updateDefault(
-    object: MessagesObject,
-    defaultObject: MessagesObject,
-    override: boolean = false
-): MessagesObject {
-    for (const key in defaultObject) {
-        if (!(key in object)) {
-            object[key] = defaultObject[key];
-        } else if (
-            typeof object[key] === "object" &&
-            object[key] !== null &&
-            typeof defaultObject[key] === "object" &&
-            defaultObject[key] !== null
-        ) {
-            updateDefault(object[key], defaultObject[key], override);
-        } else if (override) {
-            object[key] = defaultObject[key];
-        }
-    }
-    return object;
-}
-
-export function modulo(n: number, d: number): number {
-    const rem = n % d;
-    return rem < 0 ? rem + d : rem;
-}
-
-export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
-    // We use non-breaking space as a proxy for the empty string,
-    // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === NBSP) {
-        a = "";
-    }
-    if (b === NBSP) {
-        b = "";
-    }
-    if (isNaN(Number(a)) === isNaN(Number(b))) {
-        // a and b are (1) both numbers or (2) both non-numbers
-        if (!isNaN(Number(a))) {
-            // a and b are both numbers
-            a = Number(a);
-            b = Number(b);
-        }
-        return a === b ? 0 : a < b ? -1 : 1;
-    } else {
-        // a and b are of different types
-        // let's say that numbers are smaller than non-numbers
-        return isNaN(Number(a)) ? 1 : -1;
     }
 }
