@@ -12,7 +12,7 @@ export class Cookies {
     }
 
     load(): void {
-        const allCookies = document.cookie.split(";");
+        const allCookies = document.cookie.split("; ");
         allCookies.map((cookie) => {
             const splitCookie = cookie.split("=");
             if (splitCookie.length !== 2) {
