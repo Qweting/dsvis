@@ -83,6 +83,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         this.heapArray.setSize(this.heapArray.getSize() - 1);
         this.heapArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
         this.mergeSort(this.heapArray, 0, this.heapArray.getSize(), 1);
+        await this.pause('general.finished');
     }
     async mergeSort(arr, left, right, iteration) {
         if (left >= right){
@@ -99,21 +100,23 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 mergeArray1.setValue(k, arr.getValue(k));
             }
             this.animate(mergeArray1).cx(CX-arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            
+            await this.pause('sort.split', mergeArray1.getValues(), arr.getValues());
+
             const mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(mid), arr.cy());
             for(let k = 0; k+mid < right; k++){
                 mergeArray2.setValue(k, arr.getValue(k+mid));
             }
             this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
-            await this.pause();
+            await this.pause('sort.split', mergeArray2.getValues(), arr.getValues());
+            
             await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
-            await this.pause();
+            
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
-            await this.pause();
+            
             await this.merge(arr, mergeArray1, mergeArray2);
         }
         else if(arr.getSize() == 2){
-            await this.pause();
+            await this.pause('sort.compare', arr.getValue(0), arr.getValue(1));
             if(arr.getValue(0) > arr.getValue(1)){
                 await this.swap(arr, 0, 1, 'sort.swap', arr.getValue(0), arr.getValue(1));
                 arr.setIndexHighlight(0, false);
@@ -127,7 +130,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         let a1i = 0;
         let a2i = 0;
         for(i = 0; i < array.getSize(); i++){
+            await this.pause('sort.compare', (a1i < subarray1.getSize() ? subarray1.getValue(a1i) : 'empty array'), (a2i < subarray2.getSize() ? subarray2.getValue(a2i) : 'empty array'));
             if(a2i >= subarray2.getSize() || (a1i < subarray1.getSize() && subarray1.getValue(a1i) < subarray2.getValue(a2i))){
+                await this.pause('sort.move', subarray1.getValue(a1i));
                 let svgValue = this.SVG.textCircle(subarray1.getValue(a1i), subarray1.getCX(a1i), subarray1.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy(), true);
                 await this.pause();
@@ -136,6 +141,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 a1i++;
             }
             else{
+                await this.pause('sort.move', subarray2.getValue(a2i));
                 let svgValue = this.SVG.textCircle(subarray2.getValue(a2i), subarray2.getCX(a2i), subarray2.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy(), true);
                 await this.pause();
@@ -162,6 +168,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         sort: {
             compare: (a, b) => `Compare ${a} and ${b}`,
             swap: (a, b) => `Swap ${a} and ${b}`,
+            split: (a, b) => `Split ${a} from ${b}`,
+            move: (a) => `Move ${a} to upper array`,
             foundNewMin:(a) => `Found a smaller value ${a}`,
         },
     };
