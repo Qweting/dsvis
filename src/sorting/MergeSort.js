@@ -116,6 +116,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
             await this.pause();
             if(arr.getValue(0) > arr.getValue(1)){
                 await this.swap(arr, 0, 1, 'sort.swap', arr.getValue(0), arr.getValue(1));
+                arr.setIndexHighlight(0, false);
+                arr.setIndexHighlight(1, false);
             }
         }
     }
@@ -126,12 +128,18 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         let a2i = 0;
         for(i = 0; i < array.getSize(); i++){
             if(a2i >= subarray2.getSize() || (a1i < subarray1.getSize() && subarray1.getValue(a1i) < subarray2.getValue(a2i))){
+                let svgValue = this.SVG.textCircle(subarray1.getValue(a1i), subarray1.getCX(a1i), subarray1.cy());
+                this.animate(svgValue).center(array.getCX(i), array.cy(), true);
+                await this.pause();
+                svgValue.remove();
                 array.setValue(i, subarray1.getValue(a1i));
-                console.log("Subarray1: " + subarray1.getValue(a1i));
                 a1i++;
             }
             else{
-                console.log("Subarray2: " + subarray2.getValue(a2i));
+                let svgValue = this.SVG.textCircle(subarray2.getValue(a2i), subarray2.getCX(a2i), subarray2.cy());
+                this.animate(svgValue).center(array.getCX(i), array.cy(), true);
+                await this.pause();
+                svgValue.remove();
                 array.setValue(i, subarray2.getValue(a2i));
                 a2i++;
             }
