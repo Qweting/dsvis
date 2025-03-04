@@ -1,5 +1,6 @@
 import { Text } from "@svgdotjs/svg.js";
-import { compare, Engine, MessagesObject, parseValues } from "../../src/engine";
+import { Engine, MessagesObject } from "../../src/engine";
+import { compare, parseValues } from "../../src/helpers";
 import { TextCircle } from "../../src/objects/text-circle";
 import { BSTToolbar } from "../../src/toolbars/BST-toolbar";
 import { BinaryDir, BinaryNode } from "../objects/binary-node";

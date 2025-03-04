@@ -1,4 +1,5 @@
-import { addReturnSubmit, compare, NBSP } from "../../src/engine";
+import { NBSP } from "../../src/engine";
+import { addReturnSubmit, compare } from "../../src/helpers";
 import { AVLNode } from "../../src/objects/avl-node";
 import { BinaryDir } from "../../src/objects/binary-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";

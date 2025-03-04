@@ -1,5 +1,6 @@
-import { addReturnSubmit, Engine } from "./engine";
+import { Engine } from "./engine";
 import { BinaryHeap } from "./heaps/BinaryHeap";
+import { addReturnSubmit } from "./helpers";
 import { PrioQueueToolbar } from "./toolbars/prioqueue-toolbar";
 
 const PRIOQUEUES = {
