@@ -75,7 +75,7 @@ export class LinkedNode extends G{
     
     //get the center position of the rectangle for the arrow
     //this is for the "nextNode" arrow, IE: rightEnd
-    getRightEnd() {
+    getNextNodeCenter() {
         return {
             x: this._nextElementRect.cx() + this._rectWidth / 2,
             y: this._nextElementRect.cy(),
@@ -83,7 +83,7 @@ export class LinkedNode extends G{
     }
     
     //for the leftEnd of the rectangle, IE: current node
-    getLeftEnd() {
+    getCurrentNodeCenter() {
         return {
             x: this._elementRect.cx() - this._rectWidth / 2, //play around for the right offset value
             y: this._elementRect.cy(),
