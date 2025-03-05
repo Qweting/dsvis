@@ -59,17 +59,18 @@ export class BTree extends Engine {
 
     initialise(initialValues = null) {
         this.initialValues = parseValues(initialValues);
+        this.initialValues = ["A", "B", "C", "D", "E", "F"];
         super.initialise();
     }
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.treeRoot = null;
-        if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     initToolbar() {
@@ -97,7 +98,7 @@ export class BTree extends Engine {
     }
 
     resizeTree(svgMargin: number, nodeSpacing: number) {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             svgMargin,

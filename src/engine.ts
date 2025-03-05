@@ -5,6 +5,7 @@ import { EventListeners } from "./event-listeners";
 import { parseValues } from "./helpers";
 import { Info } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type Resolve = (value: unknown) => void;
@@ -46,13 +47,7 @@ export class Engine {
     currentStep: number = 0; // was = null before, this should work better
     debug: Debug;
 
-    state: {
-        resetting: boolean;
-        animating: boolean;
-    } = {
-        resetting: false,
-        animating: false,
-    };
+    state: State;
 
     info: Info;
 
@@ -103,6 +98,8 @@ export class Engine {
         this.container = container;
         this.toolbar = new EngineToolbar(container);
 
+        this.state = new State(this.toolbar.toggleRunner);
+
         this.cookies = new Cookies(
             {
                 objectSize: this.toolbar.objectSize,
@@ -130,7 +127,7 @@ export class Engine {
     initialise(): void {
         this.initToolbar();
         this.resetAll();
-        this.setRunning(true);
+        this.state.setRunning(true);
     }
 
     initToolbar(): void {
@@ -215,7 +212,7 @@ export class Engine {
         this.eventListeners.addListener(
             this.toolbar.toggleRunner,
             "click",
-            () => this.toggleRunner()
+            () => this.state.toggleRunner()
         );
         if (isRunning) {
             this.disableWhenRunning(true);
@@ -288,7 +285,7 @@ export class Engine {
             }
             this.actions.pop();
             if ("running" in reason && typeof reason.running === "boolean") {
-                this.setRunning(reason.running);
+                this.state.setRunning(reason.running);
             }
             until = reason.until;
             this.debug.log(
@@ -350,12 +347,12 @@ export class Engine {
         this.debug.log(
             `${
                 this.currentStep
-            }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
+            }. Doing: ${title} (running: ${this.state.isRunning()}), ${JSON.stringify(
                 this.actions
             )}`
         );
 
-        if (this.state.resetting) {
+        if (this.state.isResetting()) {
             return null;
         }
         if (title !== undefined) {
@@ -372,7 +369,7 @@ export class Engine {
                     reject,
                     runnerTimer
                 );
-                if (this.isRunning()) {
+                if (this.state.isRunning()) {
                     this.info.setStatus("running");
                     runnerTimer = setTimeout(
                         () => this.stepForward(resolve, reject),
@@ -422,7 +419,7 @@ export class Engine {
 
     stepForward(resolve: Resolve, reject: Reject): void {
         this.currentStep++;
-        this.state.animating = true;
+        this.state.setAnimating(true);
         resolve(undefined);
     }
 
@@ -432,7 +429,7 @@ export class Engine {
             action.nsteps = this.currentStep;
         }
         this.currentStep++;
-        this.state.animating = false;
+        this.state.setAnimating(false);
         if (this.debug.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
@@ -440,26 +437,8 @@ export class Engine {
         }
     }
 
-    isRunning(): boolean {
-        return this.toolbar.toggleRunner.classList.contains("selected");
-    }
-
-    setRunning(running: boolean): this {
-        const classes = this.toolbar.toggleRunner.classList;
-        if (running) {
-            classes.add("selected");
-        } else {
-            classes.remove("selected");
-        }
-        return this;
-    }
-
-    toggleRunner(): this {
-        return this.setRunning(!this.isRunning());
-    }
-
     animate(elem: Element, animate = true) {
-        if (this.state.animating && animate) {
+        if (this.state.isAnimating() && animate) {
             this.info.setStatus("running");
             this.info.setStatus("paused", this.getAnimationSpeed());
             return elem.animate(this.getAnimationSpeed(), 0, "now");

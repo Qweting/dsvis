@@ -62,15 +62,15 @@ export class BinaryHeap extends Engine {
             this.heapArray.x(this.$Svg.margin);
         }
         this.heapSize = 0;
-        if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     resizeTree() {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
