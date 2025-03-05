@@ -82,7 +82,14 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         if(this.sortArray.getValue(this.sortArray.getSize()-1) === DSVis.NBSP){
         this.sortArray.setSize(this.sortArray.getSize() - 1);
     }
+        for(let i = 0; i < this.sortArray.getSize(); i++){
+            this.sortArray.setDisabled(i, true);
+        }
         this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
+
+        //Compensate here
+        //if(this.getTreeRoot()[0] - Math.ceil(this.sortArray.getSize()/2)
+
         await this.mergeSort(this.sortArray, 0, this.sortArray.getSize(), 1);
         await this.pause('general.finished');
     }
@@ -123,6 +130,10 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 arr.setIndexHighlight(0, false);
                 arr.setIndexHighlight(1, false);
             }
+            arr.setDisabled(0, false);
+            arr.setDisabled(1, false);
+        }else{
+            arr.setDisabled(0, false);
         }
     }
 
@@ -130,6 +141,9 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         let i
         let a1i = 0;
         let a2i = 0;
+        for(i=0; i < array.getSize(); i++){
+            array.setValue(i, DSVis.NBSP);
+        }
         for(i = 0; i < array.getSize(); i++){
             await this.pause('sort.compare', (a1i < subarray1.getSize() ? subarray1.getValue(a1i) : 'empty array'), (a2i < subarray2.getSize() ? subarray2.getValue(a2i) : 'empty array'));
             if(a2i >= subarray2.getSize() || (a1i < subarray1.getSize() && subarray1.getValue(a1i) < subarray2.getValue(a2i))){
@@ -138,6 +152,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 this.animate(svgValue).center(array.getCX(i), array.cy(), true);
                 await this.pause();
                 svgValue.remove();
+                subarray1.setDisabled(a1i, true);
+                array.setDisabled(i, false);
                 array.setValue(i, subarray1.getValue(a1i));
                 a1i++;
             }
@@ -147,6 +163,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
                 this.animate(svgValue).center(array.getCX(i), array.cy(), true);
                 await this.pause();
                 svgValue.remove();
+                subarray2.setDisabled(a2i, true);
+                array.setDisabled(i, false);
                 array.setValue(i, subarray2.getValue(a2i));
                 a2i++;
             }
