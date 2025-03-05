@@ -1,6 +1,8 @@
 import {
     Text, G, Marker, Svg, Rect,
 } from "@svgdotjs/svg.js";
+import { Connection } from "./node-connection";
+import { Cookie } from "undici-types";
 
 export class LinkedNode extends G{
     private _value: string | number;
@@ -22,6 +24,9 @@ export class LinkedNode extends G{
         this._textElement = this.text(String(value)) //initializing the text element for current node (value)
             .font({ size: this._rectHeight * 0.6 })
             .center(this._elementRect.cx(), this._elementRect.cy());
+        
+        const noz : Connection = new Connection(this.getCurrentNodeCenter(), this.getNextNodeCenter());
+        this.add(noz);
     }
 
     get value(): string | number {

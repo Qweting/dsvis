@@ -1,33 +1,21 @@
 import {
-    Text, G, Marker, Svg, Rect, Path
+    Text, G, Marker, Svg, Polyline, Path,
 } from "@svgdotjs/svg.js";
 import { LinkedNode } from "./linked-node";
 
-export class Connection extends Path{
-    arrowMarker: Marker;
-    constructor(startNode: LinkedNode, endNode: LinkedNode) {
+export class Connection extends Polyline{
+    private arrowMarker: Marker;
+    // arrowMarker: Marker;
+    constructor(startNode: {x:number, y:number}, endNode: {x:number, y:number} ) {
         super();
 
-        //const startX = Number(grp.x()) + rectWidth + (rectWidth / 4);
-        //const startY = Number(grp.y()) + rectHeight / 2;        const endX = startX + 50;
-        //const endY = startY;
-
-        /* const arrowMarker: Marker = this.Svg.marker(10, 10, (add) => {
-            add.path('M0,0 L10,5 L0,10 Z');
+        this.arrowMarker = this.marker('start', 10, 10, (add) => {
+            add.path("M0,0 L10,5 L0,10 Z");
         }).ref(1, 5);
 
-        const arrowLine = this.Svg.line(startX, startY, endX, endY)
+        // Draw the arrow as a polyline from the start center to the end center
+        this.plot([startNode.x, startNode.y, endNode.x, endNode.y])
             .stroke({ width: 2, color: '#000' })
-            .marker('end', arrowMarker);
-
-        grp.add(arrowLine);
-        grp.add(arrowMarker); */
-
-        const startNodeCords = startNode.getRightEnd();
-        const endNodeCords = startNode.getLeftEnd();
-
-        this.arrowMarker= this.marker(10, 10, (add) => {
-            add.path('M0,0 L10,5 L0,10 Z');
-        }).ref(1, 5);
-    }
+            .marker('end', this.arrowMarker);
+}
 }

@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="7e4ddeb9-96f0-4672-bb56-09d678023797" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/objects/basic-structure-objects/linked-node.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/objects/basic-structure-objects/linked-node.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/objects/basic-structure-objects/node-connection.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/objects/basic-structure-objects/node-connection.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,31 +40,31 @@
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript Debug.avl-quiz.html.executor&quot;: &quot;Run&quot;,
-    &quot;JavaScript Debug.collections.html.executor&quot;: &quot;Run&quot;,
-    &quot;JavaScript Debug.index.html.executor&quot;: &quot;Run&quot;,
-    &quot;JavaScript Debug.prioqueues.html.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.AVL-quiz.js.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.LinkedList.js.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.LinkedListAnim.js.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.collections.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.engine.js.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;basic-ts&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/qweqwe/bachelor/dsvis&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;trusted.hosts&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/home/qweqwe/dsvis/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.avl-quiz.html.executor": "Run",
+    "JavaScript Debug.collections.html.executor": "Run",
+    "JavaScript Debug.index.html.executor": "Run",
+    "JavaScript Debug.prioqueues.html.executor": "Run",
+    "Node.js.AVL-quiz.js.executor": "Run",
+    "Node.js.LinkedList.js.executor": "Run",
+    "Node.js.LinkedListAnim.js.executor": "Run",
+    "Node.js.collections.ts.executor": "Run",
+    "Node.js.engine.js.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "basic-ts",
+    "last_opened_file_path": "/home/qweqwe/bachelor/dsvis",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "ts.external.directory.path": "/home/qweqwe/dsvis/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="JavaScript Debug.collections.html">
     <configuration name="collections.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/dsvis/collections.html" useBuiltInWebServerPort="true">
       <method v="2" />
@@ -120,7 +123,7 @@
       <workItem from="1740154842105" duration="1844000" />
       <workItem from="1740157454760" duration="431000" />
       <workItem from="1740467904370" duration="851000" />
-      <workItem from="1741162139677" duration="570000" />
+      <workItem from="1741162139677" duration="4944000" />
     </task>
     <servers />
   </component>
