@@ -1,8 +1,6 @@
 import {
-    Text, G, Marker, Svg, Rect,
+    Text, G, Rect,
 } from "@svgdotjs/svg.js";
-import { Connection } from "./node-connection";
-import { Cookie } from "undici-types";
 
 export class LinkedNode extends G{
     private _value: string | number;
@@ -11,7 +9,7 @@ export class LinkedNode extends G{
     
     private _elementRect: Rect;
     private _textElement: Text; 
-    private _nextElementRect: Rect; 
+    private _nextNodeRect: Rect;
 
     constructor(value: string | number, objectSize: number) {
         super();
@@ -20,7 +18,7 @@ export class LinkedNode extends G{
         this._rectHeight = objectSize;
         
         this._elementRect = this.rect(this._rectWidth, this._rectHeight); //initializing the rectangle for current node
-        this._nextElementRect = this.rect(this._rectWidth / 2, this._rectHeight).move(this._rectWidth + 1, 0); //initializing the rectangle for next node
+        this._nextNodeRect = this.rect(this._rectWidth / 2, this._rectHeight).move(this._rectWidth + 1, 0); //initializing the rectangle for next node
         this._textElement = this.text(String(value)) //initializing the text element for current node (value)
             .font({ size: this._rectHeight * 0.6 })
             .center(this._elementRect.cx(), this._elementRect.cy());
@@ -68,43 +66,31 @@ export class LinkedNode extends G{
     }
 
     get nextElementRect(): Rect {
-        return this._nextElementRect;
+        return this._nextNodeRect;
     }
 
     set nextElementRect(value: Rect) {
-        this._nextElementRect = value;
+        this._nextNodeRect = value;
     }
     
     // Get the center left coords of the node
-    getLeft() {
-        return {
-            x: this._elementRect.cx() - this._rectWidth / 2,
-            y: this._elementRect.cy(),
-        };
+    getLeft(): [number, number] {
+        return [this._elementRect.cx() - this._rectWidth / 2, this._elementRect.cy()];
     }
     
     // Get the center right coords of the node
-    getRight() {
-        return {
-            x: this._nextElementRect.cx() + this._rectWidth / 4,
-            y: this._elementRect.cy(),
-        };
+    getRight(): [number, number] {
+        return [this._nextNodeRect.cx() + this._rectWidth / 4, this._elementRect.cy()];
     }
 
     // Get the center top coords of the node
-    getTop() {
-        return {
-            x: this._elementRect.cx() + this._rectWidth / 2,
-            y: this._elementRect.cy() - this._rectHeight / 2,
-        };
+    getTop(): [number, number] {
+        return [this._elementRect.cx() + this._rectWidth / 2, this._elementRect.cy() - this._rectHeight / 2];
     }
 
     // Get the center bottom coords of the node
-    getBottom() {
-        return {
-            x: this._elementRect.cx() + this._rectWidth / 2,
-            y: this._elementRect.cy() + this._rectHeight / 2,
-        };
+    getBottom(): [number, number] {
+        return [this._elementRect.cx() + this._rectWidth / 2, this._elementRect.cy() + this._rectHeight / 2];
     }
     
 }

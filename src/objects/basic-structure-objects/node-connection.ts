@@ -1,7 +1,6 @@
 import {
-    Text, G, Marker, Svg, Rect, Line
+    Marker, Svg, Line
 } from "@svgdotjs/svg.js";
-import { LinkedNode } from "./linked-node";
 
 export class Connection extends Line {
     private x1: number;
@@ -11,12 +10,12 @@ export class Connection extends Line {
 
     private arrowMarker: Marker;
 
-    constructor(startNodeCoords: {x: number; y: number;}, endNodeCoords: {x: number; y: number;}, svgContext: Svg) {
+    constructor(startNodeCoords: [number, number], endNodeCoords: [number, number], svgContext: Svg) {
         super();
-        this.x1 = startNodeCoords.x;
-        this.y1 = startNodeCoords.y;
-        this.x2 = endNodeCoords.x;
-        this.y2 = endNodeCoords.y;
+        this.x1 = startNodeCoords[0];
+        this.y1 = startNodeCoords[1];
+        this.x2 = endNodeCoords[0];
+        this.y2 = endNodeCoords[1];
 
         this.arrowMarker = svgContext.marker(5, 4, function (add) {
             add.polygon([0, 0, 5, 2, 0, 4]).addClass("filled");
