@@ -31,6 +31,21 @@ type AllowedCharacters =
     | "alphanum"
     | "alphanum+";
 
+const allowedCharactersRegex = {
+    int: "0-9",
+    "int+": "0-9 ",
+    float: "-.0-9",
+    "float+": "-.0-9 ",
+    ALPHA: "A-Z",
+    "ALPHA+": "A-Z ",
+    alpha: "a-zA-Z",
+    "alpha+": "a-zA-Z ",
+    ALPHANUM: "A-Z0-9",
+    "ALPHANUM+": "A-Z0-9 ",
+    alphanum: "a-zA-Z0-9",
+    "alphanum+": "a-zA-Z0-9 ",
+} as const satisfies Record<AllowedCharacters, string>;
+
 // Adds "return-to-submit" functionality to a text input field - performs action when the user presses Enter
 // Additionally restricts input to the defined allowed characters (with + meaning spaces are allowed)
 export function addReturnSubmit(
@@ -38,39 +53,15 @@ export function addReturnSubmit(
     allowed: AllowedCharacters,
     action?: () => void
 ): void {
-    const allowedCharacters =
-        allowed === "int"
-            ? "0-9"
-            : allowed === "int+"
-            ? "0-9 "
-            : allowed === "float"
-            ? "-.0-9"
-            : allowed === "float+"
-            ? "-.0-9 "
-            : allowed === "ALPHA"
-            ? "A-Z"
-            : allowed === "ALPHA+"
-            ? "A-Z "
-            : allowed === "alpha"
-            ? "a-zA-Z"
-            : allowed === "alpha+"
-            ? "a-zA-Z "
-            : allowed === "ALPHANUM"
-            ? "A-Z0-9"
-            : allowed === "ALPHANUM+"
-            ? "A-Z0-9 "
-            : allowed === "alphanum"
-            ? "a-zA-Z0-9"
-            : allowed === "alphanum+"
-            ? "a-zA-Z0-9 "
-            : allowed;
+    const allowedCharacters = allowedCharactersRegex[allowed];
+
     const isAllowed = new RegExp(`[^${allowedCharacters}]`, "g");
 
     // Transform case of text input to match allowed
     function matchAllowedCase(s: string): string {
-        if (allowed === allowed.toUpperCase()) {
+        if (allowedCharacters === allowedCharacters.toUpperCase()) {
             return s.toUpperCase();
-        } else if (allowed === allowed.toLowerCase()) {
+        } else if (allowedCharacters === allowedCharacters.toLowerCase()) {
             return s.toLowerCase();
         }
         return s;
