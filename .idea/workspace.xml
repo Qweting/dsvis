@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7e4ddeb9-96f0-4672-bb56-09d678023797" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +58,7 @@
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;trusted.hosts&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/home/qweqwe/bachelor/dsvis/node_modules/typescript/lib&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/home/qweqwe/dsvis/node_modules/typescript/lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -120,6 +120,7 @@
       <workItem from="1740154842105" duration="1844000" />
       <workItem from="1740157454760" duration="431000" />
       <workItem from="1740467904370" duration="851000" />
+      <workItem from="1741162139677" duration="570000" />
     </task>
     <servers />
   </component>
