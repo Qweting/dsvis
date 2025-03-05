@@ -11,25 +11,21 @@ export class Connection extends Line {
 
     private arrowMarker: Marker;
 
-    constructor(startNode: LinkedNode, endNode: LinkedNode) {
+    constructor(startNodeCoords: {x: number; y: number;}, endNodeCoords: {x: number; y: number;}, svgContext: Svg) {
         super();
-        this.x1 = startNode.getRightEnd().x;
-        this.y1 = startNode.getRightEnd().y;
-        this.x2 = endNode.getLeftEnd().x;
-        this.y2 = endNode.getLeftEnd().y;
+        this.x1 = startNodeCoords.x;
+        this.y1 = startNodeCoords.y;
+        this.x2 = endNodeCoords.x;
+        this.y2 = endNodeCoords.y;
 
-        this.arrowMarker = new Svg().marker(10, 10, function(add) {
-            add.circle(10).fill('#f06')
-          })
-
-        /* this.marker("end", 20, 20, function (add) {
+        this.arrowMarker = svgContext.marker(5, 4, function (add) {
             add.polygon([0, 0, 5, 2, 0, 4]).addClass("filled");
-        }); */
+        });
 
         this.update();
     }
 
     update(): void {
-        this.plot(this.x1, this.y1, this.x2, this.y2).stroke({ width: 2, color: '#000' }); // .marker('end', this.arrowMarker)
+        this.plot(this.x1, this.y1, this.x2, this.y2).stroke({ width: 2, color: '#000' }).marker('end', this.arrowMarker);
     }
 }

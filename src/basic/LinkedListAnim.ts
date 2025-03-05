@@ -9,11 +9,7 @@ import {
 
 import LinkedList from "./LinkedList";
 import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
-
-interface NodeArray {
-    value: string | number;
-    node: G;
-}
+import { Connection } from "../../src/objects/basic-structure-objects/node-connection";
 
 export const LinkedListMessages = {
     general: {
@@ -43,7 +39,7 @@ export class LinkedListAnim extends Engine {
     maxListSize: number = 10; // Limit the size of the list to maintain readability
     initialValues: string[] | null = null; // Only used for hard-coded values
     linkedList: LinkedList<string | number> = new LinkedList(); // Linked list instance
-    nodeArray: NodeArray[] = [];
+    nodeArray: LinkedNode[] = []; // Array to store the nodes
 
     initialise(initialValues: string[] | null = null): void {
         this.initialValues = initialValues;
@@ -73,48 +69,26 @@ export class LinkedListAnim extends Engine {
     }
 
     async newNode(value: string | number): Promise<void> {
-        /* const rectWidth = 100; // Width of rectangle
-        const rectHeight = 50; // Height of rectangle
-
-        // const grp: G = this.SVG.group(); // Container holding the rectangle and text
-        const grp: G = this.Svg.group();
-
-        const elementRect = grp.rect(rectWidth, rectHeight);
-        const nextRect = grp.rect(rectWidth / 2, rectHeight).move(rectWidth + 1, 0);
-        const textElement: Text = this.Svg.text(String(value))
-            .font({ size: rectHeight * 0.6 })
-            .center(elementRect.cx(), elementRect.cy());
-
-        grp.add(elementRect);
-        grp.add(nextRect);
-        grp.add(textElement); */
 
         const grp = new LinkedNode(value, this.getObjectSize())
-
-
-        grp.move(this.$Svg.width / 4, this.$Svg.height / 2);
-
-        // const startX = Number(grp.x()) + rectWidth + (rectWidth / 4);
-        // const startY = Number(grp.y()) + rectHeight / 2;        const endX = startX + 50;
-        // const endY = startY;
-        //
-        // const arrowMarker: Marker = this.Svg.marker(10, 10, (add) => {
-        //     add.path('M0,0 L10,5 L0,10 Z');
-        // }).ref(1, 5);
-        //
-        // const arrowLine = this.Svg.line(startX, startY, endX, endY)
-        //     .stroke({ width: 2, color: '#000' })
-        //     .marker('end', arrowMarker);
-        //
-        // grp.add(arrowLine);
-        // grp.add(arrowMarker); 
-
+        grp.move(this.$Svg.width / 2, this.$Svg.height / 2);
         this.Svg.add(grp);
-
-        grp.children().forEach(child => child.setHighlight(true));
-
+        //grp.children().forEach(child => child.setHighlight(true));
         await this.pause('insert.head', value);
         grp.animate(1000).move(100, 100);
+
+        // rest is code for testing
+
+        const grp2 = new LinkedNode(value, this.getObjectSize())
+        grp2.move(this.$Svg.width / 2, this.$Svg.height / 2);
+        this.Svg.add(grp2);
+        await this.pause('insert.head', value);
+        grp2.animate(1000).move(400, 100);
+
+        await new Promise(f => setTimeout(f, 1000));
+
+        const connection = new Connection(grp.getRight(), grp2.getLeft(), this.Svg);
+        this.Svg.add(connection);
     }
 
     async insertOne(value: string | number): Promise<void> {
@@ -124,6 +98,14 @@ export class LinkedListAnim extends Engine {
 
         this.linkedList.insertBack(value);
         await this.newNode(value);
+        await this.makeConnection();
+    }
+
+    async makeConnection(): Promise<void> {
+        // If there are more than one node in the list, make the connection
+        if (this.linkedList.size > 1) {
+            // Get the last two nodes and make the connection
+        }
     }
 
     // Visualization logic for inserting a node to the front

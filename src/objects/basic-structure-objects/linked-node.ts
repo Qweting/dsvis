@@ -24,9 +24,6 @@ export class LinkedNode extends G{
         this._textElement = this.text(String(value)) //initializing the text element for current node (value)
             .font({ size: this._rectHeight * 0.6 })
             .center(this._elementRect.cx(), this._elementRect.cy());
-        
-        const noz : Connection = new Connection(this.getCurrentNodeCenter(), this.getNextNodeCenter());
-        this.add(noz);
     }
 
     get value(): string | number {
@@ -78,20 +75,35 @@ export class LinkedNode extends G{
         this._nextElementRect = value;
     }
     
-    //get the center position of the rectangle for the arrow
-    //this is for the "nextNode" arrow, IE: rightEnd
-    getNextNodeCenter() {
+    // Get the center left coords of the node
+    getLeft() {
         return {
-            x: this._nextElementRect.cx() + this._rectWidth / 2,
-            y: this._nextElementRect.cy(),
+            x: this._elementRect.cx() - this._rectWidth / 2,
+            y: this._elementRect.cy(),
         };
     }
     
-    //for the leftEnd of the rectangle, IE: current node
-    getCurrentNodeCenter() {
+    // Get the center right coords of the node
+    getRight() {
         return {
-            x: this._elementRect.cx() - this._rectWidth / 2, //play around for the right offset value
+            x: this._nextElementRect.cx() + this._rectWidth / 4,
             y: this._elementRect.cy(),
+        };
+    }
+
+    // Get the center top coords of the node
+    getTop() {
+        return {
+            x: this._elementRect.cx() + this._rectWidth / 2,
+            y: this._elementRect.cy() - this._rectHeight / 2,
+        };
+    }
+
+    // Get the center bottom coords of the node
+    getBottom() {
+        return {
+            x: this._elementRect.cx() + this._rectWidth / 2,
+            y: this._elementRect.cy() + this._rectHeight / 2,
         };
     }
     
