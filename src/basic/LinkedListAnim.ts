@@ -43,17 +43,19 @@ export class LinkedListAnim extends Engine {
     nodeArray: [LinkedNode, Connection | null][] = []; // Array to store the nodes and connections
 
     initialise(initialValues: string[] | null = null): void {
-        this.initialValues = ["T", "E", "S", "T", "T", "T", "T", "T", "T"];
-        //this.initialValues = initialValues;
+        //this.initialValues = ["T", "E", "S", "T", "T", "T", "T", "T", "T"];
+        this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
 
     // Reset the algorithm to its initial state
+    // !! Engine then re builds by calling all recorded actions
     async resetAlgorithm(): Promise<void> {
         await super.resetAlgorithm();
 
         // Reset the linked list by creating a new instance
         this.linkedList = new LinkedList();
+        this.nodeArray = [];
 
         // If initial values are provided, insert them into the animated list
         if (this.initialValues) {
