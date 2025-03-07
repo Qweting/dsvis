@@ -1,49 +1,51 @@
-import {
-    Text, G, Rect,
-} from "@svgdotjs/svg.js";
+import { Text, G, Rect } from "@svgdotjs/svg.js";
 
-export class LinkedNode extends G{
-    private value: string | number;
-    private rectWidth: number;
-    private rectHeight: number; 
-    
+export class LinkedNode extends G {
+    private nodeWidth: number;
+    private nodeHeight: number;
+
     private elementRect: Rect;
-    private textElement: Text; 
-    private nextNodeRect: Rect;
+    private elementRectWidth: number;
+    private value: string | number;
+    private textElement: Text;
 
-    constructor(value: string | number, objectSize: number) {
+    private nextNodeRect: Rect;
+    private nextNodeRectWidth: number;
+
+    constructor(value: string | number, nodeDimensions: [number, number]) {
         super();
         this.value = value;
-        this.rectWidth = 2*objectSize;
-        this.rectHeight = objectSize;
-        
-        this.elementRect = this.rect(this.rectWidth, this.rectHeight); //initializing the rectangle for current node
-        this.nextNodeRect = this.rect(this.rectWidth / 2, this.rectHeight).move(this.rectWidth + 1, 0); //initializing the rectangle for next node
+        this.nodeWidth = nodeDimensions[0];
+        this.nodeHeight = nodeDimensions[1];
+        this.elementRectWidth = this.nodeWidth * (3 / 4);
+        this.nextNodeRectWidth = this.nodeWidth * (1 / 4);
+
+        this.elementRect = this.rect(this.elementRectWidth, this.nodeHeight); //initializing the rectangle for current node
+        this.nextNodeRect = this.rect(
+            this.nextNodeRectWidth,
+            this.nodeHeight
+        ).move(this.elementRectWidth + 1, 0); //initializing the rectangle for next node
+
         this.textElement = this.text(String(value)) //initializing the text element for current node (value)
-            .font({ size: this.rectHeight * 0.6 })
+            .font({ size: this.nodeHeight * 0.6 })
             .center(this.elementRect.cx(), this.elementRect.cy());
     }
 
-    
-    
-    // Get the center left coords of the node
-    getLeft(): [number, number] {
-        return [this.elementRect.cx() - this.rectWidth / 2, this.elementRect.cy()];
-    }
-    
-    // Get the center right coords of the node
-    getRight(): [number, number] {
-        return [this.nextNodeRect.cx() + this.rectWidth / 4, this.elementRect.cy()];
+    // mirrors the node so that elementRect and nextNodeRect are swapped
+    mirror(): void {
+        this.nextNodeRect.move(0, 0);
+        this.elementRect.move(this.nextNodeRectWidth + 1, 0);
+        this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
     }
 
-    // Get the center top coords of the node
-    getTop(): [number, number] {
-        return [this.elementRect.cx() + this.rectWidth / 2, this.elementRect.cy() - this.rectHeight / 2];
+    // Position where a connection should begin
+    getPointerPos(): [number, number] {
+        return [this.nextNodeRect.cx(), this.nextNodeRect.cy()];
     }
 
-    // Get the center bottom coords of the node
-    getBottom(): [number, number] {
-        return [this.elementRect.cx() + this.rectWidth / 2, this.elementRect.cy() + this.rectHeight / 2];
+    getCenterPos(): [number, number] {
+        const x = this.cx();
+        const y = this.cy();
+        return [x, y];
     }
-    
 }

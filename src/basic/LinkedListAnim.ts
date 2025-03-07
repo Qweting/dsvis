@@ -38,12 +38,20 @@ export const LinkedListMessages = {
 
 export class LinkedListAnim extends Engine {
     initialValues: string[] | null = null; // Only used for hard-coded values
-    maxListSize: number = 12; // Limit the size of the list to maintain readability
+    maxListSize: number = 100; // Limit the size of the list to maintain readability
     linkedList: LinkedList<string | number> = new LinkedList(); // Linked list instance
     nodeArray: [LinkedNode, Connection | null][] = []; // Array to store the nodes and connections
+    nodeDimensions: [number, number] = [this.getObjectSize() * 2, this.getObjectSize()]; // Dimensions for the nodes
 
     initialise(initialValues: string[] | null = null): void {
-        //this.initialValues = ["T", "E", "S", "T", "T", "T", "T", "T", "T"];
+        /* this.initialValues = ["T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T",
+                              "T", "E", "S", "T"]; */
         this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
@@ -56,6 +64,7 @@ export class LinkedListAnim extends Engine {
         // Reset the linked list by creating a new instance
         this.linkedList = new LinkedList();
         this.nodeArray = [];
+        this.nodeDimensions= [this.getObjectSize() * 2, this.getObjectSize()];
 
         // If initial values are provided, insert them into the animated list
         if (this.initialValues) {
@@ -84,13 +93,14 @@ export class LinkedListAnim extends Engine {
         } else {
             await this.pause("insert.element", value);
         }
-        const node = new LinkedNode(value, this.getObjectSize());
+        const node = new LinkedNode(value, this.nodeDimensions);
         this.Svg.add(node);
 
         // TODO: Starting pos can be ugly find a pos that's always empty
         // Suggestion: upper left corner close to edge, final nodes pos within good margin
         const coords = this.newNodeCoords();
         //node.move(this.$Svg.width / 2, this.$Svg.height / 2); // Starting position
+        if (coords[2]) {node.mirror();}
         node.move(coords[0], coords[1]);
         this.highlight(node, true);
         //node.animate(1000).move(coords[0], coords[1]); // animate should probably not be called here since it doesen't adhere to animation speed
@@ -127,55 +137,61 @@ export class LinkedListAnim extends Engine {
     
         // insertBack
         const prevNode = this.nodeArray[this.nodeArray.length - 1][0];
-        const connection = new Connection(prevNode.getRight(), node.getLeft(), this.Svg);
+        const connection = new Connection(prevNode.getPointerPos(), node.getCenterPos(), this.nodeDimensions, this.Svg);
         // insertFront
         // insertAt
         this.Svg.add(connection);
         return connection;
     }
 
-    // Calculates the next position for a node in a zigzag layout pattern
-    // Returns the [x, y] coordinates for the next node
-    private newNodeCoords(): [number, number] {
-        const margin = 100;
-        const topMargin = 80; // To not overlap with messages
-        const nodeSize = this.getObjectSize() * 2;
-        const spacing = this.getNodeSpacing() * 3;
-        const totalNodeWidth = nodeSize + spacing;
+    // Calculates the next position for a node in a zigzag layout pattern and if it should be mirrored
+    // if the node is going on an odd row, it should be mirrored
+    private newNodeCoords(): [number, number, boolean] {
+        const TOP_MARGIN = 120;
+        const MIN_SIDE_MARGIN = 20; // Minimum side margin
+        const [nodeWidth, nodeHeight] = this.nodeDimensions;
+        const nodeSpacing = this.getNodeSpacing();
+        let mirrored = false;
         
-        // Calculate how many nodes can fit in a row
-        const availableWidth = this.$Svg.width - (2 * margin);
-        const nodesPerRow = Math.max(1, Math.floor(availableWidth / totalNodeWidth));
+        // Get container dimensions
+        const containerWidth = this.$Svg.width;  
+        const containerHeight = this.$Svg.height;
+        
+        // Calculate how many nodes can fit in a row with minimum margins
+        const maxNodesPerRow = Math.max(1, Math.floor((containerWidth - 2 * MIN_SIDE_MARGIN) / (nodeWidth + nodeSpacing)));
+        
+        // Calculate the total width needed for all nodes in a row
+        const totalNodesWidth = maxNodesPerRow * nodeWidth + (maxNodesPerRow - 1) * nodeSpacing;
+        
+        // Calculate the actual side margin to ensure symmetric alignment
+        const sideMargin = (containerWidth - totalNodesWidth) / 2;
         
         // Calculate the current row and position within that row
-        const nodeIndex = this.nodeArray.length;
-        const row = Math.floor(nodeIndex / nodesPerRow);
-        const posInRow = nodeIndex % nodesPerRow;
+        const currentIndex = this.nodeArray.length;
+        const row = Math.floor(currentIndex / maxNodesPerRow);
+        const positionInRow = currentIndex % maxNodesPerRow;
+        
+        // Calculate y position
+        const y = TOP_MARGIN + row * (nodeHeight + nodeSpacing);
+        
+        // Calculate x position based on zigzag pattern
+        let x: number;
+        if (row % 2 === 0) {
+            // Even rows go left to right
+            x = sideMargin + positionInRow * (nodeWidth + nodeSpacing);
+        } else {
+            // Odd rows go right to left
+            // Calculate position from the right side, ensuring vertical alignment with even rows
+            x = sideMargin + (maxNodesPerRow - 1 - positionInRow) * (nodeWidth + nodeSpacing);
+            mirrored = true;
+        }
         
         // Check if we've exceeded the bottom margin
-        const availableHeight = this.$Svg.height - (topMargin + margin); // Account for different top margin
-        const maxRows = Math.floor(availableHeight / (nodeSize + spacing));
-        
-        if (row >= maxRows) {
-            console.warn('Exceeded maximum rows for nodes');
-            // Return weird position to indicate problem
-            return [this.$Svg.width - totalNodeWidth, this.$Svg.height - nodeSize];
+        if (y + nodeHeight > containerHeight - MIN_SIDE_MARGIN) {
+            throw new Error("Cannot add more nodes: Exceeded bottom margin of canvas");
         }
         
-        let x: number;
-        const y = topMargin + row * (nodeSize + spacing); // Use topMargin for vertical positioning
-        
-        // Determine direction for current row (even rows: left to right, odd rows: right to left)
-        if (row % 2 === 0) {
-            // Left to right
-            x = margin + posInRow * totalNodeWidth;
-        } else {
-            // Right to left
-            //x = this.$Svg.width - margin - totalNodeWidth * (posInRow + 1) + spacing;
-            x = this.$Svg.width - margin - totalNodeWidth * posInRow - spacing;
-        }
-        
-        return [x, y];
+        return [x, y, mirrored];
     }
 
     private highlight(node: LinkedNode, value: boolean): void {
