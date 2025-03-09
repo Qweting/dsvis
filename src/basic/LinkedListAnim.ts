@@ -88,22 +88,29 @@ export class LinkedListAnim extends Engine {
     // Visualization logic for inserting a node to the back
     async insertBack(value: string | number): Promise<void> {
         this.linkedList.insertBack(value);
-        if (this.linkedList.size === 1) {
-            await this.pause("insert.head", value);
-        } else {
-            await this.pause("insert.element", value);
-        }
+
+        const insertionText = this.linkedList.size === 1 ? "insert.head" : "insert.element";
+        await this.pause(insertionText, value);
+
         const node = new LinkedNode(value, this.nodeDimensions);
         this.Svg.add(node);
 
-        // TODO: Starting pos can be ugly find a pos that's always empty
-        // Suggestion: upper left corner close to edge, final nodes pos within good margin
         const coords = this.newNodeCoords();
-        //node.move(this.$Svg.width / 2, this.$Svg.height / 2); // Starting position
         if (coords[2]) {node.mirror();}
-        node.move(coords[0], coords[1]);
+
         this.highlight(node, true);
-        //node.animate(1000).move(coords[0], coords[1]); // animate should probably not be called here since it doesen't adhere to animation speed
+
+        // Start at the upper right corner and then move to the correct position with animation
+        node.move(this.$Svg.width - this.nodeDimensions[0] - 20, this.nodeDimensions[1]); // Starting position
+        await this.pause(insertionText, value);
+
+        /* if (this.state.resetting) {
+            node.move(coords[0], coords[1]); // Move to the correct position without animation
+        } else {
+            node.animate(this.getAnimationSpeed()).move(coords[0], coords[1]); // Move to the correct position with animation
+        } */
+
+        node.move(coords[0], coords[1]); // Move to the correct position without animation
         // Add the node to the array and make connections
         this.nodeArray.push([node, await this.makeConnections(node)]);
         this.highlight(node, false);
