@@ -1,5 +1,6 @@
 import { Debug } from "./debug";
 import { Engine } from "./engine";
+import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
@@ -32,6 +33,7 @@ export class EventListeners {
     engine: Engine;
     toolbar: EngineToolbar;
     debug: Debug;
+    state: State;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
@@ -40,6 +42,7 @@ export class EventListeners {
         this.engine = engine;
         this.toolbar = engine.toolbar;
         this.debug = engine.debug;
+        this.state = engine.state;
 
         this.idleListeners.push(
             {
@@ -47,7 +50,7 @@ export class EventListeners {
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
-                    this.engine.setRunning(false);
+                    this.state.setRunning(false);
                     const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
                     this.engine.execute(
                         action.oper,
@@ -98,7 +101,7 @@ export class EventListeners {
                 element: this.toolbar.stepForward,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.engine.setRunning(false);
+                    this.state.setRunning(false);
                     this.engine.stepForward(resolve, reject);
                 },
             },
@@ -115,8 +118,8 @@ export class EventListeners {
                 element: this.toolbar.toggleRunner,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.engine.toggleRunner();
-                    if (this.engine.isRunning()) {
+                    this.state.toggleRunner();
+                    if (this.state.isRunning()) {
                         this.engine.stepForward(resolve, reject);
                     } else {
                         this.engine.currentStep++;

@@ -77,12 +77,12 @@ export class BST extends Engine {
         await super.resetAlgorithm();
         this.treeRoot = null;
 
-        if (this.initialValues) {
-            this.state.resetting = true;
-            // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     initToolbar(): void {
@@ -121,7 +121,7 @@ export class BST extends Engine {
     }
 
     resizeTree(): this {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.canvas.getTreeRoot(),
             this.canvas.$Svg.margin,
