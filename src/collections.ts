@@ -1,4 +1,4 @@
-import { Engine } from "./engine";
+import { Engine, SubmitFunction } from "./engine";
 import { addReturnSubmit } from "./helpers";
 import { CollectionToolbar } from "./toolbars/collection-toolbar";
 import { AVL } from "./trees/AVL";
@@ -7,13 +7,24 @@ import { BTree } from "./trees/BTree";
 import { RedBlack } from "./trees/RedBlack";
 import { SplayTree } from "./trees/SplayTree";
 
+export interface Collection extends Engine {
+    insert: SubmitFunction;
+    find: SubmitFunction;
+    delete: SubmitFunction;
+    print: SubmitFunction;
+}
+
 const COLLECTIONS_CLASSES = {
     BST: BST,
     AVL: AVL,
     RedBlack: RedBlack,
     SplayTree: SplayTree,
     BTree: BTree,
-} as const;
+} as const satisfies Record<string, new (...args: never[]) => Collection>;
+
+function isCollection(engine: Engine | Collection): engine is Collection {
+    return engine instanceof Engine && engine.constructor !== Engine;
+}
 
 initialiseCollections("#collectionsContainer");
 
@@ -64,29 +75,36 @@ function initialiseCollections(containerID: string) {
         toolbar.insertSelect.value = "";
     });
 
+    if (!isCollection(CollectionEngine)) {
+        return;
+    }
+
     addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
-        CollectionEngine.submit("insert", toolbar.insertField)
+        CollectionEngine.submit(CollectionEngine.insert, toolbar.insertField)
     );
+
     toolbar.insertSubmit.addEventListener("click", () => {
-        CollectionEngine.submit("insert", toolbar.insertField);
+        CollectionEngine.submit(CollectionEngine.insert, toolbar.insertField);
     });
 
     addReturnSubmit(toolbar.findField, "ALPHANUM", () =>
-        CollectionEngine.submit("find", toolbar.findField)
+        CollectionEngine.submit(CollectionEngine.find, toolbar.findField)
     );
+
     toolbar.findSubmit.addEventListener("click", () =>
-        CollectionEngine.submit("find", toolbar.findField)
+        CollectionEngine.submit(CollectionEngine.find, toolbar.findField)
     );
 
     addReturnSubmit(toolbar.deleteField, "ALPHANUM", () =>
-        CollectionEngine.submit("delete", toolbar.deleteField)
+        CollectionEngine.submit(CollectionEngine.delete, toolbar.deleteField)
     );
+
     toolbar.deleteSubmit.addEventListener("click", () =>
-        CollectionEngine.submit("delete", toolbar.deleteField)
+        CollectionEngine.submit(CollectionEngine.delete, toolbar.deleteField)
     );
 
     toolbar.printSubmit.addEventListener("click", () =>
-        CollectionEngine.submit("print", toolbar.printSubmit)
+        CollectionEngine.submit(CollectionEngine.print, toolbar.printSubmit)
     );
 
     toolbar.clearSubmit.addEventListener("click", () =>

@@ -1,4 +1,5 @@
 import { Text } from "@svgdotjs/svg.js";
+import { Collection } from "../../src/collections";
 import { Engine, MessagesObject } from "../../src/engine";
 import { compare, parseValues } from "../../src/helpers";
 import { TextCircle } from "../../src/objects/text-circle";
@@ -55,7 +56,10 @@ export const BSTMessages = {
     },
 };
 
-export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
+export class BST<Node extends BinaryNode = BinaryNode>
+    extends Engine
+    implements Collection
+{
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
@@ -79,7 +83,6 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
 
         await this.state.runWhileResetting(async () => {
             if (this.initialValues) {
-                // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
                 await this.insert(...this.initialValues);
             }
         });
@@ -128,13 +131,19 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return this;
     }
 
-    async insert(...values: string[]): Promise<void> {
+    async insert(...values: (string | number)[]): Promise<void> {
         for (const val of values) {
             await this.insertOne(val);
         }
     }
 
-    async find(value: string | number): Promise<{
+    async find(...values: (string | number)[]): Promise<void> {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: string | number): Promise<{
         success: boolean;
         node: Node | null;
     }> {
@@ -199,10 +208,11 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return { success: false, node: parent };
     }
 
-    async insertOne(value: string): Promise<{
+    async insertOne(value: string | number): Promise<{
         success: boolean;
         node: Node | null;
     }> {
+        value = String(value); //TODO: Check if this can be handled better
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value) as Node;
             await this.pause("insert.newroot", value);
@@ -237,8 +247,14 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return { success: true, node: child };
     }
 
+    async delete(...values: (string | number)[]) {
+        for (const val of values) {
+            await this.deleteOne(val);
+        }
+    }
+
     // TODO: update type with separate for success true and false
-    async delete(value: string | number): Promise<{
+    async deleteOne(value: string | number): Promise<{
         success: boolean;
         direction: BinaryDir | null;
         parent: Node | null;

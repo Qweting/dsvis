@@ -3,6 +3,7 @@ import { compare } from "../../src/helpers";
 import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
 import { TextCircle } from "../../src/objects/text-circle";
+import { Prioqueue } from "../../src/prioqueues";
 
 export const BinaryHeapMessages = {
     general: {
@@ -35,7 +36,7 @@ export const BinaryHeapMessages = {
     },
 };
 
-export class BinaryHeap extends Engine {
+export class BinaryHeap extends Engine implements Prioqueue {
     messages: MessagesObject = BinaryHeapMessages;
 
     arraySize: number = 28;
@@ -79,7 +80,7 @@ export class BinaryHeap extends Engine {
         );
     }
 
-    async insert(...values: Array<string>) {
+    async insert(...values: (string | number)[]) {
         for (const val of values) {
             await this.insertOne(val);
         }
@@ -119,7 +120,8 @@ export class BinaryHeap extends Engine {
         kLabel.remove();
     }
 
-    async insertOne(value: string) {
+    async insertOne(value: string | number) {
+        value = String(value); //TODO: Check if this can be handled better
         if (this.heapSize === null) {
             throw new Error("Heap size not initialised");
         }

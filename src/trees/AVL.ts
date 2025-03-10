@@ -1,3 +1,4 @@
+import { Collection } from "../../src/collections";
 import { MessagesObject } from "../../src/engine";
 import { updateDefault } from "../../src/helpers";
 import { AVLNode } from "../../src/objects/avl-node";
@@ -13,7 +14,7 @@ export const AVLmessages = {
     },
 };
 
-export class AVL extends BST<AVLNode> {
+export class AVL extends BST<AVLNode> implements Collection {
     messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
     pointer: HighlightCircle | null = null;
 
@@ -39,8 +40,8 @@ export class AVL extends BST<AVLNode> {
         return result;
     }
 
-    async delete(value: string | number) {
-        const result = await super.delete(value);
+    async deleteOne(value: string | number) {
+        const result = await super.deleteOne(value);
 
         if (result && result.success) {
             if (result.parent) {

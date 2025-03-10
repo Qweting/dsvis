@@ -169,15 +169,20 @@ export class AVLQuiz extends BST<AVLNode> {
         moving.remove();
     }
 
-    async insertLeft(value: string) {
-        await this.insertBelow("left", value);
+    async insertLeft(...values: (string | number)[]) {
+        for (const value of values) {
+            await this.insertBelow("left", value);
+        }
     }
 
-    async insertRight(value: string) {
-        await this.insertBelow("right", value);
+    async insertRight(...values: (string | number)[]) {
+        for (const value of values) {
+            await this.insertBelow("right", value);
+        }
     }
 
-    async insertBelow(direction: BinaryDir, value: string) {
+    async insertBelow(direction: BinaryDir, value: string | number) {
+        value = String(value); //TODO: Check if this can be handled better
         if (!this.current) {
             throw new Error("There is no current node");
             return;
@@ -265,36 +270,47 @@ function initialiseAVLQuiz(containerID: string) {
     const toolbar = new AVLQuizToolbar(AVLEngine.container);
 
     addReturnSubmit(toolbar.insertField, "ALPHANUM");
+
     toolbar.createLeft.addEventListener("click", () =>
-        AVLEngine.submit("insertLeft", toolbar.insertField)
+        AVLEngine.submit(AVLEngine.insertLeft, toolbar.insertField)
     );
+
     toolbar.createRight.addEventListener("click", () =>
-        AVLEngine.submit("insertRight", toolbar.insertField)
+        AVLEngine.submit(AVLEngine.insertRight, toolbar.insertField)
     );
+
     toolbar.moveParent.addEventListener("click", () =>
-        AVLEngine.execute("moveParent")
+        AVLEngine.execute(AVLEngine.moveParent, [])
     );
+
     toolbar.moveLeft.addEventListener("click", () =>
-        AVLEngine.execute("moveChild", ["left"])
+        AVLEngine.execute(AVLEngine.moveChild, ["left"])
     );
+
     toolbar.moveRight.addEventListener("click", () =>
-        AVLEngine.execute("moveChild", ["right"])
+        AVLEngine.execute(AVLEngine.moveChild, ["right"])
     );
+
     toolbar.rotateLeft.addEventListener("click", () =>
-        AVLEngine.execute("rotateCurrent", ["left"])
+        AVLEngine.execute(AVLEngine.rotateCurrent, ["left"])
     );
+
     toolbar.rotateRight.addEventListener("click", () =>
-        AVLEngine.execute("rotateCurrent", ["right"])
+        AVLEngine.execute(AVLEngine.rotateCurrent, ["right"])
     );
+
     toolbar.markNode.addEventListener("click", () =>
-        AVLEngine.execute("markNode")
+        AVLEngine.execute(AVLEngine.markNode, [])
     );
+
     toolbar.copyToMark.addEventListener("click", () =>
-        AVLEngine.execute("copyToMark")
+        AVLEngine.execute(AVLEngine.copyToMark, [])
     );
+
     toolbar.deleteNode.addEventListener("click", () =>
-        AVLEngine.execute("deleteCurrent")
+        AVLEngine.execute(AVLEngine.deleteCurrent, [])
     );
+
     toolbar.restartQuiz.addEventListener("click", () => AVLEngine.resetAll());
 }
 

@@ -1,4 +1,5 @@
 import { Text } from "@svgdotjs/svg.js";
+import { Collection } from "../../src/collections";
 import { Engine, MessagesObject } from "../../src/engine";
 import { compare, parseValues, updateDefault } from "../../src/helpers";
 import { BTreeNode } from "../../src/objects/btree-node";
@@ -43,7 +44,7 @@ const BTreeMessages = {
     },
 };
 
-export class BTree extends Engine {
+export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
 
@@ -59,7 +60,6 @@ export class BTree extends Engine {
 
     initialise(initialValues = null) {
         this.initialValues = parseValues(initialValues);
-        this.initialValues = ["A", "B", "C", "D", "E", "F"];
         super.initialise();
     }
 
@@ -116,7 +116,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Find a value
 
-    async find(value: number | string) {
+    async find(...values: (number | string)[]) {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;
@@ -130,6 +136,7 @@ export class BTree extends Engine {
     }
 
     async findHelper(value: number | string, findLeaf = false) {
+        value = String(value); //TODO: Check if this can be handled better
         let parent = null;
         let node = this.treeRoot;
         const pointer = this.Svg.put(new HighlightCircle()).init(
@@ -146,7 +153,7 @@ export class BTree extends Engine {
             node.setHighlight(true);
             await this.pause(undefined);
             let i = 0;
-            let cmpStr = String(value);
+            let cmpStr = value;
             while (i < node.numValues()) {
                 const txt = node.getText(i);
                 const cmp = compare(value, txt);
@@ -442,7 +449,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Delete a value
 
-    async delete(value: number | string) {
+    async delete(...values: (number | string)[]) {
+        for (const value of values) {
+            this.deleteOne(value);
+        }
+    }
+
+    async deleteOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;

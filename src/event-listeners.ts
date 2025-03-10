@@ -53,7 +53,7 @@ export class EventListeners {
                     this.state.setRunning(false);
                     const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
                     this.engine.execute(
-                        action.oper,
+                        action.method,
                         action.args,
                         action.nsteps - 1
                     );
@@ -68,7 +68,7 @@ export class EventListeners {
                     if (this.engine.actions.length > 0) {
                         const action = this.engine.actions.pop()!;
                         this.engine.execute(
-                            action.oper,
+                            action.method,
                             action.args,
                             action.nsteps
                         );
@@ -85,7 +85,7 @@ export class EventListeners {
                     if (this.engine.actions.length > 0) {
                         const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                         this.engine.execute(
-                            action.oper,
+                            action.method,
                             action.args,
                             action.nsteps
                         );

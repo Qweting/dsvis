@@ -11,6 +11,8 @@ import { EngineToolbar } from "./toolbars/engine-toolbar";
 type Resolve = (value: unknown) => void;
 type Reject = (props: { until?: number; running?: boolean }) => void;
 
+export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
+
 export interface MessagesObject {
     [key: string]:
         | string // handled like () => string
@@ -42,7 +44,11 @@ export class Engine {
     cookies: Cookies;
     container: HTMLElement;
     toolbar: EngineToolbar;
-    actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
+    actions: {
+        method: (...args: unknown[]) => Promise<void>;
+        args: unknown[];
+        nsteps: number;
+    }[] = [];
     currentAction: number = 0; // was = null before, this should work better
     currentStep: number = 0; // was = null before, this should work better
     debug: Debug;
@@ -230,7 +236,7 @@ export class Engine {
     // Executing the actions
 
     async submit(
-        method: string,
+        method: SubmitFunction,
         field: HTMLInputElement | null
     ): Promise<boolean> {
         try {
@@ -250,15 +256,16 @@ export class Engine {
         return false;
     }
 
-    async execute(
-        operation: string,
-        args: unknown[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async execute<T extends (...args: any[]) => Promise<void>>(
+        method: T,
+        args: Parameters<T>,
         until = 0
     ): Promise<void> {
         await this.reset();
-        this.actions.push({ oper: operation, args: args, nsteps: until });
+        this.actions.push({ method, args, nsteps: until });
         this.debug.log(
-            `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
+            `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
                 this.actions
             )}`
         );
@@ -296,12 +303,12 @@ export class Engine {
 
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                operation = action.oper;
-                args = action.args;
+                method = action.method as T;
+                args = action.args as Parameters<T>;
                 until = action.nsteps;
             }
             if (until > 0) {
-                this.execute(operation, args, until);
+                this.execute(method, args, until);
             } else {
                 this.reset();
             }
@@ -315,7 +322,8 @@ export class Engine {
             this.currentAction = nAction;
             this.currentStep = 0;
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
-            const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
+            const messageArr =
+                action.method.name.match(/[A-Za-z][a-z]*/g) || [];
             let message = messageArr.join(" ");
             message = `${
                 message.charAt(0).toUpperCase() + message.substring(1)
@@ -326,16 +334,9 @@ export class Engine {
 
             this.info.setTitle(message);
             await this.pause("");
-            if (
-                !(
-                    action.oper in this &&
-                    typeof this[action.oper as keyof Engine] === "function"
-                )
-            ) {
-                throw new Error("Cannot call action that does not exist");
-            }
-            // @ts-expect-error Have checked that it exists and that is a function. Only thing would be to validate input. Better to do in each function in any case
-            await this[action.oper](...action.args); // Kommer bli knölig att lösa
+
+            // Bind this to metod and call it
+            await action.method.apply(this, action.args);
         }
     }
 
