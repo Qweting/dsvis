@@ -1,5 +1,5 @@
 import { Debug } from "./debug";
-import { Engine } from "./engine";
+import { Engine, Reject, Resolve } from "./engine";
 import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
@@ -25,9 +25,6 @@ type EventListenersMap = Map<
     AllowedElements,
     Partial<Record<ListenerType, () => void>>
 >;
-
-type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
 
 export class EventListeners {
     engine: Engine;

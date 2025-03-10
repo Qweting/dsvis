@@ -144,3 +144,16 @@ export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
         return isNaN(Number(a)) ? 1 : -1;
     }
 }
+
+export function isValidReason(
+    obj: unknown
+): obj is { until: number; running?: boolean } {
+    return (
+        typeof obj === "object" &&
+        obj !== null &&
+        "until" in obj &&
+        typeof obj.until === "number" &&
+        // if running is in object it should be a boolean
+        ("running" in obj ? typeof obj.running === "boolean" : true)
+    );
+}

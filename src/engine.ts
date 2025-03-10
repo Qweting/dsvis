@@ -2,14 +2,14 @@ import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "./cookies";
 import { Debug } from "./debug";
 import { EventListeners } from "./event-listeners";
-import { parseValues } from "./helpers";
+import { isValidReason, parseValues } from "./helpers";
 import { Info } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
-type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
+export type Resolve = (value: unknown) => void;
+export type Reject = (props: { until: number; running?: boolean }) => void;
 
 export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
 
@@ -21,6 +21,12 @@ export interface MessagesObject {
         | MessagesObject;
 }
 
+type Action = {
+    method: (...args: unknown[]) => Promise<void>;
+    args: unknown[];
+    nsteps: number;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
@@ -31,7 +37,6 @@ export class Engine {
     // Default variable names start with $
 
     Svg: Svg;
-
     messages: MessagesObject = {};
 
     $Svg = {
@@ -44,19 +49,12 @@ export class Engine {
     cookies: Cookies;
     container: HTMLElement;
     toolbar: EngineToolbar;
-    actions: {
-        method: (...args: unknown[]) => Promise<void>;
-        args: unknown[];
-        nsteps: number;
-    }[] = [];
-    currentAction: number = 0; // was = null before, this should work better
-    currentStep: number = 0; // was = null before, this should work better
+    actions: Action[] = [];
+    currentAction: number = 0;
+    currentStep: number = 0;
     debug: Debug;
-
     state: State;
-
     info: Info;
-
     eventListeners: EventListeners;
 
     getAnimationSpeed(): number {
@@ -239,9 +237,10 @@ export class Engine {
         method: SubmitFunction,
         field: HTMLInputElement | null
     ): Promise<boolean> {
+        let rawValue: string = "";
         try {
-            let rawValue: string = "";
-            if (field) {
+            if (field instanceof HTMLInputElement) {
+                // Read value from input and reset to empty string
                 rawValue = field.value;
                 field.value = "";
             }
@@ -272,28 +271,26 @@ export class Engine {
 
         try {
             await this.runActionsLoop();
-            this.actions[this.actions.length - 1].nsteps =
-                this.currentStep || 0; // TODO: Not sure if this is correct
+            this.actions[this.actions.length - 1].nsteps = this.currentStep;
             this.debug.log(
                 `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
             );
 
             this.resetListeners(false);
         } catch (reason) {
-            if (
-                typeof reason !== "object" ||
-                reason === null || // Added line to help checks below
-                "until" in reason === false || // Added line to help checks below
-                typeof reason.until !== "number" // Changed to be able to assign to until which is a number
-            ) {
+            // Check if reason is thrown from async listener
+            if (!isValidReason(reason)) {
+                // Error not thrown by async handlers. Log it and exit
                 console.error(reason);
                 this.resetListeners(false);
                 return;
             }
-            this.actions.pop();
-            if ("running" in reason && typeof reason.running === "boolean") {
+
+            // If optional running argument is provided set running state
+            if (reason.running !== undefined) {
                 this.state.setRunning(reason.running);
             }
+            this.actions.pop();
             until = reason.until;
             this.debug.log(
                 `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
@@ -301,12 +298,14 @@ export class Engine {
                 )}`
             );
 
+            // until is smaller or equal to 0 the previus action should be run if it exists
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                 method = action.method as T;
                 args = action.args as Parameters<T>;
                 until = action.nsteps;
             }
+
             if (until > 0) {
                 this.execute(method, args, until);
             } else {
@@ -321,6 +320,8 @@ export class Engine {
             const action = this.actions[nAction];
             this.currentAction = nAction;
             this.currentStep = 0;
+
+            // Get and set title for this action
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             const messageArr =
                 action.method.name.match(/[A-Za-z][a-z]*/g) || [];
