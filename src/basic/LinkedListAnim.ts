@@ -9,7 +9,7 @@ import {
 
 import LinkedList from "./LinkedList";
 import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
-import { Connection } from "../../src/objects/basic-structure-objects/node-connection";
+import { LinkedConnection } from "../../src/objects/basic-structure-objects/node-connection";
 
 export const LinkedListMessages = {
     general: {
@@ -34,13 +34,16 @@ export const LinkedListMessages = {
         found: (value: string) => `Found node ${value} to delete`,
         adjust: "Adjusting link",
     },
+    connection: {
+        connect: (start: string, end: string) => `connecting ${start} with ${end}`,
+    },
 };
 
 export class LinkedListAnim extends Engine {
     initialValues: string[] | null = null; // Only used for hard-coded values
     maxListSize: number = 100; // Limit the size of the list to maintain readability
     linkedList: LinkedList<string | number> = new LinkedList(); // Linked list instance
-    nodeArray: [LinkedNode, Connection | null][] = []; // Array to store the nodes and connections
+    nodeArray: [LinkedNode, LinkedConnection | null][] = []; // Array to store the nodes and connections
     nodeDimensions: [number, number] = [this.getObjectSize() * 2, this.getObjectSize()]; // Dimensions for the nodes
 
     initialise(initialValues: string[] | null = null): void {
@@ -110,7 +113,8 @@ export class LinkedListAnim extends Engine {
             node.animate(this.getAnimationSpeed()).move(coords[0], coords[1]); // Move to the correct position with animation
         } */
 
-        node.move(coords[0], coords[1]); // Move to the correct position without animation
+        this.animate(node).move(coords[0], coords[1]); // Move to the correct position with animation
+        //node.move(coords[0], coords[1]); // Move to the correct position without animation
         // Add the node to the array and make connections
         this.nodeArray.push([node, await this.makeConnections(node)]);
         this.highlight(node, false);
@@ -136,7 +140,7 @@ export class LinkedListAnim extends Engine {
         // Implementation goes here
     }
 
-    async makeConnections(node: LinkedNode): Promise<Connection | null> {
+    async makeConnections(node: LinkedNode): Promise<LinkedConnection | null> {
         // If there is only one node in the list, then do nothing
         if (this.linkedList.size === 1) {
             return null;
@@ -144,11 +148,15 @@ export class LinkedListAnim extends Engine {
     
         // insertBack
         const prevNode = this.nodeArray[this.nodeArray.length - 1][0];
-        const connection = new Connection(prevNode.getPointerPos(), node.getCenterPos(), this.nodeDimensions, this.Svg);
-        // insertFront
-        // insertAt
+        await this.pause("connection.connect", prevNode.value, node.value);
+        const connection = new LinkedConnection(prevNode, node, this.nodeDimensions, 3);
         this.Svg.add(connection);
+        connection.update(connection.$coords, this.getAnimationSpeed());
+        console.log("HIIIw");
         return connection;
+
+        //const animate = !this.state.resetting;
+        //animate ? this.$Svg.animationSpeed : 0
     }
 
     // Calculates the next position for a node in a zigzag layout pattern and if it should be mirrored

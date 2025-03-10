@@ -1,42 +1,37 @@
 import {
     Marker, Svg, Line
 } from "@svgdotjs/svg.js";
+import { Connection } from "../connection";
+import { LinkedNode } from "./linked-node";
 
-export class Connection extends Line {
-    private x1: number;
-    private y1: number;
-    private x2: number;
-    private y2: number;
+export class LinkedConnection extends Connection<LinkedNode> {
 
-    private arrowWidth: number;
-    private arrowHeight: number;
-    private arrowMarker: Marker;
-
-    private strokeWidth: number;
-
-    constructor(startNodeCoords: [number, number], endNodeCoords: [number, number], nodeDimensions: [number, number], svgContext: Svg) {
-        super();
-        this.x1 = startNodeCoords[0];
-        this.y1 = startNodeCoords[1];
-        const endCoords = this.getEndCoords(endNodeCoords, nodeDimensions);
-        this.x2 = endCoords[0];
-        this.y2 = endCoords[1];
-
-
-        this.arrowWidth = Math.max(nodeDimensions[1] / 4, 5);
-        this.arrowHeight = Math.max(nodeDimensions[1] / 10, 3);
-
-        this.arrowMarker = svgContext.marker(this.arrowWidth, this.arrowHeight, (add) => {
-            add.polygon([0, 0, this.arrowWidth / 2, this.arrowHeight / 2, 0, this.arrowHeight]).addClass("filled");
-        });
-
-        this.strokeWidth = nodeDimensions[1] <= 12 ? 1 : 2;
-
-        this.update();
+    constructor(start: LinkedNode, end: LinkedNode, nodeDimensions: [number, number], strokeWidth: number) {
+        super(start, end);
+        const endCoords = this.getEndCoords(end.getCenterPos(), nodeDimensions);
+        this.$coords = {
+            x1: start.getPointerPos()[0],
+            y1: start.getPointerPos()[1],
+            x2: endCoords[0],
+            y2: endCoords[1],
+            //r2: end.getSize() / 2,
+            r2: 0,
+        };
+        this.init(strokeWidth, 0, false); // TODO directed should be = true
     }
 
-    update(): void {
-        this.plot(this.x1, this.y1, this.x2, this.y2).stroke({ width: this.strokeWidth, color: '#000' }).marker('end', this.arrowMarker);
+    init(
+        strokeWidth: number,
+        bend: number = 0,
+        directed: boolean = false
+    ): this {
+        this.stroke({ width: strokeWidth });
+        this.setBend(bend);
+        if (directed) {
+            this._createArrow();
+        }
+        this.update(this.$coords);
+        return this;
     }
 
     // Calculates the positon where the end connection should be
@@ -49,8 +44,8 @@ export class Connection extends Line {
         const halfHeight = nodeHeight / 2;
         
         // Calculate the direction vector from end node to start point
-        const dx = this.x1 - endNodeX;
-        const dy = this.y1 - endNodeY;
+        const dx = this.$coords.x1 - endNodeX;
+        const dy = this.$coords.y1 - endNodeY;
         
         let intersectionX, intersectionY;
         
@@ -58,10 +53,10 @@ export class Connection extends Line {
         if (Math.abs(dx) > Math.abs(dy)) {
             // Intersect with left or right edge
             intersectionX = endNodeX + Math.sign(dx) * halfWidth;
-            intersectionY = this.y1;
+            intersectionY = this.$coords.y1;
         } else {
             // Intersect with top or bottom edge
-            intersectionX = this.x1;
+            intersectionX = this.$coords.x1;
             intersectionY = endNodeY + Math.sign(dy) * halfHeight;
         }
         

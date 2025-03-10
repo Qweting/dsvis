@@ -1,12 +1,12 @@
 import { Text, G, Rect } from "@svgdotjs/svg.js";
 
 export class LinkedNode extends G {
+    value: string | number;
     private nodeWidth: number;
     private nodeHeight: number;
 
     private elementRect: Rect;
     private elementRectWidth: number;
-    private value: string | number;
     private textElement: Text;
 
     private nextNodeRect: Rect;
@@ -47,5 +47,9 @@ export class LinkedNode extends G {
         const x = this.cx();
         const y = this.cy();
         return [x, y];
+    }
+
+    getSize(): number {
+        return this.nodeWidth;
     }
 }
