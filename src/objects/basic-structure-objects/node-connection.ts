@@ -1,56 +1,48 @@
-import {
-    Marker, Svg, Line
-} from "@svgdotjs/svg.js";
+import { Svg } from "@svgdotjs/svg.js";
+import { Connection } from "../connection";
+import { LinkedNode } from "./linked-node";
 
-export class Connection extends Line {
-    private x1: number;
-    private y1: number;
-    private x2: number;
-    private y2: number;
+export class LinkedConnection extends Connection<LinkedNode> {
+    private nodeDimensions: [number, number];
 
-    private arrowWidth: number;
-    private arrowHeight: number;
-    private arrowMarker: Marker;
-
-    private strokeWidth: number;
-
-    constructor(startNodeCoords: [number, number], endNodeCoords: [number, number], nodeDimensions: [number, number], svgContext: Svg) {
-        super();
-        this.x1 = startNodeCoords[0];
-        this.y1 = startNodeCoords[1];
-        const endCoords = this.getEndCoords(endNodeCoords, nodeDimensions);
-        this.x2 = endCoords[0];
-        this.y2 = endCoords[1];
-
-
-        this.arrowWidth = Math.max(nodeDimensions[1] / 4, 5);
-        this.arrowHeight = Math.max(nodeDimensions[1] / 10, 3);
-
-        this.arrowMarker = svgContext.marker(this.arrowWidth, this.arrowHeight, (add) => {
-            add.polygon([0, 0, this.arrowWidth / 2, this.arrowHeight / 2, 0, this.arrowHeight]).addClass("filled");
-        });
-
-        this.strokeWidth = nodeDimensions[1] <= 12 ? 1 : 2;
-
-        this.update();
+    constructor(start: LinkedNode, end: LinkedNode, nodeDimensions: [number, number], strokeWidth: number, svgContext: Svg) {
+        super(start, end);
+        this.nodeDimensions = nodeDimensions;
+        this.setCoords(this.getEndCoords(end.getCenterPos(), false));
+        svgContext.put(this);
+        this.init(strokeWidth, 0, true);
+        this.front();
     }
 
-    update(): void {
-        this.plot(this.x1, this.y1, this.x2, this.y2).stroke({ width: this.strokeWidth, color: '#000' }).marker('end', this.arrowMarker);
+    updateEnd(endNodeCoords: [number, number], animationDuration: number): void
+    {
+        const endCoords = this.getEndCoords([endNodeCoords[0] + this.nodeDimensions[0] / 2, endNodeCoords[1] + this.nodeDimensions[1] / 2]);
+        this.setCoords(endCoords);
+        super.update(this.$coords, animationDuration);
+    }
+
+    private setCoords(endCoords: [number, number]): void {
+        this.$coords = {
+            x1: this.$start.getPointerPos()[0],
+            y1: this.$start.getPointerPos()[1],
+            x2: endCoords[0],
+            y2: endCoords[1],
+            r2: -2, // ofset to make sure the arrow just exactly touches the node
+        };
     }
 
     // Calculates the positon where the end connection should be
-    getEndCoords(endNodeCoords: [number, number], nodeDimensions: [number, number]): [number, number] {
+    private getEndCoords(endNodeCoords: [number, number], straight = true): [number, number] {
         const [endNodeX, endNodeY] = endNodeCoords;
-        const [nodeWidth, nodeHeight] = nodeDimensions;
+        const [nodeWidth, nodeHeight] = this.nodeDimensions;
         
         // Calculate the half dimensions
         const halfWidth = nodeWidth / 2;
         const halfHeight = nodeHeight / 2;
         
         // Calculate the direction vector from end node to start point
-        const dx = this.x1 - endNodeX;
-        const dy = this.y1 - endNodeY;
+        const dx = this.$coords.x1 - endNodeX;
+        const dy = this.$coords.y1 - endNodeY;
         
         let intersectionX, intersectionY;
         
@@ -58,10 +50,11 @@ export class Connection extends Line {
         if (Math.abs(dx) > Math.abs(dy)) {
             // Intersect with left or right edge
             intersectionX = endNodeX + Math.sign(dx) * halfWidth;
-            intersectionY = this.y1;
+            intersectionY = straight ? this.$start.getPointerPos()[1] : endNodeY;
         } else {
             // Intersect with top or bottom edge
-            intersectionX = this.x1;
+            // straight ? this.$start.getPointerPos()[1] : this.$start.getPointerPos()[0]
+            intersectionX = straight ? this.$start.getPointerPos()[0] : endNodeX;
             intersectionY = endNodeY + Math.sign(dy) * halfHeight;
         }
         
