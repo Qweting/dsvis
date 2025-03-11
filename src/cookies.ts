@@ -12,7 +12,20 @@ export class Cookies {
     constructor(initialCookies: CookieObject, debug: Debug) {
         this.cookies = initialCookies;
         this.debug = debug;
-        this.load();
+        this.load(); // Set element values to saved values
+        this.addEventListeners();
+        this.save(); // Save on initialization to add more days before expiration
+    }
+
+    addEventListeners(): void {
+        this.debug.log(
+            "Adding eventlisteners to cookie elements",
+            this.cookies
+        );
+
+        Object.values(this.cookies).map((cookieField) => {
+            cookieField.addEventListener("change", () => this.save());
+        });
     }
 
     load(): void {
