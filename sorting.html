@@ -56,7 +56,6 @@
 </fieldset>
 
 <div class="psuedoCode"></div>
-
 <div>
   <svg></svg>
 </div>
@@ -92,14 +91,22 @@
   </span>
   <span class="formgroup">
     <label>Scroll speed:
-      <select id="scrollSpeed">
+      <select class="scrollSpeed">
         <option value="1">Slowest</option>
-        <option value="2" selected>Slow</option>
-        <option value="5">Medium</option>
+        <option value="2">Slow</option>
+        <option value="5" selected>Medium</option>
         <option value="10" >Fast</option>
         <option value="20">Fastest</option>
       </select>
     </label>
+  </span>
+  <span class="formgroup">
+    <button class="moveLeft">&lt;</button>
+    <button class="moveUp">^</button>
+    <button class="moveDown">v</button>
+    <button class="moveRight">&gt;</button>
+    <button class="zoomIn">+</button>
+    <button class="zoomOut">-</button>
   </span>
 </fieldset>
 

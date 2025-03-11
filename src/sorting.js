@@ -41,7 +41,11 @@ function initialisePrioQueues(containerID) {
     tools.clearSubmit = container.querySelector(".clearSubmit");
     tools.psuedoCode = container.querySelector(".psuedoCode");
     
-
+    document.querySelector(".scrollSpeed").addEventListener("change", (event) => {scrollSpeed = Number(event.target.value);event.target.blur();});
+    document.querySelector(".moveLeft").addEventListener("click", () => goRight(false));
+    document.querySelector(".moveRight").addEventListener("click", () => goRight(true));
+    document.querySelector(".moveUp").addEventListener("click", () => goDown(false));
+    document.querySelector(".moveDown").addEventListener("click", () => goDown(true));
     tools.insertSelect.addEventListener("change", () => {
         tools.insertField.value = tools.insertSelect.value;
         tools.insertSelect.value = "";
@@ -52,9 +56,8 @@ function initialisePrioQueues(containerID) {
     tools.insertSubmit.addEventListener("click", () => PQEngine.submit("insert", tools.insertField));
     tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", " "));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
-    
-    
     addEventListener("keydown", (event) => {
+        console.log(scrollSpeed);
         if (event.key === "ArrowDown") {goDown(true);}
         else if (event.key === "ArrowUp") {goDown(false);}
         else if (event.key === "ArrowRight") {goRight(true);}
