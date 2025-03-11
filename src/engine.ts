@@ -134,15 +134,10 @@ export class Engine {
         this.state.setRunning(true);
     }
 
-    initToolbar(): void {
-        this.toolbar.animationSpeed.addEventListener("change", () =>
-            this.cookies.save()
-        );
-    }
+    initToolbar(): void {}
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        this.cookies.load();
         await this.reset();
     }
 
@@ -207,7 +202,6 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
-        this.cookies.save();
         this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
             this.disableWhenRunning(true);
