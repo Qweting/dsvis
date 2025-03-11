@@ -1,43 +1,40 @@
-import {
-    Marker, Svg, Line
-} from "@svgdotjs/svg.js";
+import { Svg } from "@svgdotjs/svg.js";
 import { Connection } from "../connection";
 import { LinkedNode } from "./linked-node";
 
 export class LinkedConnection extends Connection<LinkedNode> {
+    private nodeDimensions: [number, number];
 
-    constructor(start: LinkedNode, end: LinkedNode, nodeDimensions: [number, number], strokeWidth: number) {
+    constructor(start: LinkedNode, end: LinkedNode, nodeDimensions: [number, number], strokeWidth: number, svgContext: Svg) {
         super(start, end);
-        const endCoords = this.getEndCoords(end.getCenterPos(), nodeDimensions);
-        this.$coords = {
-            x1: start.getPointerPos()[0],
-            y1: start.getPointerPos()[1],
-            x2: endCoords[0],
-            y2: endCoords[1],
-            //r2: end.getSize() / 2,
-            r2: 0,
-        };
-        this.init(strokeWidth, 0, false); // TODO directed should be = true
+        this.nodeDimensions = nodeDimensions;
+        this.setCoords(this.getEndCoords(end.getCenterPos(), false));
+        svgContext.put(this);
+        this.init(strokeWidth, 0, true);
+        this.front();
     }
 
-    init(
-        strokeWidth: number,
-        bend: number = 0,
-        directed: boolean = false
-    ): this {
-        this.stroke({ width: strokeWidth });
-        this.setBend(bend);
-        if (directed) {
-            this._createArrow();
-        }
-        this.update(this.$coords);
-        return this;
+    updateEnd(endNodeCoords: [number, number], animationDuration: number): void
+    {
+        const endCoords = this.getEndCoords([endNodeCoords[0] + this.nodeDimensions[0] / 2, endNodeCoords[1] + this.nodeDimensions[1] / 2]);
+        this.setCoords(endCoords);
+        super.update(this.$coords, animationDuration);
+    }
+
+    private setCoords(endCoords: [number, number]): void {
+        this.$coords = {
+            x1: this.$start.getPointerPos()[0],
+            y1: this.$start.getPointerPos()[1],
+            x2: endCoords[0],
+            y2: endCoords[1],
+            r2: -2, // ofset to make sure the arrow just exactly touches the node
+        };
     }
 
     // Calculates the positon where the end connection should be
-    getEndCoords(endNodeCoords: [number, number], nodeDimensions: [number, number]): [number, number] {
+    private getEndCoords(endNodeCoords: [number, number], straight = true): [number, number] {
         const [endNodeX, endNodeY] = endNodeCoords;
-        const [nodeWidth, nodeHeight] = nodeDimensions;
+        const [nodeWidth, nodeHeight] = this.nodeDimensions;
         
         // Calculate the half dimensions
         const halfWidth = nodeWidth / 2;
@@ -53,10 +50,11 @@ export class LinkedConnection extends Connection<LinkedNode> {
         if (Math.abs(dx) > Math.abs(dy)) {
             // Intersect with left or right edge
             intersectionX = endNodeX + Math.sign(dx) * halfWidth;
-            intersectionY = this.$coords.y1;
+            intersectionY = straight ? this.$start.getPointerPos()[1] : endNodeY;
         } else {
             // Intersect with top or bottom edge
-            intersectionX = this.$coords.x1;
+            // straight ? this.$start.getPointerPos()[1] : this.$start.getPointerPos()[0]
+            intersectionX = straight ? this.$start.getPointerPos()[0] : endNodeX;
             intersectionY = endNodeY + Math.sign(dy) * halfHeight;
         }
         

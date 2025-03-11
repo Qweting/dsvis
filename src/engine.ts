@@ -681,7 +681,7 @@ export class Engine {
                 )}`
             );
         }
-        if (this.state.resetting) {
+        if (this.state.resetting) {//
             return null;
         }
         if (title !== undefined) {
