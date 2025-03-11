@@ -1,4 +1,4 @@
-import { Debug } from "./debug";
+import { Debug } from "@/debug";
 
 interface CookieObject {
     [key: string]: HTMLSelectElement;

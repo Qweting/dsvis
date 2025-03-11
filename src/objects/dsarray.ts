@@ -1,5 +1,5 @@
+import { NBSP } from "@/engine";
 import { G, Rect, Text } from "@svgdotjs/svg.js";
-import { NBSP } from "../../src/engine";
 
 export class DSArray extends G {
     $horizontal: boolean;
