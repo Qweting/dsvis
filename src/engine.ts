@@ -318,7 +318,7 @@ export class Engine {
             // Get and set title for this action
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
             const messageArr =
-                action.method.name.match(/[A-Za-z][a-z]*|[^A-Za-z-_]+/g) || [];
+                action.method.name.match(/[A-Za-z][a-z]*/g) || [];
             let message = messageArr.join(" ");
             message = `${
                 message.charAt(0).toUpperCase() + message.substring(1)
