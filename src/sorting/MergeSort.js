@@ -11,7 +11,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
     }
 
 
-    async drawViewbox(right, down, zoom = 1) {
+    async drawViewbox(right, down, zoom) {
         this.SVG.viewbox(right, down, this.$Svg.width*zoom, this.$Svg.height*zoom);
     }
 

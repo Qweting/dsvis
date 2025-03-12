@@ -6,9 +6,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 let PQEngine = null;
-right = 0;
-down = 0;
-scrollSpeed = 5;
+let right = 0;
+let down = 0;
+let zoom = 1;
+let scrollSpeed = 5;
 
 function initialisePrioQueues(containerID) {
     const algoSelector = document.querySelector(`${containerID} .algorithmSelector`);
@@ -41,6 +42,9 @@ function initialisePrioQueues(containerID) {
     tools.clearSubmit = container.querySelector(".clearSubmit");
     tools.psuedoCode = container.querySelector(".psuedoCode");
     
+
+    document.querySelector(".zoomIn").addEventListener("click", () => zoomIn(true));
+    document.querySelector(".zoomOut").addEventListener("click", () => zoomIn(false));
     document.querySelector(".scrollSpeed").addEventListener("change", (event) => {scrollSpeed = Number(event.target.value);event.target.blur();});
     document.querySelector(".moveLeft").addEventListener("click", () => goRight(false));
     document.querySelector(".moveRight").addEventListener("click", () => goRight(true));
@@ -57,7 +61,6 @@ function initialisePrioQueues(containerID) {
     tools.sortSubmit.addEventListener("click", () => PQEngine.submit("sort", " "));
     tools.clearSubmit.addEventListener("click", () => PQEngine.confirmResetAll());
     addEventListener("keydown", (event) => {
-        console.log(scrollSpeed);
         if (event.key === "ArrowDown") {goDown(true);}
         else if (event.key === "ArrowUp") {goDown(false);}
         else if (event.key === "ArrowRight") {goRight(true);}
@@ -67,17 +70,25 @@ function initialisePrioQueues(containerID) {
 
 function goRight(goingRight) {
     if(goingRight) {
-    this.right+=scrollSpeed;
-    } else if (this.right > 0) {
-        this.right-=scrollSpeed;
+    right+=scrollSpeed;
+    } else if (right > 0) {
+        right-=scrollSpeed;
     }
-    PQEngine.drawViewbox(right, down)
+    PQEngine.drawViewbox(right, down, zoom)
 }
 function goDown(goingDown) {
     if(goingDown) {
-    this.down+=scrollSpeed;
-    } else if (this.down > 0) {
-        this.down-=scrollSpeed;
+    down+=scrollSpeed;
+    } else if (down > 0) {
+        down-=scrollSpeed;
     }
-    PQEngine.drawViewbox(right, down)
+    PQEngine.drawViewbox(right, down, zoom)
+}
+function zoomIn(zoomingIn) {
+    if(zoomingIn && zoom > 0.2) {
+        zoom-=0.1;
+    } else if(zoom < 3) {
+        zoom+=0.1;
+    }
+    PQEngine.drawViewbox(right, down, zoom)
 }

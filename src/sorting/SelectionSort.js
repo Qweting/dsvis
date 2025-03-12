@@ -9,8 +9,8 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
         
     }
 
-    async drawViewbox(right, down) {
-        this.SVG.viewbox(right, down, this.$Svg.width, this.$Svg.height);
+    async drawViewbox(right, down, zoom) {
+        this.SVG.viewbox(right, down, this.$Svg.width*zoom, this.$Svg.height*zoom);
     }
 
     async resetAlgorithm() {

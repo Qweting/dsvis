@@ -8,8 +8,8 @@ DSVis.InsertionSort = class InsertionSort extends DSVis.Engine {
         super.initialise();
     }
 
-    async drawViewbox(right, down) {
-        this.SVG.viewbox(right, down, this.$Svg.width, this.$Svg.height);
+    async drawViewbox(right, down, zoom) {
+        this.SVG.viewbox(right, down, this.$Svg.width*zoom, this.$Svg.height*zoom);
     }
 
     async resetAlgorithm() {
