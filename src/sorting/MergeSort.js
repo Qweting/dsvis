@@ -3,6 +3,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
     arraySize = 28;
     initialValues;
     compensate = 0;
+    mergeArrayList = [];
     
     initialise(initialValues = null) {
         this.initialValues = initialValues;
@@ -78,6 +79,10 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
             await this.pause('general.empty');
             return;
         }
+        for(let i = 0; i < this.mergeArrayList.length; i++){
+            this.mergeArrayList[i].remove();
+        }
+        this.mergeArrayList = [];
         this.sortArray.getValues()
         if(this.sortArray.getValue(this.sortArray.getSize()-1) === DSVis.NBSP){
         this.sortArray.setSize(this.sortArray.getSize() - 1);
@@ -101,7 +106,14 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         const [xCenter,yCenter] = this.getTreeRoot();
         const baseY = this.$Svg.margin*4;
         const CX = arr.getCX(0);
-        
+        for(let i = 0; this.mergeArrayList.length > 0; i++){
+            if(this.mergeArrayList[i].getCX(0) > 0){
+                this.compensate = this.mergeArrayList[i].getCX(0);
+                for(let j = 0; j < this.mergeArrayList.length; j++){
+                    //TODO compensate for the mergeArray and the original array
+                }
+            }
+        }
         if(arr.getSize() > 2){
             const mergeArray1 = this.SVG.dsArray(mid-left, CX, arr.cy());
             for(let k = 0; k < mid; k++){
@@ -116,7 +128,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
             }
             this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             await this.pause('sort.split', mergeArray2.getValues(), arr.getValues());
-            
+            this.mergeArrayList.push(mergeArray1);
+            this.mergeArrayList.push(mergeArray2);
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
 
             await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);
