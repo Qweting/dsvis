@@ -19,7 +19,7 @@ export class Cookies {
 
     addEventListeners(): void {
         this.debug.log(
-            "Adding eventlisteners to cookie elements",
+            "Adding event listeners to cookie elements",
             this.cookies
         );
 
@@ -48,9 +48,9 @@ export class Cookies {
     save(): void {
         let expires = "";
         if (this.$COOKIE_EXPIRE_DAYS > 0) {
-            const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
-            expires = `;expires=${exdate.toUTCString()}`;
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + this.$COOKIE_EXPIRE_DAYS);
+            expires = `;expires=${expiryDate.toUTCString()}`;
         }
 
         Object.entries(this.cookies).map(([cookieName, cookieField]) => {

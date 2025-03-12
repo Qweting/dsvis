@@ -9,7 +9,8 @@ import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 export type Resolve = (value: unknown) => void;
-export type Reject = (props: { until: number; running?: boolean }) => void;
+export type Reject = (props: RejectReason) => void;
+export type RejectReason = { until: number; running?: boolean };
 
 export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
 
@@ -24,7 +25,7 @@ export interface MessagesObject {
 type Action = {
     method: (...args: unknown[]) => Promise<void>;
     args: unknown[];
-    nsteps: number;
+    stepCount: number;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -134,7 +135,10 @@ export class Engine {
         this.state.setRunning(true);
     }
 
-    initToolbar(): void {}
+    initToolbar(): void {
+        /* Allow subclasses to use this function */
+        // TODO: Move all these into toolbar class
+    }
 
     async resetAll(): Promise<void> {
         this.actions = [];
@@ -155,7 +159,9 @@ export class Engine {
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {}
+    async resetAlgorithm(): Promise<void> {
+        /* Allow subclasses to use this function */
+    }
 
     clearCanvas(): void {
         this.Svg.clear();
@@ -202,17 +208,21 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
+        // Clear all currently running listeners
         this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
+            // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
             return;
         }
+
         this.eventListeners.addListener(
             this.toolbar.toggleRunner,
             "click",
             () => this.state.toggleRunner()
         );
         if (isRunning) {
+            // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
             this.info.setStatus("paused");
             return;
@@ -256,7 +266,7 @@ export class Engine {
         until = 0
     ): Promise<void> {
         await this.reset();
-        this.actions.push({ method, args, nsteps: until });
+        this.actions.push({ method, args, stepCount: until });
         this.debug.log(
             `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
                 this.actions
@@ -265,7 +275,7 @@ export class Engine {
 
         try {
             await this.runActionsLoop();
-            this.actions[this.actions.length - 1].nsteps = this.currentStep;
+            this.actions[this.actions.length - 1].stepCount = this.currentStep;
             this.debug.log(
                 `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
             );
@@ -292,14 +302,15 @@ export class Engine {
                 )}`
             );
 
-            // until is smaller or equal to 0 the previus action should be run if it exists
+            // until is smaller or equal to 0 meaning the previous action should be run if it exists
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                 method = action.method as T;
                 args = action.args as Parameters<T>;
-                until = action.nsteps;
+                until = action.stepCount;
             }
 
+            // Re execute if there is something to run until, otherwise reset
             if (until > 0) {
                 this.execute(method, args, until);
             } else {
@@ -309,6 +320,7 @@ export class Engine {
     }
 
     async runActionsLoop(): Promise<void> {
+        // Run through all our actions
         for (let nAction = 0; nAction < this.actions.length; nAction++) {
             this.resetListeners(true);
             const action = this.actions[nAction];
@@ -317,20 +329,20 @@ export class Engine {
 
             // Get and set title for this action
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
-            const messageArr =
+            const methodNameArr =
                 action.method.name.match(/[A-Za-z][a-z]*/g) || [];
-            let message = messageArr.join(" ");
-            message = `${
-                message.charAt(0).toUpperCase() + message.substring(1)
-            } ${action.args.join(", ")}`;
+            const methodName = methodNameArr
+                .map((str) => str.charAt(0).toUpperCase() + str.substring(1))
+                .join(" ");
+            const title = `${methodName} ${action.args.join(", ")}`;
             this.debug.log(
-                `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
+                `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
             );
 
-            this.info.setTitle(message);
+            this.info.setTitle(methodName);
             await this.pause("");
 
-            // Bind this to metod and call it
+            // Bind this to method and call it
             await action.method.apply(this, action.args);
         }
     }
@@ -339,39 +351,44 @@ export class Engine {
         message: string | undefined,
         ...args: unknown[]
     ): Promise<unknown> | null {
-        const title = this.getMessage(message, ...args);
+        const body = this.getMessage(message, ...args);
         this.debug.log(
             `${
                 this.currentStep
-            }. Doing: ${title} (running: ${this.state.isRunning()}), ${JSON.stringify(
+            }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
                 this.actions
             )}`
         );
 
+        // If resetting no pause should be run
         if (this.state.isResetting()) {
             return null;
         }
-        if (title !== undefined) {
-            this.info.setBody(title);
+
+        if (body !== undefined) {
+            this.info.setBody(body);
         }
+
         return new Promise((resolve, reject) => {
             const action = this.actions[this.currentAction];
-            if (action.nsteps != null && this.currentStep < action.nsteps) {
+
+            // Check if step has been executed previously (action.stepCount = 0 if first time and has a value otherwise)
+            if (this.currentStep < action.stepCount) {
                 this.fastForward(resolve, reject);
-            } else {
-                let runnerTimer: NodeJS.Timeout | undefined = undefined;
-                this.eventListeners.addAsyncListeners(
-                    resolve,
-                    reject,
-                    runnerTimer
+                return;
+            }
+
+            // Add async listeners that handle button presses while paused
+            let runnerTimer: NodeJS.Timeout | undefined = undefined;
+            this.eventListeners.addAsyncListeners(resolve, reject, runnerTimer);
+
+            // If running, automatically step forward after waiting animation speed
+            if (this.state.isRunning()) {
+                this.info.setStatus("running");
+                runnerTimer = setTimeout(
+                    () => this.stepForward(resolve, reject),
+                    this.getAnimationSpeed() * 1.1
                 );
-                if (this.state.isRunning()) {
-                    this.info.setStatus("running");
-                    runnerTimer = setTimeout(
-                        () => this.stepForward(resolve, reject),
-                        this.getAnimationSpeed() * 1.1
-                    );
-                }
             }
         });
     }
@@ -387,10 +404,11 @@ export class Engine {
             return undefined;
         }
 
+        // Assume that message is a key to access this.messages
         let title: MessagesObject[string] = this.messages;
-
         const keys = message.split(".");
         if (!(keys[0] in title)) {
+            // Assumption was wrong returning the original message and the extra arguments
             return [message, ...args].join("\n");
         }
         for (const key of keys) {
@@ -400,6 +418,8 @@ export class Engine {
             }
             title = title[key];
         }
+
+        // Title is now hopefully a string or function from this.messages
         if (typeof title === "function") {
             title = title(...args);
         }
@@ -407,9 +427,7 @@ export class Engine {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        if (title === "") {
-            title = NBSP;
-        }
+
         return title;
     }
 
@@ -421,11 +439,12 @@ export class Engine {
 
     fastForward(resolve: Resolve, reject: Reject): void {
         const action = this.actions[this.currentAction];
-        if (this.currentStep >= action.nsteps) {
-            action.nsteps = this.currentStep;
+        if (this.currentStep >= action.stepCount) {
+            action.stepCount = this.currentStep;
         }
         this.currentStep++;
         this.state.setAnimating(false);
+        // If debugging is enabled then add a small delay
         if (this.debug.isEnabled()) {
             setTimeout(resolve, 10);
         } else {

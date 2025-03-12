@@ -1,7 +1,7 @@
 import { Svg as SvgElement, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "./engine";
 
-export type InfoStatus = "running" | "paused" | "inactive";
+type InfoStatus = "running" | "paused" | "inactive";
 
 const statusText = {
     running: "Animating",
