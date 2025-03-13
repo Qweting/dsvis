@@ -374,7 +374,7 @@ export class BST<Node extends BinaryNode = BinaryNode>
             node.setHighlight(false);
 
             if (child === parent.getLeft()?.getLeft()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
@@ -382,7 +382,7 @@ export class BST<Node extends BinaryNode = BinaryNode>
             }
 
             if (child === parent.getRight()?.getRight()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()

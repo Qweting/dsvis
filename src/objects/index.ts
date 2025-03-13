@@ -11,7 +11,7 @@ declare module "@svgdotjs/svg.js" {
         setHighlight(high: boolean | null): this;
         getCenter(): [number, number];
         setCenter(x: number, y: number, animationDuration?: number): this;
-        dmoveCenter(dx: number, dy: number, animationDuration?: number): this;
+        dMoveCenter(dx: number, dy: number, animationDuration?: number): this;
         engine(): Engine;
     }
 

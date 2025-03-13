@@ -6,7 +6,7 @@ import { BinaryDir } from "../../src/objects/binary-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
-export const AVLmessages = {
+export const AVLMessages = {
     node: {
         updateHeight: "Update node heights",
         unbalanced: "Node is unbalanced!",
@@ -15,7 +15,7 @@ export const AVLmessages = {
 };
 
 export class AVL extends BST<AVLNode> implements Collection {
-    messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
+    messages: MessagesObject = updateDefault(AVLMessages, BSTMessages);
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
@@ -63,9 +63,9 @@ export class AVL extends BST<AVLNode> implements Collection {
 
     async updateHeights(
         startNode: AVLNode,
-        fromchild: BinaryDir | undefined | null
+        fromChild: BinaryDir | undefined | null
     ) {
-        const child = (fromchild && startNode.getChild(fromchild)) || startNode;
+        const child = (fromChild && startNode.getChild(fromChild)) || startNode;
         this.pointer = this.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),
