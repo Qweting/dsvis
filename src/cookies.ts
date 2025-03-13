@@ -31,6 +31,10 @@ export class Cookies {
     load(): void {
         this.debug.log("Loading cookies", document.cookie);
 
+        if (document.cookie === "") {
+            return;
+        }
+
         const allCookies = document.cookie.split("; ");
         allCookies.map((cookie) => {
             const splitCookie = cookie.split("=");
