@@ -1,19 +1,11 @@
 import { Text } from "@svgdotjs/svg.js";
-import {
-    compare,
-    Engine,
-    EngineToolbarItems,
-    MessagesObject,
-    parseValues,
-    updateDefault,
-} from "../../src/engine";
+import { Collection } from "../../src/collections";
+import { Engine, MessagesObject } from "../../src/engine";
+import { compare, parseValues, updateDefault } from "../../src/helpers";
 import { BTreeNode } from "../../src/objects/btree-node";
 import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
-
-type BTreeToolbarItems = EngineToolbarItems & {
-    maxDegree: HTMLSelectElement;
-};
 
 const BTreeMessages = {
     find: {
@@ -52,45 +44,18 @@ const BTreeMessages = {
     },
 };
 
-export class BTree extends Engine {
+export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
 
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
 
-    toolbar!: BTreeToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
+    toolbar: BTreeToolbar;
 
     constructor(containerSelector: string) {
         super(containerSelector);
-    }
 
-    getToolbar(): BTreeToolbarItems {
-        const toolbar = super.getToolbar();
-
-        toolbar.algorithmControls.insertAdjacentHTML(
-            "beforeend",
-            `<span class="formgroup"><label>
-        Max degree:
-        <select class="maxDegree disableWhenRunning">
-          <option value="3">2/3-tree</option>
-          <option value="4">2/3/4-tree</option>
-          <option value="5">Max degree 5</option>
-          <option value="6">Max degree 6</option>
-        </select>
-      </label></span>`
-        );
-
-        const maxDegree =
-            this.container.querySelector<HTMLSelectElement>("select.maxDegree");
-
-        if (!maxDegree) {
-            throw new Error("Could not find max degree select element");
-        }
-
-        return {
-            ...toolbar,
-            maxDegree,
-        };
+        this.toolbar = new BTreeToolbar(this.container);
     }
 
     initialise(initialValues = null) {
@@ -101,23 +66,23 @@ export class BTree extends Engine {
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.treeRoot = null;
-        if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     initToolbar() {
         super.initToolbar();
 
-        this.toolbar.maxDegree?.addEventListener("change", () =>
+        this.toolbar.maxDegree.addEventListener("change", () =>
             this.confirmResetAll()
         );
     }
 
     getMaxDegree() {
-        return parseInt(this.toolbar.maxDegree?.value || "0");
+        return parseInt(this.toolbar.maxDegree.value);
     }
 
     getMaxKeys() {
@@ -133,7 +98,7 @@ export class BTree extends Engine {
     }
 
     resizeTree(svgMargin: number, nodeSpacing: number) {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             svgMargin,
@@ -151,7 +116,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Find a value
 
-    async find(value: number | string) {
+    async find(...values: (number | string)[]) {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;
@@ -165,6 +136,7 @@ export class BTree extends Engine {
     }
 
     async findHelper(value: number | string, findLeaf = false) {
+        value = String(value); //TODO: Check if this can be handled better
         let parent = null;
         let node = this.treeRoot;
         const pointer = this.Svg.put(new HighlightCircle()).init(
@@ -181,7 +153,7 @@ export class BTree extends Engine {
             node.setHighlight(true);
             await this.pause(undefined);
             let i = 0;
-            let cmpStr = String(value);
+            let cmpStr = value;
             while (i < node.numValues()) {
                 const txt = node.getText(i);
                 const cmp = compare(value, txt);
@@ -477,7 +449,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Delete a value
 
-    async delete(value: number | string) {
+    async delete(...values: (number | string)[]) {
+        for (const value of values) {
+            this.deleteOne(value);
+        }
+    }
+
+    async deleteOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;
