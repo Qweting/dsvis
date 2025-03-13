@@ -1,6 +1,7 @@
 import { Element, Marker, Path } from "@svgdotjs/svg.js";
 import { BTreeNode } from "./btree-node";
 import { GraphNode } from "./graph-node";
+import { LinkedNode } from "../objects/basic-structure-objects/linked-node";
 
 type ConnectionCoordinates = {
     x1: number;
@@ -10,7 +11,7 @@ type ConnectionCoordinates = {
     r2: number;
 };
 
-export class Connection<T extends GraphNode | BTreeNode> extends Path {
+export class Connection<T extends GraphNode | BTreeNode | LinkedNode> extends Path {
     $coords: ConnectionCoordinates = {
         r2: 0,
         x1: 0,

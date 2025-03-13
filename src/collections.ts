@@ -6,6 +6,7 @@ import { BST } from "./trees/BST";
 import { BTree } from "./trees/BTree";
 import { RedBlack } from "./trees/RedBlack";
 import { SplayTree } from "./trees/SplayTree";
+import { LinkedListAnim } from "./basic/LinkedListAnim";
 
 export interface Collection extends Engine {
     insert: SubmitFunction;
