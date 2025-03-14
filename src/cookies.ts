@@ -1,4 +1,4 @@
-import { Debug } from "~/debug";
+import { Debugger } from "./debugger";
 
 interface CookieObject {
     [key: string]: HTMLSelectElement;
@@ -7,9 +7,9 @@ interface CookieObject {
 export class Cookies {
     private $COOKIE_EXPIRE_DAYS = 30;
     private cookies: CookieObject;
-    private debug: Debug;
+    private debug: Debugger;
 
-    constructor(initialCookies: CookieObject, debug: Debug) {
+    constructor(initialCookies: CookieObject, debug: Debugger) {
         this.cookies = initialCookies;
         this.debug = debug;
         this.load(); // Set element values to saved values

@@ -1,6 +1,6 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "~/cookies";
-import { Debug } from "~/debug";
+import { Debugger } from "~/debugger";
 import { EventListeners } from "~/event-listeners";
 import { isValidReason, parseValues } from "~/helpers";
 import { Info } from "~/info";
@@ -53,7 +53,7 @@ export class Engine {
     actions: Action[] = [];
     currentAction: number = 0;
     currentStep: number = 0;
-    debug: Debug;
+    debugger: Debugger;
     state: State;
     info: Info;
     eventListeners: EventListeners;
@@ -92,7 +92,7 @@ export class Engine {
     // Inititalisation
 
     constructor(containerSelector: string) {
-        this.debug = new Debug();
+        this.debugger = new Debugger();
 
         const container =
             document.querySelector<HTMLElement>(containerSelector);
@@ -110,7 +110,7 @@ export class Engine {
                 objectSize: this.toolbar.objectSize,
                 animationSpeed: this.toolbar.animationSpeed,
             },
-            this.debug
+            this.debugger
         );
 
         const svgContainer = this.container.querySelector("svg");
@@ -121,7 +121,7 @@ export class Engine {
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = this;
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             this.Svg.addClass("debug");
         }
 
@@ -168,7 +168,7 @@ export class Engine {
 
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }
@@ -267,7 +267,7 @@ export class Engine {
     ): Promise<void> {
         await this.reset();
         this.actions.push({ method, args, stepCount: until });
-        this.debug.log(
+        this.debugger.log(
             `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
                 this.actions
             )}`
@@ -276,7 +276,7 @@ export class Engine {
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].stepCount = this.currentStep;
-            this.debug.log(
+            this.debugger.log(
                 `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
             );
 
@@ -296,7 +296,7 @@ export class Engine {
             }
             this.actions.pop();
             until = reason.until;
-            this.debug.log(
+            this.debugger.log(
                 `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
                     this.actions
                 )}`
@@ -335,7 +335,7 @@ export class Engine {
                 .map((str) => str.charAt(0).toUpperCase() + str.substring(1))
                 .join(" ");
             const title = `${methodName} ${action.args.join(", ")}`;
-            this.debug.log(
+            this.debugger.log(
                 `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
             );
 
@@ -352,7 +352,7 @@ export class Engine {
         ...args: unknown[]
     ): Promise<unknown> | null {
         const body = this.getMessage(message, ...args);
-        this.debug.log(
+        this.debugger.log(
             `${
                 this.currentStep
             }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
@@ -445,7 +445,7 @@ export class Engine {
         this.currentStep++;
         this.state.setAnimating(false);
         // If debugging is enabled then add a small delay
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);

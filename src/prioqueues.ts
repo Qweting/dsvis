@@ -52,7 +52,7 @@ function initialisePrioQueues(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (PQEngine.debug.isEnabled()) {
+        if (PQEngine.debugger.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");

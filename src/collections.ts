@@ -57,7 +57,7 @@ function initialiseCollections(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (CollectionEngine.debug.isEnabled()) {
+        if (CollectionEngine.debugger.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");

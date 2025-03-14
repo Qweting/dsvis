@@ -1,7 +1,7 @@
-import { Debug } from "~/debug";
-import { Engine, Reject, Resolve } from "~/engine";
-import { State } from "~/state";
-import { EngineToolbar } from "~/toolbars/engine-toolbar";
+import { Debugger } from "./debugger";
+import { Engine, Reject, Resolve } from "./engine";
+import { State } from "./state";
+import { EngineToolbar } from "./toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -29,7 +29,7 @@ type EventListenersMap = Map<
 export class EventListeners {
     engine: Engine;
     toolbar: EngineToolbar;
-    debug: Debug;
+    debugger: Debugger;
     state: State;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
@@ -38,7 +38,7 @@ export class EventListeners {
     constructor(engine: Engine) {
         this.engine = engine;
         this.toolbar = engine.toolbar;
-        this.debug = engine.debug;
+        this.debugger = engine.debugger;
         this.state = engine.state;
 
         this.idleListeners.push(
@@ -163,7 +163,7 @@ export class EventListeners {
     addIdleListeners(): void {
         this.idleListeners.forEach((listener) => {
             this.addListener(listener.element, listener.type, () => {
-                this.debug.log(
+                this.debugger.log(
                     listener.element,
                     `${listener.type}: ${JSON.stringify(this.engine.actions)}`
                 );
