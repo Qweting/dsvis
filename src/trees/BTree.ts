@@ -204,7 +204,7 @@ export class BTree extends Engine implements Collection {
 
     async insertOne(value: string | number) {
         if (this.treeRoot) {
-            await this.insertBottomup(value);
+            await this.insertBottomUp(value);
         } else {
             this.treeRoot = this.Svg.put(new BTreeNode()).init(
                 true,
@@ -220,7 +220,7 @@ export class BTree extends Engine implements Collection {
         }
     }
 
-    async insertBottomup(value: number | string) {
+    async insertBottomUp(value: number | string) {
         await this.pause("insert.search", value);
         const found = await this.findHelper(value);
         const node = found.node;
@@ -474,7 +474,7 @@ export class BTree extends Engine implements Collection {
         if (found.node?.isLeaf()) {
             await this.deleteLeaf(found.node, found.i || 0);
         } else {
-            await this.deleteNonleaf(found.node as BTreeNode, found.i || 0);
+            await this.deleteNonLeaf(found.node as BTreeNode, found.i || 0);
         }
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
@@ -501,7 +501,7 @@ export class BTree extends Engine implements Collection {
         await this.repairAfterDelete(node);
     }
 
-    async deleteNonleaf(node: BTreeNode, i: number) {
+    async deleteNonLeaf(node: BTreeNode, i: number) {
         node.addClass("marked");
         const pointer = this.Svg.put(new HighlightCircle()).init(
             node.getCX(i, this.getObjectSize()),

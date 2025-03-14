@@ -52,7 +52,7 @@ export class EventListeners {
                     this.engine.execute(
                         action.method,
                         action.args,
-                        action.nsteps - 1
+                        action.stepCount - 1
                     );
                 },
             },
@@ -67,7 +67,7 @@ export class EventListeners {
                         this.engine.execute(
                             action.method,
                             action.args,
-                            action.nsteps
+                            action.stepCount
                         );
                     } else {
                         this.engine.reset();
@@ -84,7 +84,7 @@ export class EventListeners {
                         this.engine.execute(
                             action.method,
                             action.args,
-                            action.nsteps
+                            action.stepCount
                         );
                     } else {
                         this.engine.reset();
@@ -106,7 +106,7 @@ export class EventListeners {
                 element: this.toolbar.fastForward,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.engine.actions[this.engine.currentAction].nsteps =
+                    this.engine.actions[this.engine.currentAction].stepCount =
                         Number.MAX_SAFE_INTEGER;
                     this.engine.fastForward(resolve, reject);
                 },
