@@ -1,7 +1,7 @@
-import { Engine, SubmitFunction } from "./engine";
-import { BinaryHeap } from "./heaps/BinaryHeap";
-import { addReturnSubmit } from "./helpers";
-import { PrioQueueToolbar } from "./toolbars/prioqueue-toolbar";
+import { Engine, SubmitFunction } from "~/engine";
+import { BinaryHeap } from "~/heaps/BinaryHeap";
+import { addReturnSubmit } from "~/helpers";
+import { PrioQueueToolbar } from "~/toolbars/prioqueue-toolbar";
 
 export interface Prioqueue {
     insert: SubmitFunction;

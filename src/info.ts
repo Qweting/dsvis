@@ -1,5 +1,5 @@
 import { Svg as SvgElement, Text } from "@svgdotjs/svg.js";
-import { NBSP } from "./engine";
+import { NBSP } from "~/engine";
 
 type InfoStatus = "running" | "paused" | "inactive";
 

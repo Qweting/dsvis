@@ -1,7 +1,7 @@
-import { Debug } from "./debug";
-import { Engine, Reject, Resolve } from "./engine";
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Debug } from "~/debug";
+import { Engine, Reject, Resolve } from "~/engine";
+import { State } from "~/state";
+import { EngineToolbar } from "~/toolbars/engine-toolbar";
 
 type ListenerType = "click" | "change";
 type AllowedElements =

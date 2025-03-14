@@ -1,4 +1,4 @@
-import { MessagesObject, NBSP, RejectReason } from "./engine";
+import { MessagesObject, NBSP, RejectReason } from "~/engine";
 
 export function normalizeNumber(input: string): string | number {
     input = input.trim();

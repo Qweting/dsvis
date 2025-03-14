@@ -1,10 +1,10 @@
 import { Text } from "@svgdotjs/svg.js";
-import { Collection } from "../../src/collections";
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare, parseValues, updateDefault } from "../../src/helpers";
-import { BTreeNode } from "../../src/objects/btree-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
-import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues, updateDefault } from "~/helpers";
+import { BTreeNode } from "~/objects/btree-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { BTreeToolbar } from "~/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
 
 const BTreeMessages = {

@@ -1,5 +1,5 @@
 import { Element, extend, Svg } from "@svgdotjs/svg.js";
-import { Engine } from "../../src/engine";
+import { Engine } from "~/engine";
 
 declare module "@svgdotjs/svg.js" {
     interface Svg {

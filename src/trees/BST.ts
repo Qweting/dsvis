@@ -1,11 +1,11 @@
 import { Text } from "@svgdotjs/svg.js";
-import { Collection } from "../../src/collections";
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare, parseValues } from "../../src/helpers";
-import { TextCircle } from "../../src/objects/text-circle";
-import { BSTToolbar } from "../../src/toolbars/BST-toolbar";
-import { BinaryDir, BinaryNode } from "../objects/binary-node";
-import { HighlightCircle } from "../objects/highlight-circle";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { TextCircle } from "~/objects/text-circle";
+import { BSTToolbar } from "~/toolbars/BST-toolbar";
 
 export const BSTMessages = {
     general: {

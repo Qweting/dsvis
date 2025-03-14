@@ -1,9 +1,9 @@
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare } from "../../src/helpers";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
-import { DSArray } from "../../src/objects/dsarray";
-import { TextCircle } from "../../src/objects/text-circle";
-import { Prioqueue } from "../../src/prioqueues";
+import { Engine, MessagesObject } from "~/engine";
+import { compare } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { DSArray } from "~/objects/dsarray";
+import { TextCircle } from "~/objects/text-circle";
+import { Prioqueue } from "~/prioqueues";
 
 export const BinaryHeapMessages = {
     general: {

@@ -1,12 +1,12 @@
 import { Element } from "@svgdotjs/svg.js";
-import { Cookies } from "./cookies";
-import { Debug } from "./debug";
-import { EventListeners } from "./event-listeners";
-import { isValidReason, parseValues } from "./helpers";
-import { Info } from "./info";
-import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Cookies } from "~/cookies";
+import { Debug } from "~/debug";
+import { EventListeners } from "~/event-listeners";
+import { isValidReason, parseValues } from "~/helpers";
+import { Info } from "~/info";
+import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { State } from "~/state";
+import { EngineToolbar } from "~/toolbars/engine-toolbar";
 
 export type Resolve = (value: unknown) => void;
 export type Reject = (props: RejectReason) => void;

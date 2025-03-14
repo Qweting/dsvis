@@ -1,11 +1,11 @@
-import { Engine, SubmitFunction } from "./engine";
-import { addReturnSubmit } from "./helpers";
-import { CollectionToolbar } from "./toolbars/collection-toolbar";
-import { AVL } from "./trees/AVL";
-import { BST } from "./trees/BST";
-import { BTree } from "./trees/BTree";
-import { RedBlack } from "./trees/RedBlack";
-import { SplayTree } from "./trees/SplayTree";
+import { Engine, SubmitFunction } from "~/engine";
+import { addReturnSubmit } from "~/helpers";
+import { CollectionToolbar } from "~/toolbars/collection-toolbar";
+import { AVL } from "~/trees/AVL";
+import { BST } from "~/trees/BST";
+import { BTree } from "~/trees/BTree";
+import { RedBlack } from "~/trees/RedBlack";
+import { SplayTree } from "~/trees/SplayTree";
 
 export interface Collection extends Engine {
     insert: SubmitFunction;

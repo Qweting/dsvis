@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const path = require("path");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
 module.exports = (env, argv) => {
     const isDevelopment = argv.mode === "development";
@@ -14,6 +15,7 @@ module.exports = (env, argv) => {
         },
         resolve: {
             extensions: [".ts", ".js"],
+            plugins: [new TsconfigPathsPlugin()],
         },
         module: {
             rules: [

@@ -1,9 +1,9 @@
-import { Collection } from "../../src/collections";
-import { MessagesObject } from "../../src/engine";
-import { updateDefault } from "../../src/helpers";
-import { AVLNode } from "../../src/objects/avl-node";
-import { BinaryDir } from "../../src/objects/binary-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { updateDefault } from "~/helpers";
+import { AVLNode } from "~/objects/avl-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
 export const AVLMessages = {
