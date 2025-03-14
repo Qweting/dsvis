@@ -1,11 +1,11 @@
-import { NBSP } from "@/engine";
-import { addReturnSubmit, compare } from "@/helpers";
-import { AVLNode } from "@/objects/avl-node";
-import { BinaryDir } from "@/objects/binary-node";
-import { HighlightCircle } from "@/objects/highlight-circle";
-import { TextCircle } from "@/objects/text-circle";
-import { AVLQuizToolbar } from "@/toolbars/AVL-quiz-toolbar";
-import { BST } from "@/trees/BST";
+import { NBSP } from "~/engine";
+import { addReturnSubmit, compare } from "~/helpers";
+import { AVLNode } from "~/objects/avl-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { TextCircle } from "~/objects/text-circle";
+import { AVLQuizToolbar } from "~/toolbars/AVL-quiz-toolbar";
+import { BST } from "~/trees/BST";
 
 export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;

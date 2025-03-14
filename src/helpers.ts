@@ -1,4 +1,4 @@
-import { MessagesObject, NBSP } from "@/engine";
+import { MessagesObject, NBSP } from "~/engine";
 
 export function normalizeNumber(input: string): string | number {
     input = input.trim();

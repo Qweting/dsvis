@@ -1,5 +1,5 @@
-import { NBSP } from "@/engine";
 import { G, Line, Rect, Text } from "@svgdotjs/svg.js";
+import { NBSP } from "~/engine";
 import { BTreeConnection } from "./btree-connection";
 
 export class BTreeNode extends G {

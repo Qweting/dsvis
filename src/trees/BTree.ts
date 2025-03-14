@@ -1,10 +1,10 @@
-import { Collection } from "@/collections";
-import { Engine, MessagesObject } from "@/engine";
-import { compare, parseValues, updateDefault } from "@/helpers";
-import { BTreeNode } from "@/objects/btree-node";
-import { HighlightCircle } from "@/objects/highlight-circle";
-import { BTreeToolbar } from "@/toolbars/BTree-toolbar";
 import { Text } from "@svgdotjs/svg.js";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues, updateDefault } from "~/helpers";
+import { BTreeNode } from "~/objects/btree-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { BTreeToolbar } from "~/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
 
 const BTreeMessages = {

@@ -1,7 +1,7 @@
-import { Collection } from "@/collections";
-import { MessagesObject } from "@/engine";
-import { updateDefault } from "@/helpers";
-import { BinaryDir, BinaryNode } from "@/objects/binary-node";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { updateDefault } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
 const RedBlackMessages = {

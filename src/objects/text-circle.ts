@@ -1,5 +1,5 @@
-import { NBSP } from "@/engine";
 import { Circle, G, Text } from "@svgdotjs/svg.js";
+import { NBSP } from "~/engine";
 
 export class TextCircle extends G {
     $circle: Circle;
