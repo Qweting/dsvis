@@ -1,11 +1,9 @@
 import {
-    compare,
     Engine,
-    EngineToolbarItems,
     MessagesObject,
-    parseValues,
 } from "../engine";
 
+import { Collection } from "../../src/collections";
 import LinkedList from "./LinkedList";
 import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
 import { LinkedConnection } from "../../src/objects/basic-structure-objects/node-connection";
@@ -38,7 +36,7 @@ export const LinkedListMessages = {
     },
 };
 
-export class LinkedListAnim extends Engine {
+export class LinkedListAnim extends Engine implements Collection {
     private readonly TOP_MARGIN = 100;
     private readonly MIN_SIDE_MARGIN = 20;
 
@@ -74,11 +72,11 @@ export class LinkedListAnim extends Engine {
         this.maxListSize = this.calculateMaxListSize();
 
         // If initial values are provided, insert them into the animated list
-        if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     // Insert initial values into the linked list
@@ -114,7 +112,7 @@ export class LinkedListAnim extends Engine {
         
         await this.pause(insertionText, value);
         // Move to the correct position with animation
-        this.animate(node, !this.state.resetting).move(coords[0], coords[1]);
+        this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
         connection?.updateEnd([coords[0], coords[1]], this.animationValue());
 
         this.highlight(node, false);
@@ -134,13 +132,17 @@ export class LinkedListAnim extends Engine {
     }
 
     // Visualization logic for deleting a node
-    async deleteAnimate(value: string | number): Promise<void> {
+    async delete(value: string | number): Promise<void> {
         // Implementation goes here
     }
 
     // Visualization logic for finding a node
-    async findAnimate(value: string | number): Promise<void> {
+    async find(value: string | number): Promise<void> {
         // Implementation goes here
+    }
+
+    async print(): Promise<void> {
+        
     }
 
     async makeConnections(node: LinkedNode): Promise<LinkedConnection | null> {
@@ -197,7 +199,7 @@ export class LinkedListAnim extends Engine {
     }
 
     private animationValue(): number {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         return (animate ? this.$Svg.animationSpeed : 0);
     }
 }

@@ -21,6 +21,7 @@ const COLLECTIONS_CLASSES = {
     RedBlack: RedBlack,
     SplayTree: SplayTree,
     BTree: BTree,
+    LinkedListAnim: LinkedListAnim,
 } as const satisfies Record<string, new (...args: never[]) => Collection>;
 
 function isCollection(engine: Engine | Collection): engine is Collection {
