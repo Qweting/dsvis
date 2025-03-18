@@ -41,7 +41,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
 
     async insert(...values) {
         this.sortArray.setSize(this.sortArray.getSize() + values.length);
-        this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
+        this.sortArray.center(this.getTreeRoot()[0], this.getTreeRoot()[1]+this.$Svg.margin*4);
         for (const val of values) await this.insertOne(val); 
     }
 
@@ -82,6 +82,7 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         for(let i = 0; i < this.mergeArrayList.length; i++){
             this.mergeArrayList[i].remove();
         }
+        this.compensate = 0;
         this.mergeArrayList = [];
         this.sortArray.getValues()
         if(this.sortArray.getValue(this.sortArray.getSize()-1) === DSVis.NBSP){
@@ -90,10 +91,8 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         for(let i = 0; i < this.sortArray.getSize(); i++){
             this.sortArray.setDisabled(i, true);
         }
-        this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
+        this.sortArray.center(this.getTreeRoot()[0], this.getTreeRoot()[1]+this.$Svg.margin*4);
 
-        //Compensate here
-        //if(this.getTreeRoot()[0] - Math.ceil(this.sortArray.getSize()/2)
 
         await this.mergeSort(this.sortArray, 0, this.sortArray.getSize(), 1);
         await this.pause('general.finished');
@@ -106,30 +105,37 @@ DSVis.MergeSort = class MergeSort extends DSVis.Engine {
         const [xCenter,yCenter] = this.getTreeRoot();
         const baseY = this.$Svg.margin*4;
         const CX = arr.getCX(0);
-        for(let i = 0; this.mergeArrayList.length > 0; i++){
-            if(this.mergeArrayList[i].getCX(0) > 0){
-                this.compensate = this.mergeArrayList[i].getCX(0);
-                for(let j = 0; j < this.mergeArrayList.length; j++){
-                    //TODO compensate for the mergeArray and the original array
-                }
-            }
-        }
+
         if(arr.getSize() > 2){
             const mergeArray1 = this.SVG.dsArray(mid-left, CX, arr.cy());
             for(let k = 0; k < mid; k++){
                 mergeArray1.setValue(k, arr.getValue(k));
             }
-            this.animate(mergeArray1).cx(CX-arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            this.animate(mergeArray1).cx(CX-arr.engine().getObjectSize()*2/iteration).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             await this.pause('sort.split', mergeArray1.getValues(), arr.getValues());
 
             const mergeArray2 = this.SVG.dsArray(right-mid, arr.getCX(mid), arr.cy());
             for(let k = 0; k+mid < right; k++){
                 mergeArray2.setValue(k, arr.getValue(k+mid));
             }
-            this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration+this.compensate).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
+            this.animate(mergeArray2).cx(arr.getCX(arr.getSize()-1)+arr.engine().getObjectSize()*2/iteration).cy(yCenter+baseY*iteration*this.getObjectSize()/28+baseY);
             await this.pause('sort.split', mergeArray2.getValues(), arr.getValues());
             this.mergeArrayList.push(mergeArray1);
             this.mergeArrayList.push(mergeArray2);
+            //Compensation to keep the array within the viewbox
+            console.log(mergeArray1.getCX(0));
+            if(mergeArray1.getCX(0) < 0){
+                this.compensate = mergeArray1.getCX(0)*(-1) + this.$Svg.margin;
+
+                const sortArrayCenter = this.sortArray.getCX(this.sortArray.getSize()/2);
+                this.sortArray.center(sortArrayCenter + this.compensate, this.sortArray.cy());
+                
+                for(let j = 0; j < this.mergeArrayList.length; j++){
+                    const midPoint = this.mergeArrayList[j].getSize()/2;
+                    const centerCords = this.mergeArrayList[j].getCX(midPoint);
+                    this.mergeArrayList[j].center(centerCords + this.compensate, this.mergeArrayList[j].cy());
+                }
+            }
             await this.mergeSort(mergeArray1, left, mid, iteration+1);
 
             await this.mergeSort(mergeArray2, 0, right-mid, iteration+1);

@@ -16,9 +16,9 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
     async resetAlgorithm() {
         await super.resetAlgorithm();
         const [xRoot, yRoot] = this.getTreeRoot();
-        this.heapArray = this.SVG.dsArray(this.arraySize, xRoot, yRoot+this.$Svg.margin*4);
-        if (this.heapArray.x() < this.$Svg.margin)
-            this.heapArray.x(this.$Svg.margin);
+        this.sortArray = this.SVG.dsArray(this.arraySize, xRoot, yRoot+this.$Svg.margin*4);
+        if (this.sortArray.x() < this.$Svg.margin)
+            this.sortArray.x(this.$Svg.margin);
         this.sortSize = 0;
         if (this.initialValues) {
             this.State.resetting = true;
@@ -34,8 +34,8 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
     }
 
     async swap(j, k, message, ...args) {
-        this.heapArray.swap(j, k, true);
-        this.heapArray.setIndexHighlight(j, true);
+        this.sortArray.swap(j, k, true);
+        this.sortArray.setIndexHighlight(j, true);
         await this.pause(message, ...args);
     }
 
@@ -47,21 +47,19 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
 
         let currentIndex = this.sortSize;
         const arrayLabel = this.SVG.textCircle(value, ...this.getNodeStart());
-        let sortArray = []
         await this.pause('insert.value', value);
 
-        arrayLabel.setCenter(this.heapArray.getCX(currentIndex), this.heapArray.cy(), true);
-        sortArray.push(value);
+        arrayLabel.setCenter(this.sortArray.getCX(currentIndex), this.sortArray.cy(), true);
         await this.pause();
 
         arrayLabel.remove();
-        this.heapArray.setDisabled(currentIndex, false);
-        this.heapArray.setValue(currentIndex, value);
-        this.heapArray.setIndexHighlight(currentIndex, true);
+        this.sortArray.setDisabled(currentIndex, false);
+        this.sortArray.setValue(currentIndex, value);
+        this.sortArray.setIndexHighlight(currentIndex, true);
         this.sortSize++;
 
 
-        this.heapArray.setIndexHighlight(currentIndex, false);
+        this.sortArray.setIndexHighlight(currentIndex, false);
     }
 
 
@@ -78,42 +76,42 @@ DSVis.SelectionSort = class SelectionSort extends DSVis.Engine {
             for (let j = i + 1; j < this.sortSize; j++) {
 
                 // Highlight the current element and the minimum element
-                this.heapArray.setBlueHighlight(j, true);
-                this.heapArray.setBlueHighlight(minIndex, true);
+                this.sortArray.setBlueHighlight(j, true);
+                this.sortArray.setBlueHighlight(minIndex, true);
 
                 // Message: Compare the current element with the minimum element
-                await this.pause('sort.compare', this.heapArray.getValue(j), this.heapArray.getValue(minIndex));
+                await this.pause('sort.compare', this.sortArray.getValue(j), this.sortArray.getValue(minIndex));
 
 
-                if (this.heapArray.getValue(j) < this.heapArray.getValue(minIndex)) {
+                if (this.sortArray.getValue(j) < this.sortArray.getValue(minIndex)) {
                     // Unhighlight the previous minimum element
-                    this.heapArray.setBlueHighlight(minIndex, false);
+                    this.sortArray.setBlueHighlight(minIndex, false);
 
                     minIndex = j;
 
                     // Message: Found a new minimum element
-                    await this.pause('sort.foundNewMin', this.heapArray.getValue(minIndex));
+                    await this.pause('sort.foundNewMin', this.sortArray.getValue(minIndex));
                 } else {
                     // Unhighlight the current element
-                    this.heapArray.setBlueHighlight(j, false);
+                    this.sortArray.setBlueHighlight(j, false);
                 }
                 // Unhighlight the minimum element and the current element
-                this.heapArray.setBlueHighlight(j, false);
-                this.heapArray.setBlueHighlight(minIndex, false);
+                this.sortArray.setBlueHighlight(j, false);
+                this.sortArray.setBlueHighlight(minIndex, false);
             }
             // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {
-                await this.swap(i, minIndex, 'sort.swap', this.heapArray.getValue(i), this.heapArray.getValue(minIndex));
+                await this.swap(i, minIndex, 'sort.swap', this.sortArray.getValue(i), this.sortArray.getValue(minIndex));
             }
             // Highlight the sorted part of the array
-            this.heapArray.setIndexHighlight(i, true);
+            this.sortArray.setIndexHighlight(i, true);
         }
-        this.heapArray.setIndexHighlight(this.sortSize-1, true);
+        this.sortArray.setIndexHighlight(this.sortSize-1, true);
         await this.pause('general.finished');
 
         // Reset the highlights
         for (let i = 0; i < this.sortSize; i++) {
-            this.heapArray.setIndexHighlight(i, false);
+            this.sortArray.setIndexHighlight(i, false);
         }
     }
 
