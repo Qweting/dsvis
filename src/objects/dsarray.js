@@ -106,17 +106,6 @@ SVG.DSArray = class DSArray extends SVG.G {
         return this;
     }
 
-    setIndexHighlight(i, high) {
-        for (const obj of [this.$backgrounds[i], this.$values[i]]) {
-            if (high == null) obj.toggleClass("highlight");
-            else if (high) obj.addClass("highlight");
-            else obj.removeClass("highlight");
-        }
-        for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.hasClass("highlight")) bg.back();
-        }
-        return this;
-    }
 
     setBlueHighlight(i, high) {
         for (const obj of [this.$backgrounds[i], this.$values[i]]) {
@@ -126,6 +115,31 @@ SVG.DSArray = class DSArray extends SVG.G {
         }
         for (const bg of Object.values(this.$backgrounds)) {
             if (!bg.hasClass("highlightblue")) bg.back();
+        }
+        return this;
+    }
+
+    setIndexHighlight(i, high, color="#C00") {
+        if (this.$backgrounds[i]){
+            if (high){
+                this.$backgrounds[i].css("stroke", color);
+            }
+            else{
+                this.$backgrounds[i].css("stroke", "");
+            }
+        }
+
+        if (this.$values[i]){
+            if (high){
+                this.$values[i].css("fill", color);
+            }
+            else{
+                this.$values[i].css("fill", "");
+            }
+        }
+
+        for (const bg of Object.values(this.$backgrounds)) {
+            if (!bg.css("stroke")) bg.back();
         }
         return this;
     }
@@ -156,12 +170,25 @@ SVG.DSArray = class DSArray extends SVG.G {
 
     moveArrow(arrowId, indexTo) {
         const arrow = this.findOne(`#${arrowId}`);
-        const element = this.$backgrounds[indexTo];
-        const x = this.getCX(indexTo)
+        const x = this.getCX(indexTo);
 
         if (arrow) {
             this.engine().animate(arrow, true).cx(x);
         }
+    }
+
+    setArrowHighlight(id, high, color="#C00") {
+        const arrow = this.findOne(`#${id}`);
+
+
+        if (high) {
+            arrow.css("fill", color)
+        }
+        else {
+            arrow.css("fill", "")
+        }
+        
+        return this;
     }
 };
 
