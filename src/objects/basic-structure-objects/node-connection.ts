@@ -20,6 +20,8 @@ export class LinkedConnection extends Connection<LinkedNode> {
         this.setCoords(endCoords);
         super.update(this.$coords, animationDuration);
     }
+    
+    
 
     private setCoords(endCoords: [number, number]): void {
         this.$coords = {
@@ -27,7 +29,7 @@ export class LinkedConnection extends Connection<LinkedNode> {
             y1: this.$start.getPointerPos()[1],
             x2: endCoords[0],
             y2: endCoords[1],
-            r2: -2, // ofset to make sure the arrow just exactly touches the node
+            r2: -2, // offset to make sure the arrow just exactly touches the node
         };
     }
 

@@ -8,6 +8,10 @@ export class CollectionToolbar {
     deleteSubmit: HTMLInputElement;
     printSubmit: HTMLInputElement;
     clearSubmit: HTMLInputElement;
+    
+    insertFrontSubmit: HTMLInputElement;
+    insertFrontField: HTMLInputElement;
+    
     constructor(container: HTMLElement) {
         const insertSelect = container.querySelector<HTMLSelectElement>(
             "select.insertSelect"
@@ -28,6 +32,11 @@ export class CollectionToolbar {
             container.querySelector<HTMLInputElement>("input.printSubmit");
         const clearSubmit =
             container.querySelector<HTMLInputElement>("input.clearSubmit");
+        
+        const insertFrontField =
+            container.querySelector<HTMLInputElement>("input.insertFrontField");
+        const insertFrontSubmit =
+            container.querySelector<HTMLInputElement>("input.insertFrontSubmit");
 
         if (!insertSelect) {
             throw new Error("Missing insert select");
@@ -56,6 +65,12 @@ export class CollectionToolbar {
         if (!clearSubmit) {
             throw new Error("Missing clear submit");
         }
+        if (!insertFrontSubmit) {
+            throw new Error("Missing insert at front submit");
+        }
+        if (!insertFrontField) {
+            throw new Error("Missing insert at front field");
+        }
 
         this.insertSelect = insertSelect;
         this.insertField = insertField;
@@ -66,5 +81,9 @@ export class CollectionToolbar {
         this.deleteSubmit = deleteSubmit;
         this.printSubmit = printSubmit;
         this.clearSubmit = clearSubmit;
+        
+        this.insertFrontSubmit= insertFrontSubmit;
+        this.insertFrontField= insertFrontField;
+        
     }
 }

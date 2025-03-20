@@ -13,6 +13,7 @@ export interface Collection extends Engine {
     find: SubmitFunction;
     delete: SubmitFunction;
     print: SubmitFunction;
+    insertFront: SubmitFunction;
 }
 
 const COLLECTIONS_CLASSES = {
@@ -112,4 +113,13 @@ function initialiseCollections(containerID: string) {
     toolbar.clearSubmit.addEventListener("click", () =>
         CollectionEngine.confirmResetAll()
     );
+
+    addReturnSubmit(toolbar.insertFrontField, "ALPHANUM+", () =>
+        CollectionEngine.submit(CollectionEngine.insertFront, toolbar.insertFrontField)
+    );
+
+    toolbar.insertFrontSubmit.addEventListener("click", () => {
+        CollectionEngine.submit(CollectionEngine.insertFront, toolbar.insertFrontField);
+    });
+    
 }
