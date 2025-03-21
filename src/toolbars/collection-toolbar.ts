@@ -8,6 +8,7 @@ export class CollectionToolbar {
     deleteSubmit: HTMLInputElement;
     printSubmit: HTMLInputElement;
     clearSubmit: HTMLInputElement;
+    
     constructor(container: HTMLElement) {
         const insertSelect = container.querySelector<HTMLSelectElement>(
             "select.insertSelect"
@@ -28,6 +29,7 @@ export class CollectionToolbar {
             container.querySelector<HTMLInputElement>("input.printSubmit");
         const clearSubmit =
             container.querySelector<HTMLInputElement>("input.clearSubmit");
+        
 
         if (!insertSelect) {
             throw new Error("Missing insert select");

@@ -7,6 +7,7 @@ import { Collection } from "../../src/collections";
 import LinkedList from "./LinkedList";
 import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
 import { LinkedConnection } from "../../src/objects/basic-structure-objects/node-connection";
+import { Number } from "@svgdotjs/svg.js";
 
 export const LinkedListMessages = {
     general: {
@@ -56,7 +57,9 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
-        this.initialValues = initialValues;
+        // this.initialValues = ["A", "B", "D", "E", "F"];
+        this.initialValues = ["A", "B"];
+        // this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
 
@@ -70,6 +73,8 @@ export class LinkedListAnim extends Engine implements Collection {
         this.nodeArray = [];
         this.nodeDimensions= [this.getObjectSize() * 2, this.getObjectSize()];
         this.maxListSize = this.calculateMaxListSize();
+        
+        
 
         // If initial values are provided, insert them into the animated list
         await this.state.runWhileResetting(async () => {
@@ -106,7 +111,8 @@ export class LinkedListAnim extends Engine implements Collection {
         this.highlight(node, true);
 
         // Start at the lower right corner and then move to the correct position with animation
-        node.move(this.$Svg.width - this.nodeDimensions[0] - 20, this.$Svg.height - this.nodeDimensions[1]*2); // Starting position
+        // node.move(this.$Svg.width - this.nodeDimensions[0] - 20, this.$Svg.height - this.nodeDimensions[1]*2); // Starting position
+        node.move(this.$Svg.width/2, this.$Svg.height/2); //center the starting push, kinda ish.
         
         const connection = await this.makeConnections(node);
         
@@ -123,8 +129,8 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for inserting a node to the front
     async insertFront(value: string | number): Promise<void> {
-        // Implementation goes here
     }
+    
 
     // Visualization logic for inserting a node to a specific index
     async insertAt(value: string | number, index: number): Promise<void> {
@@ -138,7 +144,33 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for finding a node
     async find(value: string | number): Promise<void> {
-        // Implementation goes here
+        const findText = "find.start";
+        const foundText = "find.found";
+        const notFoundText = "find.notfound";
+        const lookText = "find.look";
+        let isFound = false;
+        let index = 0;
+        
+        await this.pause(findText, value); //start the search
+
+        for (let x = 0; x < this.nodeArray.length-1; x++) { 
+            const element = this.nodeArray[x][0].value;
+            if (element === value) { //check if the current node is the value we are looking for
+                this.highlight(this.nodeArray[x][0], true);
+                await this.pause(foundText,element); //element is found 
+                isFound = true; //set the flag to true
+                index = x;
+                this.highlight(this.nodeArray[x][0], false);
+                break; //break the loop
+            } else {
+                this.highlight(this.nodeArray[x][0], true);
+                await this.pause(notFoundText, value); //not found 
+                this.highlight(this.nodeArray[x][0], false);
+                await this.pause(lookText, element); //look into the next node
+            }
+        }
+        
+        await this.pause(notFoundText, value); //element is not found
     }
 
     async print(): Promise<void> {
@@ -148,7 +180,7 @@ export class LinkedListAnim extends Engine implements Collection {
     async makeConnections(node: LinkedNode): Promise<LinkedConnection | null> {
         // If there is only one node in the list, then do nothing
         if (this.linkedList.size === 1) {
-            return null;
+            return null; //what if we make it connect to a null node?
         }
         // insertBack
         const prevNode = this.nodeArray[this.nodeArray.length - 1][0];

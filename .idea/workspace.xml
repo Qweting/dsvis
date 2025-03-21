@@ -4,11 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0fb48964-b585-4599-b59d-7aa0e6461934" name="Changes" comment="" />
+    <list default="true" id="0fb48964-b585-4599-b59d-7aa0e6461934" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dsvis.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/collections.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/collections.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/basic/LinkedListAnim.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/collections.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/collections.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/toolbars/collection-toolbar.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/toolbars/collection-toolbar.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -25,6 +47,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "basic-ts",
@@ -34,6 +57,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.completion",
     "ts.external.directory.path": "/home/qweqwe/dsvis/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
@@ -54,6 +78,12 @@
       <option name="presentableId" value="Default" />
       <updated>1741853486819</updated>
       <workItem from="1741853488573" duration="1405000" />
+      <workItem from="1742505387372" duration="960000" />
+      <workItem from="1742557637120" duration="1776000" />
+      <workItem from="1742565727509" duration="19000" />
+      <workItem from="1742565771823" duration="35000" />
+      <workItem from="1742565816099" duration="2071000" />
+      <workItem from="1742569722634" duration="6754000" />
     </task>
     <servers />
   </component>

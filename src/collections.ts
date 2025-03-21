@@ -15,6 +15,7 @@ export interface Collection extends Engine {
     print: SubmitFunction;
 }
 
+
 const COLLECTIONS_CLASSES = {
     BST: BST,
     AVL: AVL,
@@ -112,4 +113,5 @@ function initialiseCollections(containerID: string) {
     toolbar.clearSubmit.addEventListener("click", () =>
         CollectionEngine.confirmResetAll()
     );
+    
 }
