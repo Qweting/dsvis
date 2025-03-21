@@ -7,7 +7,6 @@ import { Collection } from "../../src/collections";
 import LinkedList from "./LinkedList";
 import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
 import { LinkedConnection } from "../../src/objects/basic-structure-objects/node-connection";
-import { Number } from "@svgdotjs/svg.js";
 
 export const LinkedListMessages = {
     general: {
@@ -73,8 +72,6 @@ export class LinkedListAnim extends Engine implements Collection {
         this.nodeArray = [];
         this.nodeDimensions= [this.getObjectSize() * 2, this.getObjectSize()];
         this.maxListSize = this.calculateMaxListSize();
-        
-        
 
         // If initial values are provided, insert them into the animated list
         await this.state.runWhileResetting(async () => {
@@ -129,8 +126,8 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for inserting a node to the front
     async insertFront(value: string | number): Promise<void> {
+        // Implementation goes here
     }
-    
 
     // Visualization logic for inserting a node to a specific index
     async insertAt(value: string | number, index: number): Promise<void> {
