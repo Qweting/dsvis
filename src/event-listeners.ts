@@ -1,5 +1,5 @@
-import { Debug } from "./debug";
-import { Engine } from "./engine";
+import { Debugger } from "./debugger";
+import { Engine, Reject, Resolve } from "./engine";
 import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
 
@@ -26,13 +26,10 @@ type EventListenersMap = Map<
     Partial<Record<ListenerType, () => void>>
 >;
 
-type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
-
 export class EventListeners {
     engine: Engine;
     toolbar: EngineToolbar;
-    debug: Debug;
+    debugger: Debugger;
     state: State;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
@@ -41,7 +38,7 @@ export class EventListeners {
     constructor(engine: Engine) {
         this.engine = engine;
         this.toolbar = engine.toolbar;
-        this.debug = engine.debug;
+        this.debugger = engine.debugger;
         this.state = engine.state;
 
         this.idleListeners.push(
@@ -53,9 +50,9 @@ export class EventListeners {
                     this.state.setRunning(false);
                     const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
                     this.engine.execute(
-                        action.oper,
+                        action.method,
                         action.args,
-                        action.nsteps - 1
+                        action.stepCount - 1
                     );
                 },
             },
@@ -68,9 +65,9 @@ export class EventListeners {
                     if (this.engine.actions.length > 0) {
                         const action = this.engine.actions.pop()!;
                         this.engine.execute(
-                            action.oper,
+                            action.method,
                             action.args,
-                            action.nsteps
+                            action.stepCount
                         );
                     } else {
                         this.engine.reset();
@@ -85,9 +82,9 @@ export class EventListeners {
                     if (this.engine.actions.length > 0) {
                         const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
                         this.engine.execute(
-                            action.oper,
+                            action.method,
                             action.args,
-                            action.nsteps
+                            action.stepCount
                         );
                     } else {
                         this.engine.reset();
@@ -109,7 +106,7 @@ export class EventListeners {
                 element: this.toolbar.fastForward,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.engine.actions[this.engine.currentAction].nsteps =
+                    this.engine.actions[this.engine.currentAction].stepCount =
                         Number.MAX_SAFE_INTEGER;
                     this.engine.fastForward(resolve, reject);
                 },
@@ -166,7 +163,7 @@ export class EventListeners {
     addIdleListeners(): void {
         this.idleListeners.forEach((listener) => {
             this.addListener(listener.element, listener.type, () => {
-                this.debug.log(
+                this.debugger.log(
                     listener.element,
                     `${listener.type}: ${JSON.stringify(this.engine.actions)}`
                 );

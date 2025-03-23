@@ -1,4 +1,4 @@
-import { MessagesObject, NBSP } from "./engine";
+import { MessagesObject, NBSP, RejectReason } from "~/engine";
 
 export function normalizeNumber(input: string): string | number {
     input = input.trim();
@@ -143,4 +143,15 @@ export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
         // let's say that numbers are smaller than non-numbers
         return isNaN(Number(a)) ? 1 : -1;
     }
+}
+
+export function isValidReason(obj: unknown): obj is RejectReason {
+    return (
+        typeof obj === "object" &&
+        obj !== null &&
+        "until" in obj &&
+        typeof obj.until === "number" &&
+        // if running is in object it should be a boolean
+        ("running" in obj ? typeof obj.running === "boolean" : true)
+    );
 }

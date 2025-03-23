@@ -1,5 +1,5 @@
 import { G, Line, Rect, Text } from "@svgdotjs/svg.js";
-import { NBSP } from "../../src/engine";
+import { NBSP } from "~/engine";
 import { BTreeConnection } from "./btree-connection";
 
 export class BTreeNode extends G {
@@ -16,19 +16,19 @@ export class BTreeNode extends G {
 
     init(
         leaf: boolean,
-        nvalues: number,
+        nValues: number,
         x: number,
         y: number,
         objectSize: number,
         strokeWidth: number
     ): this {
-        if (nvalues < 1) {
+        if (nValues < 1) {
             throw new Error("BTreeNode: must have at least one value");
         }
 
-        this.$children = leaf ? null : Array(nvalues + 1);
+        this.$children = leaf ? null : Array(nValues + 1);
 
-        this.setNumValues(nvalues, objectSize, strokeWidth);
+        this.setNumValues(nValues, objectSize, strokeWidth);
 
         if (x && y) {
             this.center(x, y);
@@ -77,7 +77,7 @@ export class BTreeNode extends G {
     ): this {
         if (i < this.numValues()) {
             const dx = (i / Math.max(1, this.numValues()) - 1) * objectSize;
-            this.dmoveCenter(dx, 0);
+            this.dMoveCenter(dx, 0);
         }
 
         this.$values.splice(i, 0, null);
@@ -118,11 +118,11 @@ export class BTreeNode extends G {
     }
 
     setNumValues(
-        nvalues: number,
+        nValues: number,
         objectSize: number,
         strokeWidth: number
     ): this {
-        while (nvalues < this.numValues()) {
+        while (nValues < this.numValues()) {
             if (!this.isLeaf()) {
                 this.setChild(this.$children!.length - 1, null, strokeWidth);
                 this.$children!.pop();
@@ -133,30 +133,30 @@ export class BTreeNode extends G {
         }
 
         if (!this.$rect) {
-            this.$rect = this.rect(objectSize * nvalues, objectSize)
+            this.$rect = this.rect(objectSize * nValues, objectSize)
                 .stroke({ width: strokeWidth })
                 .center(0, 0);
         }
 
         this.$rect
-            .width(objectSize * Math.max(0.5, nvalues))
+            .width(objectSize * Math.max(0.5, nValues))
             .radius(objectSize / 4);
 
         const cx = this.$rect.cx(),
             cy = this.$rect.cy();
 
-        for (let i = 0; i < nvalues; i++) {
+        for (let i = 0; i < nValues; i++) {
             if (!this.$values[i]) {
                 this.$values[i] = this.text(NBSP);
             }
 
             this.$values[i]!.center(
-                cx + objectSize * (i - nvalues / 2 + 0.5),
+                cx + objectSize * (i - nValues / 2 + 0.5),
                 cy
             );
 
             if (i > 0) {
-                const dx = objectSize * (i - nvalues / 2);
+                const dx = objectSize * (i - nValues / 2);
                 const dy = objectSize / 2;
 
                 if (!this.$lines[i]) {
@@ -169,7 +169,7 @@ export class BTreeNode extends G {
             }
         }
         if (!this.isLeaf()) {
-            const n = (this.$children!.length = nvalues + 1);
+            const n = (this.$children!.length = nValues + 1);
 
             for (let i = 0; i < n; i++) {
                 this.$children![i]?.update({ i: i, n: n });

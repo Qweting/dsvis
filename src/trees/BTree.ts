@@ -1,9 +1,10 @@
 import { Text } from "@svgdotjs/svg.js";
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare, parseValues, updateDefault } from "../../src/helpers";
-import { BTreeNode } from "../../src/objects/btree-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
-import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues, updateDefault } from "~/helpers";
+import { BTreeNode } from "~/objects/btree-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { BTreeToolbar } from "~/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
 
 const BTreeMessages = {
@@ -43,7 +44,7 @@ const BTreeMessages = {
     },
 };
 
-export class BTree extends Engine {
+export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
 
@@ -59,7 +60,6 @@ export class BTree extends Engine {
 
     initialise(initialValues = null) {
         this.initialValues = parseValues(initialValues);
-        this.initialValues = ["A", "B", "C", "D", "E", "F"];
         super.initialise();
     }
 
@@ -116,7 +116,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Find a value
 
-    async find(value: number | string) {
+    async find(...values: (number | string)[]) {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;
@@ -130,6 +136,7 @@ export class BTree extends Engine {
     }
 
     async findHelper(value: number | string, findLeaf = false) {
+        value = String(value); //TODO: Check if this can be handled better
         let parent = null;
         let node = this.treeRoot;
         const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
@@ -146,7 +153,7 @@ export class BTree extends Engine {
             node.setHighlight(true);
             await this.pause(undefined);
             let i = 0;
-            let cmpStr = String(value);
+            let cmpStr = value;
             while (i < node.numValues()) {
                 const txt = node.getText(i);
                 const cmp = compare(value, txt);
@@ -197,7 +204,7 @@ export class BTree extends Engine {
 
     async insertOne(value: string | number) {
         if (this.treeRoot) {
-            await this.insertBottomup(value);
+            await this.insertBottomUp(value);
         } else {
             this.treeRoot = this.canvas.Svg.put(new BTreeNode()).init(
                 true,
@@ -216,7 +223,7 @@ export class BTree extends Engine {
         }
     }
 
-    async insertBottomup(value: number | string) {
+    async insertBottomUp(value: number | string) {
         await this.pause("insert.search", value);
         const found = await this.findHelper(value);
         const node = found.node;
@@ -466,7 +473,13 @@ export class BTree extends Engine {
     ///////////////////////////////////////////////////////////////////////////
     // Delete a value
 
-    async delete(value: number | string) {
+    async delete(...values: (number | string)[]) {
+        for (const value of values) {
+            this.deleteOne(value);
+        }
+    }
+
+    async deleteOne(value: number | string) {
         if (!this.treeRoot) {
             await this.pause("general.empty");
             return;
@@ -485,7 +498,7 @@ export class BTree extends Engine {
         if (found.node?.isLeaf()) {
             await this.deleteLeaf(found.node, found.i || 0);
         } else {
-            await this.deleteNonleaf(found.node as BTreeNode, found.i || 0);
+            await this.deleteNonLeaf(found.node as BTreeNode, found.i || 0);
         }
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
@@ -519,7 +532,7 @@ export class BTree extends Engine {
         await this.repairAfterDelete(node);
     }
 
-    async deleteNonleaf(node: BTreeNode, i: number) {
+    async deleteNonLeaf(node: BTreeNode, i: number) {
         node.addClass("marked");
         const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
             node.getCX(i, this.canvas.getObjectSize()),

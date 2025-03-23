@@ -1,4 +1,4 @@
-import { Debug } from "./debug";
+import { Debugger } from "./debugger";
 
 interface CookieObject {
     [key: string]: HTMLSelectElement;
@@ -7,16 +7,33 @@ interface CookieObject {
 export class Cookies {
     private $COOKIE_EXPIRE_DAYS = 30;
     private cookies: CookieObject;
-    private debug: Debug;
+    private debug: Debugger;
 
-    constructor(initialCookies: CookieObject, debug: Debug) {
+    constructor(initialCookies: CookieObject, debug: Debugger) {
         this.cookies = initialCookies;
         this.debug = debug;
-        this.load();
+        this.load(); // Set element values to saved values
+        this.addEventListeners();
+        this.save(); // Save on initialization to add more days before expiration
+    }
+
+    addEventListeners(): void {
+        this.debug.log(
+            "Adding event listeners to cookie elements",
+            this.cookies
+        );
+
+        Object.values(this.cookies).map((cookieField) => {
+            cookieField.addEventListener("change", () => this.save());
+        });
     }
 
     load(): void {
         this.debug.log("Loading cookies", document.cookie);
+
+        if (document.cookie === "") {
+            return;
+        }
 
         const allCookies = document.cookie.split("; ");
         allCookies.map((cookie) => {
@@ -35,9 +52,9 @@ export class Cookies {
     save(): void {
         let expires = "";
         if (this.$COOKIE_EXPIRE_DAYS > 0) {
-            const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
-            expires = `;expires=${exdate.toUTCString()}`;
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + this.$COOKIE_EXPIRE_DAYS);
+            expires = `;expires=${expiryDate.toUTCString()}`;
         }
 
         Object.entries(this.cookies).map(([cookieName, cookieField]) => {

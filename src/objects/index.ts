@@ -1,5 +1,5 @@
 import { Element, extend, Svg } from "@svgdotjs/svg.js";
-import { Engine } from "../../src/engine";
+import { Engine } from "~/engine";
 
 declare module "@svgdotjs/svg.js" {
     interface Svg {
@@ -11,7 +11,7 @@ declare module "@svgdotjs/svg.js" {
         setHighlight(high: boolean | null): this;
         getCenter(): [number, number];
         setCenter(x: number, y: number, animationDuration?: number): this;
-        dmoveCenter(dx: number, dy: number, animationDuration?: number): this;
+        dMoveCenter(dx: number, dy: number, animationDuration?: number): this;
         engine(): Engine;
     }
 

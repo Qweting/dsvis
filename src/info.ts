@@ -1,8 +1,7 @@
 import { Svg as SvgElement, Text } from "@svgdotjs/svg.js";
-import { NBSP } from "./engine";
-import { Canvas } from "./canvas";
+import { NBSP } from "~/engine";
 
-export type InfoStatus = "running" | "paused" | "inactive";
+type InfoStatus = "running" | "paused" | "inactive";
 
 const statusText = {
     running: "Animating",
@@ -23,10 +22,9 @@ export class Info {
     printer: Text;
     status: Text;
 
-    constructor(canvas: Canvas) {
-        this.Svg = canvas.Svg;
+    constructor(Svg: SvgElement, margin: number) {
+        this.Svg = Svg;
         const height = this.Svg.viewbox().height;
-        const margin = canvas.$Svg.margin;
 
         const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
         const body = this.Svg.text(NBSP)

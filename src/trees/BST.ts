@@ -1,10 +1,11 @@
 import { Text } from "@svgdotjs/svg.js";
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare, parseValues } from "../../src/helpers";
-import { TextCircle } from "../../src/objects/text-circle";
-import { BSTToolbar } from "../../src/toolbars/BST-toolbar";
-import { BinaryDir, BinaryNode } from "../objects/binary-node";
-import { HighlightCircle } from "../objects/highlight-circle";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { TextCircle } from "~/objects/text-circle";
+import { BSTToolbar } from "~/toolbars/BST-toolbar";
 
 export const BSTMessages = {
     general: {
@@ -55,11 +56,14 @@ export const BSTMessages = {
     },
 };
 
-export class BST extends Engine {
+export class BST<Node extends BinaryNode = BinaryNode>
+    extends Engine
+    implements Collection
+{
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
-    treeRoot: BinaryNode | null = null;
-    toolbar!: BSTToolbar; // ! Can be used because this.getToolbar is called in the constructor of Engine
+    treeRoot: Node | null = null;
+    toolbar: BSTToolbar;
 
     constructor(containerSelector: string) {
         super(containerSelector);
@@ -79,7 +83,6 @@ export class BST extends Engine {
 
         await this.state.runWhileResetting(async () => {
             if (this.initialValues) {
-                // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
                 await this.insert(...this.initialValues);
             }
         });
@@ -132,15 +135,21 @@ export class BST extends Engine {
         return this;
     }
 
-    async insert(...values: string[]): Promise<void> {
+    async insert(...values: (string | number)[]): Promise<void> {
         for (const val of values) {
             await this.insertOne(val);
         }
     }
 
-    async find(value: string | number): Promise<{
+    async find(...values: (string | number)[]): Promise<void> {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: string | number): Promise<{
         success: boolean;
-        node: BinaryNode | null;
+        node: Node | null;
     }> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
@@ -165,8 +174,8 @@ export class BST extends Engine {
             );
         }
 
-        let parent: BinaryNode = this.treeRoot;
-        let node: BinaryNode | null = this.treeRoot;
+        let parent: Node = this.treeRoot;
+        let node: Node | null = this.treeRoot;
         const pointer = this.canvas.Svg.put(new HighlightCircle()).init(
             this.treeRoot.cx(),
             this.treeRoot.cy(),
@@ -203,12 +212,13 @@ export class BST extends Engine {
         return { success: false, node: parent };
     }
 
-    async insertOne(value: string): Promise<{
+    async insertOne(value: string | number): Promise<{
         success: boolean;
-        node: BinaryNode | null;
+        node: Node | null;
     }> {
+        value = String(value); //TODO: Check if this can be handled better
         if (!this.treeRoot) {
-            this.treeRoot = this.newNode(value);
+            this.treeRoot = this.newNode(value) as Node;
             await this.pause("insert.newroot", value);
             this.resizeTree();
             await this.pause(undefined);
@@ -224,7 +234,7 @@ export class BST extends Engine {
             return { success: false, node: found.node };
         }
 
-        const child = this.newNode(value);
+        const child = this.newNode(value) as Node;
         const cmp = compare(value, found.node.getText());
         const direction = cmp < 0 ? "left" : "right";
 
@@ -241,11 +251,17 @@ export class BST extends Engine {
         return { success: true, node: child };
     }
 
+    async delete(...values: (string | number)[]) {
+        for (const val of values) {
+            await this.deleteOne(val);
+        }
+    }
+
     // TODO: update type with separate for success true and false
-    async delete(value: string | number): Promise<{
+    async deleteOne(value: string | number): Promise<{
         success: boolean;
         direction: BinaryDir | null;
-        parent: BinaryNode | null;
+        parent: Node | null;
     } | null> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
@@ -268,8 +284,8 @@ export class BST extends Engine {
         return await this.deleteHelper(found.node);
     }
 
-    async deleteHelper(node: BinaryNode) {
-        if (!(node.getLeft() && node.getRight())) {
+    async deleteHelper(node: Node) {
+        if (!(node?.getLeft() && node?.getRight())) {
             return await this.deleteNode(node);
         }
 
@@ -329,10 +345,10 @@ export class BST extends Engine {
         return await this.deleteNode(predecessor);
     }
 
-    async deleteNode(node: BinaryNode): Promise<{
+    async deleteNode(node: Node): Promise<{
         success: true;
         direction: BinaryDir | null;
-        parent: BinaryNode | null;
+        parent: Node | null;
     }> {
         // The node will NOT have two children - this has been taken care of by deleteHelper
         if (node.getLeft() && node.getRight()) {
@@ -366,7 +382,7 @@ export class BST extends Engine {
             node.setHighlight(false);
 
             if (child === parent.getLeft()?.getLeft()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
                     this.canvas.getAnimationSpeed()
@@ -374,7 +390,7 @@ export class BST extends Engine {
             }
 
             if (child === parent.getRight()?.getRight()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
                     this.canvas.getAnimationSpeed()
@@ -433,7 +449,7 @@ export class BST extends Engine {
     }
 
     async printHelper(
-        node: BinaryNode,
+        node: Node,
         pointer: HighlightCircle,
         printed: Text[]
     ): Promise<void> {
@@ -492,10 +508,7 @@ export class BST extends Engine {
         // This is implemented by, e.g., AVL trees
     }
 
-    async doubleRotate<Node extends BinaryNode>(
-        firstDir: BinaryDir,
-        node: Node
-    ): Promise<Node> {
+    async doubleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
 
@@ -508,10 +521,7 @@ export class BST extends Engine {
         return await this.singleRotate(firstDir, node);
     }
 
-    async singleRotate<Node extends BinaryNode>(
-        firstDir: BinaryDir,
-        node: Node
-    ): Promise<Node> {
+    async singleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
         // Note: 'left' and 'right' are variables that can have values "left" or "right"!
         // So, if left==="right", then we rotate right.
         const secondDir = firstDir === "left" ? "right" : "left";

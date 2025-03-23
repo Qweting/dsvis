@@ -1,16 +1,18 @@
 import { Element } from "@svgdotjs/svg.js";
-import { Cookies } from "./cookies";
-import { Debug } from "./debug";
-import { EventListeners } from "./event-listeners";
-import { parseValues } from "./helpers";
-import { Info } from "./info";
-import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Cookies } from "~/cookies";
+import { Debugger } from "~/debugger";
+import { EventListeners } from "~/event-listeners";
+import { isValidReason, parseValues } from "~/helpers";
+import { Info } from "~/info";
+import { State } from "~/state";
+import { EngineToolbar } from "~/toolbars/engine-toolbar";
 import { Canvas } from "./canvas";
 
-type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
+export type Resolve = (value: unknown) => void;
+export type Reject = (props: RejectReason) => void;
+export type RejectReason = { until: number; running?: boolean };
+
+export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
 
 export interface MessagesObject {
     [key: string]:
@@ -20,6 +22,12 @@ export interface MessagesObject {
         | MessagesObject;
 }
 
+type Action = {
+    method: (...args: unknown[]) => Promise<void>;
+    args: unknown[];
+    stepCount: number;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
@@ -27,29 +35,26 @@ export interface MessagesObject {
 export const NBSP = "\u00A0";
 
 export class Engine {
-    container: HTMLElement;
     canvas: Canvas;
 
     messages: MessagesObject = {};
 
     cookies: Cookies;
+    container: HTMLElement;
     toolbar: EngineToolbar;
-    actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
-    currentAction: number = 0; // was = null before, this should work better
-    currentStep: number = 0; // was = null before, this should work better
-    debug: Debug;
-
+    actions: Action[] = [];
+    currentAction: number = 0;
+    currentStep: number = 0;
+    debugger: Debugger;
     state: State;
-
     info: Info;
-
     eventListeners: EventListeners;
 
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
 
     constructor(containerSelector: string) {
-        this.debug = new Debug();
+        this.debugger = new Debugger();
 
         const container =
             document.querySelector<HTMLElement>(containerSelector);
@@ -67,7 +72,7 @@ export class Engine {
                 objectSize: this.toolbar.objectSize,
                 animationSpeed: this.toolbar.animationSpeed,
             },
-            this.debug
+            this.debugger
         );
 
         const svgContainer = this.container.querySelector("svg");
@@ -76,8 +81,11 @@ export class Engine {
         }
 
         this.canvas = new Canvas(svgContainer, this);
+        if (this.debugger.isEnabled()) {
+            this.canvas.Svg.addClass("debug");
+        }
 
-        this.info = new Info(this.canvas);
+        this.info = new Info(this.canvas.Svg, this.canvas.$Svg.margin);
         this.eventListeners = new EventListeners(this);
     }
 
@@ -88,14 +96,12 @@ export class Engine {
     }
 
     initToolbar(): void {
-        this.toolbar.animationSpeed.addEventListener("change", () =>
-            this.cookies.save()
-        );
+        /* Allow subclasses to use this function */
+        // TODO: Move all these into toolbar class
     }
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        this.cookies.load();
         await this.reset();
     }
 
@@ -114,7 +120,9 @@ export class Engine {
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {}
+    async resetAlgorithm(): Promise<void> {
+        /* Allow subclasses to use this function */
+    }
 
     setIdleTitle(): void {
         this.info.setTitle("Select an action from the menu above");
@@ -133,18 +141,21 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
-        this.cookies.save();
+        // Clear all currently running listeners
         this.eventListeners.removeAllListeners();
         if (this.constructor === Engine) {
+            // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
             return;
         }
+
         this.eventListeners.addListener(
             this.toolbar.toggleRunner,
             "click",
             () => this.state.toggleRunner()
         );
         if (isRunning) {
+            // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
             this.info.setStatus("paused");
             return;
@@ -160,12 +171,13 @@ export class Engine {
     // Executing the actions
 
     async submit(
-        method: string,
+        method: SubmitFunction,
         field: HTMLInputElement | null
     ): Promise<boolean> {
+        let rawValue: string = "";
         try {
-            let rawValue: string = "";
-            if (field) {
+            if (field instanceof HTMLInputElement) {
+                // Read value from input and reset to empty string
                 rawValue = field.value;
                 field.value = "";
             }
@@ -180,58 +192,60 @@ export class Engine {
         return false;
     }
 
-    async execute(
-        operation: string,
-        args: unknown[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async execute<T extends (...args: any[]) => Promise<void>>(
+        method: T,
+        args: Parameters<T>,
         until = 0
     ): Promise<void> {
         await this.reset();
-        this.actions.push({ oper: operation, args: args, nsteps: until });
-        this.debug.log(
-            `EXEC ${until}: ${operation} ${args.join(", ")}, ${JSON.stringify(
+        this.actions.push({ method, args, stepCount: until });
+        this.debugger.log(
+            `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
                 this.actions
             )}`
         );
 
         try {
             await this.runActionsLoop();
-            this.actions[this.actions.length - 1].nsteps =
-                this.currentStep || 0; // TODO: Not sure if this is correct
-            this.debug.log(
+            this.actions[this.actions.length - 1].stepCount = this.currentStep;
+            this.debugger.log(
                 `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
             );
 
             this.resetListeners(false);
         } catch (reason) {
-            if (
-                typeof reason !== "object" ||
-                reason === null || // Added line to help checks below
-                "until" in reason === false || // Added line to help checks below
-                typeof reason.until !== "number" // Changed to be able to assign to until which is a number
-            ) {
+            // Check if reason is thrown from async listener
+            if (!isValidReason(reason)) {
+                // Error not thrown by async handlers. Log it and exit
                 console.error(reason);
                 this.resetListeners(false);
                 return;
             }
-            this.actions.pop();
-            if ("running" in reason && typeof reason.running === "boolean") {
+
+            // If optional running argument is provided set running state
+            if (reason.running !== undefined) {
                 this.state.setRunning(reason.running);
             }
+            this.actions.pop();
             until = reason.until;
-            this.debug.log(
+            this.debugger.log(
                 `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
                     this.actions
                 )}`
             );
 
+            // until is smaller or equal to 0 meaning the previous action should be run if it exists
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                operation = action.oper;
-                args = action.args;
-                until = action.nsteps;
+                method = action.method as T;
+                args = action.args as Parameters<T>;
+                until = action.stepCount;
             }
+
+            // Re execute if there is something to run until, otherwise reset
             if (until > 0) {
-                this.execute(operation, args, until);
+                this.execute(method, args, until);
             } else {
                 this.reset();
             }
@@ -239,33 +253,30 @@ export class Engine {
     }
 
     async runActionsLoop(): Promise<void> {
+        // Run through all our actions
         for (let nAction = 0; nAction < this.actions.length; nAction++) {
             this.resetListeners(true);
             const action = this.actions[nAction];
             this.currentAction = nAction;
             this.currentStep = 0;
+
+            // Get and set title for this action
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
-            const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
-            let message = messageArr.join(" ");
-            message = `${
-                message.charAt(0).toUpperCase() + message.substring(1)
-            } ${action.args.join(", ")}`;
-            this.debug.log(
-                `CALL ${nAction}: ${message}, ${JSON.stringify(this.actions)}`
+            const methodNameArr =
+                action.method.name.match(/[A-Za-z][a-z]*/g) || [];
+            const methodName = methodNameArr
+                .map((str) => str.charAt(0).toUpperCase() + str.substring(1))
+                .join(" ");
+            const title = `${methodName} ${action.args.join(", ")}`;
+            this.debugger.log(
+                `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
             );
 
-            this.info.setTitle(message);
+            this.info.setTitle(methodName);
             await this.pause("");
-            if (
-                !(
-                    action.oper in this &&
-                    typeof this[action.oper as keyof Engine] === "function"
-                )
-            ) {
-                throw new Error("Cannot call action that does not exist");
-            }
-            // @ts-expect-error Have checked that it exists and that is a function. Only thing would be to validate input. Better to do in each function in any case
-            await this[action.oper](...action.args); // Kommer bli knölig att lösa
+
+            // Bind this to method and call it
+            await action.method.apply(this, action.args);
         }
     }
 
@@ -273,39 +284,44 @@ export class Engine {
         message: string | undefined,
         ...args: unknown[]
     ): Promise<unknown> | null {
-        const title = this.getMessage(message, ...args);
-        this.debug.log(
+        const body = this.getMessage(message, ...args);
+        this.debugger.log(
             `${
                 this.currentStep
-            }. Doing: ${title} (running: ${this.state.isRunning()}), ${JSON.stringify(
+            }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
                 this.actions
             )}`
         );
 
+        // If resetting no pause should be run
         if (this.state.isResetting()) {
             return null;
         }
-        if (title !== undefined) {
-            this.info.setBody(title);
+
+        if (body !== undefined) {
+            this.info.setBody(body);
         }
+
         return new Promise((resolve, reject) => {
             const action = this.actions[this.currentAction];
-            if (action.nsteps != null && this.currentStep < action.nsteps) {
+
+            // Check if step has been executed previously (action.stepCount = 0 if first time and has a value otherwise)
+            if (this.currentStep < action.stepCount) {
                 this.fastForward(resolve, reject);
-            } else {
-                let runnerTimer: NodeJS.Timeout | undefined = undefined;
-                this.eventListeners.addAsyncListeners(
-                    resolve,
-                    reject,
-                    runnerTimer
+                return;
+            }
+
+            // Add async listeners that handle button presses while paused
+            let runnerTimer: NodeJS.Timeout | undefined = undefined;
+            this.eventListeners.addAsyncListeners(resolve, reject, runnerTimer);
+
+            // If running, automatically step forward after waiting animation speed
+            if (this.state.isRunning()) {
+                this.info.setStatus("running");
+                runnerTimer = setTimeout(
+                    () => this.stepForward(resolve, reject),
+                    this.canvas.getAnimationSpeed() * 1.1
                 );
-                if (this.state.isRunning()) {
-                    this.info.setStatus("running");
-                    runnerTimer = setTimeout(
-                        () => this.stepForward(resolve, reject),
-                        this.canvas.getAnimationSpeed() * 1.1
-                    );
-                }
             }
         });
     }
@@ -321,10 +337,11 @@ export class Engine {
             return undefined;
         }
 
+        // Assume that message is a key to access this.messages
         let title: MessagesObject[string] = this.messages;
-
         const keys = message.split(".");
         if (!(keys[0] in title)) {
+            // Assumption was wrong returning the original message and the extra arguments
             return [message, ...args].join("\n");
         }
         for (const key of keys) {
@@ -334,6 +351,8 @@ export class Engine {
             }
             title = title[key];
         }
+
+        // Title is now hopefully a string or function from this.messages
         if (typeof title === "function") {
             title = title(...args);
         }
@@ -341,9 +360,7 @@ export class Engine {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        if (title === "") {
-            title = NBSP;
-        }
+
         return title;
     }
 
@@ -355,12 +372,13 @@ export class Engine {
 
     fastForward(resolve: Resolve, reject: Reject): void {
         const action = this.actions[this.currentAction];
-        if (this.currentStep >= action.nsteps) {
-            action.nsteps = this.currentStep;
+        if (this.currentStep >= action.stepCount) {
+            action.stepCount = this.currentStep;
         }
         this.currentStep++;
         this.state.setAnimating(false);
-        if (this.debug.isEnabled()) {
+        // If debugging is enabled then add a small delay
+        if (this.debugger.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);

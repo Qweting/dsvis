@@ -1,11 +1,24 @@
-import { Engine } from "./engine";
-import { BinaryHeap } from "./heaps/BinaryHeap";
-import { addReturnSubmit } from "./helpers";
-import { PrioQueueToolbar } from "./toolbars/prioqueue-toolbar";
+import { Engine, SubmitFunction } from "~/engine";
+import { BinaryHeap } from "~/heaps/BinaryHeap";
+import { addReturnSubmit } from "~/helpers";
+import { PrioQueueToolbar } from "~/toolbars/prioqueue-toolbar";
+
+export interface Prioqueue {
+    insert: SubmitFunction;
+    deleteMin: SubmitFunction;
+}
+
+type PrioqueueEngine = Engine & Prioqueue;
 
 const PRIOQUEUES = {
     BinaryHeap: BinaryHeap,
-} as const;
+} as const satisfies Record<string, new (...args: never[]) => PrioqueueEngine>;
+
+function isPrioqueueEngine(
+    engine: Engine | PrioqueueEngine
+): engine is PrioqueueEngine {
+    return engine instanceof Engine && engine.constructor !== Engine;
+}
 
 initialisePrioQueues("#prioqueuesContainer");
 
@@ -39,7 +52,7 @@ function initialisePrioQueues(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (PQEngine.debug.isEnabled()) {
+        if (PQEngine.debugger.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");
@@ -52,19 +65,27 @@ function initialisePrioQueues(containerID: string) {
 
     const toolbar = new PrioQueueToolbar(PQEngine.container);
 
+    if (!isPrioqueueEngine(PQEngine)) {
+        return;
+    }
+
     toolbar.insertSelect.addEventListener("change", () => {
         toolbar.insertField.value = toolbar.insertSelect.value;
         toolbar.insertSelect.value = "";
     });
+
     addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
-        PQEngine.submit("insert", toolbar.insertField)
+        PQEngine.submit(PQEngine.insert, toolbar.insertField)
     );
+
     toolbar.insertSubmit.addEventListener("click", () =>
-        PQEngine.submit("insert", toolbar.insertField)
+        PQEngine.submit(PQEngine.insert, toolbar.insertField)
     );
+
     toolbar.deleteSubmit.addEventListener("click", () =>
-        PQEngine.submit("deleteMin", null)
+        PQEngine.submit(PQEngine.deleteMin, null)
     );
+
     toolbar.clearSubmit.addEventListener("click", () =>
         PQEngine.confirmResetAll()
     );

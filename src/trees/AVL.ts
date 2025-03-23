@@ -1,11 +1,12 @@
-import { MessagesObject } from "../../src/engine";
-import { updateDefault } from "../../src/helpers";
-import { AVLNode } from "../../src/objects/avl-node";
-import { BinaryDir } from "../../src/objects/binary-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { updateDefault } from "~/helpers";
+import { AVLNode } from "~/objects/avl-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
-export const AVLmessages = {
+export const AVLMessages = {
     node: {
         updateHeight: "Update node heights",
         unbalanced: "Node is unbalanced!",
@@ -13,9 +14,8 @@ export const AVLmessages = {
     },
 };
 
-export class AVL extends BST {
-    messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
-    treeRoot: AVLNode | null = null;
+export class AVL extends BST<AVLNode> implements Collection {
+    messages: MessagesObject = updateDefault(AVLMessages, BSTMessages);
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
@@ -32,14 +32,8 @@ export class AVL extends BST {
         return node ? node.getHeight() : 0;
     }
 
-    async insertOne(value: string): Promise<{
-        success: boolean;
-        node: AVLNode | null;
-    }> {
-        const result = (await super.insertOne(value)) as {
-            success: boolean;
-            node: AVLNode | null;
-        };
+    async insertOne(value: string) {
+        const result = await super.insertOne(value);
 
         if (result.success && result.node) {
             result.node.updateHeightPosition();
@@ -50,12 +44,8 @@ export class AVL extends BST {
         return result;
     }
 
-    async delete(value: string | number) {
-        const result = (await super.delete(value)) as {
-            success: boolean;
-            direction: BinaryDir | null;
-            parent: AVLNode | null;
-        } | null;
+    async deleteOne(value: string | number) {
+        const result = await super.deleteOne(value);
 
         if (result && result.success) {
             if (result.parent) {
@@ -63,6 +53,7 @@ export class AVL extends BST {
             }
             await this.updateHeightPositions();
         }
+
         return result;
     }
 
@@ -76,9 +67,9 @@ export class AVL extends BST {
 
     async updateHeights(
         startNode: AVLNode,
-        fromchild: BinaryDir | undefined | null
+        fromChild: BinaryDir | undefined | null
     ) {
-        const child = (fromchild && startNode.getChild(fromchild)) || startNode;
+        const child = (fromChild && startNode.getChild(fromChild)) || startNode;
         this.pointer = this.canvas.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),

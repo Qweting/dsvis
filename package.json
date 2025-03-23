@@ -4,7 +4,8 @@
   "description": "- **[Try out the library here!](https://chalmersgu-data-structure-courses.github.io/dsvis/)**",
   "main": "index.js",
   "dependencies": {
-    "@svgdotjs/svg.js": "^3.2.4"
+    "@svgdotjs/svg.js": "^3.2.4",
+    "tsconfig-paths-webpack-plugin": "^4.2.0"
   },
   "devDependencies": {
     "eslint": "^9.20.1",

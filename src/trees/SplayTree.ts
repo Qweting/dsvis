@@ -1,6 +1,7 @@
-import { MessagesObject } from "../../src/engine";
-import { compare, updateDefault } from "../../src/helpers";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { compare, updateDefault } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
 const SplayTreeMessages = {
@@ -19,10 +20,10 @@ const SplayTreeMessages = {
     },
 };
 
-export class SplayTree extends BST {
+export class SplayTree extends BST implements Collection {
     messages: MessagesObject = updateDefault(SplayTreeMessages, BSTMessages);
-    async find(value: string | number) {
-        const found = await super.find(value);
+    async findOne(value: string | number) {
+        const found = await super.findOne(value);
         if (found?.node) {
             await this.splayUp(found.node);
         }
@@ -40,7 +41,7 @@ export class SplayTree extends BST {
         return result;
     }
 
-    async delete(value: string): Promise<{
+    async deleteOne(value: string): Promise<{
         success: boolean;
         direction: BinaryDir | null;
         parent: BinaryNode | null;
@@ -49,7 +50,7 @@ export class SplayTree extends BST {
             return { success: false, direction: null, parent: null };
         }
 
-        await this.find(value);
+        await this.findOne(value);
         if (compare(value, this.treeRoot?.getText()) !== 0) {
             await this.pause("delete.notexists", value);
             return { success: false, parent: null, direction: null };
