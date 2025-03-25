@@ -19,7 +19,7 @@ export const LinkedListMessages = {
         found: (element: string | number) => `Found ${element}`,
         notfound: (element: string | number) => `Did not find ${element}`,
         look: (NextNode: string | number) => `Look into ${NextNode}`,
-        nonExsistent: (element: string | number) => `Element ${element} does not exist`,
+        nonExistent: (element: string | number) => `Element ${element} does not exist`,
     },
     insert: {
         element: (element: string | number) => `Insert element: ${element}`,
@@ -48,6 +48,11 @@ export class LinkedListAnim extends Engine implements Collection {
     nodeArray: [LinkedNode, LinkedConnection | null][] = []; // Array to store the nodes and connections
     nodeDimensions: [number, number] = [this.getObjectSize() * 2, this.getObjectSize()]; // Dimensions for the nodes
 
+    cols: number = Math.floor((this.$Svg.width / this.nodeDimensions[0]/2)); //number of columns
+    rows: number = Math.ceil((this.$Svg.height / this.nodeDimensions[1])/2); //number of rows based on size and height of the canvas
+
+
+
     initialise(initialValues: string[] | null = null): void {
         /* this.initialValues = ["T", "E", "S", "T",
                               "T", "E", "S", "T",
@@ -58,8 +63,8 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
         // this.initialValues = ["A", "B", "D", "E", "F"];
-        this.initialValues = ["A", "B"];
-        // this.initialValues = initialValues;
+        // this.initialValues = ["A", "B"];
+        this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
 
@@ -155,7 +160,6 @@ export class LinkedListAnim extends Engine implements Collection {
             const element = this.nodeArray[x][0].value;
             if (element === value) { //check if the current node is the value we are looking for
                 this.highlight(this.nodeArray[x][0], true);
-                await this.pause(foundText,element); //element is found 
                 isFound = true; //set the flag to true
                 index = x;
                 this.highlight(this.nodeArray[x][0], false);
@@ -164,15 +168,17 @@ export class LinkedListAnim extends Engine implements Collection {
                 this.highlight(this.nodeArray[x][0], true);
                 await this.pause(notFoundText, value); //not found 
                 this.highlight(this.nodeArray[x][0], false);
+                //TODO
                 await this.pause(lookText, element); //look into the next node, but it doesn't. It should but doesn't. We need to check x+ 1, how10=!?
             }
         }
-        
-        await this.pause(nonExistentText, value); //element is not found
+
+        await this.pause(isFound ? foundText : nonExistentText, value);
+
+
     }
 
     async print(): Promise<void> {
-        
     }
 
     async makeConnections(node: LinkedNode): Promise<LinkedConnection | null> {
@@ -210,11 +216,11 @@ export class LinkedListAnim extends Engine implements Collection {
         const row = Math.floor(this.nodeArray.length / maxNodesPerRow);
         const positionInRow = this.nodeArray.length % maxNodesPerRow;
 
-        const y = this.TOP_MARGIN + row * (nodeHeight + this.getNodeSpacing());
+        const y = this.TOP_MARGIN + row * (nodeHeight + this.getNodeSpacing()) + 15; //placement position for the node, y-axis + 15 so it is easier to see the node
 
         let x: number;
         if (row % 2 === 0) {
-            x = sideMargin + positionInRow * (nodeWidth + this.getNodeSpacing());
+            x = sideMargin + positionInRow * (nodeWidth + this.getNodeSpacing()); //placement position for the node, x-axis
         } else {
             x = sideMargin + (maxNodesPerRow - 1 - positionInRow) * (nodeWidth + this.getNodeSpacing());
             mirrored = true;
@@ -236,3 +242,4 @@ export class LinkedListAnim extends Engine implements Collection {
         return (animate ? this.$Svg.animationSpeed : 0);
     }
 }
+

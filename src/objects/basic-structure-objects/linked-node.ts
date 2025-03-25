@@ -29,6 +29,7 @@ export class LinkedNode extends G {
         this.textElement = this.text(String(value)) //initializing the text element for current node (value)
             .font({ size: this.nodeHeight * 0.6 })
             .center(this.elementRect.cx() + 15, this.elementRect.cy()); // + 15 to center the text in the rectangle
+
     }
 
     // mirrors the node so that elementRect and nextNodeRect are swapped
