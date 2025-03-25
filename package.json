@@ -7,19 +7,27 @@
     "@svgdotjs/svg.js": "^3.2.4"
   },
   "devDependencies": {
+    "css-loader": "^7.1.2",
     "eslint": "^9.20.1",
+    "favicons": "^7.2.0",
+    "favicons-webpack-plugin": "^6.0.1",
     "globals": "^15.15.0",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
     "ts-loader": "^9.5.2",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.0",
     "webpack": "^5.97.1",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.0"
+    "webpack-dev-server": "^5.2.0",
+    "webpack-remove-empty-scripts": "^1.0.4"
   },
   "scripts": {
-    "dev": "webpack --watch --mode development",
-    "build": "webpack --mode production",
-    "serve": "webpack serve"
+    "build": "webpack --mode production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "serve": "webpack serve",
+    "dev": "npm run serve"
   },
   "author": "",
   "license": "ISC"
