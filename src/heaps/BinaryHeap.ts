@@ -110,12 +110,14 @@ export class BinaryHeap extends Engine implements Prioqueue {
                 this.canvas.getStrokeWidth()
             )
         ).init(kNode.cx(), kNode.cy());
-        jLabel.setCenter(
+        this.canvas.setCenter(
+            jLabel,
             kLabel.cx(),
             kLabel.cy(),
             this.canvas.getAnimationSpeed()
         );
-        kLabel.setCenter(
+        this.canvas.setCenter(
+            kLabel,
             jLabel.cx(),
             jLabel.cy(),
             this.canvas.getAnimationSpeed()
@@ -165,7 +167,8 @@ export class BinaryHeap extends Engine implements Prioqueue {
         this.treeNodes[currentIndex] = treeNode;
         await this.pause("insert.value", value);
 
-        arrayLabel.setCenter(
+        this.canvas.setCenter(
+            arrayLabel,
             this.heapArray.getCX(currentIndex),
             this.heapArray.cy(),
             this.canvas.getAnimationSpeed()
@@ -191,7 +194,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
         this.heapSize++;
 
         while (currentIndex > 0) {
-            treeNode.setHighlight(true);
+            this.canvas.setHighlight(treeNode, true);
             await this.pause("insert.shiftUp");
             parentIndex = Math.floor((currentIndex - 1) / 2);
             parentNode = this.treeNodes[parentIndex];
@@ -205,7 +208,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
                 await this.pause("insert.stopShift", parentValue);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(parentIndex, false);
-                treeNode.setHighlight(false);
+                this.canvas.setHighlight(treeNode, false);
                 parentNode.setChildHighlight(direction, false);
                 break;
             }
@@ -218,13 +221,13 @@ export class BinaryHeap extends Engine implements Prioqueue {
                 parentValue
             );
             this.heapArray.setIndexHighlight(currentIndex, false);
-            treeNode.setHighlight(false);
+            this.canvas.setHighlight(treeNode, false);
             parentNode.setChildHighlight(direction, false);
             currentIndex = parentIndex;
             treeNode = parentNode;
         }
         this.heapArray.setIndexHighlight(currentIndex, false);
-        treeNode.setHighlight(false);
+        this.canvas.setHighlight(treeNode, false);
     }
 
     async deleteMin() {
@@ -257,7 +260,8 @@ export class BinaryHeap extends Engine implements Prioqueue {
         if (this.heapSize === 0) {
             await this.pause("delete.root", minValue);
             this.heapArray.setValue(0, "");
-            arrayLabel.setCenter(
+            this.canvas.setCenter(
+                arrayLabel,
                 ...this.canvas.getNodeStart(),
                 this.canvas.getAnimationSpeed()
             );
@@ -283,11 +287,13 @@ export class BinaryHeap extends Engine implements Prioqueue {
         await this.pause("remove.minValue", minValue);
         this.heapArray.setValue(0, "");
         this.treeRoot.setText(null);
-        arrayLabel.setCenter(
+        this.canvas.setCenter(
+            arrayLabel,
             ...this.canvas.getNodeStart(),
             this.canvas.getAnimationSpeed()
         );
-        treeLabel.setCenter(
+        this.canvas.setCenter(
+            treeLabel,
             ...this.canvas.getNodeStart(),
             this.canvas.getAnimationSpeed()
         );
@@ -301,12 +307,12 @@ export class BinaryHeap extends Engine implements Prioqueue {
         let currentIndex = 0;
         let currentNode = this.treeNodes[currentIndex];
         while (currentIndex < this.heapSize) {
-            currentNode.setHighlight(true);
+            this.canvas.setHighlight(currentNode, true);
             this.heapArray.setIndexHighlight(currentIndex, true);
             let childIndex = currentIndex * 2 + 1;
             if (childIndex >= this.heapSize) {
                 await this.pause("finished");
-                currentNode.setHighlight(false);
+                this.canvas.setHighlight(currentNode, false);
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 break;
             }
@@ -326,7 +332,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
 
             this.heapArray.setIndexHighlight(childIndex, true);
             currentNode.setChildHighlight(direction, true);
-            childNode.setHighlight(true);
+            this.canvas.setHighlight(childNode, true);
 
             const cmp = compare(currentValue, childValue);
             if (cmp <= 0) {
@@ -334,7 +340,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
                 this.heapArray.setIndexHighlight(currentIndex, false);
                 this.heapArray.setIndexHighlight(childIndex, false);
                 currentNode.setChildHighlight(direction, false);
-                childNode.setHighlight(false);
+                this.canvas.setHighlight(childNode, false);
                 break;
             }
 
@@ -349,7 +355,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
             this.heapArray.setIndexHighlight(currentIndex, false);
             this.heapArray.setIndexHighlight(childIndex, false);
             currentNode.setChildHighlight(direction, false);
-            childNode.setHighlight(false);
+            this.canvas.setHighlight(childNode, false);
             currentIndex = childIndex;
             currentNode = childNode;
         }

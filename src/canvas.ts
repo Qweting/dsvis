@@ -1,3 +1,5 @@
+import { Runner } from "@svgdotjs/svg.js";
+import { Element } from "@svgdotjs/svg.js";
 import { Engine } from "~/engine";
 import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
@@ -79,5 +81,52 @@ export class Canvas {
             this.Svg.viewbox().width / 2,
             2 * this.$Svg.margin + this.getObjectSize() / 2,
         ];
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Helper functions (carried over from index.ts)
+
+    getHighlight(element: Element): boolean {
+        return element.hasClass("highlight");
+    }
+
+    setHighlight(element: Element, high: boolean | null): Element {
+        if (high == null) {
+            element.toggleClass("highlight");
+        } else if (high) {
+            element.addClass("highlight");
+        } else {
+            element.removeClass("highlight");
+        }
+        return element;
+    }
+
+    getCenter(element: Element): [number, number] {
+        return [element.cx(), element.cy()];
+    }
+
+    setCenter(
+        element: Element,
+        x: number,
+        y: number,
+        animationDuration: number = 0
+    ): Element | Runner {
+        return this.Svg.$engine
+            .animate(element, animationDuration > 0)
+            .center(x, y);
+    }
+
+    dmoveCenter(
+        element: Element,
+        dx: number,
+        dy: number,
+        animationDuration: number = 0
+    ): Element | Runner {
+        return this.setCenter(
+            element,
+            element.cx() + dx,
+            element.cy() + dy,
+            animationDuration
+        );
     }
 }

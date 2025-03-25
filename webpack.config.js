@@ -9,9 +9,9 @@ module.exports = (env, argv) => {
         mode: isDevelopment ? "development" : "production",
         devtool: isDevelopment ? "inline-source-map" : false,
         entry: {
-            collections: "./src/collections.ts",
+            // collections: "./src/collections.ts",
             prioqueues: "./src/prioqueues.ts",
-            "avl-quiz": "./src/quizzes/AVL-quiz.ts",
+            // "avl-quiz": "./src/quizzes/AVL-quiz.ts",
         },
         resolve: {
             extensions: [".ts", ".js"],
