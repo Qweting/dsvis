@@ -1,6 +1,4 @@
 import { Engine, SubmitFunction } from "~/engine";
-import { addReturnSubmit } from "~/helpers";
-import { CollectionToolbar } from "~/toolbars/collection-toolbar";
 import { AVL } from "~/trees/AVL";
 import { BST } from "~/trees/BST";
 import { BTree } from "~/trees/BTree";
@@ -21,10 +19,6 @@ const COLLECTIONS_CLASSES = {
     SplayTree: SplayTree,
     BTree: BTree,
 } as const satisfies Record<string, new (...args: never[]) => Collection>;
-
-function isCollection(engine: Engine | Collection): engine is Collection {
-    return engine instanceof Engine && engine.constructor !== Engine;
-}
 
 initialiseCollections("#collectionsContainer");
 
@@ -67,47 +61,4 @@ function initialiseCollections(containerID: string) {
         window.history.replaceState("", "", url);
         window.location.reload();
     });
-
-    const toolbar = new CollectionToolbar(CollectionEngine.container);
-
-    toolbar.insertSelect.addEventListener("change", () => {
-        toolbar.insertField.value = toolbar.insertSelect.value;
-        toolbar.insertSelect.value = "";
-    });
-
-    if (!isCollection(CollectionEngine)) {
-        return;
-    }
-
-    addReturnSubmit(toolbar.insertField, "ALPHANUM+", () =>
-        CollectionEngine.submit(CollectionEngine.insert, toolbar.insertField)
-    );
-
-    toolbar.insertSubmit.addEventListener("click", () => {
-        CollectionEngine.submit(CollectionEngine.insert, toolbar.insertField);
-    });
-
-    addReturnSubmit(toolbar.findField, "ALPHANUM", () =>
-        CollectionEngine.submit(CollectionEngine.find, toolbar.findField)
-    );
-
-    toolbar.findSubmit.addEventListener("click", () =>
-        CollectionEngine.submit(CollectionEngine.find, toolbar.findField)
-    );
-
-    addReturnSubmit(toolbar.deleteField, "ALPHANUM", () =>
-        CollectionEngine.submit(CollectionEngine.delete, toolbar.deleteField)
-    );
-
-    toolbar.deleteSubmit.addEventListener("click", () =>
-        CollectionEngine.submit(CollectionEngine.delete, toolbar.deleteField)
-    );
-
-    toolbar.printSubmit.addEventListener("click", () =>
-        CollectionEngine.submit(CollectionEngine.print, toolbar.printSubmit)
-    );
-
-    toolbar.clearSubmit.addEventListener("click", () =>
-        CollectionEngine.confirmResetAll()
-    );
 }
