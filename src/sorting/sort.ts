@@ -36,8 +36,9 @@ export class Sort extends Engine {
                 yRoot + this.$Svg.margin * 4
             )
         );
-        if (this.sortArray && Number(this.sortArray.x()) < this.$Svg.margin)
+        if (this.sortArray && Number(this.sortArray.x()) < this.$Svg.margin) {
             this.sortArray.x(this.$Svg.margin);
+        }
         if (this.initialValues) {
             this.state.resetting = true;
             await this.insert(...this.initialValues);
@@ -52,7 +53,9 @@ export class Sort extends Engine {
                 this.getTreeRoot()[0],
                 this.getTreeRoot()[1] + this.$Svg.margin * 4
             );
-            for (const val of values) await this.insertOne(val);
+            for (const val of values) {
+                await this.insertOne(val);
+            }
         }
     }
 

@@ -1,5 +1,5 @@
-import { Sort } from './sort';
-
+import { MessagesObject, compare } from "src/engine";
+import { Sort } from "./sort";
 
 export const SelectionSortMessages = {
     general: {
@@ -8,25 +8,24 @@ export const SelectionSortMessages = {
         finished: "Finished",
     },
     insert: {
-        value: (value : string) => `Insert value: ${value}`,
+        value: (value: string) => `Insert value: ${value}`,
     },
     sort: {
-        compare: (a : string, b : string) => `Compare ${a} and ${b}`,
-        swap: (a : string, b : string) => `Swap ${a} and ${b}`,
-        foundNewMin:(a : string) => `Found a smaller value ${a}`,
+        compare: (a: string, b: string) => `Compare ${a} and ${b}`,
+        swap: (a: string, b: string) => `Swap ${a} and ${b}`,
+        foundNewMin: (a: string) => `Found a smaller value ${a}`,
     },
 };
 
-
 export class SelectionSort extends Sort {
-
+    messages: MessagesObject = SelectionSortMessages;
     async sort() {
         if (this.sortArray === null) {
             throw new Error("Sort array not initialised");
         }
         let sortSize = this.sortArray.getSize();
         if (sortSize <= 1) {
-            await this.pause('general.empty');
+            await this.pause("general.empty");
             return;
         }
 
@@ -35,23 +34,33 @@ export class SelectionSort extends Sort {
 
             // Find the index of the minimum element in the unsorted part of the array
             for (let j = i + 1; j < sortSize; j++) {
-
                 // Highlight the current element and the minimum element
                 this.sortArray.setBlueHighlight(j, true);
                 this.sortArray.setBlueHighlight(minIndex, true);
 
                 // Message: Compare the current element with the minimum element
-                await this.pause('sort.compare', this.sortArray.getValue(j), this.sortArray.getValue(minIndex));
+                await this.pause(
+                    "sort.compare",
+                    this.sortArray.getValue(j),
+                    this.sortArray.getValue(minIndex)
+                );
 
-
-                if (this.sortArray.getValue(j) < this.sortArray.getValue(minIndex)) {
+                if (
+                    compare(
+                        this.sortArray.getValue(j),
+                        this.sortArray.getValue(minIndex)
+                    ) < 0
+                ) {
                     // Unhighlight the previous minimum element
                     this.sortArray.setBlueHighlight(minIndex, false);
 
                     minIndex = j;
 
                     // Message: Found a new minimum element
-                    await this.pause('sort.foundNewMin', this.sortArray.getValue(minIndex));
+                    await this.pause(
+                        "sort.foundNewMin",
+                        this.sortArray.getValue(minIndex)
+                    );
                 } else {
                     // Unhighlight the current element
                     this.sortArray.setBlueHighlight(j, false);
@@ -62,22 +71,24 @@ export class SelectionSort extends Sort {
             }
             // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {
-                await this.swap(this.sortArray, i, minIndex, 'sort.swap', this.sortArray.getValue(i), this.sortArray.getValue(minIndex));
+                await this.swap(
+                    this.sortArray,
+                    i,
+                    minIndex,
+                    "sort.swap",
+                    this.sortArray.getValue(i),
+                    this.sortArray.getValue(minIndex)
+                );
             }
             // Highlight the sorted part of the array
             this.sortArray.setIndexHighlight(i, true);
         }
-        this.sortArray.setIndexHighlight(sortSize-1, true);
-        await this.pause('general.finished');
+        this.sortArray.setIndexHighlight(sortSize - 1, true);
+        await this.pause("general.finished");
 
         // Reset the highlights
         for (let i = 0; i < sortSize; i++) {
             this.sortArray.setIndexHighlight(i, false);
         }
     }
-
-    
-
-};
-
-    
+}
