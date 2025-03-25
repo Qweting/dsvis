@@ -3,37 +3,24 @@
 <head>
 <meta charset="utf-8"/>
 <link rel="stylesheet" href="dsvis.css">
-<script type="text/javascript" src="lib/svg.min.js"></script>
-<script type="text/javascript" src="src/engine.js"></script>
-<script type="text/javascript" src="src/objects/basicobjects.js"></script>
-<script type="text/javascript" src="src/objects/btreenode.js"></script>
-<script type="text/javascript" src="src/collections.js"></script>
-<script type="text/javascript" src="src/trees/BST.js"></script>
-<script type="text/javascript" src="src/trees/AVL.js"></script>
-<script type="text/javascript" src="src/trees/RedBlack.js"></script>
-<script type="text/javascript" src="src/trees/SplayTree.js"></script>
-<script type="text/javascript" src="src/trees/BTree.js"></script>
+<script type="text/javascript" src="js/prioqueues.js" defer></script>
 </head>
 
-<body onload="initialiseCollections('#collectionsContainer')">
+<body>
 
 <header>
   <h1><a href="index.html">Visualizations of data structures and algorithms</a></h1>
 </header>
 
 <main>
-<section id="collectionsContainer">
+<section id="prioqueuesContainer">
 
-<label for="algorithmSelector">Choose a collection data structure:</label>
+<label for="algorithmSelector">Choose a priority queue data structure:</label>
 <h2 class="selectorWrapper">
   <select name="algorithmSelector" class="algorithmSelector">
     <option disabled value="">&mdash; Please choose a data structure &mdash;</option>
     <hr/>
-    <option value="BST">BST: Binary search tree</option>
-    <option value="AVL">AVL tree</option>
-    <option value="RedBlack">Red-black tree</option>
-    <option value="SplayTree">Splay tree</option>
-    <option value="BTree">B-tree</option>
+    <option value="BinaryHeap">Binary heap</option>
   </select>
 </h2>
 
@@ -52,15 +39,7 @@
     <input class="insertSubmit disableWhenRunning" type="submit" value="Insert"/>
   </span>
   <span class="formgroup">
-    <input class="findField disableWhenRunning" type="text" size="4" maxlength="4"/>
-    <input class="findSubmit disableWhenRunning" type="submit" value="Find"/>
-  </span>
-  <span class="formgroup">
-    <input class="deleteField disableWhenRunning" type="text" size="4" maxlength="4"/>
-    <input class="deleteSubmit disableWhenRunning" type="submit" value="Delete"/>
-  </span>
-  <span class="formgroup">
-    <input class="printSubmit disableWhenRunning" type="submit" value="Print"/>
+    <input class="deleteSubmit disableWhenRunning" type="submit" value="Remove smallest"/>
   </span>
   <span class="formgroup">
     <input class="clearSubmit disableWhenRunning" type="submit" value="Clear"/>
