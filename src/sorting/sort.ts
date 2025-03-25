@@ -1,5 +1,5 @@
-import { compare, Engine } from "../../src/engine";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
+import { Engine } from "../../src/engine";
+import { BinaryNode } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
 import { TextCircle } from "../../src/objects/text-circle";
 
@@ -63,29 +63,35 @@ export class Sort extends Engine {
         message: string,
         ...args: Array<number | string>
     ) {
-        if (!arr) {return;}
-            arr.swap(j, k, true);
-            arr.setIndexHighlight(j, true);
-            await this.pause(message, ...args);
+        if (!arr) {
+            throw new Error("Sort array not initialised");
+        }
+        arr.swap(j, k, true);
+        arr.setIndexHighlight(j, true);
+        await this.pause(message, ...args);
     }
 
-    async insertOne(value : number | string) {
-
-        const arrayLabel = this.Svg.textCircle(value, ...this.getNodeStart());
+    async insertOne(value: number | string) {
+        value = String(value);
+        if (!this.sortArray) {
+            throw new Error("Sort array not initialised");
+        }
+        const arrayLabel = this.Svg.put(
+            new TextCircle(value, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
         await this.pause("insert.value", value);
-
+        const currentIndex = this.sortArray.getSize();
         arrayLabel.setCenter(
             this.sortArray.getCX(currentIndex),
             this.sortArray.cy(),
-            true
+            this.getAnimationSpeed()
         );
-        await this.pause();
+        await this.pause(undefined);
 
         arrayLabel.remove();
         this.sortArray.setDisabled(currentIndex, false);
         this.sortArray.setValue(currentIndex, value);
         this.sortArray.setIndexHighlight(currentIndex, true);
-        this.sortSize++;
 
         this.sortArray.setIndexHighlight(currentIndex, false);
     }
