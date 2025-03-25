@@ -1,5 +1,6 @@
 import { G, Rect, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "../../src/engine";
+import { Polyline } from "@svgdotjs/svg.js";
 
 export class DSArray extends G {
     $horizontal: boolean;
@@ -136,70 +137,78 @@ export class DSArray extends G {
         return this;
     }
 
-    setBlueHighlight(i : number, high : boolean) {
+    setBlueHighlight(i: number, high: boolean) {
         for (const obj of [this.$backgrounds[i], this.$values[i]]) {
-            if (high == null) obj.toggleClass("highlightblue");
-            else if (high) obj.addClass("highlightblue");
-            else {obj.removeClass("highlightblue");}
+            if (high == null) {
+                obj.toggleClass("highlightblue");
+            } else if (high) {
+                obj.addClass("highlightblue");
+            } else {
+                obj.removeClass("highlightblue");
+            }
         }
         for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.hasClass("highlightblue")) bg.back();
+            if (!bg.hasClass("highlightblue")) {
+                bg.back();
+            }
         }
         return this;
     }
 
-
-    setIndexHighlight(i : number, high : boolean, color : string ="#C00") {
-        if (this.$backgrounds[i]){
-            if (high){
+    setIndexHighlight(i: number, high: boolean, color: string = "#C00") {
+        if (this.$backgrounds[i]) {
+            if (high) {
                 this.$backgrounds[i].css("stroke", color);
-            }
-            else{
+            } else {
                 this.$backgrounds[i].css("stroke", "");
             }
         }
 
-        if (this.$values[i]){
-            if (high){
+        if (this.$values[i]) {
+            if (high) {
                 this.$values[i].css("fill", color);
-            }
-            else{
+            } else {
                 this.$values[i].css("fill", "");
             }
         }
 
         for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.css("stroke")) bg.back();
+            if (!bg.css("stroke")) {
+                bg.back();
+            }
         }
         return this;
     }
 
-    addArrow(index, arrowId="arrow") {
+    addArrow(index: number, arrowId: string = "arrow") {
         const arrowSize = 10;
         const arrowOffset = 10;
 
         const x = this.getCX(index);
         const y = this.cy() - this.engine().getObjectSize() / 2 - arrowOffset;
-    
+
         const arrow = this.polyline([
-            [x, y], 
-            [x - arrowSize, y - arrowSize], 
-            [x + arrowSize, y - arrowSize], 
-            [x, y] 
-        ]).fill('none').stroke({ width: 2, color: "#000" }).id(arrowId);
+            [x, y],
+            [x - arrowSize, y - arrowSize],
+            [x + arrowSize, y - arrowSize],
+            [x, y],
+        ])
+            .fill("none")
+            .stroke({ width: 2, color: "#000" })
+            .id(arrowId);
 
         this.add(arrow);
     }
 
-    removeArrow(arrowId) {
-        const arrow = this.findOne(`#${arrowId}`);
+    removeArrow(arrowId: string) {
+        const arrow = this.findOne(`#${arrowId}`) as Polyline | null;
         if (arrow) {
             arrow.remove();
         }
     }
 
-    moveArrow(arrowId, indexTo) {
-        const arrow = this.findOne(`#${arrowId}`);
+    moveArrow(arrowId: string, indexTo: number) {
+        const arrow = this.findOne(`#${arrowId}`) as Polyline | null;
         const x = this.getCX(indexTo);
 
         if (arrow) {
@@ -207,17 +216,16 @@ export class DSArray extends G {
         }
     }
 
-    setArrowHighlight(id, high, color="#C00") {
+    setArrowHighlight(id: number, high: boolean, color: string = "#C00") {
         const arrow = this.findOne(`#${id}`);
-
-
-        if (high) {
-            arrow.css("fill", color)
+        if (arrow) {
+            if (high) {
+                arrow.css("fill", color);
+            } else {
+                arrow.css("fill", "");
+            }
         }
-        else {
-            arrow.css("fill", "")
-        }
-        
+
         return this;
     }
 }
