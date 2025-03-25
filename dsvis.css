@@ -1,0 +1,281 @@
+@charset "utf-8";
+
+/* A mixture of the following two CSS resets:
+   - Josh Comeau: https://www.joshwcomeau.com/css/custom-css-reset/
+   - Andy Bell: https://piccalil.li/blog/a-more-modern-css-reset/
+*/
+
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+input, button, textarea, select {
+	font: inherit;
+}
+body {
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, button, input, label {
+  	line-height: 1.1;
+}
+p, h1, h2, h3, h4, h5, h6 {
+	overflow-wrap: break-word;
+}
+img, picture, video, canvas, svg {
+	display: block;
+	max-width: 100%;
+}
+
+/* End CSS reset */
+
+body {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 100%;
+	background-color: maroon;
+}
+
+main {
+	background-color: lemonchiffon;
+}
+
+section, p, h1, h2, h3, h4, h5, h6, ul, ol, dl {
+	padding-bottom: 1rem;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1.1rem; }
+
+body > * {
+	padding-top: 1rem;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+ul, ol {
+	padding-left: 2em;
+}
+
+header, footer {
+	color: lemonchiffon;
+	background-color: maroon;
+}
+
+a {
+	color: inherit;
+}
+
+h1 a {
+	text-decoration: none;
+}
+
+
+.selectorWrapper > select {
+	appearance: none;
+	padding: 6px 12px;
+	background-color: inherit;
+}
+
+svg, .selectorWrapper > select {
+	border: solid 1px maroon;
+	border-radius: 5px;
+	width: 100%;
+}
+
+.selectorWrapper {
+	position: relative;
+	max-width: 1000px;
+}
+
+.selectorWrapper::after {
+	content: "▼";
+	color: maroon;
+	font-size: 1rem;
+	top: 10px;
+	right: 10px;
+	position: absolute;
+}
+
+/*-----------------------------------------------------------------*/
+
+svg {
+    background-color: white;
+    border: 2px solid maroon;
+    width: 100%;
+	max-width: 1000px;
+}
+
+fieldset, form {
+    border: none;
+	display: inline-block;
+}
+
+.formgroup {
+	white-space: nowrap;
+	margin-right: 12px;
+}
+
+select, input, button {
+	margin: 3px 0;
+	padding: 3px 6px;
+	background-color: white;
+	border: solid 1px maroon;
+	border-radius: 5px;
+}
+
+input[type="checkbox"], input[type="radio"] {
+	width: 18px;
+	height: 18px;
+	margin-right: 0;
+	vertical-align: middle;
+}
+
+select:hover:not(:disabled), input:hover:not(:disabled), button:hover:not(:disabled) {
+	cursor: pointer;
+}
+
+input:active:not(:disabled), button:active:not(:disabled), button.selected:not(:disabled) {
+	background-color: maroon;
+	color: white;
+}
+
+*:disabled, *:disabled * {
+	background: transparent;
+	color: maroon;
+}
+
+
+/*-----------------------------------------------------------------*/
+
+:root {
+	--node-font-size: 100%;
+}
+
+svg {
+	font-size: 20px;
+}
+
+svg g {
+	font-size: var(--node-font-size);
+}
+
+text {
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+text.status-report {
+	fill: grey;
+	font-size: 80%;
+}
+text.status-report.paused {
+	fill: brown;
+}
+text.status-report.running {
+	fill: green;
+}
+
+text.title, text.message {
+	fill: brown;
+}
+text.title {
+	font-weight: bold;
+}
+
+text.printer {
+	fill: blue;
+}
+
+circle, rect, polygon {
+    stroke: black;
+    fill: lemonchiffon;
+}
+
+path, line, polyline {
+    stroke: black;
+    fill: none;
+}
+
+svg .filled {
+	stroke: none;
+	fill: black;
+}
+
+svg .marked, svg .marked > * {
+    stroke: green;
+}
+
+svg .marked.filled, svg text.marked, svg .marked > .filled, svg .marked > text {
+	stroke: none;
+	fill: green;
+}
+
+svg .highlight, svg .highlight > * {
+    stroke: #C00;
+}
+
+svg .highlight.filled, svg text.highlight, svg .highlight > .filled, svg .highlight > text {
+	stroke: none;
+	fill: #C00;
+}
+
+svg .nofill {
+	fill: none;
+}
+
+svg .highlight-circle {
+	stroke: #C00;
+	fill: none;
+}
+
+g text {
+	stroke: none;
+    fill: black;
+    text-anchor: middle;
+}
+
+g text.avlheight {
+	font-size: 70%;
+}
+
+g.unfilled circle {
+	fill: none;
+}
+
+g.red circle {
+	fill: pink;
+}
+
+g.red.black circle {
+	fill: lightgrey;
+}
+
+text.arrayindex > tspan {
+	font-size: 70%;
+}
+
+rect.background.disabled {
+	fill: lightgray;
+}
+
+svg.shownullnodes .nullnode:not(.invisible) {
+	fill: black;
+	stroke: black;
+}
+
+line.gridline, svg .invisible, svg .nullnode {
+	fill: none;
+	stroke: none;
+}
+
+line.gridline {
+	stroke-width: 1;
+}
+
+svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
+    stroke: lightgray;
+}
+
