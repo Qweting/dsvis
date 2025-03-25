@@ -2,6 +2,23 @@ import { compare, Engine, MessagesObject } from "../../src/engine";
 import { DSArray } from "../../src/objects/dsarray";
 import { TextCircle } from "../../src/objects/text-circle";
 
+export const InsertionSortmessages = {
+    general: {
+        empty: "Heap is empty!",
+        full: "Heap is full!",
+        finished: "Finished",
+    },
+    insert: {
+        value: (value: string | number) => `Insert value: ${value}`,
+    },
+    sort: {
+        compare: (a: string | number, b: string | number) => `Compare ${a} and ${b}`,
+        swap: (a: string | number, b: string | number) => `Swap ${a} and ${b} since ${a} is smaller`,
+        smallerLeft:(a: string | number, b: string | number) => `${a} is smaller than ${b} no swap`,
+        record: (a: string | number) => `The record is set to ${a}` 
+    },
+};
+
 export class InsertionSort extends Engine {
 
     arraySize : number = 28;
@@ -88,7 +105,12 @@ export class InsertionSort extends Engine {
 
 
     async sort() {
-
+        if (this.sortArray === null) {
+            throw new Error("Sort array not initialised");
+        }
+        if (this.sortSize === null) {
+            throw new Error("Sort size not initialised");
+        }
         
         if (this.sortSize <= 1) {
             await this.pause('general.empty');
@@ -107,7 +129,7 @@ export class InsertionSort extends Engine {
                 await this.pause('sort.compare', this.sortArray.getValue(j), this.sortArray.getValue(j-1));
                 
 
-                if (DSVis.compare( this.sortArray.getValue(j), this.sortArray.getValue(j-1)) >= 0){
+                if (compare( this.sortArray.getValue(j), this.sortArray.getValue(j-1)) >= 0){
                     await this.pause('sort.smallerLeft', this.sortArray.getValue(j-1), this.sortArray.getValue(j));
                     this.sortArray.setIndexHighlight(j, false);
                     this.sortArray.setIndexHighlight(j-1, false);
@@ -133,22 +155,4 @@ export class InsertionSort extends Engine {
 
     
 
-};
-
-
-DSVis.InsertionSort.messages = {
-    general: {
-        empty: "Heap is empty!",
-        full: "Heap is full!",
-        finished: "Finished",
-    },
-    insert: {
-        value: (value: string | number) => `Insert value: ${value}`,
-    },
-    sort: {
-        compare: (a: string | number, b: string | number) => `Compare ${a} and ${b}`,
-        swap: (a: string | number, b: string | number) => `Swap ${a} and ${b} since ${a} is smaller`,
-        smallerLeft:(a: string | number, b: string | number) => `${a} is smaller than ${b} no swap`,
-        record: (a: string | number) => `The record is set to ${a}` 
-    },
 };
