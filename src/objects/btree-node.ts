@@ -77,6 +77,7 @@ export class BTreeNode extends G {
     ): this {
         if (i < this.numValues()) {
             const dx = (i / Math.max(1, this.numValues()) - 1) * objectSize;
+            console.log(this.dMoveCenter, this.getCenter, this.setCenter);
             this.dMoveCenter(dx, 0);
         }
 

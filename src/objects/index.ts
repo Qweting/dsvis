@@ -46,7 +46,7 @@ extend(Element, {
             .animate(this as Element, animationDuration > 0)
             .center(x, y);
     },
-    dmoveCenter(dx: number, dy: number, animationDuration: number = 0) {
+    dMoveCenter(dx: number, dy: number, animationDuration: number = 0) {
         (this as Element).setCenter(
             (this as Element).cx() + dx,
             (this as Element).cy() + dy,
