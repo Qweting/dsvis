@@ -10,9 +10,11 @@ export class LinkedConnection extends Connection<LinkedNode> {
         this.nodeDimensions = nodeDimensions;
         this.setCoords(this.getEndCoords(end.getCenterPos(), false));
         svgContext.put(this);
-        this.init(strokeWidth, 0, true);
+        this.init(strokeWidth,0,  true);
         this.front();
     }
+
+
 
     updateEnd(endNodeCoords: [number, number], animationDuration: number): void
     {

@@ -52,4 +52,7 @@ export class LinkedNode extends G {
     getSize(): number {
         return this.nodeWidth;
     }
+
+
+
 }

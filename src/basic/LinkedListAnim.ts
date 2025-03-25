@@ -19,6 +19,7 @@ export const LinkedListMessages = {
         found: (element: string | number) => `Found ${element}`,
         notfound: (element: string | number) => `Did not find ${element}`,
         look: (NextNode: string | number) => `Look into ${NextNode}`,
+        nonExsistent: (element: string | number) => `Element ${element} does not exist`,
     },
     insert: {
         element: (element: string | number) => `Insert element: ${element}`,
@@ -63,7 +64,7 @@ export class LinkedListAnim extends Engine implements Collection {
     }
 
     // Reset the algorithm to its initial state
-    // !! Engine then re builds by calling all recorded actions
+    // !! Engine then re-builds by calling all recorded actions
     async resetAlgorithm(): Promise<void> {
         await super.resetAlgorithm();
 
@@ -108,9 +109,8 @@ export class LinkedListAnim extends Engine implements Collection {
         this.highlight(node, true);
 
         // Start at the lower right corner and then move to the correct position with animation
-        // node.move(this.$Svg.width - this.nodeDimensions[0] - 20, this.$Svg.height - this.nodeDimensions[1]*2); // Starting position
-        node.move(this.$Svg.width/2, this.$Svg.height/2); //center the starting push, kinda ish.
-        
+        node.center(this.$Svg.width/2, this.$Svg.height - this.nodeDimensions[1]*2); // center starting position
+
         const connection = await this.makeConnections(node);
         
         await this.pause(insertionText, value);
@@ -145,12 +145,13 @@ export class LinkedListAnim extends Engine implements Collection {
         const foundText = "find.found";
         const notFoundText = "find.notfound";
         const lookText = "find.look";
+        const nonExistentText = "find.nonExistent";
         let isFound = false;
         let index = 0;
         
         await this.pause(findText, value); //start the search
 
-        for (let x = 0; x < this.nodeArray.length-1; x++) { 
+        for (let x = 0; x < this.nodeArray.length; x++) {
             const element = this.nodeArray[x][0].value;
             if (element === value) { //check if the current node is the value we are looking for
                 this.highlight(this.nodeArray[x][0], true);
@@ -163,11 +164,11 @@ export class LinkedListAnim extends Engine implements Collection {
                 this.highlight(this.nodeArray[x][0], true);
                 await this.pause(notFoundText, value); //not found 
                 this.highlight(this.nodeArray[x][0], false);
-                await this.pause(lookText, element); //look into the next node
+                await this.pause(lookText, element); //look into the next node, but it doesn't. It should but doesn't. We need to check x+ 1, how10=!?
             }
         }
         
-        await this.pause(notFoundText, value); //element is not found
+        await this.pause(nonExistentText, value); //element is not found
     }
 
     async print(): Promise<void> {
@@ -181,8 +182,10 @@ export class LinkedListAnim extends Engine implements Collection {
         }
         // insertBack
         const prevNode = this.nodeArray[this.nodeArray.length - 1][0];
+
         const connection = new LinkedConnection(prevNode, node, this.nodeDimensions, this.getStrokeWidth(), this.Svg);
         return connection;
+
     }
 
     // Calculate the maximum number of nodes that can fit in the available space
@@ -198,6 +201,7 @@ export class LinkedListAnim extends Engine implements Collection {
     private newNodeCoords(): [number, number, boolean] {
         const [nodeWidth, nodeHeight] = this.nodeDimensions;
         let mirrored = false;
+        let tmp;
 
         const maxNodesPerRow = Math.max(1, Math.floor((this.$Svg.width - 2 * this.MIN_SIDE_MARGIN) / (nodeWidth + this.getNodeSpacing())));
         const totalNodesWidth = maxNodesPerRow * nodeWidth + (maxNodesPerRow - 1) * this.getNodeSpacing();
