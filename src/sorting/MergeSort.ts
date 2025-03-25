@@ -1,6 +1,6 @@
 import { DSArray } from "src/objects/dsarray";
 import { Sort } from "./sort";
-import { NBSP } from "src/engine";
+import { NBSP, compare } from "src/engine";
 import { TextCircle } from "../../src/objects/text-circle";
 
 export const MergeSortMessages = {
@@ -202,7 +202,7 @@ export class MergeSort extends Sort {
             if (
                 a2i >= subarray2.getSize() ||
                 (a1i < subarray1.getSize() &&
-                    subarray1.getValue(a1i) < subarray2.getValue(a2i))
+                    compare(subarray1.getValue(a1i),  subarray2.getValue(a2i)) < 0)
             ) {
                 await this.pause("sort.move", subarray1.getValue(a1i));
                 let svgValue = this.Svg.put(
