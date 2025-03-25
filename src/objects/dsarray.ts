@@ -216,7 +216,7 @@ export class DSArray extends G {
         }
     }
 
-    setArrowHighlight(id: number, high: boolean, color: string = "#C00") {
+    setArrowHighlight(id: string, high: boolean, color: string = "#C00") {
         const arrow = this.findOne(`#${id}`);
         if (arrow) {
             if (high) {
