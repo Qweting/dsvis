@@ -339,7 +339,7 @@ export class Engine {
                 `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
             );
 
-            this.info.setTitle(methodName);
+            this.info.setTitle(title);
             await this.pause("");
 
             // Bind this to method and call it
