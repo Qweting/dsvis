@@ -18,7 +18,8 @@ export const LinkedListMessages = {
         start: (element: string | number) => `Searching for ${element}`,
         found: (element: string | number) => `Found ${element}`,
         notfound: (element: string | number) => `Did not find ${element}`,
-        look: (NextNode: string | number) => `Look into ${NextNode}`,
+        look: (element: string | number) => `Looking into the next node: ${element}`,
+        read: (element: string | number) => `Reading the value of the node: ${element}`,
         nonExistent: (element: string | number) => `Element ${element} does not exist`,
     },
     insert: {
@@ -113,17 +114,25 @@ export class LinkedListAnim extends Engine implements Collection {
 
         this.highlight(node, true);
 
-        // Start at the lower right corner and then move to the correct position with animation
-        node.center(this.$Svg.width/2, this.$Svg.height - this.nodeDimensions[1]*2); // center starting position
+        // Start at the lower center and then move to the correct position with animation
+        node.center(this.$Svg.width/2, this.$Svg.height - this.nodeDimensions[1]*2);
 
         const connection = await this.makeConnections(node);
+        if (connection) {
+            this.highlight(connection, true);
+        }
         
         await this.pause(insertionText, value);
         // Move to the correct position with animation
         this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
         connection?.updateEnd([coords[0], coords[1]], this.animationValue());
 
+        await this.pause(undefined);
+
         this.highlight(node, false);
+        if (connection) {
+            this.highlight(connection, false);
+        }
 
         // Add the node to the array and make connections
         this.nodeArray.push([node, connection]);
@@ -146,31 +155,39 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for finding a node
     async find(value: string | number): Promise<LinkedNode | null> {
-        let isFound = false;
-        let index = 0;
-        
         await this.pause("find.start", value); //start the search
+        let curNode = this.nodeArray[0][0];
+        let curConnection;
+        this.highlight(curNode, true);
+        await this.pause("find.read", curNode.value);
 
         for (let x = 0; x < this.nodeArray.length; x++) {
-            const element = this.nodeArray[x][0].value;
-            if (element === value) { //check if the current node is the value we are looking for
-                this.highlight(this.nodeArray[x][0], true);
-                isFound = true; //set the flag to true
-                index = x;
-                this.highlight(this.nodeArray[x][0], false);
-                break; //break the loop
+            curNode = this.nodeArray[x][0];
+            if (curNode.value === value) { //check if the current node is the value we are looking for
+                await this.pause("find.found", value);
+                this.highlight(curNode, false);
+                if(curConnection) {
+                    this.highlight(curConnection, false);
+                }
+                return curNode;
             } else {
-                this.highlight(this.nodeArray[x][0], true);
                 await this.pause("find.notfound", value); //not found 
-                this.highlight(this.nodeArray[x][0], false);
-                //TODO
-                await this.pause("find.look", element); //look into the next node, but it doesn't. It should but doesn't. We need to check x+ 1, how10=!?
+                this.highlight(curNode, false);
+                if(curConnection) {
+                    this.highlight(curConnection, false);
+                }
+                if(this.nodeArray[x+1][0]) {
+                    const next = this.nodeArray[x+1][0];
+                    curConnection = this.nodeArray[x+1][1] as LinkedConnection;
+                    this.highlight(next, true);
+                    this.highlight(curConnection, true); // Highlight the connection
+                    await this.pause("find.look", next.value);
+                }
             }
         }
 
-        await this.pause(isFound ? "find.found" : "find.nonExistent", value);
-        return isFound ? this.nodeArray[index][0] : null;
-
+        await this.pause("find.nonExistent", value);
+        return null;
     }
 
     async print(): Promise<void> {
@@ -228,8 +245,12 @@ export class LinkedListAnim extends Engine implements Collection {
         return [x, y, mirrored];
     }
 
-    private highlight(node: LinkedNode, value: boolean): void {
-        node.children().forEach(child => child.setHighlight(value)); // Highlight the node
+    private highlight(element: LinkedNode | LinkedConnection, value: boolean): void {
+        if(element instanceof LinkedConnection) {
+            element.setHighlight(value);
+        } else {
+            element.children().forEach(child => child.setHighlight(value)); // Highlight the element
+        }
     }
 
     private animationValue(): number {
