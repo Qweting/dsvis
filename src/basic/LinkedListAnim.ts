@@ -148,11 +148,6 @@ export class LinkedListAnim extends Engine implements Collection {
         // Implementation goes here
     }
 
-    // Visualization logic for deleting a node
-    async delete(value: string | number): Promise<void> {
-        // Implementation goes here
-    }
-
     // Visualization logic for finding a node
     async find(value: string | number): Promise<LinkedNode | null> {
         await this.pause("find.start", value); //start the search
@@ -176,7 +171,7 @@ export class LinkedListAnim extends Engine implements Collection {
                 if(curConnection) {
                     this.highlight(curConnection, false);
                 }
-                if(this.nodeArray[x+1][0]) {
+                if(x+1 < this.nodeArray.length) {
                     const next = this.nodeArray[x+1][0];
                     curConnection = this.nodeArray[x+1][1] as LinkedConnection;
                     this.highlight(next, true);
@@ -188,6 +183,13 @@ export class LinkedListAnim extends Engine implements Collection {
 
         await this.pause("find.nonExistent", value);
         return null;
+    }
+
+    // Visualization logic for deleting a node
+    async delete(value: string | number): Promise<void> {
+        if(await this.find(value)) {
+            console.log("yeeeeeeeeeeeeeeeeeet this mfk");
+        }
     }
 
     async print(): Promise<void> {
