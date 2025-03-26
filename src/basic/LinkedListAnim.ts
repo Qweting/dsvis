@@ -62,8 +62,8 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
-        // this.initialValues = ["A", "B", "D", "E", "F"];
-        this.initialValues = ["A", "B"];
+        this.initialValues = ["A", "B", "D", "E", "F"];
+        //this.initialValues = ["A", "B"];
         //this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
@@ -145,7 +145,7 @@ export class LinkedListAnim extends Engine implements Collection {
     }
 
     // Visualization logic for finding a node
-    async find(value: string | number): Promise<void> {
+    async find(value: string | number): Promise<LinkedNode | null> {
         let isFound = false;
         let index = 0;
         
@@ -169,7 +169,7 @@ export class LinkedListAnim extends Engine implements Collection {
         }
 
         await this.pause(isFound ? "find.found" : "find.nonExistent", value);
-
+        return isFound ? this.nodeArray[index][0] : null;
 
     }
 

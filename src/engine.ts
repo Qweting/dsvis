@@ -7,12 +7,13 @@ import { Info } from "./info";
 import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { State } from "./state";
 import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { LinkedNode } from "./objects/basic-structure-objects/linked-node"; ///////////////
 
 export type Resolve = (value: unknown) => void;
 export type Reject = (props: RejectReason) => void;
 export type RejectReason = { until: number; running?: boolean };
 
-export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
+export type SubmitFunction = (...args: (string | number)[]) => Promise<void | LinkedNode | null>; //////////
 
 export interface MessagesObject {
     [key: string]:
@@ -23,7 +24,7 @@ export interface MessagesObject {
 }
 
 type Action = {
-    method: (...args: unknown[]) => Promise<void>;
+    method: (...args: unknown[]) => Promise<void | LinkedNode | null>;
     args: unknown[];
     stepCount: number;
 };
@@ -260,7 +261,7 @@ export class Engine {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async execute<T extends (...args: any[]) => Promise<void>>(
+    async execute<T extends (...args: any[]) => Promise<void | LinkedNode | null>>(
         method: T,
         args: Parameters<T>,
         until = 0
