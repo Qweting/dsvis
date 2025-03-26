@@ -116,7 +116,7 @@ export class Canvas {
             .center(x, y);
     }
 
-    dmoveCenter(
+    dMoveCenter(
         element: Element,
         dx: number,
         dy: number,
