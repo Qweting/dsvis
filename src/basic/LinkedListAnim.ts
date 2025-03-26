@@ -63,8 +63,8 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
         // this.initialValues = ["A", "B", "D", "E", "F"];
-        // this.initialValues = ["A", "B"];
-        this.initialValues = initialValues;
+        this.initialValues = ["A", "B"];
+        //this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
 
@@ -146,15 +146,10 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for finding a node
     async find(value: string | number): Promise<void> {
-        const findText = "find.start";
-        const foundText = "find.found";
-        const notFoundText = "find.notfound";
-        const lookText = "find.look";
-        const nonExistentText = "find.nonExistent";
         let isFound = false;
         let index = 0;
         
-        await this.pause(findText, value); //start the search
+        await this.pause("find.start", value); //start the search
 
         for (let x = 0; x < this.nodeArray.length; x++) {
             const element = this.nodeArray[x][0].value;
@@ -166,14 +161,14 @@ export class LinkedListAnim extends Engine implements Collection {
                 break; //break the loop
             } else {
                 this.highlight(this.nodeArray[x][0], true);
-                await this.pause(notFoundText, value); //not found 
+                await this.pause("find.notfound", value); //not found 
                 this.highlight(this.nodeArray[x][0], false);
                 //TODO
-                await this.pause(lookText, element); //look into the next node, but it doesn't. It should but doesn't. We need to check x+ 1, how10=!?
+                await this.pause("find.look", element); //look into the next node, but it doesn't. It should but doesn't. We need to check x+ 1, how10=!?
             }
         }
 
-        await this.pause(isFound ? foundText : nonExistentText, value);
+        await this.pause(isFound ? "find.found" : "find.nonExistent", value);
 
 
     }
