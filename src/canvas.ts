@@ -54,11 +54,11 @@ export class Canvas {
     // Animation constants
 
     getAnimationSpeed(): number {
-        return parseInt(this.Svg.$engine.toolbar.animationSpeed.value);
+        return parseInt(this.Svg.$engine.generalControls.animationSpeed.value);
     }
 
     getObjectSize(): number {
-        return parseInt(this.Svg.$engine.toolbar.objectSize.value);
+        return parseInt(this.Svg.$engine.generalControls.objectSize.value);
     }
 
     getNodeSpacing(): number {

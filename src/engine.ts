@@ -1,12 +1,12 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "~/cookies";
 import { Debugger } from "~/debugger";
-import { EventListeners } from "~/event-listeners";
 import { isValidReason, parseValues } from "~/helpers";
 import { Info } from "~/info";
 import { State } from "~/state";
-import { EngineToolbar } from "~/toolbars/engine-toolbar";
 import { Canvas } from "./canvas";
+import { EngineAlgorithmControl } from "./algorithm-controls/engine-algorithm-controls";
+import { EngineGeneralControls } from "./general-controls/engine-general-controls";
 
 export type Resolve = (value: unknown) => void;
 export type Reject = (props: RejectReason) => void;
@@ -41,14 +41,14 @@ export class Engine {
 
     cookies: Cookies;
     container: HTMLElement;
-    toolbar: EngineToolbar;
+    generalControls: EngineGeneralControls;
+    algorithmControls: EngineAlgorithmControl;
     actions: Action[] = [];
     currentAction: number = 0;
     currentStep: number = 0;
     debugger: Debugger;
     state: State;
     info: Info;
-    eventListeners: EventListeners;
 
     ///////////////////////////////////////////////////////////////////////////////
     // Inititalisation
@@ -63,14 +63,15 @@ export class Engine {
         }
 
         this.container = container;
-        this.toolbar = new EngineToolbar(container);
+        this.generalControls = new EngineGeneralControls(container, this);
+        this.algorithmControls = new EngineAlgorithmControl(container);
 
-        this.state = new State(this.toolbar.toggleRunner);
+        this.state = new State(this.generalControls.toggleRunner);
 
         this.cookies = new Cookies(
             {
-                objectSize: this.toolbar.objectSize,
-                animationSpeed: this.toolbar.animationSpeed,
+                objectSize: this.generalControls.objectSize,
+                animationSpeed: this.generalControls.animationSpeed,
             },
             this.debugger
         );
@@ -86,18 +87,11 @@ export class Engine {
         }
 
         this.info = new Info(this.canvas.Svg, this.canvas.$Svg.margin);
-        this.eventListeners = new EventListeners(this);
     }
 
     initialise(): void {
-        this.initToolbar();
         this.resetAll();
         this.state.setRunning(true);
-    }
-
-    initToolbar(): void {
-        /* Allow subclasses to use this function */
-        // TODO: Move all these into toolbar class
     }
 
     async resetAll(): Promise<void> {
@@ -142,15 +136,15 @@ export class Engine {
 
     resetListeners(isRunning: boolean): void {
         // Clear all currently running listeners
-        this.eventListeners.removeAllListeners();
+        this.generalControls.removeAllListeners();
         if (this.constructor === Engine) {
             // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
             return;
         }
 
-        this.eventListeners.addListener(
-            this.toolbar.toggleRunner,
+        this.generalControls.addListener(
+            this.generalControls.toggleRunner,
             "click",
             () => this.state.toggleRunner()
         );
@@ -164,7 +158,7 @@ export class Engine {
         this.disableWhenRunning(false);
         this.setIdleTitle();
         this.info.setStatus("inactive");
-        this.eventListeners.addIdleListeners();
+        this.generalControls.addIdleListeners();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -313,7 +307,11 @@ export class Engine {
 
             // Add async listeners that handle button presses while paused
             let runnerTimer: NodeJS.Timeout | undefined = undefined;
-            this.eventListeners.addAsyncListeners(resolve, reject, runnerTimer);
+            this.generalControls.addAsyncListeners(
+                resolve,
+                reject,
+                runnerTimer
+            );
 
             // If running, automatically step forward after waiting animation speed
             if (this.state.isRunning()) {

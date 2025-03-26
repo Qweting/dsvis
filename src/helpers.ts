@@ -1,4 +1,4 @@
-import { MessagesObject, NBSP, RejectReason } from "~/engine";
+import { Engine, MessagesObject, NBSP, RejectReason } from "~/engine";
 
 export function normalizeNumber(input: string): string | number {
     input = input.trim();
@@ -154,4 +154,53 @@ export function isValidReason(obj: unknown): obj is RejectReason {
         // if running is in object it should be a boolean
         ("running" in obj ? typeof obj.running === "boolean" : true)
     );
+}
+
+export type RecordOfEngines<T extends Engine = Engine> = Record<
+    string,
+    new (containerSelector: string) => T
+>;
+
+export function initialiseEngine(
+    containerID: string,
+    engineSubclasses: RecordOfEngines
+) {
+    const algoSelector = document.querySelector<HTMLSelectElement>(
+        `${containerID} .algorithmSelector`
+    );
+
+    if (!algoSelector) {
+        throw new Error("Could not find algo selector");
+    }
+
+    const searchParams = new URL(window.location.href).searchParams;
+
+    const algo =
+        new URL(window.location.href).searchParams.get("algorithm") || "";
+    algoSelector.value = algo;
+
+    const EngineClass = engineSubclasses[algo] || Engine;
+    const engine = new EngineClass(containerID);
+    engine.initialise();
+
+    algoSelector.addEventListener("change", () => {
+        if (algoSelector.value in engineSubclasses) {
+            searchParams.set("algorithm", algoSelector.value);
+        } else {
+            searchParams.delete("algorithm");
+        }
+
+        if (engine.debugger.isEnabled()) {
+            searchParams.set("debug", "true");
+        } else {
+            searchParams.delete("debug");
+        }
+
+        window.history.replaceState(
+            "",
+            "",
+            `${window.location.pathname}?${searchParams}`
+        );
+        window.location.reload();
+    });
 }

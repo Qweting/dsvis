@@ -1,11 +1,12 @@
 import { Text } from "@svgdotjs/svg.js";
+import { CollectionAlgorithmControl } from "~/algorithm-controls/collection-algorithm-controls";
 import { Collection } from "~/collections";
 import { Engine, MessagesObject } from "~/engine";
+import { BSTGeneralControls } from "~/general-controls/BST-general-controls";
 import { compare, parseValues } from "~/helpers";
 import { BinaryDir, BinaryNode } from "~/objects/binary-node";
 import { HighlightCircle } from "~/objects/highlight-circle";
 import { TextCircle } from "~/objects/text-circle";
-import { BSTToolbar } from "~/toolbars/BST-toolbar";
 
 export const BSTMessages = {
     general: {
@@ -63,12 +64,15 @@ export class BST<Node extends BinaryNode = BinaryNode>
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
-    toolbar: BSTToolbar;
 
     constructor(containerSelector: string) {
         super(containerSelector);
 
-        this.toolbar = new BSTToolbar(this.container);
+        this.generalControls = new BSTGeneralControls(this.container, this);
+        this.algorithmControls = new CollectionAlgorithmControl(
+            this.container,
+            this
+        );
     }
 
     initialise(initialValues: string[] | null = null): this {
@@ -86,31 +90,6 @@ export class BST<Node extends BinaryNode = BinaryNode>
                 await this.insert(...this.initialValues);
             }
         });
-    }
-
-    initToolbar(): void {
-        super.initToolbar();
-
-        this.toolbar.showNullNodes.addEventListener("change", () =>
-            this.toggleNullNodes(null)
-        );
-
-        this.toggleNullNodes(true);
-    }
-
-    toggleNullNodes(show: boolean | null): this {
-        if (show === null) {
-            show = this.toolbar.showNullNodes.checked;
-        }
-
-        this.toolbar.showNullNodes.checked = show;
-
-        if (show) {
-            this.canvas.Svg.addClass("shownullnodes");
-        } else {
-            this.canvas.Svg.removeClass("shownullnodes");
-        }
-        return this;
     }
 
     newNode(text: string): BinaryNode {

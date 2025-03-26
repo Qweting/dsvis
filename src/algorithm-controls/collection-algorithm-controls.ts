@@ -1,4 +1,8 @@
-export class CollectionToolbar {
+import { Collection } from "~/collections";
+import { addReturnSubmit } from "~/helpers";
+import { EngineAlgorithmControl } from "./engine-algorithm-controls";
+
+export class CollectionAlgorithmControl extends EngineAlgorithmControl {
     insertSelect: HTMLSelectElement;
     insertField: HTMLInputElement;
     insertSubmit: HTMLInputElement;
@@ -8,7 +12,13 @@ export class CollectionToolbar {
     deleteSubmit: HTMLInputElement;
     printSubmit: HTMLInputElement;
     clearSubmit: HTMLInputElement;
-    constructor(container: HTMLElement) {
+    engine: Collection;
+
+    constructor(container: HTMLElement, engine: Collection) {
+        super(container);
+
+        this.engine = engine;
+
         const insertSelect = container.querySelector<HTMLSelectElement>(
             "select.insertSelect"
         );
@@ -66,5 +76,46 @@ export class CollectionToolbar {
         this.deleteSubmit = deleteSubmit;
         this.printSubmit = printSubmit;
         this.clearSubmit = clearSubmit;
+
+        this.initialize();
+    }
+
+    initialize() {
+        this.insertSelect.addEventListener("change", () => {
+            this.insertField.value = this.insertSelect.value;
+            this.insertSelect.value = "";
+        });
+
+        addReturnSubmit(this.insertField, "ALPHANUM+", () =>
+            this.engine.submit(this.engine.insert, this.insertField)
+        );
+
+        this.insertSubmit.addEventListener("click", () => {
+            this.engine.submit(this.engine.insert, this.insertField);
+        });
+
+        addReturnSubmit(this.findField, "ALPHANUM", () =>
+            this.engine.submit(this.engine.find, this.findField)
+        );
+
+        this.findSubmit.addEventListener("click", () =>
+            this.engine.submit(this.engine.find, this.findField)
+        );
+
+        addReturnSubmit(this.deleteField, "ALPHANUM", () =>
+            this.engine.submit(this.engine.delete, this.deleteField)
+        );
+
+        this.deleteSubmit.addEventListener("click", () =>
+            this.engine.submit(this.engine.delete, this.deleteField)
+        );
+
+        this.printSubmit.addEventListener("click", () =>
+            this.engine.submit(this.engine.print, null)
+        );
+
+        this.clearSubmit.addEventListener("click", () =>
+            this.engine.confirmResetAll()
+        );
     }
 }

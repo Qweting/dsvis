@@ -1,4 +1,8 @@
-export class AVLQuizToolbar {
+import { addReturnSubmit } from "~/helpers";
+import { AVLQuiz } from "~/quizzes/AVL-quiz";
+import { EngineAlgorithmControl } from "./engine-algorithm-controls";
+
+export class AVLQuizAlgorithmControl extends EngineAlgorithmControl {
     insertField: HTMLInputElement;
     createLeft: HTMLInputElement;
     createRight: HTMLInputElement;
@@ -11,7 +15,13 @@ export class AVLQuizToolbar {
     copyToMark: HTMLInputElement;
     deleteNode: HTMLInputElement;
     restartQuiz: HTMLInputElement;
-    constructor(container: HTMLElement) {
+    engine: AVLQuiz;
+
+    constructor(container: HTMLElement, engine: AVLQuiz) {
+        super(container);
+
+        this.engine = engine;
+
         const insertField =
             container.querySelector<HTMLInputElement>("input.insertField");
         const createLeft =
@@ -86,5 +96,55 @@ export class AVLQuizToolbar {
         this.copyToMark = copyToMark;
         this.deleteNode = deleteNode;
         this.restartQuiz = restartQuiz;
+
+        this.initialize();
+    }
+
+    initialize() {
+        addReturnSubmit(this.insertField, "ALPHANUM");
+
+        this.createLeft.addEventListener("click", () =>
+            this.engine.submit(this.engine.insertLeft, this.insertField)
+        );
+
+        this.createRight.addEventListener("click", () =>
+            this.engine.submit(this.engine.insertRight, this.insertField)
+        );
+
+        this.moveParent.addEventListener("click", () =>
+            this.engine.execute(this.engine.moveParent, [])
+        );
+
+        this.moveLeft.addEventListener("click", () =>
+            this.engine.execute(this.engine.moveChild, ["left"])
+        );
+
+        this.moveRight.addEventListener("click", () =>
+            this.engine.execute(this.engine.moveChild, ["right"])
+        );
+
+        this.rotateLeft.addEventListener("click", () =>
+            this.engine.execute(this.engine.rotateCurrent, ["left"])
+        );
+
+        this.rotateRight.addEventListener("click", () =>
+            this.engine.execute(this.engine.rotateCurrent, ["right"])
+        );
+
+        this.markNode.addEventListener("click", () =>
+            this.engine.execute(this.engine.markNode, [])
+        );
+
+        this.copyToMark.addEventListener("click", () =>
+            this.engine.execute(this.engine.copyToMark, [])
+        );
+
+        this.deleteNode.addEventListener("click", () =>
+            this.engine.execute(this.engine.deleteCurrent, [])
+        );
+
+        this.restartQuiz.addEventListener("click", () =>
+            this.engine.resetAll()
+        );
     }
 }

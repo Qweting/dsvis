@@ -1,7 +1,6 @@
-import { Debugger } from "./debugger";
-import { Engine, Reject, Resolve } from "./engine";
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Debugger } from "~/debugger";
+import { Engine, Reject, Resolve } from "~/engine";
+import { State } from "~/state";
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -26,24 +25,90 @@ type EventListenersMap = Map<
     Partial<Record<ListenerType, () => void>>
 >;
 
-export class EventListeners {
+export class EngineGeneralControls {
+    generalControls: HTMLFieldSetElement;
+    fastBackward: HTMLButtonElement;
+    stepBackward: HTMLButtonElement;
+    toggleRunner: HTMLButtonElement;
+    stepForward: HTMLButtonElement;
+    fastForward: HTMLButtonElement;
+    animationSpeed: HTMLSelectElement;
+    objectSize: HTMLSelectElement;
     engine: Engine;
-    toolbar: EngineToolbar;
     debugger: Debugger;
     state: State;
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
 
-    constructor(engine: Engine) {
+    constructor(container: HTMLElement, engine: Engine) {
         this.engine = engine;
-        this.toolbar = engine.toolbar;
         this.debugger = engine.debugger;
         this.state = engine.state;
 
+        const generalControls = container.querySelector<HTMLFieldSetElement>(
+            "fieldset.generalControls"
+        );
+
+        const fastBackward = container.querySelector<HTMLButtonElement>(
+            "button.fastBackward"
+        );
+        const stepBackward = container.querySelector<HTMLButtonElement>(
+            "button.stepBackward"
+        );
+        const toggleRunner = container.querySelector<HTMLButtonElement>(
+            "button.toggleRunner"
+        );
+        const stepForward =
+            container.querySelector<HTMLButtonElement>("button.stepForward");
+
+        const fastForward =
+            container.querySelector<HTMLButtonElement>("button.fastForward");
+
+        const objectSize =
+            container.querySelector<HTMLSelectElement>("select.objectSize");
+        const animationSpeed = container.querySelector<HTMLSelectElement>(
+            "select.animationSpeed"
+        );
+
+        if (!generalControls) {
+            throw new Error("Missing general controls fieldset");
+        }
+
+        if (!stepForward) {
+            throw new Error("Missing step forward button");
+        }
+        if (!stepBackward) {
+            throw new Error("Missing step backward button");
+        }
+        if (!toggleRunner) {
+            throw new Error("Missing toggle runner button");
+        }
+        if (!fastForward) {
+            throw new Error("Missing fast forward button");
+        }
+        if (!fastBackward) {
+            throw new Error("Missing fast backward button");
+        }
+        if (!objectSize) {
+            throw new Error("Missing object size select");
+        }
+        if (!animationSpeed) {
+            throw new Error("Missing animation speed select");
+        }
+
+        this.generalControls = generalControls;
+        this.stepForward = stepForward;
+        this.stepBackward = stepBackward;
+        this.toggleRunner = toggleRunner;
+        this.fastForward = fastForward;
+        this.fastBackward = fastBackward;
+        this.objectSize = objectSize;
+        this.animationSpeed = animationSpeed;
+
         this.idleListeners.push(
             {
-                element: this.toolbar.stepBackward,
+                element: this.stepBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -57,7 +122,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.fastBackward,
+                element: this.fastBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -75,7 +140,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.objectSize,
+                element: this.objectSize,
                 type: "change",
                 condition: () => true,
                 handler: () => {
@@ -95,7 +160,7 @@ export class EventListeners {
 
         this.asyncListeners.push(
             {
-                element: this.toolbar.stepForward,
+                element: this.stepForward,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.state.setRunning(false);
@@ -103,7 +168,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.fastForward,
+                element: this.fastForward,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.actions[this.engine.currentAction].stepCount =
@@ -112,7 +177,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.toggleRunner,
+                element: this.toggleRunner,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.state.toggleRunner();
@@ -125,7 +190,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.stepBackward,
+                element: this.stepBackward,
                 type: "click",
                 handler: (resolve, reject) =>
                     reject({
@@ -134,12 +199,12 @@ export class EventListeners {
                     }),
             },
             {
-                element: this.toolbar.fastBackward,
+                element: this.fastBackward,
                 type: "click",
                 handler: (resolve, reject) => reject({ until: 0 }),
             },
             {
-                element: this.toolbar.objectSize,
+                element: this.objectSize,
                 type: "change",
                 handler: (resolve, reject) =>
                     reject({ until: this.engine.currentStep }),
