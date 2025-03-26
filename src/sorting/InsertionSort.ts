@@ -1,4 +1,4 @@
-import {compare} from "../../src/engine";
+import {compare} from "../../src/helpers"
 import {Sort} from "../../src/sorting/sort"
 
 

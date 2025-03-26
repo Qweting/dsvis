@@ -1,7 +1,8 @@
 import { DSArray } from "../objects/dsarray";
 import { Sort } from "./sort";
-import { MessagesObject, NBSP, compare } from "../engine";
+import { MessagesObject, NBSP } from "../engine";
 import { TextCircle } from "../../src/objects/text-circle";
+import {compare} from "../../src/helpers"
 
 export const MergeSortMessages = {
     general: {

@@ -1,5 +1,6 @@
-import { MessagesObject, compare } from "../engine";
+import { MessagesObject } from "../engine";
 import { Sort } from "./sort";
+import {compare} from "../../src/helpers"
 
 export const SelectionSortMessages = {
     general: {

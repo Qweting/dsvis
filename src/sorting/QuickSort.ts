@@ -1,6 +1,7 @@
 import { DSArray } from "src/objects/dsarray";
-import {compare, MessagesObject, NBSP} from "../../src/engine";
+import {MessagesObject, NBSP} from "../../src/engine";
 import {Sort} from "../../src/sorting/sort"
+import {compare} from "../../src/helpers"
 
 export const QuickSortMessages = {
     general: {
