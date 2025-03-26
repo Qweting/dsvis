@@ -1,10 +1,14 @@
-import { EngineToolbar } from "./engine-toolbar";
+import { BTree } from "~/trees/BTree";
+import { CollectionAlgorithmControl } from "./collection-algorithm-controls";
 
-export class BTreeToolbar extends EngineToolbar {
+export class BTreeAlgorithmControl extends CollectionAlgorithmControl {
     maxDegree: HTMLSelectElement;
+    engine: BTree;
 
-    constructor(container: HTMLElement) {
-        super(container);
+    constructor(container: HTMLElement, engine: BTree) {
+        super(container, engine);
+
+        this.engine = engine;
 
         this.algorithmControls.insertAdjacentHTML(
             "beforeend",
@@ -27,5 +31,9 @@ export class BTreeToolbar extends EngineToolbar {
         }
 
         this.maxDegree = maxDegree;
+
+        this.maxDegree.addEventListener("change", () =>
+            this.engine.confirmResetAll()
+        );
     }
 }

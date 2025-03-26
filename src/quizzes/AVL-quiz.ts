@@ -1,15 +1,24 @@
+import { AVLQuizAlgorithmControl } from "~/algorithm-controls/AVL-quiz-algorithm-controls";
 import { NBSP } from "~/engine";
-import { addReturnSubmit, compare } from "~/helpers";
+import { compare } from "~/helpers";
 import { AVLNode } from "~/objects/avl-node";
 import { BinaryDir } from "~/objects/binary-node";
 import { HighlightCircle } from "~/objects/highlight-circle";
 import { TextCircle } from "~/objects/text-circle";
-import { AVLQuizToolbar } from "~/toolbars/AVL-quiz-toolbar";
 import { BST } from "~/trees/BST";
 
 export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
+    algorithmControls: AVLQuizAlgorithmControl;
+
+    constructor(containerSelector: string) {
+        super(containerSelector);
+        this.algorithmControls = new AVLQuizAlgorithmControl(
+            this.container,
+            this
+        );
+    }
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
@@ -266,52 +275,6 @@ export class AVLQuiz extends BST<AVLNode> {
 function initialiseAVLQuiz(containerID: string) {
     const AVLEngine = new AVLQuiz(containerID);
     AVLEngine.initialise(["K"]);
-
-    const toolbar = new AVLQuizToolbar(AVLEngine.container);
-
-    addReturnSubmit(toolbar.insertField, "ALPHANUM");
-
-    toolbar.createLeft.addEventListener("click", () =>
-        AVLEngine.submit(AVLEngine.insertLeft, toolbar.insertField)
-    );
-
-    toolbar.createRight.addEventListener("click", () =>
-        AVLEngine.submit(AVLEngine.insertRight, toolbar.insertField)
-    );
-
-    toolbar.moveParent.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.moveParent, [])
-    );
-
-    toolbar.moveLeft.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.moveChild, ["left"])
-    );
-
-    toolbar.moveRight.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.moveChild, ["right"])
-    );
-
-    toolbar.rotateLeft.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.rotateCurrent, ["left"])
-    );
-
-    toolbar.rotateRight.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.rotateCurrent, ["right"])
-    );
-
-    toolbar.markNode.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.markNode, [])
-    );
-
-    toolbar.copyToMark.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.copyToMark, [])
-    );
-
-    toolbar.deleteNode.addEventListener("click", () =>
-        AVLEngine.execute(AVLEngine.deleteCurrent, [])
-    );
-
-    toolbar.restartQuiz.addEventListener("click", () => AVLEngine.resetAll());
 }
 
 initialiseAVLQuiz("#avlquizContainer");

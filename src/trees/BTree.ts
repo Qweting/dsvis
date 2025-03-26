@@ -1,10 +1,10 @@
 import { Text } from "@svgdotjs/svg.js";
+import { BTreeAlgorithmControl } from "~/algorithm-controls/BTree-algorithm-controls";
 import { Collection } from "~/collections";
 import { Engine, MessagesObject } from "~/engine";
 import { compare, parseValues, updateDefault } from "~/helpers";
 import { BTreeNode } from "~/objects/btree-node";
 import { HighlightCircle } from "~/objects/highlight-circle";
-import { BTreeToolbar } from "~/toolbars/BTree-toolbar";
 import { BSTMessages } from "./BST";
 
 const BTreeMessages = {
@@ -47,15 +47,16 @@ const BTreeMessages = {
 export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
-
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
-
-    toolbar: BTreeToolbar;
+    algorithmControls: BTreeAlgorithmControl;
 
     constructor(containerSelector: string) {
         super(containerSelector);
 
-        this.toolbar = new BTreeToolbar(this.container);
+        this.algorithmControls = new BTreeAlgorithmControl(
+            this.container,
+            this
+        );
     }
 
     initialise(initialValues = null) {
@@ -73,16 +74,8 @@ export class BTree extends Engine implements Collection {
         });
     }
 
-    initToolbar() {
-        super.initToolbar();
-
-        this.toolbar.maxDegree.addEventListener("change", () =>
-            this.confirmResetAll()
-        );
-    }
-
     getMaxDegree() {
-        return parseInt(this.toolbar.maxDegree.value);
+        return parseInt(this.algorithmControls.maxDegree.value);
     }
 
     getMaxKeys() {
