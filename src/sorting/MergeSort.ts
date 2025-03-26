@@ -217,7 +217,7 @@ export class MergeSort extends Sort {
                 await this.pause("sort.move", subarray2.getValue(a2i));
                 let svgValue = this.Svg.put(
                     new TextCircle(
-                        subarray1.getValue(a2i),
+                        subarray2.getValue(a2i),
                         this.getObjectSize(),
                         this.getStrokeWidth()
                     ).init(subarray2.getCX(a2i), subarray2.cy())

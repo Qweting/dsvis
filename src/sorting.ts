@@ -1,4 +1,4 @@
-import { addReturnSubmit, Engine } from "./engine";
+import { addReturnSubmit } from "./helpers";
 import { SelectionSort } from "./sorting/SelectionSort";
 import { InsertionSort } from "./sorting/InsertionSort";
 import { MergeSort } from "./sorting/MergeSort";
@@ -47,7 +47,7 @@ function initialisePrioQueues(containerID: string) {
             searchParams.delete("algorithm");
         }
 
-        if (PQEngine.DEBUG) {
+        if (PQEngine.debugger.isEnabled()) {
             searchParams.set("debug", "true");
         } else {
             searchParams.delete("debug");
@@ -98,13 +98,13 @@ function initialisePrioQueues(containerID: string) {
     });
 
     addReturnSubmit(tools.insertField, "ALPHANUM+", () =>
-        PQEngine.submit("insert", tools.insertField)
+        PQEngine.submit(PQEngine.insert, tools.insertField)
     );
     tools.insertSubmit.addEventListener("click", () =>
-        PQEngine.submit("insert", tools.insertField)
+        PQEngine.submit(PQEngine.insert, tools.insertField)
     );
     tools.sortSubmit.addEventListener("click", () =>
-        PQEngine.submit("sort", null)
+        PQEngine.submit(PQEngine.sort, null)
     );
     tools.clearSubmit.addEventListener("click", () =>
         PQEngine.confirmResetAll()

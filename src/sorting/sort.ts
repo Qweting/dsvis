@@ -95,4 +95,6 @@ export class Sort extends Engine {
         this.indexLength++;
         this.sortArray.setIndexHighlight(currentIndex, false);
     }
+
+    async sort() {}
 }
