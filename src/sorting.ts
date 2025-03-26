@@ -104,7 +104,7 @@ function initialisePrioQueues(containerID: string) {
         PQEngine.submit("insert", tools.insertField)
     );
     tools.sortSubmit.addEventListener("click", () =>
-        PQEngine.submit("sort", " ")
+        PQEngine.submit("sort", null)
     );
     tools.clearSubmit.addEventListener("click", () =>
         PQEngine.confirmResetAll()
