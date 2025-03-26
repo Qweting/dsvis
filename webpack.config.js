@@ -10,6 +10,7 @@ module.exports = (env, argv) => {
         entry: {
             collections: "./src/collections.ts",
             prioqueues: "./src/prioqueues.ts",
+            sorting: "./src/sorting.ts",
             "avl-quiz": "./src/quizzes/AVL-quiz.ts",
         },
         resolve: {

@@ -155,8 +155,6 @@ function getSortingToolbar(container: HTMLElement) {
         container.querySelector<HTMLInputElement>("input.insertField");
     const insertSubmit =
         container.querySelector<HTMLInputElement>("input.insertSubmit");
-    const deleteSubmit =
-        container.querySelector<HTMLInputElement>("input.deleteSubmit");
     const clearSubmit =
         container.querySelector<HTMLInputElement>("input.clearSubmit");
     const psuedoCode =
@@ -173,26 +171,18 @@ function getSortingToolbar(container: HTMLElement) {
     if (!insertSubmit) {
         throw new Error("Missing insert submit");
     }
-    if (!deleteSubmit) {
-        throw new Error("Missing delete submit");
-    }
     if (!clearSubmit) {
         throw new Error("Missing clear submit");
     }
-    if (!psuedoCode) {
-        throw new Error("Missing clear submit");
-    }
     if (!sortSubmit) {
-        throw new Error("Missing clear submit");
+        throw new Error("Missing sort submit");
     }
 
     return {
         insertSelect,
         insertField,
         insertSubmit,
-        deleteSubmit,
         clearSubmit,
-        psuedoCode,
         sortSubmit,
     };
 }

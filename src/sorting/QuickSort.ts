@@ -1,5 +1,5 @@
 import { DSArray } from "src/objects/dsarray";
-import {compare, NBSP} from "../../src/engine";
+import {compare, MessagesObject, NBSP} from "../../src/engine";
 import {Sort} from "../../src/sorting/sort"
 
 export const QuickSortMessages = {
@@ -24,7 +24,7 @@ export const QuickSortMessages = {
 };
 
 export class QuickSort extends Sort {
-
+    messages: MessagesObject = QuickSortMessages;
     async sort() {
         if (this.sortArray === null) {
             throw new Error("Sort array not initialised");

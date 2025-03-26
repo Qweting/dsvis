@@ -1,6 +1,6 @@
-import { DSArray } from "src/objects/dsarray";
+import { DSArray } from "../objects/dsarray";
 import { Sort } from "./sort";
-import { NBSP, compare } from "src/engine";
+import { MessagesObject, NBSP, compare } from "../engine";
 import { TextCircle } from "../../src/objects/text-circle";
 
 export const MergeSortMessages = {
@@ -23,7 +23,7 @@ export const MergeSortMessages = {
 
 export class MergeSort extends Sort {
     mergeArrayList: DSArray[] = [];
-
+    messages: MessagesObject = MergeSortMessages;
     async sort() {
         if (this.sortArray === null) {
             throw new Error("Sort array not initialised");
@@ -73,12 +73,8 @@ export class MergeSort extends Sort {
 
             if (arr.getSize() > 2) {
                 const mergeArray1 = this.Svg.put(
-                    new DSArray(mid - left, this.getObjectSize()).init(
-                        mid - left,
-                        CX,
-                        arr.cy()
-                    )
-                );
+                    new DSArray(mid - left, this.getObjectSize())
+                ).init(mid - left, CX, arr.cy());
                 for (let k = 0; k < mid; k++) {
                     mergeArray1.setValue(k, arr.getValue(k));
                 }
@@ -96,12 +92,8 @@ export class MergeSort extends Sort {
                 );
 
                 const mergeArray2 = this.Svg.put(
-                    new DSArray(right - mid, this.getObjectSize()).init(
-                        right - mid,
-                        arr.getCX(mid),
-                        arr.cy()
-                    )
-                );
+                    new DSArray(right - mid, this.getObjectSize())
+                ).init(right - mid, arr.getCX(mid), arr.cy());
                 for (let k = 0; k + mid < right; k++) {
                     mergeArray2.setValue(k, arr.getValue(k + mid));
                 }
@@ -202,7 +194,8 @@ export class MergeSort extends Sort {
             if (
                 a2i >= subarray2.getSize() ||
                 (a1i < subarray1.getSize() &&
-                    compare(subarray1.getValue(a1i),  subarray2.getValue(a2i)) < 0)
+                    compare(subarray1.getValue(a1i), subarray2.getValue(a2i)) <
+                        0)
             ) {
                 await this.pause("sort.move", subarray1.getValue(a1i));
                 let svgValue = this.Svg.put(

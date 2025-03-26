@@ -42,6 +42,7 @@ export class DSArray extends G {
             this.$values.pop()?.remove();
             this.$indices.pop()?.remove();
         }
+        console.log(this);
         const w0 = this.engine().getObjectSize();
         const h = this.engine().getObjectSize();
         const stroke = this.engine().getStrokeWidth();

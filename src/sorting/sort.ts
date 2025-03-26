@@ -10,6 +10,8 @@ export class Sort extends Engine {
     treeNodes: Array<BinaryNode> | null = null;
     compensate: number = 0;
     sortArray: DSArray | null = null;
+    indexLength: number = 0;
+
 
     initialise(initialValues = null) {
         this.initialValues = initialValues;
@@ -27,15 +29,11 @@ export class Sort extends Engine {
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
-
+        this.indexLength = 0;
         const [xRoot, yRoot] = this.getTreeRoot();
         this.sortArray = this.Svg.put(
-            new DSArray(1, this.getObjectSize()).init(
-                1,
-                xRoot,
-                yRoot + this.$Svg.margin * 4
-            )
-        );
+            new DSArray(1, this.getObjectSize())
+        ).init(1, xRoot, yRoot + this.$Svg.margin * 4);
         if (this.sortArray && Number(this.sortArray.x()) < this.$Svg.margin) {
             this.sortArray.x(this.$Svg.margin);
         }
@@ -83,7 +81,7 @@ export class Sort extends Engine {
             new TextCircle(value, this.getObjectSize(), this.getStrokeWidth())
         ).init(...this.getNodeStart());
         await this.pause("insert.value", value);
-        const currentIndex = this.sortArray.getSize();
+        const currentIndex = this.indexLength;
         arrayLabel.setCenter(
             this.sortArray.getCX(currentIndex),
             this.sortArray.cy(),
@@ -95,7 +93,7 @@ export class Sort extends Engine {
         this.sortArray.setDisabled(currentIndex, false);
         this.sortArray.setValue(currentIndex, value);
         this.sortArray.setIndexHighlight(currentIndex, true);
-
+        this.indexLength++;
         this.sortArray.setIndexHighlight(currentIndex, false);
     }
 }
