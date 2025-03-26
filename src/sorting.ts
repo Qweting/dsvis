@@ -3,6 +3,7 @@ import { SelectionSort } from "./sorting/SelectionSort";
 import { InsertionSort } from "./sorting/InsertionSort";
 import { MergeSort } from "./sorting/MergeSort";
 import { QuickSort } from "./sorting/QuickSort";
+import { Sort } from "./sorting/sort";
 let right : number = 0;
 let down : number= 0;
 let zoom : number = 1;
@@ -33,7 +34,7 @@ function initialisePrioQueues(containerID: string) {
     const algoClass = algo as keyof typeof PRIOQUEUES | "";
     algoSelector.value = algo;
 
-    const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Engine;
+    const PrioQueue = algoClass ? PRIOQUEUES[algoClass] : Sort;
     const PQEngine = new PrioQueue(containerID);
     PQEngine.initialise();
 
@@ -121,7 +122,7 @@ function initialisePrioQueues(containerID: string) {
     });
 }
 
-function goRight(goingRight : boolean, PQEngine : Engine) {
+function goRight(goingRight : boolean, PQEngine : Sort) {
     if (goingRight) {
         right += scrollSpeed;
     } else if (right > 0) {
@@ -129,7 +130,7 @@ function goRight(goingRight : boolean, PQEngine : Engine) {
     }
     PQEngine.drawViewbox(right, down, zoom);
 }
-function goDown(goingDown : boolean, PQEngine : Engine) {
+function goDown(goingDown : boolean, PQEngine : Sort) {
     if (goingDown) {
         down += scrollSpeed;
     } else if (down > 0) {
@@ -137,7 +138,7 @@ function goDown(goingDown : boolean, PQEngine : Engine) {
     }
     PQEngine.drawViewbox(right, down, zoom);
 }
-function zoomIn(zoomingIn : boolean, PQEngine : Engine) {
+function zoomIn(zoomingIn : boolean, PQEngine : Sort) {
     if (zoomingIn && zoom > 0.2) {
         zoom -= 0.1;
     } else if (zoom < 3) {
