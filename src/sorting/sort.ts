@@ -5,15 +5,14 @@ import { TextCircle } from "../../src/objects/text-circle";
 
 export class Sort extends Engine {
     arraySize: number = 28;
-    initialValues: Array<string> | null = null;
+    initialValues: Array<string> = [];
     treeRoot: BinaryNode | null = null;
     treeNodes: Array<BinaryNode> | null = null;
     compensate: number = 0;
     sortArray: DSArray | null = null;
     indexLength: number = 0;
 
-
-    initialise(initialValues = null) {
+    initialise(initialValues = []) {
         this.initialValues = initialValues;
         super.initialise();
     }
@@ -38,9 +37,9 @@ export class Sort extends Engine {
             this.sortArray.x(this.$Svg.margin);
         }
         if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
+            this.state.runWhileResetting(
+                async () => await this.insert(...this.initialValues)
+            );
         }
     }
 
