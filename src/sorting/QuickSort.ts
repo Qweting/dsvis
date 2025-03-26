@@ -129,8 +129,8 @@ export class QuickSort extends Sort {
         low += 1;
 
         //Adds arrows to indicate low and high
-        this.sortArray.addArrow(low, leftArrowId);
-        this.sortArray.addArrow(high, rightArrowId);
+        this.sortArray.addArrow(low, leftArrowId, red);
+        this.sortArray.addArrow(high, rightArrowId, blue);
 
         while (true) {
             this.sortArray.setIndexHighlight(low, true, red);
