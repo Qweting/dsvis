@@ -1,7 +1,10 @@
-import { compare, Engine, MessagesObject } from "../../src/engine";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
-import { DSArray } from "../../src/objects/dsarray";
-import { TextCircle } from "../../src/objects/text-circle";
+import { PrioQueueAlgorithmControl } from "~/algorithm-controls/prioqueue-algorithm-controls";
+import { Engine, MessagesObject } from "~/engine";
+import { compare } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { DSArray } from "~/objects/dsarray";
+import { TextCircle } from "~/objects/text-circle";
+import { Prioqueue } from "~/prioqueues";
 
 export const BinaryHeapMessages = {
     general: {
@@ -34,15 +37,24 @@ export const BinaryHeapMessages = {
     },
 };
 
-export class BinaryHeap extends Engine {
+export class BinaryHeap extends Engine implements Prioqueue {
     messages: MessagesObject = BinaryHeapMessages;
-
     arraySize: number = 28;
     initialValues: Array<string> | null = null;
     treeRoot: BinaryNode | null = null;
     treeNodes: Array<BinaryNode> | null = null;
     heapArray: DSArray | null = null;
     heapSize: number | null = null;
+    algorithmControls: PrioQueueAlgorithmControl;
+
+    constructor(containerSelector: string) {
+        super(containerSelector);
+
+        this.algorithmControls = new PrioQueueAlgorithmControl(
+            this.container,
+            this
+        );
+    }
 
     initialise(initialValues: Array<string> | null = null) {
         this.initialValues = initialValues;
@@ -61,15 +73,15 @@ export class BinaryHeap extends Engine {
             this.heapArray.x(this.$Svg.margin);
         }
         this.heapSize = 0;
-        if (this.initialValues) {
-            this.state.resetting = true;
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     resizeTree() {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
@@ -78,7 +90,7 @@ export class BinaryHeap extends Engine {
         );
     }
 
-    async insert(...values: Array<string>) {
+    async insert(...values: (string | number)[]) {
         for (const val of values) {
             await this.insertOne(val);
         }
@@ -118,7 +130,8 @@ export class BinaryHeap extends Engine {
         kLabel.remove();
     }
 
-    async insertOne(value: string) {
+    async insertOne(value: string | number) {
+        value = String(value); //TODO: Check if this can be handled better
         if (this.heapSize === null) {
             throw new Error("Heap size not initialised");
         }

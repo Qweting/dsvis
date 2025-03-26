@@ -1,5 +1,5 @@
 import { G, Rect, Text } from "@svgdotjs/svg.js";
-import { NBSP } from "../../src/engine";
+import { NBSP } from "~/engine";
 import { Polyline } from "@svgdotjs/svg.js";
 
 export class DSArray extends G {

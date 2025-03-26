@@ -1,18 +1,12 @@
 import { Text } from "@svgdotjs/svg.js";
-import {
-    compare,
-    Engine,
-    EngineToolbarItems,
-    MessagesObject,
-    parseValues,
-} from "../../src/engine";
-import { TextCircle } from "../../src/objects/text-circle";
-import { BinaryDir, BinaryNode } from "../objects/binary-node";
-import { HighlightCircle } from "../objects/highlight-circle";
-
-type BSTToolbarItems = EngineToolbarItems & {
-    showNullNodes: HTMLInputElement;
-};
+import { CollectionAlgorithmControl } from "~/algorithm-controls/collection-algorithm-controls";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { BSTGeneralControls } from "~/general-controls/BST-general-controls";
+import { compare, parseValues } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { TextCircle } from "~/objects/text-circle";
 
 export const BSTMessages = {
     general: {
@@ -63,34 +57,22 @@ export const BSTMessages = {
     },
 };
 
-export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
+export class BST<Node extends BinaryNode = BinaryNode>
+    extends Engine
+    implements Collection
+{
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
-    toolbar!: BSTToolbarItems; // ! Can be used because this.getToolbar is called in the constructor of Engine
 
     constructor(containerSelector: string) {
         super(containerSelector);
-    }
 
-    getToolbar(): BSTToolbarItems {
-        const toolbar = super.getToolbar();
-
-        toolbar.generalControls.insertAdjacentHTML(
-            "beforeend",
-            `<span class="formgroup"><label>
-        <input class="showNullNodes" type="checkbox"/> Show null nodes
-       </label></span>`
+        this.generalControls = new BSTGeneralControls(this.container, this);
+        this.algorithmControls = new CollectionAlgorithmControl(
+            this.container,
+            this
         );
-        const showNullNodes = this.container.querySelector<HTMLInputElement>(
-            "input.showNullNodes"
-        );
-
-        if (!showNullNodes) {
-            throw new Error("Could not find show null nodes input");
-        }
-
-        return { ...toolbar, showNullNodes };
     }
 
     initialise(initialValues: string[] | null = null): this {
@@ -103,37 +85,11 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         await super.resetAlgorithm();
         this.treeRoot = null;
 
-        if (this.initialValues) {
-            this.state.resetting = true;
-            // @ts-expect-error TODO: Decide how we want to handle numbers and then update types
-            await this.insert(...this.initialValues);
-            this.state.resetting = false;
-        }
-    }
-
-    initToolbar(): void {
-        super.initToolbar();
-
-        this.toolbar.showNullNodes.addEventListener("change", () =>
-            this.toggleNullNodes(null)
-        );
-
-        this.toggleNullNodes(true);
-    }
-
-    toggleNullNodes(show: boolean | null): this {
-        if (show === null) {
-            show = this.toolbar.showNullNodes.checked;
-        }
-
-        this.toolbar.showNullNodes.checked = show;
-
-        if (show) {
-            this.Svg.addClass("shownullnodes");
-        } else {
-            this.Svg.removeClass("shownullnodes");
-        }
-        return this;
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
     }
 
     newNode(text: string): BinaryNode {
@@ -143,7 +99,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
     }
 
     resizeTree(): this {
-        const animate = !this.state.resetting;
+        const animate = !this.state.isResetting();
         this.treeRoot?.resize(
             ...this.getTreeRoot(),
             this.$Svg.margin,
@@ -154,13 +110,19 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return this;
     }
 
-    async insert(...values: string[]): Promise<void> {
+    async insert(...values: (string | number)[]): Promise<void> {
         for (const val of values) {
             await this.insertOne(val);
         }
     }
 
-    async find(value: string | number): Promise<{
+    async find(...values: (string | number)[]): Promise<void> {
+        for (const val of values) {
+            await this.findOne(val);
+        }
+    }
+
+    async findOne(value: string | number): Promise<{
         success: boolean;
         node: Node | null;
     }> {
@@ -225,10 +187,11 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return { success: false, node: parent };
     }
 
-    async insertOne(value: string): Promise<{
+    async insertOne(value: string | number): Promise<{
         success: boolean;
         node: Node | null;
     }> {
+        value = String(value); //TODO: Check if this can be handled better
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value) as Node;
             await this.pause("insert.newroot", value);
@@ -263,8 +226,14 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
         return { success: true, node: child };
     }
 
+    async delete(...values: (string | number)[]) {
+        for (const val of values) {
+            await this.deleteOne(val);
+        }
+    }
+
     // TODO: update type with separate for success true and false
-    async delete(value: string | number): Promise<{
+    async deleteOne(value: string | number): Promise<{
         success: boolean;
         direction: BinaryDir | null;
         parent: Node | null;
@@ -384,7 +353,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
             node.setHighlight(false);
 
             if (child === parent.getLeft()?.getLeft()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     -node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()
@@ -392,7 +361,7 @@ export class BST<Node extends BinaryNode = BinaryNode> extends Engine {
             }
 
             if (child === parent.getRight()?.getRight()) {
-                node.dmoveCenter(
+                node.dMoveCenter(
                     node.getSize(),
                     -node.getSize() / 2,
                     this.getAnimationSpeed()

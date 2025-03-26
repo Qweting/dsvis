@@ -1,5 +1,7 @@
-import { MessagesObject, updateDefault } from "../../src/engine";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { updateDefault } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
 const RedBlackMessages = {
@@ -59,7 +61,7 @@ const RedBlackMessages = {
     },
 };
 
-export class RedBlack extends BST {
+export class RedBlack extends BST implements Collection {
     messages: MessagesObject = updateDefault(RedBlackMessages, BSTMessages);
 
     newNode(text: string) {
@@ -145,8 +147,8 @@ export class RedBlack extends BST {
         await this.singleRotate(rotate, grandparent as BinaryNode);
     }
 
-    async delete(value: string | number) {
-        const result = await super.delete(value);
+    async deleteOne(value: string | number) {
+        const result = await super.deleteOne(value);
         if (result?.success) {
             if (result.parent && result.direction) {
                 await this.fixDeleteImbalance(result.parent, result.direction);

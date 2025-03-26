@@ -1,13 +1,24 @@
-import { addReturnSubmit, compare, NBSP } from "../../src/engine";
-import { AVLNode } from "../../src/objects/avl-node";
-import { BinaryDir } from "../../src/objects/binary-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
-import { TextCircle } from "../../src/objects/text-circle";
-import { BST } from "../../src/trees/BST";
+import { AVLQuizAlgorithmControl } from "~/algorithm-controls/AVL-quiz-algorithm-controls";
+import { NBSP } from "~/engine";
+import { compare } from "~/helpers";
+import { AVLNode } from "~/objects/avl-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
+import { TextCircle } from "~/objects/text-circle";
+import { BST } from "~/trees/BST";
 
 export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
+    algorithmControls: AVLQuizAlgorithmControl;
+
+    constructor(containerSelector: string) {
+        super(containerSelector);
+        this.algorithmControls = new AVLQuizAlgorithmControl(
+            this.container,
+            this
+        );
+    }
 
     async resetAlgorithm() {
         await super.resetAlgorithm();
@@ -77,8 +88,8 @@ export class AVLQuiz extends BST<AVLNode> {
                 : unbalanced
                 ? "Tree is unbalanced!"
                 : "Tree is a correct AVL tree";
-        this.info.title.text(message);
-        this.info.body.text(NBSP);
+        this.info.setTitle(message);
+        this.info.setBody(NBSP);
     }
 
     newNode(text: string) {
@@ -167,15 +178,20 @@ export class AVLQuiz extends BST<AVLNode> {
         moving.remove();
     }
 
-    async insertLeft(value: string) {
-        await this.insertBelow("left", value);
+    async insertLeft(...values: (string | number)[]) {
+        for (const value of values) {
+            await this.insertBelow("left", value);
+        }
     }
 
-    async insertRight(value: string) {
-        await this.insertBelow("right", value);
+    async insertRight(...values: (string | number)[]) {
+        for (const value of values) {
+            await this.insertBelow("right", value);
+        }
     }
 
-    async insertBelow(direction: BinaryDir, value: string) {
+    async insertBelow(direction: BinaryDir, value: string | number) {
+        value = String(value); //TODO: Check if this can be handled better
         if (!this.current) {
             throw new Error("There is no current node");
             return;
@@ -259,97 +275,6 @@ export class AVLQuiz extends BST<AVLNode> {
 function initialiseAVLQuiz(containerID: string) {
     const AVLEngine = new AVLQuiz(containerID);
     AVLEngine.initialise(["K"]);
-
-    const container = AVLEngine.container;
-    const tools = AVLEngine.toolbar;
-    const insertField =
-        container.querySelector<HTMLInputElement>("input.insertField");
-    const createLeft =
-        container.querySelector<HTMLInputElement>("input.createLeft");
-    const createRight =
-        container.querySelector<HTMLInputElement>("input.createRight");
-    const moveParent =
-        container.querySelector<HTMLInputElement>("input.moveParent");
-    const moveLeft =
-        container.querySelector<HTMLInputElement>("input.moveLeft");
-    const moveRight =
-        container.querySelector<HTMLInputElement>("input.moveRight");
-    const rotateLeft =
-        container.querySelector<HTMLInputElement>("input.rotateLeft");
-    const rotateRight =
-        container.querySelector<HTMLInputElement>("input.rotateRight");
-    const markNode =
-        container.querySelector<HTMLInputElement>("input.markNode");
-    const copyToMark =
-        container.querySelector<HTMLInputElement>("input.copyToMark");
-    const deleteNode =
-        container.querySelector<HTMLInputElement>("input.deleteNode");
-    const restartQuiz =
-        container.querySelector<HTMLInputElement>("input.restartQuiz");
-
-    if (!insertField) {
-        throw new Error("Could not find insert field");
-    }
-    if (!createLeft) {
-        throw new Error("Could not find create left field");
-    }
-    if (!createRight) {
-        throw new Error("Could not find create right field");
-    }
-    if (!moveParent) {
-        throw new Error("Could not find move parent field");
-    }
-    if (!moveLeft) {
-        throw new Error("Could not find move left field");
-    }
-    if (!moveRight) {
-        throw new Error("Could not find move right field");
-    }
-    if (!rotateLeft) {
-        throw new Error("Could not find rotate left field");
-    }
-    if (!rotateRight) {
-        throw new Error("Could not find rotate right field");
-    }
-    if (!markNode) {
-        throw new Error("Could not find mark node field");
-    }
-    if (!copyToMark) {
-        throw new Error("Could not find copy to mark field");
-    }
-    if (!deleteNode) {
-        throw new Error("Could not find delete node field");
-    }
-    if (!restartQuiz) {
-        throw new Error("Could not find restart quiz field");
-    }
-
-    addReturnSubmit(insertField, "ALPHANUM");
-    createLeft.addEventListener("click", () =>
-        AVLEngine.submit("insertLeft", insertField)
-    );
-    createRight.addEventListener("click", () =>
-        AVLEngine.submit("insertRight", insertField)
-    );
-    moveParent.addEventListener("click", () => AVLEngine.execute("moveParent"));
-    moveLeft.addEventListener("click", () =>
-        AVLEngine.execute("moveChild", ["left"])
-    );
-    moveRight.addEventListener("click", () =>
-        AVLEngine.execute("moveChild", ["right"])
-    );
-    rotateLeft.addEventListener("click", () =>
-        AVLEngine.execute("rotateCurrent", ["left"])
-    );
-    rotateRight.addEventListener("click", () =>
-        AVLEngine.execute("rotateCurrent", ["right"])
-    );
-    markNode.addEventListener("click", () => AVLEngine.execute("markNode"));
-    copyToMark.addEventListener("click", () => AVLEngine.execute("copyToMark"));
-    deleteNode.addEventListener("click", () =>
-        AVLEngine.execute("deleteCurrent")
-    );
-    restartQuiz.addEventListener("click", () => AVLEngine.resetAll());
 }
 
 initialiseAVLQuiz("#avlquizContainer");

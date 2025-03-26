@@ -1,36 +1,18 @@
-import { Element, Text } from "@svgdotjs/svg.js";
-import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { Element } from "@svgdotjs/svg.js";
+import { Cookies } from "~/cookies";
+import { Debugger } from "~/debugger";
+import { isValidReason, parseValues } from "~/helpers";
+import { Info } from "~/info";
+import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { State } from "~/state";
+import { EngineAlgorithmControl } from "./algorithm-controls/engine-algorithm-controls";
+import { EngineGeneralControls } from "./general-controls/engine-general-controls";
 
-export type EngineToolbarItems = {
-    animationSpeed: HTMLSelectElement;
-    objectSize: HTMLSelectElement;
+export type Resolve = (value: unknown) => void;
+export type Reject = (props: RejectReason) => void;
+export type RejectReason = { until: number; running?: boolean };
 
-    generalControls: HTMLFieldSetElement;
-    algorithmControls: HTMLFieldSetElement;
-
-    stepForward: HTMLButtonElement;
-    stepBackward: HTMLButtonElement;
-    toggleRunner: HTMLButtonElement;
-    fastForward: HTMLButtonElement;
-    fastBackward: HTMLButtonElement;
-};
-
-type ListenerType = "click" | "change";
-type EventListeners = Record<string, Partial<Record<ListenerType, () => void>>>;
-type IdleListeners = Record<
-    string,
-    { type: ListenerType; condition: () => boolean; handler: () => void }
->;
-type AsyncListeners = Record<
-    string,
-    {
-        type: ListenerType;
-        handler: (resolve: Resolve, reject: Reject) => void;
-    }
->;
-type Resolve = (value: unknown) => void;
-type Reject = (props: { until?: number; running?: boolean }) => void;
-type Status = "running" | "paused" | "inactive";
+export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
 
 export interface MessagesObject {
     [key: string]:
@@ -39,6 +21,12 @@ export interface MessagesObject {
         | ((...args: any[]) => string)
         | MessagesObject;
 }
+
+type Action = {
+    method: (...args: unknown[]) => Promise<void>;
+    args: unknown[];
+    stepCount: number;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
@@ -50,7 +38,6 @@ export class Engine {
     // Default variable names start with $
 
     Svg: Svg;
-
     messages: MessagesObject = {};
 
     $Svg = {
@@ -60,67 +47,23 @@ export class Engine {
         objectSize: 40,
         animationSpeed: 1000, // milliseconds per step
     };
-
-    $COOKIE_EXPIRE_DAYS = 30;
-    $cookies = {
-        animationSpeed: {
-            setCookie: (value: string) => {
-                this.toolbar.animationSpeed.value = value;
-            },
-            getCookie: () => this.getAnimationSpeed(),
-        },
-        objectSize: {
-            setCookie: (value: string) => {
-                this.toolbar.objectSize.value = value;
-            },
-            getCookie: () => this.getObjectSize(),
-        },
-    };
-
+    cookies: Cookies;
     container: HTMLElement;
-    toolbar: EngineToolbarItems;
-    actions: { oper: string; args: unknown[]; nsteps: number }[] = [];
-    currentAction: number = 0; // was = null before, this should work better
-    currentStep: number = 0; // was = null before, this should work better
-    DEBUG = true;
-
-    state: {
-        resetting: boolean;
-        animating: boolean;
-    } = {
-        resetting: false,
-        animating: false,
-    };
-
-    info: {
-        title: Text;
-        body: Text;
-        printer: Text;
-        status: Text;
-    };
-
-    eventListeners: EventListeners = {
-        stepForward: {},
-        stepBackward: {},
-        fastForward: {},
-        fastBackward: {},
-        toggleRunner: {},
-    };
+    generalControls: EngineGeneralControls;
+    algorithmControls: EngineAlgorithmControl;
+    actions: Action[] = [];
+    currentAction: number = 0;
+    currentStep: number = 0;
+    debugger: Debugger;
+    state: State;
+    info: Info;
 
     getAnimationSpeed(): number {
-        if (this.toolbar.animationSpeed) {
-            return parseInt(this.toolbar.animationSpeed?.value);
-        }
-
-        return this.$Svg.animationSpeed;
+        return parseInt(this.generalControls.animationSpeed.value);
     }
 
     getObjectSize(): number {
-        if (this.toolbar.objectSize) {
-            return parseInt(this.toolbar.objectSize?.value);
-        }
-
-        return this.$Svg.objectSize;
+        return parseInt(this.generalControls.objectSize.value);
     }
 
     getNodeSpacing(): number {
@@ -149,6 +92,8 @@ export class Engine {
     // Inititalisation
 
     constructor(containerSelector: string) {
+        this.debugger = new Debugger();
+
         const container =
             document.querySelector<HTMLElement>(containerSelector);
         if (!container) {
@@ -156,7 +101,18 @@ export class Engine {
         }
 
         this.container = container;
-        this.toolbar = this.getToolbar();
+        this.generalControls = new EngineGeneralControls(container, this);
+        this.algorithmControls = new EngineAlgorithmControl(container);
+
+        this.state = new State(this.generalControls.toggleRunner);
+
+        this.cookies = new Cookies(
+            {
+                objectSize: this.generalControls.objectSize,
+                animationSpeed: this.generalControls.animationSpeed,
+            },
+            this.debugger
+        );
 
         const svgContainer = this.container.querySelector("svg");
         if (!svgContainer) {
@@ -166,136 +122,20 @@ export class Engine {
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = this;
-
-        const debugParam = new URLSearchParams(window.location.href).get(
-            "debug"
-        );
-        this.DEBUG = Boolean(debugParam || false);
-        if (this.DEBUG) {
+        if (this.debugger.isEnabled()) {
             this.Svg.addClass("debug");
         }
 
-        this.info = this.getInfoTexts();
-    }
-
-    getInfoTexts() {
-        const margin = this.$Svg.margin;
-        const h = this.Svg.viewbox().height;
-
-        const title = this.Svg.text(NBSP).addClass("title").x(margin).y(margin);
-        const body = this.Svg.text(NBSP)
-            .addClass("message")
-            .x(margin)
-            .y(2 * margin);
-        const printer = this.Svg.text(NBSP)
-            .addClass("printer")
-            .x(margin)
-            .cy(h - 2 * margin);
-        const status = this.Svg.text(NBSP)
-            .addClass("status-report")
-            .x(margin)
-            .cy(h - margin);
-
-        return {
-            title,
-            body,
-            printer,
-            status,
-        };
-    }
-
-    getToolbar(): EngineToolbarItems {
-        const generalControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.generalControls"
-            );
-        const algorithmControls =
-            this.container.querySelector<HTMLFieldSetElement>(
-                "fieldset.algorithmControls"
-            );
-
-        const stepForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.stepForward"
-            );
-        const stepBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.stepBackward"
-        );
-        const toggleRunner = this.container.querySelector<HTMLButtonElement>(
-            "button.toggleRunner"
-        );
-        const fastForward =
-            this.container.querySelector<HTMLButtonElement>(
-                "button.fastForward"
-            );
-        const fastBackward = this.container.querySelector<HTMLButtonElement>(
-            "button.fastBackward"
-        );
-        const objectSize =
-            this.container.querySelector<HTMLSelectElement>(
-                "select.objectSize"
-            );
-        const animationSpeed = this.container.querySelector<HTMLSelectElement>(
-            "select.animationSpeed"
-        );
-
-        if (!generalControls) {
-            throw new Error("Missing general controls fieldset");
-        }
-        if (!algorithmControls) {
-            throw new Error("Missing algorithm controls fieldset");
-        }
-
-        if (!stepForward) {
-            throw new Error("Missing step forward button");
-        }
-        if (!stepBackward) {
-            throw new Error("Missing step backward button");
-        }
-        if (!toggleRunner) {
-            throw new Error("Missing toggle runner button");
-        }
-        if (!fastForward) {
-            throw new Error("Missing fast forward button");
-        }
-        if (!fastBackward) {
-            throw new Error("Missing fast backward button");
-        }
-        if (!objectSize) {
-            throw new Error("Missing object size select");
-        }
-        if (!animationSpeed) {
-            throw new Error("Missing animation speed select");
-        }
-
-        return {
-            generalControls,
-            algorithmControls,
-            stepForward,
-            stepBackward,
-            toggleRunner,
-            fastForward,
-            fastBackward,
-            objectSize,
-            animationSpeed,
-        };
+        this.info = new Info(this.Svg, this.$Svg.margin);
     }
 
     initialise(): void {
-        this.initToolbar();
         this.resetAll();
-        this.setRunning(true);
-    }
-
-    initToolbar(): void {
-        this.toolbar.animationSpeed.addEventListener("change", () =>
-            this.saveCookies()
-        );
+        this.state.setRunning(true);
     }
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        this.loadCookies();
         await this.reset();
     }
 
@@ -313,14 +153,16 @@ export class Engine {
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {}
+    async resetAlgorithm(): Promise<void> {
+        /* Allow subclasses to use this function */
+    }
 
     clearCanvas(): void {
         this.Svg.clear();
 
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
-        if (this.DEBUG) {
+        if (this.debugger.isEnabled()) {
             for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }
@@ -329,7 +171,7 @@ export class Engine {
             }
         }
 
-        this.info = this.getInfoTexts();
+        this.info.reset();
         this.updateCSSVariables();
     }
 
@@ -343,117 +185,10 @@ export class Engine {
         );
     }
 
-    setStatus(status: Status, timeout = 10): void {
-        const currentStatus = this.info.status;
-
-        setTimeout(() => {
-            if (status === "running") {
-                currentStatus
-                    .text("Animating")
-                    .removeClass("paused")
-                    .addClass("running");
-            } else if (status === "paused") {
-                currentStatus
-                    .text("Paused")
-                    .addClass("paused")
-                    .removeClass("running");
-            } else {
-                currentStatus
-                    .text("Idle")
-                    .removeClass("paused")
-                    .removeClass("running");
-            }
-        }, timeout);
-    }
-
     setIdleTitle(): void {
-        this.info.title.text("Select an action from the menu above");
-        this.info.body.text(NBSP);
+        this.info.setTitle("Select an action from the menu above");
+        this.info.setBody(NBSP);
     }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // The default listeners
-
-    $IdleListeners: IdleListeners = {
-        stepBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.setRunning(false);
-                const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
-                this.execute(action.oper, action.args, action.nsteps - 1);
-            },
-        },
-        fastBackward: {
-            type: "click",
-            condition: () => this.actions.length > 0,
-            handler: () => {
-                this.actions.pop();
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!;
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-        objectSize: {
-            type: "change",
-            condition: () => true,
-            handler: () => {
-                if (this.actions.length > 0) {
-                    const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                    this.execute(action.oper, action.args, action.nsteps);
-                } else {
-                    this.reset();
-                }
-            },
-        },
-    };
-
-    // TODO: Fix some nice type for this
-    $AsyncListeners: AsyncListeners = {
-        stepForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.setRunning(false);
-                this.stepForward(resolve, reject);
-            },
-        },
-        fastForward: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.actions[this.currentAction].nsteps =
-                    Number.MAX_SAFE_INTEGER;
-                this.fastForward(resolve, reject);
-            },
-        },
-        toggleRunner: {
-            type: "click",
-            handler: (resolve, reject) => {
-                this.toggleRunner();
-                if (this.isRunning()) {
-                    this.stepForward(resolve, reject);
-                } else {
-                    this.currentStep++;
-                    resolve(undefined);
-                }
-            },
-        },
-        stepBackward: {
-            type: "click",
-            handler: (resolve, reject) =>
-                reject({ until: this.currentStep - 1, running: false }),
-        },
-        fastBackward: {
-            type: "click",
-            handler: (resolve, reject) => reject({ until: 0 }),
-        },
-        objectSize: {
-            type: "change",
-            handler: (resolve, reject) => reject({ until: this.currentStep }),
-        },
-    };
 
     ///////////////////////////////////////////////////////////////////////////////
     // Updating listeners
@@ -467,94 +202,43 @@ export class Engine {
     }
 
     resetListeners(isRunning: boolean): void {
-        this.saveCookies();
-        this.removeAllListeners();
+        // Clear all currently running listeners
+        this.generalControls.removeAllListeners();
         if (this.constructor === Engine) {
+            // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
             return;
         }
-        this.addListener("toggleRunner", "click", () => this.toggleRunner());
+
+        this.generalControls.addListener(
+            this.generalControls.toggleRunner,
+            "click",
+            () => this.state.toggleRunner()
+        );
         if (isRunning) {
+            // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
-            this.setStatus("paused");
+            this.info.setStatus("paused");
             return;
         }
 
         this.disableWhenRunning(false);
         this.setIdleTitle();
-        this.setStatus("inactive");
-        for (const id in this.$IdleListeners) {
-            const listener = this.$IdleListeners[id];
-            if (listener.condition()) {
-                if (this.DEBUG) {
-                    this.addListener(id, listener.type, () => {
-                        console.log(
-                            `${id} ${listener.type}: ${JSON.stringify(
-                                this.actions
-                            )}`
-                        );
-                        listener.handler();
-                    });
-                } else {
-                    this.addListener(id, listener.type, listener.handler);
-                }
-            }
-        }
-    }
-
-    addListener(id: string, type: ListenerType, handler: () => void): void {
-        const listeners = this.eventListeners;
-        if (!listeners[id]) {
-            listeners[id] = {};
-        }
-        const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-        if (!elem) {
-            throw new Error("Could not find element to add listener to");
-        }
-
-        const oldHandler = listeners[id][type];
-        if (oldHandler) {
-            elem.removeEventListener(type, oldHandler);
-        }
-        listeners[id][type] = handler;
-        elem.addEventListener(type, handler);
-        elem.disabled = false;
-    }
-
-    removeAllListeners(): void {
-        const listeners = this.eventListeners;
-
-        for (const id in listeners) {
-            const elem = this.toolbar[id as keyof typeof this.toolbar];
-
-            if (!elem) {
-                throw new Error(
-                    "Could not find element to remove listener from"
-                );
-            }
-
-            elem.disabled = true;
-            for (const type in listeners[id]) {
-                elem.removeEventListener(
-                    type,
-                    listeners[id][type as ListenerType]!
-                );
-            } // ! because we know that the type exists
-            listeners[id] = {};
-        }
+        this.info.setStatus("inactive");
+        this.generalControls.addIdleListeners();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Executing the actions
 
     async submit(
-        method: string,
+        method: SubmitFunction,
         field: HTMLInputElement | null
     ): Promise<boolean> {
+        let rawValue: string = "";
         try {
-            let rawValue: string = "";
-            if (field) {
+            if (field instanceof HTMLInputElement) {
+                // Read value from input and reset to empty string
                 rawValue = field.value;
                 field.value = "";
             }
@@ -569,64 +253,60 @@ export class Engine {
         return false;
     }
 
-    async execute(
-        operation: string,
-        args: unknown[] = [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async execute<T extends (...args: any[]) => Promise<void>>(
+        method: T,
+        args: Parameters<T>,
         until = 0
     ): Promise<void> {
         await this.reset();
-        this.actions.push({ oper: operation, args: args, nsteps: until });
-        if (this.DEBUG) {
-            console.log(
-                `EXEC ${until}: ${operation} ${args.join(
-                    ", "
-                )}, ${JSON.stringify(this.actions)}`
-            );
-        }
+        this.actions.push({ method, args, stepCount: until });
+        this.debugger.log(
+            `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
+                this.actions
+            )}`
+        );
 
         try {
             await this.runActionsLoop();
-            this.actions[this.actions.length - 1].nsteps =
-                this.currentStep || 0; // TODO: Not sure if this is correct
-            if (this.DEBUG) {
-                console.log(
-                    `DONE / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.actions[this.actions.length - 1].stepCount = this.currentStep;
+            this.debugger.log(
+                `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
+            );
+
             this.resetListeners(false);
         } catch (reason) {
-            if (
-                typeof reason !== "object" ||
-                reason === null || // Added line to help checks below
-                "until" in reason === false || // Added line to help checks below
-                typeof reason.until !== "number" // Changed to be able to assign to until which is a number
-            ) {
+            // Check if reason is thrown from async listener
+            if (!isValidReason(reason)) {
+                // Error not thrown by async handlers. Log it and exit
                 console.error(reason);
                 this.resetListeners(false);
                 return;
             }
+
+            // If optional running argument is provided set running state
+            if (reason.running !== undefined) {
+                this.state.setRunning(reason.running);
+            }
             this.actions.pop();
-            if ("running" in reason && typeof reason.running === "boolean") {
-                this.setRunning(reason.running);
-            }
             until = reason.until;
-            if (this.DEBUG) {
-                console.log(
-                    `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
+            this.debugger.log(
+                `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
+                    this.actions
+                )}`
+            );
+
+            // until is smaller or equal to 0 meaning the previous action should be run if it exists
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                operation = action.oper;
-                args = action.args;
-                until = action.nsteps;
+                method = action.method as T;
+                args = action.args as Parameters<T>;
+                until = action.stepCount;
             }
+
+            // Re execute if there is something to run until, otherwise reset
             if (until > 0) {
-                this.execute(operation, args, until);
+                this.execute(method, args, until);
             } else {
                 this.reset();
             }
@@ -634,36 +314,30 @@ export class Engine {
     }
 
     async runActionsLoop(): Promise<void> {
+        // Run through all our actions
         for (let nAction = 0; nAction < this.actions.length; nAction++) {
             this.resetListeners(true);
             const action = this.actions[nAction];
             this.currentAction = nAction;
             this.currentStep = 0;
+
+            // Get and set title for this action
             // Make camelCase separate words: https://stackoverflow.com/a/21148630
-            const messageArr = action.oper.match(/[A-Za-z][a-z]*/g) || [];
-            let message = messageArr.join(" ");
-            message = `${
-                message.charAt(0).toUpperCase() + message.substring(1)
-            } ${action.args.join(", ")}`;
-            if (this.DEBUG) {
-                console.log(
-                    `CALL ${nAction}: ${message}, ${JSON.stringify(
-                        this.actions
-                    )}`
-                );
-            }
-            this.info.title.text(message);
+            const methodNameArr =
+                action.method.name.match(/[A-Za-z][a-z]*/g) || [];
+            const methodName = methodNameArr
+                .map((str) => str.charAt(0).toUpperCase() + str.substring(1))
+                .join(" ");
+            const title = `${methodName} ${action.args.join(", ")}`;
+            this.debugger.log(
+                `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
+            );
+
+            this.info.setTitle(title);
             await this.pause("");
-            if (
-                !(
-                    action.oper in this &&
-                    typeof this[action.oper as keyof Engine] === "function"
-                )
-            ) {
-                throw new Error("Cannot call action that does not exist");
-            }
-            // @ts-expect-error Have checked that it exists and that is a function. Only thing would be to validate input. Better to do in each function in any case
-            await this[action.oper](...action.args); // Kommer bli knölig att lösa
+
+            // Bind this to method and call it
+            await action.method.apply(this, action.args);
         }
     }
 
@@ -671,42 +345,48 @@ export class Engine {
         message: string | undefined,
         ...args: unknown[]
     ): Promise<unknown> | null {
-        const title = this.getMessage(message, ...args);
-        if (this.DEBUG) {
-            console.log(
-                `${
-                    this.currentStep
-                }. Doing: ${title} (running: ${this.isRunning()}), ${JSON.stringify(
-                    this.actions
-                )}`
-            );
-        }
-        if (this.state.resetting) {
+        const body = this.getMessage(message, ...args);
+        this.debugger.log(
+            `${
+                this.currentStep
+            }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
+                this.actions
+            )}`
+        );
+
+        // If resetting no pause should be run
+        if (this.state.isResetting()) {
             return null;
         }
-        if (title !== undefined) {
-            this.info.body.text(title);
+
+        if (body !== undefined) {
+            this.info.setBody(body);
         }
+
         return new Promise((resolve, reject) => {
             const action = this.actions[this.currentAction];
-            if (action.nsteps != null && this.currentStep < action.nsteps) {
+
+            // Check if step has been executed previously (action.stepCount = 0 if first time and has a value otherwise)
+            if (this.currentStep < action.stepCount) {
                 this.fastForward(resolve, reject);
-            } else {
-                let runnerTimer: NodeJS.Timeout | undefined = undefined;
-                for (const id in this.$AsyncListeners) {
-                    const listener = this.$AsyncListeners[id];
-                    this.addListener(id, listener.type, () => {
-                        clearTimeout(runnerTimer);
-                        listener.handler(resolve, reject);
-                    });
-                }
-                if (this.isRunning()) {
-                    this.setStatus("running");
-                    runnerTimer = setTimeout(
-                        () => this.stepForward(resolve, reject),
-                        this.getAnimationSpeed() * 1.1
-                    );
-                }
+                return;
+            }
+
+            // Add async listeners that handle button presses while paused
+            let runnerTimer: NodeJS.Timeout | undefined = undefined;
+            this.generalControls.addAsyncListeners(
+                resolve,
+                reject,
+                runnerTimer
+            );
+
+            // If running, automatically step forward after waiting animation speed
+            if (this.state.isRunning()) {
+                this.info.setStatus("running");
+                runnerTimer = setTimeout(
+                    () => this.stepForward(resolve, reject),
+                    this.getAnimationSpeed() * 1.1
+                );
             }
         });
     }
@@ -722,10 +402,11 @@ export class Engine {
             return undefined;
         }
 
+        // Assume that message is a key to access this.messages
         let title: MessagesObject[string] = this.messages;
-
         const keys = message.split(".");
         if (!(keys[0] in title)) {
+            // Assumption was wrong returning the original message and the extra arguments
             return [message, ...args].join("\n");
         }
         for (const key of keys) {
@@ -735,6 +416,8 @@ export class Engine {
             }
             title = title[key];
         }
+
+        // Title is now hopefully a string or function from this.messages
         if (typeof title === "function") {
             title = title(...args);
         }
@@ -742,260 +425,38 @@ export class Engine {
             console.error("Unknown message:", message, ...args);
             return [message, ...args].join("\n");
         }
-        if (title === "") {
-            title = NBSP;
-        }
+
         return title;
     }
 
     stepForward(resolve: Resolve, reject: Reject): void {
         this.currentStep++;
-        this.state.animating = true;
+        this.state.setAnimating(true);
         resolve(undefined);
     }
 
     fastForward(resolve: Resolve, reject: Reject): void {
         const action = this.actions[this.currentAction];
-        if (this.currentStep >= action.nsteps) {
-            action.nsteps = this.currentStep;
+        if (this.currentStep >= action.stepCount) {
+            action.stepCount = this.currentStep;
         }
         this.currentStep++;
-        this.state.animating = false;
-        if (this.DEBUG) {
+        this.state.setAnimating(false);
+        // If debugging is enabled then add a small delay
+        if (this.debugger.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);
         }
     }
 
-    isRunning(): boolean {
-        return (
-            this.toolbar.toggleRunner?.classList.contains("selected") || false
-        );
-    }
-
-    setRunning(running: boolean): this {
-        const classes = this.toolbar.toggleRunner?.classList;
-        if (classes === undefined) {
-            throw new Error("Can not access toggleRunner");
-        }
-        if (running) {
-            classes.add("selected");
-        } else {
-            classes.remove("selected");
-        }
-        return this;
-    }
-
-    toggleRunner(): this {
-        return this.setRunning(!this.isRunning());
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Cookies
-
-    loadCookies(): void {
-        if (this.DEBUG) {
-            console.log("Loading cookies", document.cookie);
-        }
-        const allCookies = document.cookie.split(";");
-        Object.entries(this.$cookies).map(([cookieName, cookieValue]) => {
-            allCookies.map((cookie) => {
-                const splitCookie = cookie.split("=");
-                if (splitCookie.length !== 2) {
-                    throw new Error("Invalid cookie format");
-                }
-                const [documentCookieName, documentCookieValue] = splitCookie;
-                if (documentCookieName.trim() === cookieName) {
-                    const value = decodeURIComponent(documentCookieValue);
-                    cookieValue.setCookie(value);
-                }
-            });
-        });
-    }
-
-    saveCookies(): void {
-        let expires = "";
-        if (this.$COOKIE_EXPIRE_DAYS > 0) {
-            const exdate = new Date();
-            exdate.setDate(exdate.getDate() + this.$COOKIE_EXPIRE_DAYS);
-            expires = `;expires=${exdate.toUTCString()}`;
-        }
-
-        Object.entries(this.$cookies).map(([cookieName, value]) => {
-            const cookieValue = encodeURIComponent(value.getCookie());
-            document.cookie = `${cookieName}=${cookieValue}${expires}`;
-        });
-
-        if (this.DEBUG) {
-            console.log("Setting cookies", document.cookie);
-        }
-    }
-
     animate(elem: Element, animate = true) {
-        if (this.state.animating && animate) {
-            this.setStatus("running");
-            this.setStatus("paused", this.getAnimationSpeed());
+        if (this.state.isAnimating() && animate) {
+            this.info.setStatus("running");
+            this.info.setStatus("paused", this.getAnimationSpeed());
             return elem.animate(this.getAnimationSpeed(), 0, "now");
         } else {
             return elem;
         }
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Helper functions
-
-export function normalizeNumber(input: string): string | number {
-    input = input.trim();
-    return input === "" || isNaN(Number(input)) ? input : Number(input);
-}
-
-export function parseValues(
-    values: string | string[] | null | undefined
-): (string | number)[] {
-    if (!values) {
-        return [];
-    }
-    if (typeof values === "string") {
-        values = values.trim().split(/\s+/);
-    }
-    return values.map((v) => normalizeNumber(v));
-}
-
-type AllowedCharacters =
-    | "int"
-    | "int+"
-    | "float"
-    | "float+"
-    | "ALPHA"
-    | "ALPHA+"
-    | "alpha"
-    | "alpha+"
-    | "ALPHANUM"
-    | "ALPHANUM+"
-    | "alphanum"
-    | "alphanum+";
-
-// Adds "return-to-submit" functionality to a text input field - performs action when the user presses Enter
-// Additionally restricts input to the defined allowed characters (with + meaning spaces are allowed)
-export function addReturnSubmit(
-    field: HTMLInputElement,
-    allowed: AllowedCharacters,
-    action?: () => void
-): void {
-    const allowedCharacters =
-        allowed === "int"
-            ? "0-9"
-            : allowed === "int+"
-            ? "0-9 "
-            : allowed === "float"
-            ? "-.0-9"
-            : allowed === "float+"
-            ? "-.0-9 "
-            : allowed === "ALPHA"
-            ? "A-Z"
-            : allowed === "ALPHA+"
-            ? "A-Z "
-            : allowed === "alpha"
-            ? "a-zA-Z"
-            : allowed === "alpha+"
-            ? "a-zA-Z "
-            : allowed === "ALPHANUM"
-            ? "A-Z0-9"
-            : allowed === "ALPHANUM+"
-            ? "A-Z0-9 "
-            : allowed === "alphanum"
-            ? "a-zA-Z0-9"
-            : allowed === "alphanum+"
-            ? "a-zA-Z0-9 "
-            : allowed;
-    const isAllowed = new RegExp(`[^${allowedCharacters}]`, "g");
-
-    // Transform case of text input to match allowed
-    function matchAllowedCase(s: string): string {
-        if (allowed === allowed.toUpperCase()) {
-            return s.toUpperCase();
-        } else if (allowed === allowed.toLowerCase()) {
-            return s.toLowerCase();
-        }
-        return s;
-    }
-
-    // Idea taken from here: https://stackoverflow.com/a/14719818
-    // Block unwanted characters from being typed
-    field.oninput = (_) => {
-        let pos = field.selectionStart || 0;
-        let value = matchAllowedCase(field.value);
-        if (isAllowed.test(value)) {
-            value = value.replace(isAllowed, "");
-            pos--;
-        }
-        field.value = value;
-        field.setSelectionRange(pos, pos);
-    };
-
-    // Perform action when Enter is pressed
-    if (!action) {
-        return;
-    }
-    field.onkeydown = (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            action();
-        }
-    };
-}
-
-// Merges all keys from defaultObject into object
-// Set override to true to overwrite existing keys
-export function updateDefault(
-    object: MessagesObject,
-    defaultObject: MessagesObject,
-    override: boolean = false
-): MessagesObject {
-    for (const key in defaultObject) {
-        if (!(key in object)) {
-            object[key] = defaultObject[key];
-        } else if (
-            typeof object[key] === "object" &&
-            object[key] !== null &&
-            typeof defaultObject[key] === "object" &&
-            defaultObject[key] !== null
-        ) {
-            updateDefault(object[key], defaultObject[key], override);
-        } else if (override) {
-            object[key] = defaultObject[key];
-        }
-    }
-    return object;
-}
-
-export function modulo(n: number, d: number): number {
-    const rem = n % d;
-    return rem < 0 ? rem + d : rem;
-}
-
-export function compare(a: string | number, b: string | number): -1 | 0 | 1 {
-    // We use non-breaking space as a proxy for the empty string,
-    // because SVG text objects reset coordinates to (0, 0) for the empty string.
-    if (a === NBSP) {
-        a = "";
-    }
-    if (b === NBSP) {
-        b = "";
-    }
-    if (isNaN(Number(a)) === isNaN(Number(b))) {
-        // a and b are (1) both numbers or (2) both non-numbers
-        if (!isNaN(Number(a))) {
-            // a and b are both numbers
-            a = Number(a);
-            b = Number(b);
-        }
-        return a === b ? 0 : a < b ? -1 : 1;
-    } else {
-        // a and b are of different types
-        // let's say that numbers are smaller than non-numbers
-        return isNaN(Number(a)) ? 1 : -1;
     }
 }
