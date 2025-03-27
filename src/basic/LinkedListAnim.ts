@@ -194,8 +194,33 @@ export class LinkedListAnim extends Engine implements Collection {
 
     // Visualization logic for deleting a node
     async delete(value: string | number): Promise<void> {
-        if(await this.findOne(value)) {
-            console.log("yeeeeeeeeeeeeeeeeeet this mfk");
+        const node = await this.findOne(value);
+        if(node) { // If the node is found
+            this.linkedList.removeElement(value);
+            node.remove(); // Remove the node from the SVG
+
+            const index = this.nodeArray.findIndex(([n]) => n === node); // Find the index of the node in the array
+            // If the node is not the last one
+            if(index < this.nodeArray.length - 1) {
+                // Remove the connection to the next node
+                const connection = this.nodeArray[index+1][1] as LinkedConnection;
+                connection.remove();
+                // Update the connection of the previous node to go to the next node
+                // coords of the next node
+                // TODO right now we connect the prevCon to the center of the next node
+                const coords = this.nodeArray[index+1][0].getCenterPos();
+                const prevConnection = this.nodeArray[index][1] as LinkedConnection;
+                prevConnection.updateEnd(coords, this.animationValue());
+            } else { // If the node is the last one, remove the connection to the previous node
+                const prevConnection = this.nodeArray[index-1][1] as LinkedConnection;
+                prevConnection.remove();
+            }
+
+
+            // TODO: Remove the node from the array i.e clean up and make sure rebuild is correct
+            // TODO: impl. correct pauses and animation
+
+            //this.reset();
         }
     }
 
