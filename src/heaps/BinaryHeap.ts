@@ -140,6 +140,8 @@ export class BinaryHeap extends Engine implements Prioqueue {
         kLabel.remove();
     }
 
+    /// IDEA OF THE CENTURY: separera modelldelen av engine och kontrolldelen av engine!!??
+
     async insertOne(value: string | number) {
         value = String(value); //TODO: Check if this can be handled better
         if (this.heapSize === null) {

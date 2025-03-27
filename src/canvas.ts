@@ -3,9 +3,14 @@ import { Element } from "@svgdotjs/svg.js";
 import { Engine } from "~/engine";
 import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 
+export interface CanvasObject extends Element {
+    init(objectSize: number, strokeWidth: number): this;
+}
+
 export class Canvas {
     Svg: Svg;
 
+    // TODO: Remove
     $Svg = {
         width: 1000,
         height: 600,
@@ -14,13 +19,22 @@ export class Canvas {
         animationSpeed: 1000, // milliseconds per step
     };
 
-    // Todo: make debug global
+    // TODO: Integrate with Debugger
     DEBUG: boolean = false;
 
     constructor(svgContainer: SVGSVGElement, engine: Engine) {
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = engine;
+    }
+
+    put<T extends CanvasObject>(element: T): T {
+        const object: T = element.init(
+            this.getObjectSize(),
+            this.getStrokeWidth()
+        );
+        this.Svg.put(object);
+        return object;
     }
 
     clear() {
