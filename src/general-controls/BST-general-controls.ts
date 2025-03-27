@@ -1,3 +1,4 @@
+import { querySelector } from "~/helpers";
 import { BST } from "~/trees/BST";
 import { EngineGeneralControls } from "./engine-general-controls";
 
@@ -17,15 +18,10 @@ export class BSTGeneralControls extends EngineGeneralControls {
             </label></span>`
         );
 
-        const showNullNodes = container.querySelector<HTMLInputElement>(
-            "input.showNullNodes"
+        this.showNullNodes = querySelector<HTMLInputElement>(
+            "input.showNullNodes",
+            container
         );
-
-        if (!showNullNodes) {
-            throw new Error("Could not find show null nodes input");
-        }
-
-        this.showNullNodes = showNullNodes;
 
         this.showNullNodes.addEventListener("change", () =>
             this.toggleNullNodes(null)

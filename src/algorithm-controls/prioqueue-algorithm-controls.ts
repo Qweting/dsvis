@@ -1,4 +1,4 @@
-import { addReturnSubmit } from "~/helpers";
+import { addReturnSubmit, querySelector } from "~/helpers";
 import { Prioqueue } from "~/prioqueues";
 import { EngineAlgorithmControl } from "./engine-algorithm-controls";
 
@@ -14,48 +14,26 @@ export class PrioQueueAlgorithmControl extends EngineAlgorithmControl {
 
         this.engine = engine;
 
-        const insertSelect =
-            this.algorithmControls.querySelector<HTMLSelectElement>(
-                "select.insertSelect"
-            );
-        const insertField =
-            this.algorithmControls.querySelector<HTMLInputElement>(
-                "input.insertField"
-            );
-        const insertSubmit =
-            this.algorithmControls.querySelector<HTMLInputElement>(
-                "input.insertSubmit"
-            );
-        const deleteSubmit =
-            this.algorithmControls.querySelector<HTMLInputElement>(
-                "input.deleteSubmit"
-            );
-        const clearSubmit =
-            this.algorithmControls.querySelector<HTMLInputElement>(
-                "input.clearSubmit"
-            );
-
-        if (!insertSelect) {
-            throw new Error("Missing insert select");
-        }
-        if (!insertField) {
-            throw new Error("Missing insert field");
-        }
-        if (!insertSubmit) {
-            throw new Error("Missing insert submit");
-        }
-        if (!deleteSubmit) {
-            throw new Error("Missing delete submit");
-        }
-        if (!clearSubmit) {
-            throw new Error("Missing clear submit");
-        }
-
-        this.insertSelect = insertSelect;
-        this.insertField = insertField;
-        this.insertSubmit = insertSubmit;
-        this.deleteSubmit = deleteSubmit;
-        this.clearSubmit = clearSubmit;
+        this.insertSelect = querySelector<HTMLSelectElement>(
+            "select.insertSelect",
+            this.algorithmControls
+        );
+        this.insertField = querySelector<HTMLInputElement>(
+            "input.insertField",
+            this.algorithmControls
+        );
+        this.insertSubmit = querySelector<HTMLInputElement>(
+            "input.insertSubmit",
+            this.algorithmControls
+        );
+        this.deleteSubmit = querySelector<HTMLInputElement>(
+            "input.deleteSubmit",
+            this.algorithmControls
+        );
+        this.clearSubmit = querySelector<HTMLInputElement>(
+            "input.clearSubmit",
+            this.algorithmControls
+        );
 
         this.initialize();
     }

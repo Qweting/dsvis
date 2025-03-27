@@ -1,7 +1,7 @@
 import { Element } from "@svgdotjs/svg.js";
 import { Cookies } from "~/cookies";
 import { Debugger } from "~/debugger";
-import { isValidReason, parseValues } from "~/helpers";
+import { isValidReason, parseValues, querySelector } from "~/helpers";
 import { Info } from "~/info";
 import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
 import { State } from "~/state";
@@ -94,15 +94,10 @@ export class Engine {
     constructor(containerSelector: string) {
         this.debugger = new Debugger();
 
-        const container =
-            document.querySelector<HTMLElement>(containerSelector);
-        if (!container) {
-            throw new Error("No container found");
-        }
+        this.container = querySelector<HTMLElement>(containerSelector);
 
-        this.container = container;
-        this.generalControls = new EngineGeneralControls(container, this);
-        this.algorithmControls = new EngineAlgorithmControl(container);
+        this.generalControls = new EngineGeneralControls(this.container, this);
+        this.algorithmControls = new EngineAlgorithmControl(this.container);
 
         this.state = new State(this.generalControls.toggleRunner);
 
@@ -114,10 +109,10 @@ export class Engine {
             this.debugger
         );
 
-        const svgContainer = this.container.querySelector("svg");
-        if (!svgContainer) {
-            throw new Error("No svg element found");
-        }
+        const svgContainer = querySelector<SVGSVGElement>(
+            "svg",
+            this.container
+        );
 
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);

@@ -1,5 +1,6 @@
 import { Debugger } from "~/debugger";
 import { Engine, Reject, Resolve } from "~/engine";
+import { querySelector } from "~/helpers";
 import { State } from "~/state";
 
 type ListenerType = "click" | "change";
@@ -46,65 +47,39 @@ export class EngineGeneralControls {
         this.debugger = engine.debugger;
         this.state = engine.state;
 
-        const generalControls = container.querySelector<HTMLFieldSetElement>(
-            "fieldset.generalControls"
+        this.generalControls = querySelector<HTMLFieldSetElement>(
+            "fieldset.generalControls",
+            container
         );
 
-        const fastBackward = container.querySelector<HTMLButtonElement>(
-            "button.fastBackward"
+        this.fastBackward = querySelector<HTMLButtonElement>(
+            "button.fastBackward",
+            container
         );
-        const stepBackward = container.querySelector<HTMLButtonElement>(
-            "button.stepBackward"
+        this.stepBackward = querySelector<HTMLButtonElement>(
+            "button.stepBackward",
+            container
         );
-        const toggleRunner = container.querySelector<HTMLButtonElement>(
-            "button.toggleRunner"
+        this.toggleRunner = querySelector<HTMLButtonElement>(
+            "button.toggleRunner",
+            container
         );
-        const stepForward =
-            container.querySelector<HTMLButtonElement>("button.stepForward");
-
-        const fastForward =
-            container.querySelector<HTMLButtonElement>("button.fastForward");
-
-        const objectSize =
-            container.querySelector<HTMLSelectElement>("select.objectSize");
-        const animationSpeed = container.querySelector<HTMLSelectElement>(
-            "select.animationSpeed"
+        this.stepForward = querySelector<HTMLButtonElement>(
+            "button.stepForward",
+            container
         );
-
-        if (!generalControls) {
-            throw new Error("Missing general controls fieldset");
-        }
-
-        if (!stepForward) {
-            throw new Error("Missing step forward button");
-        }
-        if (!stepBackward) {
-            throw new Error("Missing step backward button");
-        }
-        if (!toggleRunner) {
-            throw new Error("Missing toggle runner button");
-        }
-        if (!fastForward) {
-            throw new Error("Missing fast forward button");
-        }
-        if (!fastBackward) {
-            throw new Error("Missing fast backward button");
-        }
-        if (!objectSize) {
-            throw new Error("Missing object size select");
-        }
-        if (!animationSpeed) {
-            throw new Error("Missing animation speed select");
-        }
-
-        this.generalControls = generalControls;
-        this.stepForward = stepForward;
-        this.stepBackward = stepBackward;
-        this.toggleRunner = toggleRunner;
-        this.fastForward = fastForward;
-        this.fastBackward = fastBackward;
-        this.objectSize = objectSize;
-        this.animationSpeed = animationSpeed;
+        this.fastForward = querySelector<HTMLButtonElement>(
+            "button.fastForward",
+            container
+        );
+        this.objectSize = querySelector<HTMLSelectElement>(
+            "select.objectSize",
+            container
+        );
+        this.animationSpeed = querySelector<HTMLSelectElement>(
+            "select.animationSpeed",
+            container
+        );
 
         this.idleListeners.push(
             {

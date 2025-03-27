@@ -165,13 +165,9 @@ export function initialiseEngine(
     containerID: string,
     engineSubclasses: RecordOfEngines
 ) {
-    const algoSelector = document.querySelector<HTMLSelectElement>(
+    const algoSelector = querySelector<HTMLSelectElement>(
         `${containerID} .algorithmSelector`
     );
-
-    if (!algoSelector) {
-        throw new Error("Could not find algo selector");
-    }
 
     const searchParams = new URL(window.location.href).searchParams;
 
@@ -203,4 +199,17 @@ export function initialiseEngine(
         );
         window.location.reload();
     });
+}
+
+export function querySelector<T extends Element = Element>(
+    selector: string,
+    container: HTMLElement = document.documentElement
+) {
+    const element = container.querySelector<T>(selector);
+
+    if (!element) {
+        throw new Error(`Could not find element with selector: "${selector}"`);
+    }
+
+    return element;
 }
