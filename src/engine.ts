@@ -185,6 +185,15 @@ export class Engine {
         );
     }
 
+    async drawViewbox(right: number, down: number, zoom: number) {
+        this.Svg.viewbox(
+            right,
+            down,
+            this.$Svg.width * zoom,
+            this.$Svg.height * zoom
+        );
+    }
+
     setIdleTitle(): void {
         this.info.setTitle("Select an action from the menu above");
         this.info.setBody(NBSP);

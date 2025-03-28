@@ -1,3 +1,4 @@
+import { SortingAlgorithmControls } from "~/algorithm-controls/sorting-algorithm-controls";
 import { Engine } from "../../src/engine";
 import { BinaryNode } from "../../src/objects/binary-node";
 import { DSArray } from "../../src/objects/dsarray";
@@ -11,19 +12,17 @@ export class Sort extends Engine {
     compensate: number = 0;
     sortArray: DSArray | null = null;
     indexLength: number = 0;
+    algorithmControls: SortingAlgorithmControls;
+
+
+    constructor(containerSelector: string) {
+        super(containerSelector);
+        this.algorithmControls = new SortingAlgorithmControls(this.container, this);
+    }
 
     initialise(initialValues = []) {
         this.initialValues = initialValues;
         super.initialise();
-    }
-
-    async drawViewbox(right: number, down: number, zoom: number) {
-        this.Svg.viewbox(
-            right,
-            down,
-            this.$Svg.width * zoom,
-            this.$Svg.height * zoom
-        );
     }
 
     async resetAlgorithm() {

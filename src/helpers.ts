@@ -203,4 +203,6 @@ export function initialiseEngine(
         );
         window.location.reload();
     });
+
+    return engine;
 }
