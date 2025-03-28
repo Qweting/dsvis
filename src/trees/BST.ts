@@ -64,6 +64,7 @@ export class BST<Node extends BinaryNode = BinaryNode>
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
+    algorithmControls: CollectionAlgorithmControl;
 
     constructor(containerSelector: string) {
         super(containerSelector);

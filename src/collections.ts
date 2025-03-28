@@ -4,6 +4,7 @@ import { BST } from "~/trees/BST";
 import { BTree } from "~/trees/BTree";
 import { RedBlack } from "~/trees/RedBlack";
 import { SplayTree } from "~/trees/SplayTree";
+import { CollectionAlgorithmControl } from "./algorithm-controls/collection-algorithm-controls";
 import { initialiseEngine, RecordOfEngines } from "./helpers";
 
 export interface Collection extends Engine {
@@ -11,6 +12,7 @@ export interface Collection extends Engine {
     find: SubmitFunction;
     delete: SubmitFunction;
     print: SubmitFunction;
+    algorithmControls: CollectionAlgorithmControl;
 }
 
 const COLLECTIONS_CLASSES = {
