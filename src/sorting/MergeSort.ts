@@ -204,8 +204,7 @@ export class MergeSort extends Sort {
                         subarray1.getValue(a1i),
                         this.getObjectSize(),
                         this.getStrokeWidth()
-                    ).init(subarray1.getCX(a1i), subarray1.cy())
-                );
+                    )).init(subarray1.getCX(a1i), subarray1.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
                 svgValue.remove();
@@ -220,8 +219,7 @@ export class MergeSort extends Sort {
                         subarray2.getValue(a2i),
                         this.getObjectSize(),
                         this.getStrokeWidth()
-                    ).init(subarray2.getCX(a2i), subarray2.cy())
-                );
+                    )).init(subarray2.getCX(a2i), subarray2.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
                 svgValue.remove();
