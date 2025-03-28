@@ -206,21 +206,32 @@ export class LinkedListAnim extends Engine implements Collection {
                 const connection = this.nodeArray[index+1][1] as LinkedConnection;
                 connection.remove();
                 // Update the connection of the previous node to go to the next node
-                // coords of the next node
-                // TODO right now we connect the prevCon to the center of the next node
-                const coords = this.nodeArray[index+1][0].getCenterPos();
-                const prevConnection = this.nodeArray[index][1] as LinkedConnection;
-                prevConnection.updateEnd(coords, this.animationValue());
+                const nextNode = this.nodeArray[index+1][0];
+                const prevConnection = this.nodeArray[index][1] as LinkedConnection; // need to move this index + 1
+                this.nodeArray[index+1][1] = prevConnection;
+                prevConnection.setEnd(nextNode, this.animationValue());
             } else { // If the node is the last one, remove the connection to the previous node
                 const prevConnection = this.nodeArray[index-1][1] as LinkedConnection;
                 prevConnection.remove();
             }
 
-
             // TODO: Remove the node from the array i.e clean up and make sure rebuild is correct
-            // TODO: impl. correct pauses and animation
+            // this.rebuildArray(index);
 
-            //this.reset();
+            // TODO: impl. correct pauses and animation
+        }
+    }
+
+    adjustNodes(index: number): void {
+        const left = this.nodeArray.splice(0, index);
+        const right = this.nodeArray.splice(index+1);
+        this.nodeArray = left;
+        for (const node of right) {
+            const coords = this.newNodeCoords();
+            if (coords[2]) {node.mirror();}
+            // Move to the correct position with animation
+            this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
+            connection?.updateEnd([coords[0], coords[1]], this.animationValue());
         }
     }
 

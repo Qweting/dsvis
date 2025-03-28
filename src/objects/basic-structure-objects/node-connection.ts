@@ -14,7 +14,13 @@ export class LinkedConnection extends Connection<LinkedNode> {
         this.front();
     }
 
-
+    setEnd(end: LinkedNode, animationDuration: number = 0): this {
+        this.$end = end;
+        const coords: [number, number] = [end.getCenterPos()[0] - this.nodeDimensions[0]/2, 
+                                        end.getCenterPos()[1] - this.nodeDimensions[1]/2];
+        this.updateEnd(coords, animationDuration);
+        return this;
+    }
 
     updateEnd(endNodeCoords: [number, number], animationDuration: number): void
     {
@@ -22,8 +28,6 @@ export class LinkedConnection extends Connection<LinkedNode> {
         this.setCoords(endCoords);
         super.update(this.$coords, animationDuration);
     }
-    
-    
 
     private setCoords(endCoords: [number, number]): void {
         this.$coords = {

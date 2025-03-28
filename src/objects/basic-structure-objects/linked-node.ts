@@ -12,6 +12,8 @@ export class LinkedNode extends G {
     private nextNodeRect: Rect;
     private nextNodeRectWidth: number;
 
+    private isMirrored: boolean = false;
+
     constructor(value: string | number, nodeDimensions: [number, number], strokeWidth: number) {
         super();
         this.value = value;
@@ -33,10 +35,12 @@ export class LinkedNode extends G {
     }
 
     // mirrors the node so that elementRect and nextNodeRect are swapped
-    mirror(): void {
-        this.nextNodeRect.move(0, 0);
-        this.elementRect.move(this.nextNodeRectWidth, 0);
-        this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
+    mirror(flip: boolean): void {
+        if(flip != this.isMirrored) {
+            this.nextNodeRect.move(0, 0);
+            this.elementRect.move(this.nextNodeRectWidth, 0);
+            this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
+        }
     }
 
     // Position where a connection should begin
