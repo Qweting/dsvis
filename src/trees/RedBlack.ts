@@ -149,7 +149,7 @@ export class RedBlack extends BST implements Collection {
 
     async deleteOne(value: string | number) {
         const result = await super.deleteOne(value);
-        if (result?.success) {
+        if (result.success) {
             if (result.parent && result.direction) {
                 await this.fixDeleteImbalance(result.parent, result.direction);
             }

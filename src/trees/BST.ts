@@ -133,16 +133,26 @@ export class BST<Node extends BinaryNode = BinaryNode>
 
         await this.pause("find.start", value);
         const found = await this.findHelper(value);
+        const node = found.success ? found.node : found.parent;
 
-        found.node.setHighlight(true);
+        node.setHighlight(true);
         const path = found.success ? "find.found" : "find.notfound";
         await this.pause(path, value);
-        found.node.setHighlight(false);
+        node.setHighlight(false);
 
-        return found;
+        return { node, success: found.success };
     }
 
-    async findHelper(value: string | number) {
+    async findHelper(value: string | number): Promise<
+        | {
+              success: true;
+              node: Node;
+          }
+        | {
+              success: false;
+              parent: Node;
+          }
+    > {
         if (!this.treeRoot) {
             throw new Error(
                 "Expected root node to exist when find helper was called"
@@ -184,13 +194,10 @@ export class BST<Node extends BinaryNode = BinaryNode>
         }
 
         pointer.remove();
-        return { success: false, node: parent };
+        return { success: false, parent };
     }
 
-    async insertOne(value: string | number): Promise<{
-        success: boolean;
-        node: Node | null;
-    }> {
+    async insertOne(value: string | number) {
         value = String(value); //TODO: Check if this can be handled better
         if (!this.treeRoot) {
             this.treeRoot = this.newNode(value) as Node;
@@ -210,14 +217,14 @@ export class BST<Node extends BinaryNode = BinaryNode>
         }
 
         const child = this.newNode(value) as Node;
-        const cmp = compare(value, found.node.getText());
+        const cmp = compare(value, found.parent.getText());
         const direction = cmp < 0 ? "left" : "right";
 
-        found.node.setChild(direction, child, this.getStrokeWidth());
+        found.parent.setChild(direction, child, this.getStrokeWidth());
         child.setHighlight(true);
-        found.node.setChildHighlight(direction, true);
+        found.parent.setChildHighlight(direction, true);
         await this.pause("insert.child", value, direction);
-        found.node.setChildHighlight(direction, false);
+        found.parent.setChildHighlight(direction, false);
         child.setHighlight(false);
 
         this.resizeTree();
@@ -232,26 +239,29 @@ export class BST<Node extends BinaryNode = BinaryNode>
         }
     }
 
-    // TODO: update type with separate for success true and false
     async deleteOne(value: string | number): Promise<{
         success: boolean;
         direction: BinaryDir | null;
         parent: Node | null;
-    } | null> {
+    }> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
-            return null;
+            return { success: false, parent: null, direction: null };
         }
 
         await this.pause("delete.search", value);
         const found = await this.findHelper(value);
         if (!found.success) {
-            found.node.setHighlight(true);
+            found.parent.setHighlight(true);
             await this.pause("delete.notexists", value);
-            found.node.setHighlight(false);
+            found.parent.setHighlight(false);
             const direction =
-                compare(value, found.node.getText()) < 0 ? "left" : "right";
-            return { success: false, direction: direction, parent: found.node };
+                compare(value, found.parent.getText()) < 0 ? "left" : "right";
+            return {
+                success: false,
+                direction: direction,
+                parent: found.parent,
+            };
         }
 
         found.node.setHighlight(true);
@@ -328,8 +338,8 @@ export class BST<Node extends BinaryNode = BinaryNode>
             );
         }
 
-        const child = node.getLeft() || node.getRight();
-        const parent = node.getParent();
+        const child = (node.getLeft() || node.getRight()) as Node | null;
+        const parent = node.getParent() as Node | null;
 
         if (!parent) {
             if (!child) {

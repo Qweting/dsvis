@@ -43,7 +43,7 @@ export class AVL extends BST<AVLNode> implements Collection {
     async deleteOne(value: string | number) {
         const result = await super.deleteOne(value);
 
-        if (result && result.success) {
+        if (result.success) {
             if (result.parent) {
                 await this.updateHeights(result.parent, result.direction);
             }
