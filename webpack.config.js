@@ -25,6 +25,7 @@ const config = {
         globals: ["./dsvis.css"],
         collections: "./src/collections.ts",
         prioqueues: "./src/prioqueues.ts",
+        sorting: "./src/sorting.ts",
         "avl-quiz": "./src/quizzes/AVL-quiz.ts",
     },
     output: {

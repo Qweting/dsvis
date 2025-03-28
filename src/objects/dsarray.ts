@@ -1,5 +1,6 @@
 import { G, Rect, Text } from "@svgdotjs/svg.js";
 import { NBSP } from "~/engine";
+import { Polyline } from "@svgdotjs/svg.js";
 
 export class DSArray extends G {
     $horizontal: boolean;
@@ -136,21 +137,83 @@ export class DSArray extends G {
         return this;
     }
 
-    setIndexHighlight(i: number, high: boolean | null) {
+    setBlueHighlight(i: number, high: boolean) {
         for (const obj of [this.$backgrounds[i], this.$values[i]]) {
             if (high == null) {
-                obj.toggleClass("highlight");
+                obj.toggleClass("highlightblue");
             } else if (high) {
-                obj.addClass("highlight");
+                obj.addClass("highlightblue");
             } else {
-                obj.removeClass("highlight");
+                obj.removeClass("highlightblue");
             }
         }
         for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.hasClass("highlight")) {
+            if (!bg.hasClass("highlightblue")) {
                 bg.back();
             }
         }
         return this;
+    }
+
+    setIndexHighlight(i: number, high: boolean, color: string = "#C00") {
+        if (this.$backgrounds[i]) {
+            if (high) {
+                this.$backgrounds[i].css("stroke", color);
+            } else {
+                this.$backgrounds[i].css("stroke", "");
+            }
+        }
+
+        if (this.$values[i]) {
+            if (high) {
+                this.$values[i].css("fill", color);
+            } else {
+                this.$values[i].css("fill", "");
+            }
+        }
+
+        for (const bg of Object.values(this.$backgrounds)) {
+            if (!bg.css("stroke")) {
+                bg.back();
+            }
+        }
+        return this;
+    }
+
+    addArrow(index: number, arrowId: string = "arrow", color: string = "#000") {
+        const arrowSize = 10;
+        const arrowOffset = 10;
+
+        const x = this.getCX(index);
+        const y = this.cy() - this.engine().getObjectSize() / 2 - arrowOffset;
+
+        const arrow = this.polyline([
+            [x, y],
+            [x - arrowSize, y - arrowSize],
+            [x + arrowSize, y - arrowSize],
+            [x, y],
+        ])
+            .fill("none")
+            .stroke({ width: 2 })
+            .id(arrowId);
+
+        arrow.css("stroke", color)
+        this.add(arrow);
+    }
+
+    removeArrow(arrowId: string) {
+        const arrow = this.findOne(`#${arrowId}`) as Polyline | null;
+        if (arrow) {
+            arrow.remove();
+        }
+    }
+
+    moveArrow(arrowId: string, indexTo: number) {
+        const arrow = this.findOne(`#${arrowId}`) as Polyline | null;
+        const x = this.getCX(indexTo);
+
+        if (arrow) {
+            this.engine().animate(arrow, true).cx(x);
+        }
     }
 }

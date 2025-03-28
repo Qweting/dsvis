@@ -279,3 +279,26 @@ svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
     stroke: lightgray;
 }
 
+/*PsuedoCode*/
+
+.psuedoCode {
+    align-self: start;
+	margin-left: 50vh;
+	margin-top: 3vh;
+	display: inline-block;
+	width: 15%;
+	position: absolute;
+}
+
+/*Highlights*/
+svg .highlightblue, svg .highlightblue > * {
+    stroke: #04D9FF;
+}
+
+svg .highlightblue.filled, svg text.highlightblue, svg .highlightblue > .filled, svg .highlightblue > text {
+	stroke: none;
+	fill: #04D9FF;
+}
+
+
+
