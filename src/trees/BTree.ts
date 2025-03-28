@@ -42,7 +42,7 @@ const BTreeMessages = {
                 `Stealing from left sibling:\n[${left}] → [${right}] → ${node}`,
         },
     },
-};
+} as const satisfies MessagesObject;
 
 export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];

@@ -35,7 +35,7 @@ export const BinaryHeapMessages = {
         lastToFirst: (val: number) =>
             `Swap in the last heap value to the first position: ${val}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class BinaryHeap extends Engine implements Prioqueue {
     messages: MessagesObject = BinaryHeapMessages;

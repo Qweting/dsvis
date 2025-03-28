@@ -1,4 +1,4 @@
-import { addReturnSubmit } from "~/helpers";
+import { addReturnSubmit, querySelector } from "~/helpers";
 import { AVLQuiz } from "~/quizzes/AVL-quiz";
 import { EngineAlgorithmControl } from "./engine-algorithm-controls";
 
@@ -22,80 +22,54 @@ export class AVLQuizAlgorithmControl extends EngineAlgorithmControl {
 
         this.engine = engine;
 
-        const insertField =
-            container.querySelector<HTMLInputElement>("input.insertField");
-        const createLeft =
-            container.querySelector<HTMLInputElement>("input.createLeft");
-        const createRight =
-            container.querySelector<HTMLInputElement>("input.createRight");
-        const moveParent =
-            container.querySelector<HTMLInputElement>("input.moveParent");
-        const moveLeft =
-            container.querySelector<HTMLInputElement>("input.moveLeft");
-        const moveRight =
-            container.querySelector<HTMLInputElement>("input.moveRight");
-        const rotateLeft =
-            container.querySelector<HTMLInputElement>("input.rotateLeft");
-        const rotateRight =
-            container.querySelector<HTMLInputElement>("input.rotateRight");
-        const markNode =
-            container.querySelector<HTMLInputElement>("input.markNode");
-        const copyToMark =
-            container.querySelector<HTMLInputElement>("input.copyToMark");
-        const deleteNode =
-            container.querySelector<HTMLInputElement>("input.deleteNode");
-        const restartQuiz =
-            container.querySelector<HTMLInputElement>("input.restartQuiz");
-
-        if (!insertField) {
-            throw new Error("Could not find insert field");
-        }
-        if (!createLeft) {
-            throw new Error("Could not find create left field");
-        }
-        if (!createRight) {
-            throw new Error("Could not find create right field");
-        }
-        if (!moveParent) {
-            throw new Error("Could not find move parent field");
-        }
-        if (!moveLeft) {
-            throw new Error("Could not find move left field");
-        }
-        if (!moveRight) {
-            throw new Error("Could not find move right field");
-        }
-        if (!rotateLeft) {
-            throw new Error("Could not find rotate left field");
-        }
-        if (!rotateRight) {
-            throw new Error("Could not find rotate right field");
-        }
-        if (!markNode) {
-            throw new Error("Could not find mark node field");
-        }
-        if (!copyToMark) {
-            throw new Error("Could not find copy to mark field");
-        }
-        if (!deleteNode) {
-            throw new Error("Could not find delete node field");
-        }
-        if (!restartQuiz) {
-            throw new Error("Could not find restart quiz field");
-        }
-
-        this.insertField = insertField;
-        this.createLeft = createLeft;
-        this.createRight = createRight;
-        this.moveParent = moveParent;
-        this.moveLeft = moveLeft;
-        this.moveRight = moveRight;
-        this.rotateLeft = rotateLeft;
-        this.rotateRight = rotateRight;
-        this.markNode = markNode;
-        this.copyToMark = copyToMark;
-        this.deleteNode = deleteNode;
-        this.restartQuiz = restartQuiz;
+        this.insertField = querySelector<HTMLInputElement>(
+            "input.insertField",
+            container
+        );
+        this.createLeft = querySelector<HTMLInputElement>(
+            "input.createLeft",
+            container
+        );
+        this.createRight = querySelector<HTMLInputElement>(
+            "input.createRight",
+            container
+        );
+        this.moveParent = querySelector<HTMLInputElement>(
+            "input.moveParent",
+            container
+        );
+        this.moveLeft = querySelector<HTMLInputElement>(
+            "input.moveLeft",
+            container
+        );
+        this.moveRight = querySelector<HTMLInputElement>(
+            "input.moveRight",
+            container
+        );
+        this.rotateLeft = querySelector<HTMLInputElement>(
+            "input.rotateLeft",
+            container
+        );
+        this.rotateRight = querySelector<HTMLInputElement>(
+            "input.rotateRight",
+            container
+        );
+        this.markNode = querySelector<HTMLInputElement>(
+            "input.markNode",
+            container
+        );
+        this.copyToMark = querySelector<HTMLInputElement>(
+            "input.copyToMark",
+            container
+        );
+        this.deleteNode = querySelector<HTMLInputElement>(
+            "input.deleteNode",
+            container
+        );
+        this.restartQuiz = querySelector<HTMLInputElement>(
+            "input.restartQuiz",
+            container
+        );
 
         this.initialize();
     }

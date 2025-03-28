@@ -12,7 +12,7 @@ export const AVLMessages = {
         unbalanced: "Node is unbalanced!",
         balanced: "Node is now balanced",
     },
-};
+} as const satisfies MessagesObject;
 
 export class AVL extends BST<AVLNode> implements Collection {
     messages: MessagesObject = updateDefault(AVLMessages, BSTMessages);
@@ -43,7 +43,7 @@ export class AVL extends BST<AVLNode> implements Collection {
     async deleteOne(value: string | number) {
         const result = await super.deleteOne(value);
 
-        if (result && result.success) {
+        if (result.success) {
             if (result.parent) {
                 await this.updateHeights(result.parent, result.direction);
             }

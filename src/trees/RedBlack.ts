@@ -59,7 +59,7 @@ const RedBlackMessages = {
         ) =>
             `${right} child ${rightChild} is black, its ${left} child is red:\nSwitch colors and rotate child ${right}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class RedBlack extends BST implements Collection {
     messages: MessagesObject = updateDefault(RedBlackMessages, BSTMessages);
@@ -149,7 +149,7 @@ export class RedBlack extends BST implements Collection {
 
     async deleteOne(value: string | number) {
         const result = await super.deleteOne(value);
-        if (result?.success) {
+        if (result.success) {
             if (result.parent && result.direction) {
                 await this.fixDeleteImbalance(result.parent, result.direction);
             }

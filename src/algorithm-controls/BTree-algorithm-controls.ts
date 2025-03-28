@@ -1,3 +1,4 @@
+import { querySelector } from "~/helpers";
 import { BTree } from "~/trees/BTree";
 import { CollectionAlgorithmControl } from "./collection-algorithm-controls";
 
@@ -23,14 +24,10 @@ export class BTreeAlgorithmControl extends CollectionAlgorithmControl {
             </label></span>`
         );
 
-        const maxDegree =
-            container.querySelector<HTMLSelectElement>("select.maxDegree");
-
-        if (!maxDegree) {
-            throw new Error("Could not find max degree select element");
-        }
-
-        this.maxDegree = maxDegree;
+        this.maxDegree = querySelector<HTMLSelectElement>(
+            "select.maxDegree",
+            container
+        );
 
         this.maxDegree.addEventListener("change", () =>
             this.engine.confirmResetAll()
