@@ -180,7 +180,7 @@ export class DSArray extends G {
         return this;
     }
 
-    addArrow(index: number, arrowId: string = "arrow") {
+    addArrow(index: number, arrowId: string = "arrow", color: string = "#000") {
         const arrowSize = 10;
         const arrowOffset = 10;
 
@@ -194,9 +194,10 @@ export class DSArray extends G {
             [x, y],
         ])
             .fill("none")
-            .stroke({ width: 2, color: "#000" })
+            .stroke({ width: 2 })
             .id(arrowId);
 
+        arrow.css("stroke", color)
         this.add(arrow);
     }
 
@@ -214,18 +215,5 @@ export class DSArray extends G {
         if (arrow) {
             this.engine().animate(arrow, true).cx(x);
         }
-    }
-
-    setArrowHighlight(id: string, high: boolean, color: string = "#C00") {
-        const arrow = this.findOne(`#${id}`);
-        if (arrow) {
-            if (high) {
-                arrow.css("fill", color);
-            } else {
-                arrow.css("fill", "");
-            }
-        }
-
-        return this;
     }
 }
