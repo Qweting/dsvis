@@ -29,29 +29,37 @@ export class MergeSort extends Sort {
         if (this.sortArray === null) {
             throw new Error("Sort array not initialised");
         }
+        //Check if array is empty
         const sortSize = this.sortArray.getSize();
         if (sortSize <= 1) {
             await this.pause("general.empty");
             return;
         }
+        //Delete old merge arrays
         for (let i = 0; i < this.mergeArrayList.length; i++) {
             this.mergeArrayList[i].remove();
         }
+        //Reset variables
         this.compensate = 0;
         this.mergeArrayList = [];
+
+        //Remove empty space from the end of the array
         this.sortArray.getValues();
         if (this.sortArray.getValue(this.sortArray.getSize() - 1) === NBSP) {
             this.sortArray.setSize(this.sortArray.getSize() - 1);
         }
+        //Set all elements to disabled to grey them out
         for (let i = 0; i < this.sortArray.getSize(); i++) {
             this.sortArray.setDisabled(i, true);
         }
+        //Centers the array
         this.sortArray.center(
             this.getTreeRoot()[0],
             this.getTreeRoot()[1] + this.$Svg.margin * 4
         );
-
+        //Start recursive calls to mergeSort
         await this.mergeSort(this.sortArray, 0, this.sortArray.getSize(), 1);
+        //Finish the algorithm
         await this.pause("general.finished");
     }
     async mergeSort(
@@ -61,17 +69,21 @@ export class MergeSort extends Sort {
         iteration: number
     ) {
         {
+            //Check if the array is empty
             if (left >= right) {
                 return;
             }
+            //Check if the array is not null
             if (!this.sortArray) {
                 throw new Error("Sort array not initialised");
             }
+            //Split the array in half
             const mid = Math.ceil(left + (right - left) / 2);
-            const [xCenter, yCenter] = this.getTreeRoot();
+            const yCenter = this.getTreeRoot()[1];
             const baseY = this.$Svg.margin * 4;
             const CX = arr.getCX(0);
 
+            //When the array is larger than 2 elements split into two arrays
             if (arr.getSize() > 2) {
                 const mergeArray1 = this.Svg.put(
                     new DSArray(mid - left, this.getObjectSize())
@@ -113,10 +125,12 @@ export class MergeSort extends Sort {
                     mergeArray2.getValues(),
                     arr.getValues()
                 );
+                
+                //Push the new arrays to the mergeArrayList
                 this.mergeArrayList.push(mergeArray1);
                 this.mergeArrayList.push(mergeArray2);
+
                 //Compensation to keep the array within the viewbox
-                console.log(mergeArray1.getCX(0));
                 if (mergeArray1.getCX(0) < 0) {
                     this.compensate =
                         mergeArray1.getCX(0) * -1 + this.$Svg.margin;
@@ -139,6 +153,8 @@ export class MergeSort extends Sort {
                         );
                     }
                 }
+
+                //Recursively call mergeSort on the new arrays
                 await this.mergeSort(mergeArray1, left, mid, iteration + 1);
 
                 await this.mergeSort(
@@ -147,9 +163,10 @@ export class MergeSort extends Sort {
                     right - mid,
                     iteration + 1
                 );
-
+                //Merge the return of the two mergeSort calls
                 await this.merge(arr, mergeArray1, mergeArray2);
             } else if (arr.getSize() == 2) {
+                //If the array is 2 elements, compare and swap them
                 await this.pause(
                     "sort.compare",
                     arr.getValue(0),
@@ -169,7 +186,7 @@ export class MergeSort extends Sort {
                 }
                 arr.setDisabled(0, false);
                 arr.setDisabled(1, false);
-            } else {
+            } else { //If the array is 1 element, set it to enabled
                 arr.setDisabled(0, false);
             }
         }
@@ -179,9 +196,11 @@ export class MergeSort extends Sort {
         let i;
         let a1i = 0;
         let a2i = 0;
+        //Empty the parent array
         for (i = 0; i < array.getSize(); i++) {
             array.setValue(i, NBSP);
         }
+        //Merge the two subarrays into the parent array
         for (i = 0; i < array.getSize(); i++) {
             await this.pause(
                 "sort.compare",
@@ -199,6 +218,7 @@ export class MergeSort extends Sort {
                         0)
             ) {
                 await this.pause("sort.move", subarray1.getValue(a1i));
+                //Move the value from the first subarray to the parent array
                 let svgValue = this.Svg.put(
                     new TextCircle(
                         subarray1.getValue(a1i),
@@ -207,13 +227,16 @@ export class MergeSort extends Sort {
                     )).init(subarray1.getCX(a1i), subarray1.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
+                //Remove the text circle
                 svgValue.remove();
+                //Set the value to disabled and set the value in the parent array
                 subarray1.setDisabled(a1i, true);
                 array.setDisabled(i, false);
                 array.setValue(i, subarray1.getValue(a1i));
                 a1i++;
             } else {
                 await this.pause("sort.move", subarray2.getValue(a2i));
+                //Move the value from the second subarray to the parent array
                 let svgValue = this.Svg.put(
                     new TextCircle(
                         subarray2.getValue(a2i),
@@ -222,7 +245,9 @@ export class MergeSort extends Sort {
                     )).init(subarray2.getCX(a2i), subarray2.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
+                //Remove the text circle
                 svgValue.remove();
+                //Set the value to disabled and set the value in the parent array
                 subarray2.setDisabled(a2i, true);
                 array.setDisabled(i, false);
                 array.setValue(i, subarray2.getValue(a2i));
