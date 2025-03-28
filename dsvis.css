@@ -279,9 +279,9 @@ svg.debug line.gridline, svg.debug .invisible, svg.debug .nullnode {
     stroke: lightgray;
 }
 
-/*PsuedoCode*/
+/*PseudoCode*/
 
-.psuedoCode {
+.pseudoCode {
     align-self: start;
 	margin-left: 50vh;
 	margin-top: 3vh;
