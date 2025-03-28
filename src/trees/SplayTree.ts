@@ -18,7 +18,7 @@ const SplayTreeMessages = {
         zigzig: (node: BinaryNode, left: BinaryDir, child: BinaryNode) =>
             `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class SplayTree extends BST implements Collection {
     messages: MessagesObject = updateDefault(SplayTreeMessages, BSTMessages);

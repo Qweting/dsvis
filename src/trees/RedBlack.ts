@@ -59,7 +59,7 @@ const RedBlackMessages = {
         ) =>
             `${right} child ${rightChild} is black, its ${left} child is red:\nSwitch colors and rotate child ${right}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class RedBlack extends BST implements Collection {
     messages: MessagesObject = updateDefault(RedBlackMessages, BSTMessages);

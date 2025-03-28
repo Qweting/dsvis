@@ -12,7 +12,7 @@ export const AVLMessages = {
         unbalanced: "Node is unbalanced!",
         balanced: "Node is now balanced",
     },
-};
+} as const satisfies MessagesObject;
 
 export class AVL extends BST<AVLNode> implements Collection {
     messages: MessagesObject = updateDefault(AVLMessages, BSTMessages);

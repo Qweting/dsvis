@@ -55,7 +55,7 @@ export const BSTMessages = {
             dir2: BinaryDir
         ) => `Zig-zag: Rotate ${child} ${dir1}, then rotate ${node} ${dir2}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class BST<Node extends BinaryNode = BinaryNode>
     extends Engine
