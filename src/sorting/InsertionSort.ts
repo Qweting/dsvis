@@ -1,3 +1,4 @@
+import { NBSP } from "../../src/engine";
 import {compare} from "../../src/helpers"
 import {Sort} from "../../src/sorting/sort"
 
@@ -29,12 +30,17 @@ export class InsertionSort extends Sort {
 
         const sortSize = this.sortArray.getSize()
     
-        
         if (sortSize <= 1) {
             await this.pause('general.empty');
             return;
         }
 
+        if(this.sortArray.getValue(this.sortArray.getSize()-1) === NBSP){
+            this.sortArray.setSize(this.sortArray.getSize() - 1);
+        }
+                
+        //Center the array depending on its size
+        this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);
         
         for (let i=1; i < sortSize; i++) {
             let j = i;
