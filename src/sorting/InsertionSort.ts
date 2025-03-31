@@ -28,7 +28,7 @@ export class InsertionSort extends Sort {
             throw new Error("Sort array not initialised");
         }
 
-        const sortSize = this.sortArray.getSize()
+        let sortSize = this.sortArray.getSize()
     
         if (sortSize <= 1) {
             await this.pause('general.empty');
@@ -37,6 +37,7 @@ export class InsertionSort extends Sort {
 
         if(this.sortArray.getValue(this.sortArray.getSize()-1) === NBSP){
             this.sortArray.setSize(this.sortArray.getSize() - 1);
+            sortSize--;
         }
                 
         //Center the array depending on its size
