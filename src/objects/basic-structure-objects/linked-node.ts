@@ -36,10 +36,16 @@ export class LinkedNode extends G {
 
     // mirrors the node so that elementRect and nextNodeRect are swapped
     mirror(flip: boolean): void {
-        if(flip != this.isMirrored) {
-            this.nextNodeRect.move(0, 0);
-            this.elementRect.move(this.nextNodeRectWidth, 0);
-            this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
+        if(flip !== this.isMirrored) {
+            if(!this.isMirrored) {
+                this.nextNodeRect.move(0, 0);
+                this.elementRect.move(this.nextNodeRectWidth, 0);
+                this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
+            } else {
+                this.elementRect.move(0, 0);
+                this.nextNodeRect.move(this.elementRectWidth, 0);
+                this.textElement.center(this.elementRect.cx() + 15, this.elementRect.cy());
+            }
         }
     }
 

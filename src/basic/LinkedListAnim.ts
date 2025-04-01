@@ -28,10 +28,9 @@ export const LinkedListMessages = {
             `List is empty, insert ${element} as head`,
     },
     delete: {
-        search: (value: string) => `Searching for node to delete ${value}`,
-        notexists: (value: string) => `There is no node ${value}`,
-        found: (value: string) => `Found node ${value} to delete`,
-        adjust: "Adjusting link",
+        delete: (value: string) => `Deleting node ${value}`,
+        adjustLink: "Adjusting link",
+        adjustPos: "Adjusting positions",
     },
     connection: {
         connect: (start: string, end: string) => `connecting ${start} with ${end}`,
@@ -63,7 +62,7 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
-        this.initialValues = ["A", "B", "D", "E", "F"];
+        this.initialValues = ["A", "B", "C", "D", "E"];
         //this.initialValues = ["A", "B"];
         //this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
@@ -110,7 +109,7 @@ export class LinkedListAnim extends Engine implements Collection {
         this.Svg.add(node);
 
         const coords = this.newNodeCoords();
-        if (coords[2]) {node.mirror();}
+        node.mirror(coords[2]);
 
         this.highlight(node, true);
 
@@ -196,9 +195,11 @@ export class LinkedListAnim extends Engine implements Collection {
     async delete(value: string | number): Promise<void> {
         const node = await this.findOne(value);
         if(node) { // If the node is found
+            await this.pause("delete.delete", value);
             this.linkedList.removeElement(value);
             node.remove(); // Remove the node from the SVG
 
+            await this.pause("delete.adjustLink");
             const index = this.nodeArray.findIndex(([n]) => n === node); // Find the index of the node in the array
             // If the node is not the last one
             if(index < this.nodeArray.length - 1) {
@@ -211,12 +212,13 @@ export class LinkedListAnim extends Engine implements Collection {
                 this.nodeArray[index+1][1] = prevConnection;
                 prevConnection.setEnd(nextNode, this.animationValue());
             } else { // If the node is the last one, remove the connection to the previous node
-                const prevConnection = this.nodeArray[index-1][1] as LinkedConnection;
+                const prevConnection = this.nodeArray[index][1] as LinkedConnection;
                 prevConnection.remove();
             }
 
             // TODO: Remove the node from the array i.e clean up and make sure rebuild is correct
-            // this.rebuildArray(index);
+            await this.pause("delete.adjustPos");
+            this.adjustNodes(index);
 
             // TODO: impl. correct pauses and animation
         }
@@ -226,12 +228,17 @@ export class LinkedListAnim extends Engine implements Collection {
         const left = this.nodeArray.splice(0, index);
         const right = this.nodeArray.splice(index+1);
         this.nodeArray = left;
-        for (const node of right) {
+        for (const nodeCon of right) {
+            const node = nodeCon[0];
+            const connection = nodeCon[1] as LinkedConnection;
+
             const coords = this.newNodeCoords();
-            if (coords[2]) {node.mirror();}
-            // Move to the correct position with animation
+            node.mirror(coords[2]);
+            // Move the node and link to the correct position with animation
             this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
             connection?.updateEnd([coords[0], coords[1]], this.animationValue());
+
+            this.nodeArray.push([node, connection]);
         }
     }
 
