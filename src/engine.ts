@@ -122,16 +122,14 @@ export class Engine {
         }
 
         this.info = new Info(this.Svg, this.$Svg.margin);
-    }
 
-    initialise(): void {
         this.resetAll();
         this.state.setRunning(true);
     }
 
     async resetAll(): Promise<void> {
         this.actions = [];
-        await this.reset();
+        this.reset();
     }
 
     confirmResetAll(): boolean {
@@ -142,13 +140,13 @@ export class Engine {
         return false;
     }
 
-    async reset(): Promise<void> {
+    reset() {
         this.clearCanvas();
-        await this.resetAlgorithm();
+        this.resetAlgorithm();
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {
+    resetAlgorithm() {
         /* Allow subclasses to use this function */
     }
 

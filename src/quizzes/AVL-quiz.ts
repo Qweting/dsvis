@@ -11,17 +11,24 @@ export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
     algorithmControls: AVLQuizAlgorithmControl;
+    initialValues: string[] | null = null;
 
-    constructor(containerSelector: string) {
+    constructor(containerSelector: string, initialValues: string[] = []) {
         super(containerSelector);
         this.algorithmControls = new AVLQuizAlgorithmControl(
             this.container,
             this
         );
+        this.initialValues = initialValues;
     }
 
-    async resetAlgorithm() {
-        await super.resetAlgorithm();
+    async resetAlgorithm(): Promise<void> {
+        super.resetAlgorithm();
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
         await this.setCurrent(this.treeRoot, false);
         this.mark = null;
     }
@@ -273,8 +280,7 @@ export class AVLQuiz extends BST<AVLNode> {
 }
 
 function initialiseAVLQuiz(containerID: string) {
-    const AVLEngine = new AVLQuiz(containerID);
-    AVLEngine.initialise(["K"]);
+    new AVLQuiz(containerID, ["K"]);
 }
 
 initialiseAVLQuiz("#avlquizContainer");

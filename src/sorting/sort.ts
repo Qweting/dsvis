@@ -6,7 +6,6 @@ import { TextCircle } from "../../src/objects/text-circle";
 
 export class Sort extends Engine {
     arraySize: number = 28;
-    initialValues: Array<string> = [];
     treeRoot: BinaryNode | null = null;
     treeNodes: Array<BinaryNode> | null = null;
     compensate: number = 0;
@@ -14,19 +13,16 @@ export class Sort extends Engine {
     indexLength: number = 0;
     algorithmControls: SortingAlgorithmControls;
 
-
     constructor(containerSelector: string) {
         super(containerSelector);
-        this.algorithmControls = new SortingAlgorithmControls(this.container, this);
-    }
-
-    initialise(initialValues = []) {
-        this.initialValues = initialValues;
-        super.initialise();
+        this.algorithmControls = new SortingAlgorithmControls(
+            this.container,
+            this
+        );
     }
 
     async resetAlgorithm() {
-        await super.resetAlgorithm();
+        super.resetAlgorithm();
         this.indexLength = 0;
         const [xRoot, yRoot] = this.getTreeRoot();
         this.sortArray = this.Svg.put(
@@ -34,11 +30,6 @@ export class Sort extends Engine {
         ).init(1, xRoot, yRoot + this.$Svg.margin * 4);
         if (this.sortArray && Number(this.sortArray.x()) < this.$Svg.margin) {
             this.sortArray.x(this.$Svg.margin);
-        }
-        if (this.initialValues) {
-            this.state.runWhileResetting(
-                async () => await this.insert(...this.initialValues)
-            );
         }
     }
 

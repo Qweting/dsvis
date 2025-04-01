@@ -59,11 +59,6 @@ export class BTree extends Engine implements Collection {
         );
     }
 
-    initialise(initialValues = null) {
-        this.initialValues = parseValues(initialValues);
-        super.initialise();
-    }
-
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.treeRoot = null;
