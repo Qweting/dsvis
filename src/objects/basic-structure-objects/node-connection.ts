@@ -22,11 +22,23 @@ export class LinkedConnection extends Connection<LinkedNode> {
         return this;
     }
 
-    updateEnd(endNodeCoords: [number, number], animationDuration: number): void
-    {
+    updateStart(startNodeCoords: [number, number], animationDuration: number): void {
+        const newCoords = {
+            x1: startNodeCoords[0],
+            y1: startNodeCoords[1],
+        };
+        super.update(newCoords, animationDuration);
+    }
+
+    updateEnd(endNodeCoords: [number, number], animationDuration: number): void {
         const endCoords = this.getEndCoords([endNodeCoords[0] + this.nodeDimensions[0] / 2, endNodeCoords[1] + this.nodeDimensions[1] / 2]);
         this.setCoords(endCoords);
         super.update(this.$coords, animationDuration);
+    }
+
+    updateAll(startNodeCoords: [number, number], endNodeCoords: [number, number], animationDuration: number): void {
+        this.updateStart(startNodeCoords, animationDuration);
+        this.updateEnd(endNodeCoords, animationDuration);
     }
 
     private setCoords(endCoords: [number, number]): void {

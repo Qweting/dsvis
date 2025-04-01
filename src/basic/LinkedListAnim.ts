@@ -219,14 +219,12 @@ export class LinkedListAnim extends Engine implements Collection {
             // TODO: Remove the node from the array i.e clean up and make sure rebuild is correct
             await this.pause("delete.adjustPos");
             this.adjustNodes(index);
-
-            // TODO: impl. correct pauses and animation
         }
     }
 
     adjustNodes(index: number): void {
-        const left = this.nodeArray.splice(0, index);
-        const right = this.nodeArray.splice(index+1);
+        const left = this.nodeArray.slice(0, index);
+        const right = this.nodeArray.slice(index+1);
         this.nodeArray = left;
         for (const nodeCon of right) {
             const node = nodeCon[0];
@@ -237,6 +235,7 @@ export class LinkedListAnim extends Engine implements Collection {
             // Move the node and link to the correct position with animation
             this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
             connection?.updateEnd([coords[0], coords[1]], this.animationValue());
+            //connection?.updateAll(right, [coords[0], coords[1]], this.animationValue());
 
             this.nodeArray.push([node, connection]);
         }
