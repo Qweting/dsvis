@@ -201,42 +201,62 @@ export class LinkedListAnim extends Engine implements Collection {
 
             await this.pause("delete.adjustLink");
             const index = this.nodeArray.findIndex(([n]) => n === node); // Find the index of the node in the array
-            // If the node is not the last one
-            if(index < this.nodeArray.length - 1) {
+            // If the node is the first one, remove the link to the next node
+            if(index === this.nodeArray.length - 1) { // If the node is the last one, remove the connection to the previous node
+                const prevConnection = this.nodeArray[index][1] as LinkedConnection;
+                prevConnection.remove();
+                this.nodeArray[index][1] = null; // Set the connection to null
+            }
+            else { // If the node is not the last one
                 // Remove the connection to the next node
                 const connection = this.nodeArray[index+1][1] as LinkedConnection;
                 connection.remove();
-                // Update the connection of the previous node to go to the next node
-                const nextNode = this.nodeArray[index+1][0];
-                const prevConnection = this.nodeArray[index][1] as LinkedConnection; // need to move this index + 1
-                this.nodeArray[index+1][1] = prevConnection;
-                prevConnection.setEnd(nextNode, this.animationValue());
-            } else { // If the node is the last one, remove the connection to the previous node
-                const prevConnection = this.nodeArray[index][1] as LinkedConnection;
-                prevConnection.remove();
+                if (index > 0) { // If the node is not the first one
+                    // Update the connection of the previous node to go to the next node
+                    const nextNode = this.nodeArray[index+1][0];
+                    const prevConnection = this.nodeArray[index][1] as LinkedConnection; // need to move this index + 1
+                    this.nodeArray[index+1][1] = prevConnection;
+                    prevConnection.setEnd(nextNode, this.animationValue());
+                }
             }
-
-            // TODO: Remove the node from the array i.e clean up and make sure rebuild is correct
             await this.pause("delete.adjustPos");
             this.adjustNodes(index);
         }
     }
-
+    
     adjustNodes(index: number): void {
         const left = this.nodeArray.slice(0, index);
         const right = this.nodeArray.slice(index+1);
+
         this.nodeArray = left;
+
+        let prevNodePointerPos: [number, number];
+        if (index > 0) {
+            prevNodePointerPos = this.nodeArray[this.nodeArray.length-1][0].getPointerPos(); // Get the pointer position of the previous node
+        }
+
         for (const nodeCon of right) {
             const node = nodeCon[0];
             const connection = nodeCon[1] as LinkedConnection;
 
             const coords = this.newNodeCoords();
             node.mirror(coords[2]);
+            
             // Move the node and link to the correct position with animation
             this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
-            connection?.updateEnd([coords[0], coords[1]], this.animationValue());
-            //connection?.updateAll(right, [coords[0], coords[1]], this.animationValue());
 
+            if (connection && this.nodeArray.length > 0) {
+                const startCoords = prevNodePointerPos!;
+                const endCoords: [number, number] = [coords[0], coords[1]];
+                connection.updateAll(startCoords, endCoords, this.animationValue());
+            }
+
+            if(!coords[2]) {
+                prevNodePointerPos = [coords[0] + node.elementRectWidth + node.nextNodeRectWidth/2, coords[1] + this.nodeDimensions[1]/2];
+            } else {
+                prevNodePointerPos = [coords[0] + node.nextNodeRectWidth/2, coords[1] + this.nodeDimensions[1]/2];
+            }
+            
             this.nodeArray.push([node, connection]);
         }
     }

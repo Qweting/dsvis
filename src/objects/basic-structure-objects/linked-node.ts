@@ -6,11 +6,11 @@ export class LinkedNode extends G {
     private nodeHeight: number;
 
     private elementRect: Rect;
-    private elementRectWidth: number;
+    elementRectWidth: number;
     private textElement: Text;
 
     private nextNodeRect: Rect;
-    private nextNodeRectWidth: number;
+    nextNodeRectWidth: number;
 
     private isMirrored: boolean = false;
 
@@ -41,10 +41,12 @@ export class LinkedNode extends G {
                 this.nextNodeRect.move(0, 0);
                 this.elementRect.move(this.nextNodeRectWidth, 0);
                 this.textElement.center(this.elementRect.cx(), this.elementRect.cy());
+                this.isMirrored = true;
             } else {
                 this.elementRect.move(0, 0);
                 this.nextNodeRect.move(this.elementRectWidth, 0);
                 this.textElement.center(this.elementRect.cx() + 15, this.elementRect.cy());
+                this.isMirrored = false;
             }
         }
     }

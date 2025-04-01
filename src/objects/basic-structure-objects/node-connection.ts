@@ -30,10 +30,14 @@ export class LinkedConnection extends Connection<LinkedNode> {
         super.update(newCoords, animationDuration);
     }
 
-    updateEnd(endNodeCoords: [number, number], animationDuration: number): void {
+    updateEnd(endNodeCoords: [number, number], animationDuration: number): void
+    {
         const endCoords = this.getEndCoords([endNodeCoords[0] + this.nodeDimensions[0] / 2, endNodeCoords[1] + this.nodeDimensions[1] / 2]);
-        this.setCoords(endCoords);
-        super.update(this.$coords, animationDuration);
+        const newCoords = {
+            x2: endCoords[0],
+            y2: endCoords[1],
+        };
+        super.update(newCoords, animationDuration);
     }
 
     updateAll(startNodeCoords: [number, number], endNodeCoords: [number, number], animationDuration: number): void {
@@ -51,7 +55,7 @@ export class LinkedConnection extends Connection<LinkedNode> {
         };
     }
 
-    // Calculates the positon where the end connection should be
+    // Calculates the positon where the end connection should be, need center pos
     private getEndCoords(endNodeCoords: [number, number], straight = true): [number, number] {
         const [endNodeX, endNodeY] = endNodeCoords;
         const [nodeWidth, nodeHeight] = this.nodeDimensions;
