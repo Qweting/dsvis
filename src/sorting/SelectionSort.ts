@@ -1,4 +1,4 @@
-import { MessagesObject } from "../engine";
+import { MessagesObject, NBSP } from "../engine";
 import { Sort } from "./sort";
 import {compare} from "../../src/helpers"
 
@@ -29,6 +29,14 @@ export class SelectionSort extends Sort {
             await this.pause("general.empty");
             return;
         }
+        
+        if(this.sortArray.getValue(this.sortArray.getSize()-1) === NBSP){
+            this.sortArray.setSize(this.sortArray.getSize() - 1);
+            sortSize--;   
+        }
+        //Center the array depending on its size
+        this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);        
+        
 
         for (let i = 0; i < sortSize - 1; i++) {
             let minIndex = i;
