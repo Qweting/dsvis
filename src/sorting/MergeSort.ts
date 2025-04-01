@@ -1,34 +1,22 @@
-import { DSArray } from "../objects/dsarray";
-import { Sort } from "./sort";
-import { MessagesObject, NBSP } from "../engine";
-import { TextCircle } from "../../src/objects/text-circle";
-import {compare} from "../../src/helpers"
+import { MessagesObject, NBSP } from "~/engine";
+import { compare, updateDefault } from "~/helpers";
+import { DSArray } from "~/objects/dsarray";
+import { TextCircle } from "~/objects/text-circle";
+import { Sorter } from "~/sorting";
+import { Sort, SortMessages } from "./sort";
 
 export const MergeSortMessages = {
-    general: {
-        empty: "Array is empty!",
-        full: "Array is full!",
-        finished: "Finished",
-    },
-    insert: {
-        value: (value: string) => `Insert value: ${value}`,
-    },
     sort: {
-        compare: (a: string, b: string) => `Compare ${a} and ${b}`,
-        swap: (a: string, b: string) => `Swap ${a} and ${b}`,
         split: (a: string, b: string) => `Split ${a} from ${b}`,
         move: (a: string) => `Move ${a} to upper array`,
         foundNewMin: (a: string) => `Found a smaller value ${a}`,
     },
-};
+} as const satisfies MessagesObject;
 
-export class MergeSort extends Sort {
+export class MergeSort extends Sort implements Sorter {
     mergeArrayList: DSArray[] = [];
-    messages: MessagesObject = MergeSortMessages;
+    messages: MessagesObject = updateDefault(MergeSortMessages, SortMessages);
     async sort() {
-        if (this.sortArray === null) {
-            throw new Error("Sort array not initialised");
-        }
         //Check if array is empty
         const sortSize = this.sortArray.getSize();
         if (sortSize <= 1) {
@@ -72,10 +60,6 @@ export class MergeSort extends Sort {
             //Check if the array is empty
             if (left >= right) {
                 return;
-            }
-            //Check if the array is not null
-            if (!this.sortArray) {
-                throw new Error("Sort array not initialised");
             }
             //Split the array in half
             const mid = Math.ceil(left + (right - left) / 2);
@@ -125,7 +109,7 @@ export class MergeSort extends Sort {
                     mergeArray2.getValues(),
                     arr.getValues()
                 );
-                
+
                 //Push the new arrays to the mergeArrayList
                 this.mergeArrayList.push(mergeArray1);
                 this.mergeArrayList.push(mergeArray2);
@@ -165,7 +149,7 @@ export class MergeSort extends Sort {
                 );
                 //Merge the return of the two mergeSort calls
                 await this.merge(arr, mergeArray1, mergeArray2);
-            } else if (arr.getSize() == 2) {
+            } else if (arr.getSize() === 2) {
                 //If the array is 2 elements, compare and swap them
                 await this.pause(
                     "sort.compare",
@@ -186,7 +170,8 @@ export class MergeSort extends Sort {
                 }
                 arr.setDisabled(0, false);
                 arr.setDisabled(1, false);
-            } else { //If the array is 1 element, set it to enabled
+            } else {
+                //If the array is 1 element, set it to enabled
                 arr.setDisabled(0, false);
             }
         }
@@ -219,12 +204,13 @@ export class MergeSort extends Sort {
             ) {
                 await this.pause("sort.move", subarray1.getValue(a1i));
                 //Move the value from the first subarray to the parent array
-                let svgValue = this.Svg.put(
+                const svgValue = this.Svg.put(
                     new TextCircle(
                         subarray1.getValue(a1i),
                         this.getObjectSize(),
                         this.getStrokeWidth()
-                    )).init(subarray1.getCX(a1i), subarray1.cy());
+                    )
+                ).init(subarray1.getCX(a1i), subarray1.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
                 //Remove the text circle
@@ -237,12 +223,13 @@ export class MergeSort extends Sort {
             } else {
                 await this.pause("sort.move", subarray2.getValue(a2i));
                 //Move the value from the second subarray to the parent array
-                let svgValue = this.Svg.put(
+                const svgValue = this.Svg.put(
                     new TextCircle(
                         subarray2.getValue(a2i),
                         this.getObjectSize(),
                         this.getStrokeWidth()
-                    )).init(subarray2.getCX(a2i), subarray2.cy());
+                    )
+                ).init(subarray2.getCX(a2i), subarray2.cy());
                 this.animate(svgValue).center(array.getCX(i), array.cy());
                 await this.pause(undefined);
                 //Remove the text circle

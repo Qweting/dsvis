@@ -1,42 +1,35 @@
-import { MessagesObject, NBSP } from "../engine";
-import { Sort } from "./sort";
-import {compare} from "../../src/helpers"
+import { MessagesObject, NBSP } from "~/engine";
+import { compare, updateDefault } from "~/helpers";
+import { Sorter } from "~/sorting";
+import { Sort, SortMessages } from "./sort";
 
 export const SelectionSortMessages = {
-    general: {
-        empty: "Array is empty!",
-        full: "Array is full!",
-        finished: "Finished",
-    },
-    insert: {
-        value: (value: string) => `Insert value: ${value}`,
-    },
     sort: {
-        compare: (a: string, b: string) => `Compare ${a} and ${b}`,
-        swap: (a: string, b: string) => `Swap ${a} and ${b}`,
         foundNewMin: (a: string) => `Found a smaller value ${a}`,
     },
-};
+} as const satisfies MessagesObject;
 
-export class SelectionSort extends Sort {
-    messages: MessagesObject = SelectionSortMessages;
+export class SelectionSort extends Sort implements Sorter {
+    messages: MessagesObject = updateDefault(
+        SelectionSortMessages,
+        SortMessages
+    );
     async sort() {
-        if (this.sortArray === null) {
-            throw new Error("Sort array not initialised");
-        }
         let sortSize = this.sortArray.getSize();
         if (sortSize <= 1) {
             await this.pause("general.empty");
             return;
         }
-        
-        if(this.sortArray.getValue(this.sortArray.getSize()-1) === NBSP){
+
+        if (this.sortArray.getValue(this.sortArray.getSize() - 1) === NBSP) {
             this.sortArray.setSize(this.sortArray.getSize() - 1);
-            sortSize--;   
+            sortSize--;
         }
         //Center the array depending on its size
-        this.sortArray.center(this.getTreeRoot()[0]+this.compensate, this.getTreeRoot()[1]+this.$Svg.margin*4);        
-        
+        this.sortArray.center(
+            this.getTreeRoot()[0] + this.compensate,
+            this.getTreeRoot()[1] + this.$Svg.margin * 4
+        );
 
         for (let i = 0; i < sortSize - 1; i++) {
             let minIndex = i;

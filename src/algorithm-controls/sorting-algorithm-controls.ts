@@ -1,5 +1,5 @@
 import { addReturnSubmit, querySelector } from "~/helpers";
-import { Sort } from "~/sorting/sort";
+import { Sorter } from "~/sorting";
 import { EngineAlgorithmControl } from "./engine-algorithm-controls";
 
 export class SortingAlgorithmControls extends EngineAlgorithmControl {
@@ -9,8 +9,9 @@ export class SortingAlgorithmControls extends EngineAlgorithmControl {
     sortSubmit: HTMLInputElement;
     pseudoCode: HTMLDivElement;
     clearSubmit: HTMLInputElement;
-    engine: Sort;
-    constructor(container: HTMLElement, engine: Sort) {
+    engine: Sorter;
+
+    constructor(container: HTMLElement, engine: Sorter) {
         super(container);
         this.engine = engine;
 
