@@ -93,13 +93,12 @@ export class Engine {
 
     constructor(containerSelector: string) {
         this.debugger = new Debugger();
+        this.state = new State();
 
         this.container = querySelector<HTMLElement>(containerSelector);
 
         this.generalControls = new EngineGeneralControls(this.container, this);
         this.algorithmControls = new EngineAlgorithmControl(this.container);
-
-        this.state = new State(this.generalControls.toggleRunner);
 
         this.cookies = new Cookies(
             {
@@ -126,7 +125,7 @@ export class Engine {
 
     initialise(): void {
         this.resetAll();
-        this.state.setRunning(true);
+        this.generalControls.setRunning(true);
     }
 
     async resetAll(): Promise<void> {
@@ -214,11 +213,7 @@ export class Engine {
             return;
         }
 
-        this.generalControls.addListener(
-            this.generalControls.toggleRunner,
-            "click",
-            () => this.state.toggleRunner()
-        );
+        this.generalControls.addRunnerListener();
         if (isRunning) {
             // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
@@ -290,7 +285,7 @@ export class Engine {
 
             // If optional running argument is provided set running state
             if (reason.running !== undefined) {
-                this.state.setRunning(reason.running);
+                this.generalControls.setRunning(reason.running);
             }
             this.actions.pop();
             until = reason.until;
@@ -353,7 +348,7 @@ export class Engine {
         this.debugger.log(
             `${
                 this.currentStep
-            }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
+            }. Doing: ${body} (running: ${this.generalControls.isRunning()}), ${JSON.stringify(
                 this.actions
             )}`
         );
@@ -385,7 +380,7 @@ export class Engine {
             );
 
             // If running, automatically step forward after waiting animation speed
-            if (this.state.isRunning()) {
+            if (this.generalControls.isRunning()) {
                 this.info.setStatus("running");
                 runnerTimer = setTimeout(
                     () => this.stepForward(resolve, reject),

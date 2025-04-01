@@ -1,7 +1,6 @@
 import { Debugger } from "~/debugger";
 import { Engine, Reject, Resolve } from "~/engine";
 import { querySelector } from "~/helpers";
-import { State } from "~/state";
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -30,14 +29,15 @@ export class EngineGeneralControls {
     generalControls: HTMLFieldSetElement;
     fastBackward: HTMLButtonElement;
     stepBackward: HTMLButtonElement;
-    toggleRunner: HTMLButtonElement;
+    toggleRunnerButton: HTMLButtonElement;
     stepForward: HTMLButtonElement;
     fastForward: HTMLButtonElement;
     animationSpeed: HTMLSelectElement;
     objectSize: HTMLSelectElement;
+
     engine: Engine;
     debugger: Debugger;
-    state: State;
+
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
@@ -45,7 +45,6 @@ export class EngineGeneralControls {
     constructor(container: HTMLElement, engine: Engine) {
         this.engine = engine;
         this.debugger = engine.debugger;
-        this.state = engine.state;
 
         this.generalControls = querySelector<HTMLFieldSetElement>(
             "fieldset.generalControls",
@@ -60,7 +59,7 @@ export class EngineGeneralControls {
             "button.stepBackward",
             container
         );
-        this.toggleRunner = querySelector<HTMLButtonElement>(
+        this.toggleRunnerButton = querySelector<HTMLButtonElement>(
             "button.toggleRunner",
             container
         );
@@ -87,7 +86,7 @@ export class EngineGeneralControls {
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
-                    this.state.setRunning(false);
+                    this.setRunning(false);
                     const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
                     this.engine.execute(
                         action.method,
@@ -138,7 +137,7 @@ export class EngineGeneralControls {
                 element: this.stepForward,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.state.setRunning(false);
+                    this.setRunning(false);
                     this.engine.stepForward(resolve, reject);
                 },
             },
@@ -152,11 +151,11 @@ export class EngineGeneralControls {
                 },
             },
             {
-                element: this.toggleRunner,
+                element: this.toggleRunnerButton,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.state.toggleRunner();
-                    if (this.state.isRunning()) {
+                    this.toggleRunner();
+                    if (this.isRunning()) {
                         this.engine.stepForward(resolve, reject);
                     } else {
                         this.engine.currentStep++;
@@ -242,5 +241,29 @@ export class EngineGeneralControls {
             }
         });
         this.activeListeners.clear();
+    }
+
+    isRunning(): boolean {
+        return this.toggleRunnerButton.classList.contains("selected");
+    }
+
+    setRunning(running: boolean): this {
+        const classes = this.toggleRunnerButton.classList;
+        if (running) {
+            classes.add("selected");
+        } else {
+            classes.remove("selected");
+        }
+        return this;
+    }
+
+    toggleRunner(): this {
+        return this.setRunning(!this.isRunning());
+    }
+
+    addRunnerListener() {
+        this.addListener(this.toggleRunnerButton, "click", () =>
+            this.toggleRunner()
+        );
     }
 }

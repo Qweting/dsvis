@@ -1,12 +1,10 @@
 export class State {
     private resetting: boolean;
     private animating: boolean;
-    private runnerButton: HTMLButtonElement;
 
-    constructor(runnerButton: HTMLButtonElement) {
+    constructor() {
         this.resetting = false;
         this.animating = false;
-        this.runnerButton = runnerButton;
     }
 
     isResetting(): boolean {
@@ -25,23 +23,5 @@ export class State {
         this.resetting = true;
         await func();
         this.resetting = false;
-    }
-
-    isRunning(): boolean {
-        return this.runnerButton.classList.contains("selected");
-    }
-
-    setRunning(running: boolean): this {
-        const classes = this.runnerButton.classList;
-        if (running) {
-            classes.add("selected");
-        } else {
-            classes.remove("selected");
-        }
-        return this;
-    }
-
-    toggleRunner(): this {
-        return this.setRunning(!this.isRunning());
     }
 }
