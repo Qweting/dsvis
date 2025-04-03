@@ -1,9 +1,10 @@
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare } from "../../src/helpers";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
-import { DSArray } from "../../src/objects/dsarray";
-import { TextCircle } from "../../src/objects/text-circle";
-import { Prioqueue } from "../../src/prioqueues";
+import { PrioQueueAlgorithmControl } from "~/algorithm-controls/prioqueue-algorithm-controls";
+import { Engine, MessagesObject } from "~/engine";
+import { compare } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { DSArray } from "~/objects/dsarray";
+import { TextCircle } from "~/objects/text-circle";
+import { Prioqueue } from "~/prioqueues";
 
 export const BinaryHeapMessages = {
     general: {
@@ -34,17 +35,26 @@ export const BinaryHeapMessages = {
         lastToFirst: (val: number) =>
             `Swap in the last heap value to the first position: ${val}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class BinaryHeap extends Engine implements Prioqueue {
     messages: MessagesObject = BinaryHeapMessages;
-
     arraySize: number = 28;
     initialValues: Array<string> | null = null;
     treeRoot: BinaryNode | null = null;
     treeNodes: Array<BinaryNode> | null = null;
     heapArray: DSArray | null = null;
     heapSize: number | null = null;
+    algorithmControls: PrioQueueAlgorithmControl;
+
+    constructor(containerSelector: string) {
+        super(containerSelector);
+
+        this.algorithmControls = new PrioQueueAlgorithmControl(
+            this.container,
+            this
+        );
+    }
 
     initialise(initialValues: Array<string> | null = null) {
         this.initialValues = initialValues;

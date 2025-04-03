@@ -1,12 +1,12 @@
 import { Element } from "@svgdotjs/svg.js";
-import { Cookies } from "./cookies";
-import { Debug } from "./debug";
-import { EventListeners } from "./event-listeners";
-import { isValidReason, parseValues } from "./helpers";
-import { Info } from "./info";
-import { Svg } from "./objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Cookies } from "~/cookies";
+import { Debugger } from "~/debugger";
+import { isValidReason, parseValues, querySelector } from "~/helpers";
+import { Info } from "~/info";
+import { Svg } from "~/objects"; // NOT THE SAME Svg as in @svgdotjs/svg.js!!!
+import { State } from "~/state";
+import { EngineAlgorithmControl } from "./algorithm-controls/engine-algorithm-controls";
+import { EngineGeneralControls } from "./general-controls/engine-general-controls";
 
 export type Resolve = (value: unknown) => void;
 export type Reject = (props: RejectReason) => void;
@@ -49,21 +49,21 @@ export class Engine {
     };
     cookies: Cookies;
     container: HTMLElement;
-    toolbar: EngineToolbar;
+    generalControls: EngineGeneralControls;
+    algorithmControls: EngineAlgorithmControl;
     actions: Action[] = [];
     currentAction: number = 0;
     currentStep: number = 0;
-    debug: Debug;
+    debugger: Debugger;
     state: State;
     info: Info;
-    eventListeners: EventListeners;
 
     getAnimationSpeed(): number {
-        return parseInt(this.toolbar.animationSpeed.value);
+        return parseInt(this.generalControls.animationSpeed.value);
     }
 
     getObjectSize(): number {
-        return parseInt(this.toolbar.objectSize.value);
+        return parseInt(this.generalControls.objectSize.value);
     }
 
     getNodeSpacing(): number {
@@ -92,52 +92,40 @@ export class Engine {
     // Inititalisation
 
     constructor(containerSelector: string) {
-        this.debug = new Debug();
+        this.debugger = new Debugger();
+        this.state = new State();
 
-        const container =
-            document.querySelector<HTMLElement>(containerSelector);
-        if (!container) {
-            throw new Error("No container found");
-        }
+        this.container = querySelector<HTMLElement>(containerSelector);
 
-        this.container = container;
-        this.toolbar = new EngineToolbar(container);
-
-        this.state = new State(this.toolbar.toggleRunner);
+        this.generalControls = new EngineGeneralControls(this.container, this);
+        this.algorithmControls = new EngineAlgorithmControl(this.container);
 
         this.cookies = new Cookies(
             {
-                objectSize: this.toolbar.objectSize,
-                animationSpeed: this.toolbar.animationSpeed,
+                objectSize: this.generalControls.objectSize,
+                animationSpeed: this.generalControls.animationSpeed,
             },
-            this.debug
+            this.debugger
         );
 
-        const svgContainer = this.container.querySelector("svg");
-        if (!svgContainer) {
-            throw new Error("No svg element found");
-        }
+        const svgContainer = querySelector<SVGSVGElement>(
+            "svg",
+            this.container
+        );
 
         this.Svg = new Svg(svgContainer);
         this.Svg.viewbox(0, 0, this.$Svg.width, this.$Svg.height);
         this.Svg.$engine = this;
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             this.Svg.addClass("debug");
         }
 
         this.info = new Info(this.Svg, this.$Svg.margin);
-        this.eventListeners = new EventListeners(this);
     }
 
     initialise(): void {
-        this.initToolbar();
         this.resetAll();
-        this.state.setRunning(true);
-    }
-
-    initToolbar(): void {
-        /* Allow subclasses to use this function */
-        // TODO: Move all these into toolbar class
+        this.generalControls.setRunning(true);
     }
 
     async resetAll(): Promise<void> {
@@ -168,7 +156,7 @@ export class Engine {
 
         const w = this.Svg.viewbox().width;
         const h = this.Svg.viewbox().height;
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             for (let x = 1; x < w / 100; x++) {
                 this.Svg.line(x * 100, 0, x * 100, h).addClass("gridline");
             }
@@ -191,6 +179,15 @@ export class Engine {
         );
     }
 
+    async drawViewbox(right: number, down: number, zoom: number) {
+        this.Svg.viewbox(
+            right,
+            down,
+            this.$Svg.width * zoom,
+            this.$Svg.height * zoom
+        );
+    }
+
     setIdleTitle(): void {
         this.info.setTitle("Select an action from the menu above");
         this.info.setBody(NBSP);
@@ -209,18 +206,14 @@ export class Engine {
 
     resetListeners(isRunning: boolean): void {
         // Clear all currently running listeners
-        this.eventListeners.removeAllListeners();
+        this.generalControls.removeAllListeners();
         if (this.constructor === Engine) {
             // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
             return;
         }
 
-        this.eventListeners.addListener(
-            this.toolbar.toggleRunner,
-            "click",
-            () => this.state.toggleRunner()
-        );
+        this.generalControls.addRunnerListener();
         if (isRunning) {
             // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
@@ -231,7 +224,7 @@ export class Engine {
         this.disableWhenRunning(false);
         this.setIdleTitle();
         this.info.setStatus("inactive");
-        this.eventListeners.addIdleListeners();
+        this.generalControls.addIdleListeners();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -267,7 +260,7 @@ export class Engine {
     ): Promise<void> {
         await this.reset();
         this.actions.push({ method, args, stepCount: until });
-        this.debug.log(
+        this.debugger.log(
             `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(
                 this.actions
             )}`
@@ -276,7 +269,7 @@ export class Engine {
         try {
             await this.runActionsLoop();
             this.actions[this.actions.length - 1].stepCount = this.currentStep;
-            this.debug.log(
+            this.debugger.log(
                 `DONE / ${this.currentStep}: ${JSON.stringify(this.actions)}`
             );
 
@@ -292,11 +285,11 @@ export class Engine {
 
             // If optional running argument is provided set running state
             if (reason.running !== undefined) {
-                this.state.setRunning(reason.running);
+                this.generalControls.setRunning(reason.running);
             }
             this.actions.pop();
             until = reason.until;
-            this.debug.log(
+            this.debugger.log(
                 `RERUN ${until} / ${this.currentStep}: ${JSON.stringify(
                     this.actions
                 )}`
@@ -335,11 +328,11 @@ export class Engine {
                 .map((str) => str.charAt(0).toUpperCase() + str.substring(1))
                 .join(" ");
             const title = `${methodName} ${action.args.join(", ")}`;
-            this.debug.log(
+            this.debugger.log(
                 `CALL ${nAction}: ${title}, ${JSON.stringify(this.actions)}`
             );
 
-            this.info.setTitle(methodName);
+            this.info.setTitle(title);
             await this.pause("");
 
             // Bind this to method and call it
@@ -352,10 +345,10 @@ export class Engine {
         ...args: unknown[]
     ): Promise<unknown> | null {
         const body = this.getMessage(message, ...args);
-        this.debug.log(
+        this.debugger.log(
             `${
                 this.currentStep
-            }. Doing: ${body} (running: ${this.state.isRunning()}), ${JSON.stringify(
+            }. Doing: ${body} (running: ${this.generalControls.isRunning()}), ${JSON.stringify(
                 this.actions
             )}`
         );
@@ -380,10 +373,14 @@ export class Engine {
 
             // Add async listeners that handle button presses while paused
             let runnerTimer: NodeJS.Timeout | undefined = undefined;
-            this.eventListeners.addAsyncListeners(resolve, reject, runnerTimer);
+            this.generalControls.addAsyncListeners(
+                resolve,
+                reject,
+                runnerTimer
+            );
 
             // If running, automatically step forward after waiting animation speed
-            if (this.state.isRunning()) {
+            if (this.generalControls.isRunning()) {
                 this.info.setStatus("running");
                 runnerTimer = setTimeout(
                     () => this.stepForward(resolve, reject),
@@ -445,7 +442,7 @@ export class Engine {
         this.currentStep++;
         this.state.setAnimating(false);
         // If debugging is enabled then add a small delay
-        if (this.debug.isEnabled()) {
+        if (this.debugger.isEnabled()) {
             setTimeout(resolve, 10);
         } else {
             resolve(undefined);

@@ -1,21 +1,21 @@
-import { Collection } from "../../src/collections";
-import { MessagesObject } from "../../src/engine";
-import { updateDefault } from "../../src/helpers";
-import { AVLNode } from "../../src/objects/avl-node";
-import { BinaryDir } from "../../src/objects/binary-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { updateDefault } from "~/helpers";
+import { AVLNode } from "~/objects/avl-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
 import { BST, BSTMessages } from "./BST";
 
-export const AVLmessages = {
+export const AVLMessages = {
     node: {
         updateHeight: "Update node heights",
         unbalanced: "Node is unbalanced!",
         balanced: "Node is now balanced",
     },
-};
+} as const satisfies MessagesObject;
 
 export class AVL extends BST<AVLNode> implements Collection {
-    messages: MessagesObject = updateDefault(AVLmessages, BSTMessages);
+    messages: MessagesObject = updateDefault(AVLMessages, BSTMessages);
     pointer: HighlightCircle | null = null;
 
     newNode(text: string) {
@@ -43,7 +43,7 @@ export class AVL extends BST<AVLNode> implements Collection {
     async deleteOne(value: string | number) {
         const result = await super.deleteOne(value);
 
-        if (result && result.success) {
+        if (result.success) {
             if (result.parent) {
                 await this.updateHeights(result.parent, result.direction);
             }
@@ -63,9 +63,9 @@ export class AVL extends BST<AVLNode> implements Collection {
 
     async updateHeights(
         startNode: AVLNode,
-        fromchild: BinaryDir | undefined | null
+        fromChild: BinaryDir | undefined | null
     ) {
-        const child = (fromchild && startNode.getChild(fromchild)) || startNode;
+        const child = (fromChild && startNode.getChild(fromChild)) || startNode;
         this.pointer = this.Svg.put(new HighlightCircle()).init(
             child.cx(),
             child.cy(),

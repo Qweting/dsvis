@@ -1,4 +1,4 @@
-export class Debug {
+export class Debugger {
     private enabled: boolean;
 
     constructor() {

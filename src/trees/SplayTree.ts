@@ -1,7 +1,7 @@
-import { Collection } from "../../src/collections";
-import { MessagesObject } from "../../src/engine";
-import { compare, updateDefault } from "../../src/helpers";
-import { BinaryDir, BinaryNode } from "../../src/objects/binary-node";
+import { Collection } from "~/collections";
+import { MessagesObject } from "~/engine";
+import { compare, updateDefault } from "~/helpers";
+import { BinaryDir, BinaryNode } from "~/objects/binary-node";
 import { BST, BSTMessages } from "./BST";
 
 const SplayTreeMessages = {
@@ -18,13 +18,13 @@ const SplayTreeMessages = {
         zigzig: (node: BinaryNode, left: BinaryDir, child: BinaryNode) =>
             `Zig-zig: Rotate ${node} ${left}, then rotate ${child} ${left}`,
     },
-};
+} as const satisfies MessagesObject;
 
 export class SplayTree extends BST implements Collection {
     messages: MessagesObject = updateDefault(SplayTreeMessages, BSTMessages);
     async findOne(value: string | number) {
         const found = await super.findOne(value);
-        if (found?.node) {
+        if (found.node) {
             await this.splayUp(found.node);
         }
         return found;
@@ -45,8 +45,9 @@ export class SplayTree extends BST implements Collection {
         success: boolean;
         direction: BinaryDir | null;
         parent: BinaryNode | null;
-    } | null> {
+    }> {
         if (!this.treeRoot) {
+            await this.pause("general.empty");
             return { success: false, direction: null, parent: null };
         }
 
@@ -62,9 +63,8 @@ export class SplayTree extends BST implements Collection {
             // TODO: Fix variable names
             const left = this.treeRoot.getLeft() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
-            const child =
-                this.treeRoot.getLeft() ||
-                (this.treeRoot.getRight() as BinaryNode);
+            const child = (this.treeRoot.getLeft() ||
+                this.treeRoot.getRight()) as BinaryNode;
             const newRoot = child.setHighlight(true);
             await this.pause("delete.singleChild", right, left);
             this.treeRoot.remove();

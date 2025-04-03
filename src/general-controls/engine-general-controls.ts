@@ -1,7 +1,6 @@
-import { Debug } from "./debug";
-import { Engine, Reject, Resolve } from "./engine";
-import { State } from "./state";
-import { EngineToolbar } from "./toolbars/engine-toolbar";
+import { Debugger } from "~/debugger";
+import { Engine, Reject, Resolve } from "~/engine";
+import { querySelector } from "~/helpers";
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -26,28 +25,68 @@ type EventListenersMap = Map<
     Partial<Record<ListenerType, () => void>>
 >;
 
-export class EventListeners {
+export class EngineGeneralControls {
+    generalControls: HTMLFieldSetElement;
+    fastBackward: HTMLButtonElement;
+    stepBackward: HTMLButtonElement;
+    toggleRunnerButton: HTMLButtonElement;
+    stepForward: HTMLButtonElement;
+    fastForward: HTMLButtonElement;
+    animationSpeed: HTMLSelectElement;
+    objectSize: HTMLSelectElement;
+
     engine: Engine;
-    toolbar: EngineToolbar;
-    debug: Debug;
-    state: State;
+    debugger: Debugger;
+
     activeListeners: EventListenersMap = new Map();
     idleListeners: IdleListener[] = [];
     asyncListeners: AsyncListener[] = [];
 
-    constructor(engine: Engine) {
+    constructor(container: HTMLElement, engine: Engine) {
         this.engine = engine;
-        this.toolbar = engine.toolbar;
-        this.debug = engine.debug;
-        this.state = engine.state;
+        this.debugger = engine.debugger;
+
+        this.generalControls = querySelector<HTMLFieldSetElement>(
+            "fieldset.generalControls",
+            container
+        );
+
+        this.fastBackward = querySelector<HTMLButtonElement>(
+            "button.fastBackward",
+            container
+        );
+        this.stepBackward = querySelector<HTMLButtonElement>(
+            "button.stepBackward",
+            container
+        );
+        this.toggleRunnerButton = querySelector<HTMLButtonElement>(
+            "button.toggleRunner",
+            container
+        );
+        this.stepForward = querySelector<HTMLButtonElement>(
+            "button.stepForward",
+            container
+        );
+        this.fastForward = querySelector<HTMLButtonElement>(
+            "button.fastForward",
+            container
+        );
+        this.objectSize = querySelector<HTMLSelectElement>(
+            "select.objectSize",
+            container
+        );
+        this.animationSpeed = querySelector<HTMLSelectElement>(
+            "select.animationSpeed",
+            container
+        );
 
         this.idleListeners.push(
             {
-                element: this.toolbar.stepBackward,
+                element: this.stepBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
-                    this.state.setRunning(false);
+                    this.setRunning(false);
                     const action = this.engine.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0);
                     this.engine.execute(
                         action.method,
@@ -57,7 +96,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.fastBackward,
+                element: this.fastBackward,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -75,7 +114,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.objectSize,
+                element: this.objectSize,
                 type: "change",
                 condition: () => true,
                 handler: () => {
@@ -95,15 +134,15 @@ export class EventListeners {
 
         this.asyncListeners.push(
             {
-                element: this.toolbar.stepForward,
+                element: this.stepForward,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.state.setRunning(false);
+                    this.setRunning(false);
                     this.engine.stepForward(resolve, reject);
                 },
             },
             {
-                element: this.toolbar.fastForward,
+                element: this.fastForward,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.actions[this.engine.currentAction].stepCount =
@@ -112,11 +151,11 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.toggleRunner,
+                element: this.toggleRunnerButton,
                 type: "click",
                 handler: (resolve, reject) => {
-                    this.state.toggleRunner();
-                    if (this.state.isRunning()) {
+                    this.toggleRunner();
+                    if (this.isRunning()) {
                         this.engine.stepForward(resolve, reject);
                     } else {
                         this.engine.currentStep++;
@@ -125,7 +164,7 @@ export class EventListeners {
                 },
             },
             {
-                element: this.toolbar.stepBackward,
+                element: this.stepBackward,
                 type: "click",
                 handler: (resolve, reject) =>
                     reject({
@@ -134,12 +173,12 @@ export class EventListeners {
                     }),
             },
             {
-                element: this.toolbar.fastBackward,
+                element: this.fastBackward,
                 type: "click",
                 handler: (resolve, reject) => reject({ until: 0 }),
             },
             {
-                element: this.toolbar.objectSize,
+                element: this.objectSize,
                 type: "change",
                 handler: (resolve, reject) =>
                     reject({ until: this.engine.currentStep }),
@@ -163,7 +202,7 @@ export class EventListeners {
     addIdleListeners(): void {
         this.idleListeners.forEach((listener) => {
             this.addListener(listener.element, listener.type, () => {
-                this.debug.log(
+                this.debugger.log(
                     listener.element,
                     `${listener.type}: ${JSON.stringify(this.engine.actions)}`
                 );
@@ -202,5 +241,29 @@ export class EventListeners {
             }
         });
         this.activeListeners.clear();
+    }
+
+    isRunning(): boolean {
+        return this.toggleRunnerButton.classList.contains("selected");
+    }
+
+    setRunning(running: boolean): this {
+        const classes = this.toggleRunnerButton.classList;
+        if (running) {
+            classes.add("selected");
+        } else {
+            classes.remove("selected");
+        }
+        return this;
+    }
+
+    toggleRunner(): this {
+        return this.setRunning(!this.isRunning());
+    }
+
+    addRunnerListener() {
+        this.addListener(this.toggleRunnerButton, "click", () =>
+            this.toggleRunner()
+        );
     }
 }

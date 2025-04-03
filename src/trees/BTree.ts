@@ -1,10 +1,10 @@
 import { Text } from "@svgdotjs/svg.js";
-import { Collection } from "../../src/collections";
-import { Engine, MessagesObject } from "../../src/engine";
-import { compare, parseValues, updateDefault } from "../../src/helpers";
-import { BTreeNode } from "../../src/objects/btree-node";
-import { HighlightCircle } from "../../src/objects/highlight-circle";
-import { BTreeToolbar } from "../../src/toolbars/BTree-toolbar";
+import { BTreeAlgorithmControl } from "~/algorithm-controls/BTree-algorithm-controls";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
+import { compare, parseValues, updateDefault } from "~/helpers";
+import { BTreeNode } from "~/objects/btree-node";
+import { HighlightCircle } from "~/objects/highlight-circle";
 import { BSTMessages } from "./BST";
 
 const BTreeMessages = {
@@ -42,20 +42,21 @@ const BTreeMessages = {
                 `Stealing from left sibling:\n[${left}] → [${right}] → ${node}`,
         },
     },
-};
+} as const satisfies MessagesObject;
 
 export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
-
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
-
-    toolbar: BTreeToolbar;
+    algorithmControls: BTreeAlgorithmControl;
 
     constructor(containerSelector: string) {
         super(containerSelector);
 
-        this.toolbar = new BTreeToolbar(this.container);
+        this.algorithmControls = new BTreeAlgorithmControl(
+            this.container,
+            this
+        );
     }
 
     initialise(initialValues = null) {
@@ -73,16 +74,8 @@ export class BTree extends Engine implements Collection {
         });
     }
 
-    initToolbar() {
-        super.initToolbar();
-
-        this.toolbar.maxDegree.addEventListener("change", () =>
-            this.confirmResetAll()
-        );
-    }
-
     getMaxDegree() {
-        return parseInt(this.toolbar.maxDegree.value);
+        return parseInt(this.algorithmControls.maxDegree.value);
     }
 
     getMaxKeys() {
@@ -204,7 +197,7 @@ export class BTree extends Engine implements Collection {
 
     async insertOne(value: string | number) {
         if (this.treeRoot) {
-            await this.insertBottomup(value);
+            await this.insertBottomUp(value);
         } else {
             this.treeRoot = this.Svg.put(new BTreeNode()).init(
                 true,
@@ -220,7 +213,7 @@ export class BTree extends Engine implements Collection {
         }
     }
 
-    async insertBottomup(value: number | string) {
+    async insertBottomUp(value: number | string) {
         await this.pause("insert.search", value);
         const found = await this.findHelper(value);
         const node = found.node;
@@ -474,7 +467,7 @@ export class BTree extends Engine implements Collection {
         if (found.node?.isLeaf()) {
             await this.deleteLeaf(found.node, found.i || 0);
         } else {
-            await this.deleteNonleaf(found.node as BTreeNode, found.i || 0);
+            await this.deleteNonLeaf(found.node as BTreeNode, found.i || 0);
         }
         if (this.treeRoot.numValues() === 0) {
             this.treeRoot.setHighlight(true);
@@ -501,7 +494,7 @@ export class BTree extends Engine implements Collection {
         await this.repairAfterDelete(node);
     }
 
-    async deleteNonleaf(node: BTreeNode, i: number) {
+    async deleteNonLeaf(node: BTreeNode, i: number) {
         node.addClass("marked");
         const pointer = this.Svg.put(new HighlightCircle()).init(
             node.getCX(i, this.getObjectSize()),
