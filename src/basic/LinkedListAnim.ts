@@ -62,8 +62,8 @@ export class LinkedListAnim extends Engine implements Collection {
                               "T", "E", "S", "T",
                               "T", "E", "S", "T",
                               "T", "E", "S", "T"]; */
-        this.initialValues = ["A", "B", "C", "D", "E"];
-        //this.initialValues = ["A", "B"];
+        this.initialValues = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+        //this.initialValues = ["A", "B", "C"];
         //this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
     }
@@ -195,6 +195,7 @@ export class LinkedListAnim extends Engine implements Collection {
     async delete(value: string | number): Promise<void> {
         const node = await this.findOne(value);
         if(node) { // If the node is found
+            this.highlight(node, true);
             await this.pause("delete.delete", value);
             this.linkedList.removeElement(value);
             node.remove(); // Remove the node from the SVG
@@ -240,17 +241,22 @@ export class LinkedListAnim extends Engine implements Collection {
             const connection = nodeCon[1] as LinkedConnection;
 
             const coords = this.newNodeCoords();
+            if(node.value === "J") {
+                console.log("coords: ", coords[0], coords[1], coords[2]);
+            }
             node.mirror(coords[2]);
             
             // Move the node and link to the correct position with animation
             this.animate(node, !this.state.isResetting()).move(coords[0], coords[1]);
 
+            // Update the connection to the new position
             if (connection && this.nodeArray.length > 0) {
                 const startCoords = prevNodePointerPos!;
                 const endCoords: [number, number] = [coords[0], coords[1]];
                 connection.updateAll(startCoords, endCoords, this.animationValue());
             }
 
+            // Remember the previous node's pointer position for the next connection
             if(!coords[2]) {
                 prevNodePointerPos = [coords[0] + node.elementRectWidth + node.nextNodeRectWidth/2, coords[1] + this.nodeDimensions[1]/2];
             } else {
@@ -260,6 +266,7 @@ export class LinkedListAnim extends Engine implements Collection {
             this.nodeArray.push([node, connection]);
         }
     }
+
 
     async print(): Promise<void> {
     }

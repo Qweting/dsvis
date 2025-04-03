@@ -77,8 +77,8 @@ export class LinkedConnection extends Connection<LinkedNode> {
             intersectionY = straight ? this.$start.getPointerPos()[1] : endNodeY;
         } else {
             // Intersect with top or bottom edge
-            // straight ? this.$start.getPointerPos()[1] : this.$start.getPointerPos()[0]
-            intersectionX = straight ? this.$start.getPointerPos()[0] : endNodeX;
+            //intersectionX = straight ? this.$start.getPointerPos()[0] : endNodeX;
+            intersectionX = straight ? this.$coords.x1 : endNodeX;
             intersectionY = endNodeY + Math.sign(dy) * halfHeight;
         }
         
