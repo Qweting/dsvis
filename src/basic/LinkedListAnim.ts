@@ -1,12 +1,9 @@
-import {
-    Engine,
-    MessagesObject,
-} from "../engine";
-
-import { Collection } from "../../src/collections";
+import { CollectionAlgorithmControl } from "~/algorithm-controls/collection-algorithm-controls";
+import { Collection } from "~/collections";
+import { Engine, MessagesObject } from "~/engine";
 import LinkedList from "./LinkedList";
-import { LinkedNode } from "../../src/objects/basic-structure-objects/linked-node";
-import { LinkedConnection } from "../../src/objects/basic-structure-objects/node-connection";
+import { LinkedNode } from "~/objects/basic-structure-objects/linked-node";
+import { LinkedConnection } from "~/objects/basic-structure-objects/node-connection";
 
 export const LinkedListMessages = {
     general: {
@@ -51,7 +48,14 @@ export class LinkedListAnim extends Engine implements Collection {
     cols: number = Math.floor((this.$Svg.width / this.nodeDimensions[0]/2)); //number of columns
     rows: number = Math.ceil((this.$Svg.height / this.nodeDimensions[1])/2); //number of rows based on size and height of the canvas
 
+    constructor(containerSelector: string) {
+        super(containerSelector);
 
+        this.algorithmControls = new CollectionAlgorithmControl(
+            this.container,
+            this
+        );
+    }
 
     initialise(initialValues: string[] | null = null): void {
         /* this.initialValues = ["T", "E", "S", "T",

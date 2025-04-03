@@ -4,8 +4,8 @@ import { BST } from "~/trees/BST";
 import { BTree } from "~/trees/BTree";
 import { RedBlack } from "~/trees/RedBlack";
 import { SplayTree } from "~/trees/SplayTree";
+import { LinkedListAnim } from "~/basic/LinkedListAnim";
 import { initialiseEngine, RecordOfEngines } from "./helpers";
-import { LinkedListAnim } from "./basic/LinkedListAnim";
 
 export interface Collection extends Engine {
     insert: SubmitFunction;
@@ -21,6 +21,7 @@ const COLLECTIONS_CLASSES = {
     RedBlack: RedBlack,
     SplayTree: SplayTree,
     BTree: BTree,
+    LinkedListAnim: LinkedListAnim,
 } as const satisfies RecordOfEngines<Collection>;
 
 initialiseEngine("#collectionsContainer", COLLECTIONS_CLASSES);
