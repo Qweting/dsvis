@@ -196,6 +196,12 @@ export class Engine {
     ///////////////////////////////////////////////////////////////////////////////
     // Updating listeners
 
+    /**
+     * Enables or disables all elements with the `.disableWhenRunning` class
+     * based on the provided state.
+     *
+     * @param disabled - A boolean indicating whether the elements should be disabled.
+     */
     disableWhenRunning(disabled: boolean): void {
         for (const elem of this.container.querySelectorAll<
             HTMLInputElement | HTMLSelectElement
@@ -204,9 +210,17 @@ export class Engine {
         }
     }
 
+    /**
+     * Resets event listeners based on the running state of the engine.
+     * This function ensures that the appropriate listeners are active
+     * while preventing new inputs when necessary.
+     *
+     * @param isRunning - A boolean indicating whether the engine is currently running.
+     */
     resetListeners(isRunning: boolean): void {
-        // Clear all currently running listeners
+        // Remove all currently active listeners
         this.generalControls.removeAllListeners();
+        // If the instance is an `Engine`, it disable UI controls and exit
         if (this.constructor === Engine) {
             // Nothing can be running so disable buttons
             this.disableWhenRunning(true);
@@ -214,13 +228,14 @@ export class Engine {
         }
 
         this.generalControls.addRunnerListener();
+        // If running, it disables new inputs and sets the status to `"paused"
         if (isRunning) {
             // Is running so disable buttons to prevent new inputs
             this.disableWhenRunning(true);
             this.info.setStatus("paused");
             return;
         }
-
+        // If idle, enable inputs, update the status to `"inactive"`, and re-add idle listener
         this.disableWhenRunning(false);
         this.setIdleTitle();
         this.info.setStatus("inactive");
@@ -230,6 +245,14 @@ export class Engine {
     ///////////////////////////////////////////////////////////////////////////////
     // Executing the actions
 
+    /**
+     * Handles the execution of the provided method with parsed values from an input field.
+     *
+     * @param method - The submission function to execute with parsed input values.
+     * @param field - The input field containing the user-provided data. Can be `null`.
+     * @returns A promise resolving to `true` if submission succeeds, or `false` if an error occurs.
+     * @throws Logs any errors encountered during execution.
+     */
     async submit(
         method: SubmitFunction,
         field: HTMLInputElement | null
@@ -242,9 +265,7 @@ export class Engine {
                 field.value = "";
             }
             const values = parseValues(rawValue);
-            if (values) {
-                await this.execute(method, values);
-            }
+            await this.execute(method, values);
             return true;
         } catch (error) {
             console.error(error);
@@ -252,10 +273,22 @@ export class Engine {
         return false;
     }
 
+    /**
+     * Executes an asynchronous method with the given arguments, managing action execution
+     * and handling errors or interruptions. This function ensures actions are logged,
+     * retried if necessary, and properly cleaned up after execution.
+     *
+     * @template Function - A function type that returns a `Promise<void>`.
+     * @param method - The asynchronous method to execute.
+     * @param args - The arguments to pass to the method.
+     * @param until - (Optional) The step count to execute until. Defaults to `0`.
+     * @returns A promise that resolves once execution is complete
+     * @throws If an unexpected error occurs, it logs the error and resets listeners.
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async execute<T extends (...args: any[]) => Promise<void>>(
-        method: T,
-        args: Parameters<T>,
+    async execute<Function extends (...args: any[]) => Promise<void>>(
+        method: Function,
+        args: Parameters<Function>,
         until = 0
     ): Promise<void> {
         await this.reset();
@@ -298,8 +331,8 @@ export class Engine {
             // until is smaller or equal to 0 meaning the previous action should be run if it exists
             if (until <= 0 && this.actions.length > 0) {
                 const action = this.actions.pop()!; // ! because we know that array is non-empty (actions.length > 0)
-                method = action.method as T;
-                args = action.args as Parameters<T>;
+                method = action.method as Function;
+                args = action.args as Parameters<Function>;
                 until = action.stepCount;
             }
 
@@ -312,6 +345,12 @@ export class Engine {
         }
     }
 
+    /**
+     * Executes a sequence of actions stored in `this.actions`.
+     * Each action is processed in order, updating the current action and step counters.
+     *
+     * @returns A promise that resolves once all actions have been executed sequentially.
+     */
     async runActionsLoop(): Promise<void> {
         // Run through all our actions
         for (let nAction = 0; nAction < this.actions.length; nAction++) {

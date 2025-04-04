@@ -466,17 +466,26 @@ export class BST<Node extends BinaryNode = BinaryNode>
     //  - Single Rotate: Left and Right (also known as Zig)
     //  - Double Rotate: Left-Right and Right-Left (also known as Zig-Zag)
 
-    async resetHeight(node: unknown) {
-        // BSTs do not store the height in the nodes, so do nothing
-        // This is implemented by, e.g., AVL trees
-    }
+    /**
+     * BSTs do not store the height in the nodes, so do nothing
+     * This is implemented by, e.g., AVL trees
+     */
+    async resetHeight(node: Node) {}
 
+    /**
+     * Performs a double rotation on the given node to maintain AVL tree balance.
+     *
+     * @param firstDir - The primary rotation direction. Same as first part of "left-right" or "right-left"
+     * @param node - The node to rotate.
+     * @returns A promise resolving to the new root of the rotated subtree.
+     * @throws Error If the necessary child nodes for the rotation is missing.
+     */
     async doubleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
         const secondDir = firstDir === "left" ? "right" : "left";
         const child = node.getChild(secondDir);
 
-        if (child === undefined || child === null) {
-            throw new Error("Invalid B node in singleRotate");
+        if (child === null) {
+            throw new Error("Missing child for the secondary rotation");
         }
 
         await this.pause("rotate.zigzag", child, secondDir, node, firstDir);
@@ -484,23 +493,29 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return await this.singleRotate(firstDir, node);
     }
 
-    async singleRotate(firstDir: BinaryDir, node: Node): Promise<Node> {
-        // Note: 'left' and 'right' are variables that can have values "left" or "right"!
-        // So, if left==="right", then we rotate right.
-        const secondDir = firstDir === "left" ? "right" : "left";
+    /**
+     * Performs a single rotation on the given node in the specified direction.
+     *
+     * @param dir - The direction of the initial rotation.
+     * @param node - The node to rotate.
+     * @returns A promise resolving to the new root of the rotated subtree.
+     * @throws Error If the necessary child node for rotation is missing.
+     */
+    async singleRotate(dir: BinaryDir, node: Node): Promise<Node> {
+        const oppositeDir = dir === "left" ? "right" : "left";
 
         const A = node;
-        const B = A.getChild(secondDir) as Node | null;
+        const B = A.getChild(oppositeDir);
 
-        if (B === undefined || B === null) {
+        if (B === null) {
             throw new Error("Invalid B node in singleRotate");
         }
 
-        const C = B.getChild(firstDir) as Node | null;
+        const C = B.getChild(dir);
 
-        A.setChildHighlight(secondDir, true);
+        A.setChildHighlight(oppositeDir, true);
         B.setHighlight(true);
-        await this.pause("rotate.single", A, firstDir);
+        await this.pause("rotate.single", A, dir);
 
         const parent = A.getParent();
         if (parent) {
@@ -510,16 +525,16 @@ export class BST<Node extends BinaryNode = BinaryNode>
             this.treeRoot = B;
         }
 
-        A.setChild(secondDir, C, this.getStrokeWidth());
-        B.setChild(firstDir, A, this.getStrokeWidth());
+        A.setChild(oppositeDir, C, this.getStrokeWidth());
+        B.setChild(dir, A, this.getStrokeWidth());
 
-        B.setChildHighlight(firstDir, true);
+        B.setChildHighlight(dir, true);
         A.setHighlight(true);
         await this.pause(undefined);
         this.resizeTree();
         await this.pause(undefined);
 
-        B.setChildHighlight(firstDir, false);
+        B.setChildHighlight(dir, false);
         A.setHighlight(false);
         await this.resetHeight(A);
         await this.resetHeight(B);

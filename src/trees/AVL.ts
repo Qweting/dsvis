@@ -140,6 +140,10 @@ export class AVL extends BST<AVLNode> implements Collection {
     ///////////////////////////////////////////////////////////////////////////////
     // Rotate the tree
 
+    /**
+     * Updates the height of the node if necessary by checking the height of the children
+     * @param node - The node to update the height of
+     */
     async resetHeight(node: AVLNode) {
         const leftHeight = this.getHeight(node.getLeft());
         const rightHeight = this.getHeight(node.getRight());
