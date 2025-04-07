@@ -1,7 +1,7 @@
 import { Text } from "@svgdotjs/svg.js";
 import { BinaryNode } from "./binary-node";
 
-export class AVLNode extends BinaryNode<AVLNode> {
+export class AVLNode extends BinaryNode {
     $height: Text;
 
     constructor(text: string, size: number, strokeWidth: number) {
