@@ -270,7 +270,7 @@ export class BinaryHeap extends Engine implements Prioqueue {
                 this.getStrokeWidth()
             )
         ).init(this.treeRoot.cx(), this.treeRoot.cy());
-        await this.pause("remove.minValue", minValue);
+        await this.pause("delete.minValue", minValue);
         this.heapArray.setValue(0, "");
         this.treeRoot.setText(null);
         arrayLabel.setCenter(...this.getNodeStart(), this.getAnimationSpeed());
