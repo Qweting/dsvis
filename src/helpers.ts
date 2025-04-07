@@ -161,10 +161,10 @@ export type RecordOfEngines<T extends Engine = Engine> = Record<
     new (containerSelector: string) => T
 >;
 
-export function initialiseEngine(
+export function initialiseEngine<T extends Engine = Engine>(
     containerID: string,
-    engineSubclasses: RecordOfEngines
-) {
+    engineSubclasses: RecordOfEngines<NoInfer<T>>
+): { isBaseEngine: false; engine: T } | { isBaseEngine: true; engine: Engine } {
     const algoSelector = querySelector<HTMLSelectElement>(
         `${containerID} .algorithmSelector`
     );
@@ -200,7 +200,11 @@ export function initialiseEngine(
         window.location.reload();
     });
 
-    return engine;
+    if (engineSubclasses[algo]) {
+        return { isBaseEngine: false, engine: engine as T };
+    } else {
+        return { isBaseEngine: true, engine: engine as Engine };
+    }
 }
 
 export function querySelector<T extends Element = Element>(

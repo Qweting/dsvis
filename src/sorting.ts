@@ -1,3 +1,4 @@
+import { SortingAlgorithmControls } from "./algorithm-controls/sorting-algorithm-controls";
 import { Engine, SubmitFunction } from "./engine";
 import { initialiseEngine, querySelector, RecordOfEngines } from "./helpers";
 import { InsertionSort } from "./sorting/InsertionSort";
@@ -22,7 +23,17 @@ const SORTING_CLASSES = {
     QuickSort: QuickSort,
 } as const satisfies RecordOfEngines<Sorter>;
 
-const SortEngine = initialiseEngine("#sortingContainer", SORTING_CLASSES);
+const { engine: SortEngine, isBaseEngine } = initialiseEngine<Sorter>(
+    "#sortingContainer",
+    SORTING_CLASSES
+);
+
+if (!isBaseEngine) {
+    SortEngine.algorithmControls = new SortingAlgorithmControls(
+        SortEngine.container,
+        SortEngine
+    );
+}
 
 const zoomInButton = querySelector(".zoomIn");
 zoomInButton.addEventListener("click", () => zoomIn(true, SortEngine));

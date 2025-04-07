@@ -275,6 +275,10 @@ export class AVLQuiz extends BST<AVLNode> {
 function initialiseAVLQuiz(containerID: string) {
     const AVLEngine = new AVLQuiz(containerID);
     AVLEngine.initialise(["K"]);
+    AVLEngine.algorithmControls = new AVLQuizAlgorithmControl(
+        AVLEngine.container,
+        AVLEngine
+    );
 }
 
 initialiseAVLQuiz("#avlquizContainer");
