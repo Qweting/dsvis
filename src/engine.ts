@@ -31,7 +31,12 @@ type Action = {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants and global variables
 
-// Non-breaking space:
+/**
+ * A non-breaking space character (`\u00A0`) used as a placeholder for an empty string.
+ *
+ * This workaround prevents SVG text elements from the `@svgdotjs/svg.js` library
+ * from resetting their coordinates to (0, 0) when assigned an empty string.
+ */
 export const NBSP = "\u00A0";
 
 export class Engine {

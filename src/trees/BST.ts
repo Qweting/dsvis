@@ -92,12 +92,24 @@ export class BST<Node extends BinaryNode = BinaryNode>
         });
     }
 
+    /**
+     * Creates a new `BinaryNode` SVG element with the given text.
+     *
+     * @param text - The text content for the new node.
+     * @returns The initialized `BinaryNode` SVG element.
+     */
     newNode(text: string): BinaryNode {
         return this.Svg.put(
             new BinaryNode(text, this.getObjectSize(), this.getStrokeWidth())
         ).init(...this.getNodeStart());
     }
 
+    /**
+     * Recalculates and animates the layout of the tree from the root down.
+     * Skips animation if the tree is in a resetting state.
+     *
+     * @returns The current instance for chaining.
+     */
     resizeTree(): this {
         const animate = !this.state.isResetting();
         this.treeRoot?.resize(
@@ -110,18 +122,39 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return this;
     }
 
+    /**
+     * Inserts multiple values into the binary tree.
+     *
+     * @param values - An array of values to insert into the tree.
+     * @returns A promise that resolves once all values are inserted.
+     */
     async insert(...values: (string | number)[]): Promise<void> {
         for (const val of values) {
             await this.insertOne(val);
         }
     }
 
+    /**
+     * Searches for multiple values in the binary tree.
+     *
+     * @param values - An array of values to search for in the tree.
+     * @returns A promise that resolves once all values are searched.
+     */
     async find(...values: (string | number)[]): Promise<void> {
         for (const val of values) {
             await this.findOne(val);
         }
     }
 
+    /**
+     * Searches for a node with the given value and highlights the result.
+     * Uses `findHelper` internally and adds visual feedback.
+     *
+     * @param value - The value to search for in the tree.
+     * @returns A promise that resolves to an object containing:
+     * - `success`: Whether the node was found.
+     * - `node`: The found node, or the last visited node if not found.
+     */
     async findOne(value: string | number): Promise<{
         success: boolean;
         node: Node | null;
@@ -143,6 +176,17 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return { node, success: found.success };
     }
 
+    /**
+     * Searches for a node with the given value in the tree.
+     * Returns the node if found, or the last visited parent if not.
+     *
+     * @param value - The value to search for in the tree.
+     * @returns A promise that resolves to an object:
+     * - `success: true` and the found node, or
+     * - `success: false` and the last parent node encountered.
+     *
+     * @throws If the tree is empty when the function is called.
+     */
     async findHelper(value: string | number): Promise<
         | {
               success: true;
@@ -197,6 +241,15 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return { success: false, parent };
     }
 
+    /**
+     * Inserts a value into the binary tree. If the tree is empty, creates a new root.
+     * If the value already exists, highlights the existing node and aborts insertion.
+     *
+     * @param value - The value to insert into the tree.
+     * @returns A promise that resolves to an object containing:
+     * - `success`: Whether the insertion was successful.
+     * - `node`: The inserted node, or the existing node if the value was already present.
+     */
     async insertOne(value: string | number) {
         value = String(value); //TODO: Check if this can be handled better
         if (!this.treeRoot) {
@@ -233,12 +286,26 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return { success: true, node: child };
     }
 
+    /**
+     * Deletes multiple values from the binary tree.
+     *
+     * @param values - An array of values to delete from the tree.
+     * @returns A promise that resolves once all values are deleted.
+     */
     async delete(...values: (string | number)[]) {
         for (const val of values) {
             await this.deleteOne(val);
         }
     }
 
+    /**
+     * Deletes a node with the given value from the tree.
+     * If the node exists, it is removed; otherwise, a failure result is returned.
+     *
+     * @param value - The value to delete from the tree.
+     * @returns A promise that resolves to an object indicating success,
+     * the parent of the deleted node (if any), and the direction from the parent.
+     */
     async deleteOne(value: string | number): Promise<{
         success: boolean;
         direction: BinaryDir | null;
@@ -269,8 +336,21 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return await this.deleteHelper(found.node);
     }
 
+    /**
+     * Handles deletion of a node that has up to two children by replacing it with its in-order predecessor.
+     * The actual removal is then delegated to `deleteNode`, which handles the simplified case.
+     *
+     * @param node - The node to delete. Can have both left and right children.
+     * @returns A promise that resolves once the deletion (and visual updates) are complete.
+     * @returns A promise that resolves to an object containing:
+     * - `success`: If the removal was successful
+     * - `direction`: The direction from the parent to the deleted node ("left" or "right"), or `null` if the node was the root.
+     * - `parent`: The parent of the deleted node, or `null` if it was the root.
+     *
+     */
     async deleteHelper(node: Node) {
-        if (!(node?.getLeft() && node?.getRight())) {
+        const leftChild = node.getLeft();
+        if (!(leftChild && node.getRight())) {
             return await this.deleteNode(node);
         }
 
@@ -287,7 +367,7 @@ export class BST<Node extends BinaryNode = BinaryNode>
         node.addClass("marked");
         await this.pause("delete.predecessor.search", node);
 
-        let predecessor = node.getLeft()!;
+        let predecessor = leftChild;
         while (true) {
             predecessor.setParentHighlight(true);
             pointer.setCenter(
@@ -297,11 +377,12 @@ export class BST<Node extends BinaryNode = BinaryNode>
             );
             await this.pause(undefined);
             predecessor.setParentHighlight(false);
-            if (!predecessor.getRight()) {
+            const rightChild = predecessor.getRight();
+            if (!rightChild) {
                 break;
             }
 
-            predecessor = predecessor.getRight()!;
+            predecessor = rightChild;
         }
 
         predecessor.setHighlight(true);
@@ -326,20 +407,32 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return await this.deleteNode(predecessor);
     }
 
+    /**
+     * Deletes a node from the binary tree.
+     * This function assumes that the node has at most one child.
+     * Cases with two children should be handled by `deleteHelper`.
+     *
+     * @param node - The node to delete. Can at most have one child.
+     * @returns A promise that resolves to an object containing:
+     * - `success`: Always `true` when resolved.
+     * - `direction`: The direction from the parent to the deleted node ("left" or "right"), or `null` if the node was the root.
+     * - `parent`: The parent of the deleted node, or `null` if it was the root.
+     *
+     * @throws Will throw an error if the node has two children, which violates the function's assumption.
+     */
     async deleteNode(node: Node): Promise<{
         success: true;
         direction: BinaryDir | null;
         parent: Node | null;
     }> {
-        // The node will NOT have two children - this has been taken care of by deleteHelper
         if (node.getLeft() && node.getRight()) {
             throw new Error(
                 "Expected node to only have one or zero children when delete node was called"
             );
         }
 
-        const child = (node.getLeft() || node.getRight()) as Node | null;
-        const parent = node.getParent() as Node | null;
+        const child = node.getLeft() || node.getRight();
+        const parent = node.getParent();
 
         if (!parent) {
             if (!child) {
@@ -397,6 +490,11 @@ export class BST<Node extends BinaryNode = BinaryNode>
         return { success: true, direction: direction, parent: parent };
     }
 
+    /**
+     * Prints all nodes of the binary tree starting from the root.
+     *
+     * @returns A promise that resolves once all nodes are printed.
+     */
     async print(): Promise<void> {
         if (!this.treeRoot) {
             await this.pause("general.empty");
@@ -426,6 +524,15 @@ export class BST<Node extends BinaryNode = BinaryNode>
         }
     }
 
+    /**
+     * Recursively prints the nodes of the tree starting from the given node,
+     * traversing in an in-order manner.
+     *
+     * @param node - The node to start printing from.
+     * @param pointer - A `HighlightCircle` to visually follow the traversal.
+     * @param printed - An array of printed `Text` elements to manage layout.
+     * @returns A promise that resolves once all nodes are printed.
+     */
     async printHelper(
         node: Node,
         pointer: HighlightCircle,
