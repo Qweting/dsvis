@@ -1,6 +1,4 @@
-import { SortingAlgorithmControls } from "~/algorithm-controls/sorting-algorithm-controls";
 import { Engine, MessagesObject, NBSP } from "~/engine";
-import { BinaryNode } from "~/objects/binary-node";
 import { DSArray } from "~/objects/dsarray";
 import { TextCircle } from "~/objects/text-circle";
 import { Sorter } from "~/sorting";
@@ -22,20 +20,13 @@ export const SortMessages = {
 
 export class Sort extends Engine implements Sorter {
     initialValues: Array<string> = [];
-    treeRoot: BinaryNode | null = null;
     compensate: number = 0;
     sortArray: DSArray;
     indexLength: number = 0;
-    algorithmControls: SortingAlgorithmControls;
     messages: MessagesObject = SortMessages;
 
     constructor(containerSelector: string) {
         super(containerSelector);
-
-        this.algorithmControls = new SortingAlgorithmControls(
-            this.container,
-            this
-        );
 
         const [xRoot, yRoot] = this.getTreeRoot();
         this.sortArray = this.Svg.put(
