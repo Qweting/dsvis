@@ -97,14 +97,7 @@ export class QuickSort extends Sort implements Sorter {
 
         //Marks pivot and swaps pivot with the first value of the range
         this.sortArray.setIndexHighlight(pivot, true);
-        await this.swap(
-            this.sortArray,
-            low,
-            pivot,
-            `sort.swap`,
-            this.sortArray.getValue(low),
-            this.sortArray.getValue(pivot)
-        );
+        await this.swap(this.sortArray, low, pivot);
         this.sortArray.setIndexHighlight(pivot, false);
 
         //Set pivots new index, disable pivot and increment low
@@ -174,14 +167,7 @@ export class QuickSort extends Sort implements Sorter {
 
             //Swap low and high since low is now higher than or equal to the pivot
             //And higher is lower than or equal to the pivot
-            await this.swap(
-                this.sortArray,
-                low,
-                high,
-                `sort.swap`,
-                this.sortArray.getValue(low),
-                this.sortArray.getValue(high)
-            );
+            await this.swap(this.sortArray, low, high);
 
             //Remove highlights
             this.sortArray.setIndexHighlight(low, false);
@@ -208,14 +194,7 @@ export class QuickSort extends Sort implements Sorter {
 
         //Swap the pivot back into its original position and now correct sorted position in the array
         await this.pause("sort.pivotSwap");
-        await this.swap(
-            this.sortArray,
-            pivot,
-            high,
-            `sort.swap`,
-            this.sortArray.getValue(pivot),
-            this.sortArray.getValue(high)
-        );
+        await this.swap(this.sortArray, pivot, high);
         //Color pivot green since it is sorted into its right place
         this.sortArray.setIndexHighlight(high, true, green);
 

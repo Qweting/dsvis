@@ -73,14 +73,7 @@ export class SelectionSort extends Sort implements Sorter {
             }
             // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {
-                await this.swap(
-                    this.sortArray,
-                    i,
-                    minIndex,
-                    "sort.swap",
-                    this.sortArray.getValue(i),
-                    this.sortArray.getValue(minIndex)
-                );
+                await this.swap(this.sortArray, i, minIndex);
             }
             // Highlight the sorted part of the array
             this.sortArray.setIndexHighlight(i, true);

@@ -73,16 +73,14 @@ export class Sort extends Engine implements Sorter {
         }
     }
 
-    async swap(
-        arr: DSArray,
-        j: number,
-        k: number,
-        message: string,
-        ...args: Array<number | string>
-    ) {
+    async swap(arr: DSArray, j: number, k: number) {
         arr.swap(j, k, true);
         arr.setIndexHighlight(j, true);
-        await this.pause(message, ...args);
+        await this.pause(
+            "sort.swap",
+            this.sortArray.getValue(j),
+            this.sortArray.getValue(k)
+        );
     }
 
     async insertOne(value: number | string) {
