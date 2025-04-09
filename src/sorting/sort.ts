@@ -21,7 +21,6 @@ export const SortMessages = {
 } as const satisfies MessagesObject;
 
 export class Sort extends Engine implements Sorter {
-    initialValues: Array<string> = [];
     treeRoot: BinaryNode | null = null;
     compensate: number = 0;
     sortArray: DSArray;
@@ -43,23 +42,13 @@ export class Sort extends Engine implements Sorter {
         ).init(1, xRoot, yRoot + this.$Svg.margin * 4);
     }
 
-    initialise(initialValues = []) {
-        this.initialValues = initialValues;
-        super.initialise();
-    }
-
     async resetAlgorithm() {
-        await super.resetAlgorithm();
+        super.resetAlgorithm();
         this.indexLength = 0;
         this.Svg.put(this.sortArray);
         this.sortArray.setSize(1);
         this.sortArray.setValue(0, NBSP);
         this.sortArray.setDisabled(0, false);
-        if (this.initialValues) {
-            this.state.runWhileResetting(
-                async () => await this.insert(...this.initialValues)
-            );
-        }
     }
 
     async insert(...values: Array<number | string>) {

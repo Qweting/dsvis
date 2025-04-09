@@ -10,13 +10,23 @@ import { BST } from "~/trees/BST";
 export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
+    initialValues: (string | number)[];
 
-    constructor(containerSelector: string) {
+    constructor(
+        containerSelector: string,
+        initialValues: (string | number)[] = []
+    ) {
         super(containerSelector);
+        this.initialValues = initialValues;
     }
 
     async resetAlgorithm() {
-        await super.resetAlgorithm();
+        super.resetAlgorithm();
+        await this.state.runWhileResetting(async () => {
+            if (this.initialValues) {
+                await this.insert(...this.initialValues);
+            }
+        });
         await this.setCurrent(this.treeRoot, false);
         this.mark = null;
     }
@@ -263,8 +273,7 @@ export class AVLQuiz extends BST<AVLNode> {
 }
 
 function initialiseAVLQuiz(containerID: string) {
-    const AVLEngine = new AVLQuiz(containerID);
-    AVLEngine.initialise(["K"]);
+    const AVLEngine = new AVLQuiz(containerID, ["K"]);
     AVLEngine.algorithmControls = new AVLQuizAlgorithmControl(
         AVLEngine.container,
         AVLEngine

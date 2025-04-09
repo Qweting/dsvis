@@ -61,7 +61,6 @@ export class BST<Node extends BinaryNode = BinaryNode>
     implements Collection
 {
     messages: MessagesObject = BSTMessages;
-    initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
     generalControls: BSTGeneralControls;
 
@@ -71,21 +70,9 @@ export class BST<Node extends BinaryNode = BinaryNode>
         this.generalControls = new BSTGeneralControls(this.container, this);
     }
 
-    initialise(initialValues: string[] | null = null): this {
-        this.initialValues = parseValues(initialValues);
-        super.initialise();
-        return this;
-    }
-
-    async resetAlgorithm(): Promise<void> {
-        await super.resetAlgorithm();
+    resetAlgorithm() {
+        super.resetAlgorithm();
         this.treeRoot = null;
-
-        await this.state.runWhileResetting(async () => {
-            if (this.initialValues) {
-                await this.insert(...this.initialValues);
-            }
-        });
     }
 
     /**

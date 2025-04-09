@@ -126,16 +126,13 @@ export class Engine {
         }
 
         this.info = new Info(this.Svg, this.$Svg.margin);
-    }
-
-    initialise(): void {
         this.resetAll();
         this.generalControls.setRunning(true);
     }
 
-    async resetAll(): Promise<void> {
+    resetAll() {
         this.actions = [];
-        await this.reset();
+        this.reset();
     }
 
     confirmResetAll(): boolean {
@@ -146,13 +143,13 @@ export class Engine {
         return false;
     }
 
-    async reset(): Promise<void> {
+    reset() {
         this.clearCanvas();
-        await this.resetAlgorithm();
+        this.resetAlgorithm();
         this.resetListeners(false);
     }
 
-    async resetAlgorithm(): Promise<void> {
+    resetAlgorithm() {
         /* Allow subclasses to use this function */
     }
 
@@ -184,7 +181,7 @@ export class Engine {
         );
     }
 
-    async drawViewbox(right: number, down: number, zoom: number) {
+    drawViewbox(right: number, down: number, zoom: number) {
         this.Svg.viewbox(
             right,
             down,
@@ -296,7 +293,7 @@ export class Engine {
         args: Parameters<Function>,
         until = 0
     ): Promise<void> {
-        await this.reset();
+        this.reset();
         this.actions.push({ method, args, stepCount: until });
         this.debugger.log(
             `EXEC ${until}: ${method.name} ${args.join(", ")}, ${JSON.stringify(

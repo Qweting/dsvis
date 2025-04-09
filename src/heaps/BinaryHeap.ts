@@ -40,7 +40,6 @@ export const BinaryHeapMessages = {
 export class BinaryHeap extends Engine implements Prioqueue {
     messages: MessagesObject = BinaryHeapMessages;
     arraySize: number = 28;
-    initialValues: Array<string> | null = null;
     treeRoot: BinaryNode | null = null;
     treeNodes: Array<BinaryNode> | null = null;
     heapArray: DSArray | null = null;
@@ -56,13 +55,8 @@ export class BinaryHeap extends Engine implements Prioqueue {
         );
     }
 
-    initialise(initialValues: Array<string> | null = null) {
-        this.initialValues = initialValues;
-        super.initialise();
-    }
-
-    async resetAlgorithm() {
-        await super.resetAlgorithm();
+    resetAlgorithm() {
+        super.resetAlgorithm();
         this.treeRoot = null;
         this.treeNodes = new Array(this.arraySize);
         const [xRoot, yRoot] = this.getTreeRoot();
@@ -73,11 +67,6 @@ export class BinaryHeap extends Engine implements Prioqueue {
             this.heapArray.x(this.$Svg.margin);
         }
         this.heapSize = 0;
-        await this.state.runWhileResetting(async () => {
-            if (this.initialValues) {
-                await this.insert(...this.initialValues);
-            }
-        });
     }
 
     resizeTree() {

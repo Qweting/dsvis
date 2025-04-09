@@ -45,7 +45,6 @@ const BTreeMessages = {
 } as const satisfies MessagesObject;
 
 export class BTree extends Engine implements Collection {
-    initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
     algorithmControls!: BTreeAlgorithmControl; // We expect this to be handled by collections.ts or a quiz created in the future
@@ -54,19 +53,9 @@ export class BTree extends Engine implements Collection {
         super(containerSelector);
     }
 
-    initialise(initialValues = null) {
-        this.initialValues = parseValues(initialValues);
-        super.initialise();
-    }
-
     async resetAlgorithm() {
-        await super.resetAlgorithm();
+        super.resetAlgorithm();
         this.treeRoot = null;
-        await this.state.runWhileResetting(async () => {
-            if (this.initialValues) {
-                await this.insert(...this.initialValues);
-            }
-        });
     }
 
     getMaxDegree() {
