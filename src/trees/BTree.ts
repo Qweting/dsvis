@@ -48,15 +48,10 @@ export class BTree extends Engine implements Collection {
     initialValues: (string | number)[] = [];
     treeRoot: BTreeNode | null = null;
     messages: MessagesObject = updateDefault(BTreeMessages, BSTMessages);
-    algorithmControls: BTreeAlgorithmControl;
+    algorithmControls!: BTreeAlgorithmControl; // We expect this to be handled by collections.ts or a quiz created in the future
 
     constructor(containerSelector: string) {
         super(containerSelector);
-
-        this.algorithmControls = new BTreeAlgorithmControl(
-            this.container,
-            this
-        );
     }
 
     initialise(initialValues = null) {
@@ -75,6 +70,9 @@ export class BTree extends Engine implements Collection {
     }
 
     getMaxDegree() {
+        if (!this.algorithmControls.maxDegree) {
+            throw new Error("Algorithm controls not initialized properly");
+        }
         return parseInt(this.algorithmControls.maxDegree.value);
     }
 
