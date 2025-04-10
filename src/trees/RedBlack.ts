@@ -132,9 +132,8 @@ export class RedBlack extends BST<RedBlackNode> implements Collection {
             node.setHighlight(false);
             parent.setHighlight(false);
             grandparent.setHighlight(false);
-            node = (await this.singleRotate(rotate, parent)).getChild(
-                rotate
-            ) as RedBlackNode;
+            await this.singleRotate(rotate, parent);
+            node = parent; // After the rotation the parent becomes the new bottom node
         }
 
         side = node.isLeftChild() ? "left" : "right";
