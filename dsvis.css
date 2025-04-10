@@ -245,14 +245,6 @@ g.unfilled circle {
 	fill: none;
 }
 
-g.red circle {
-	fill: pink;
-}
-
-g.red.black circle {
-	fill: lightgrey;
-}
-
 text.arrayindex > tspan {
 	font-size: 70%;
 }

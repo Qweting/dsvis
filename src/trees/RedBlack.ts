@@ -1,91 +1,102 @@
 import { Collection } from "~/collections";
 import { MessagesObject } from "~/engine";
 import { updateDefault } from "~/helpers";
-import { BinaryDir, BinaryNode } from "~/objects/binary-node";
+import { BinaryDir } from "~/objects/binary-node";
+import { RedBlackNode } from "~/objects/red-black-node";
 import { BST, BSTMessages } from "./BST";
 
 const RedBlackMessages = {
     color: {
         redRootBlack: "Tree root is red: Color it black",
         rootBlack: "Color the root black",
-        nodeBlack: (n: BinaryNode) => `Color node ${n} black`,
+        nodeBlack: (n: RedBlackNode) => `Color node ${n} black`,
         pushDownBlack: (
-            node: BinaryNode,
-            parent: BinaryNode,
-            pibling: BinaryNode
+            node: RedBlackNode,
+            parent: RedBlackNode,
+            pibling: RedBlackNode
         ) =>
             `Node ${node}, parent ${parent} and parent's sibling ${pibling} are all red\nPush blackness down from grandparent`,
-        switch: (parent: BinaryNode, dir: BinaryDir, dirChild: BinaryNode) =>
+        switch: (
+            parent: RedBlackNode,
+            dir: BinaryDir,
+            dirChild: RedBlackNode
+        ) =>
             `Parent ${parent} is red,\n${dir} child ${dirChild} and its children are black:\nSwitch colors`,
-        childRed: (parent: BinaryNode, dir: BinaryDir, dirChild: BinaryNode) =>
+        childRed: (
+            parent: RedBlackNode,
+            dir: BinaryDir,
+            dirChild: RedBlackNode
+        ) =>
             `Parent ${parent}, ${dir} child ${dirChild} and its children are black:\nColor ${dir} child red`,
     },
     balancing: {
-        parentImbalanced: (parent: BinaryNode) =>
+        parentImbalanced: (parent: RedBlackNode) =>
             `Parent ${parent} is imbalanced`,
     },
     rotate: {
         parent: (
-            node: BinaryNode,
+            node: RedBlackNode,
             side: BinaryDir,
             rotate: BinaryDir,
-            parent: BinaryNode
+            parent: RedBlackNode
         ) =>
             `Node ${node} is a red ${side} child of a red ${rotate} child\nRotate parent ${parent} ${rotate}`,
         grandparent: (
-            node: BinaryNode,
+            node: RedBlackNode,
             side: BinaryDir,
-            grandparent: BinaryNode,
+            grandparent: RedBlackNode,
             rotate: BinaryDir
         ) =>
             `Node ${node} is a red ${side} child of a red ${side} child\nSwitch colors and rotate grandparent ${grandparent} ${rotate}`,
         redSibling: (
-            parent: BinaryNode,
+            parent: RedBlackNode,
             right: BinaryDir,
-            rightChild: BinaryNode,
+            rightChild: RedBlackNode,
             left: BinaryDir
         ) =>
             `Parent ${parent} is black, and its ${right} child ${rightChild} is red:\nSwitch colors and rotate ${left}`,
         redDistantChild: (
             right: BinaryDir,
-            rightChild: BinaryNode,
+            rightChild: RedBlackNode,
             left: BinaryDir
         ) =>
             `${right} child ${rightChild} is black, its ${right} child is red:\nSwitch colors and rotate ${left}`,
         redCloseChild: (
             right: BinaryDir,
-            rightChild: BinaryNode,
+            rightChild: RedBlackNode,
             left: BinaryDir
         ) =>
             `${right} child ${rightChild} is black, its ${left} child is red:\nSwitch colors and rotate child ${right}`,
     },
 } as const satisfies MessagesObject;
 
-export class RedBlack extends BST implements Collection {
+export class RedBlack extends BST<RedBlackNode> implements Collection {
     messages: MessagesObject = updateDefault(RedBlackMessages, BSTMessages);
 
-    newNode(text: string) {
-        return super.newNode(text).addClass("red");
+    newNode(text: string): RedBlackNode {
+        return this.Svg.put(
+            new RedBlackNode(text, this.getObjectSize(), this.getStrokeWidth())
+        ).init(...this.getNodeStart());
     }
 
     async insertOne(value: string) {
         const result = await super.insertOne(value);
-        if (result?.success && result.node) {
+        if (result.success) {
             await this.fixDoubleRed(result.node);
-            if (this.treeRoot && this.isRed(this.treeRoot)) {
+            if (this.treeRoot && this.treeRoot.isRed()) {
                 await this.pause("color.redRootBlack");
-                this.colorBlack(this.treeRoot);
+                this.treeRoot.colorBlack();
             }
         }
         return result;
     }
 
-    async fixDoubleRed(node: BinaryNode) {
+    async fixDoubleRed(node: RedBlackNode) {
         let parent = node.getParent();
         if (!parent) {
             return;
         }
-        if (!this.isRed(parent)) {
+        if (!parent.isRed()) {
             return;
         }
 
@@ -95,7 +106,7 @@ export class RedBlack extends BST implements Collection {
         }
 
         const pibling = parent.getSibling();
-        if (pibling && this.isRed(pibling)) {
+        if (pibling && pibling.isRed()) {
             node.setHighlight(true);
             parent.setHighlight(true);
             pibling.setHighlight(true);
@@ -103,9 +114,9 @@ export class RedBlack extends BST implements Collection {
             node.setHighlight(false);
             parent.setHighlight(false);
             pibling.setHighlight(false);
-            this.colorBlack(pibling);
-            this.colorBlack(parent);
-            this.colorRed(grandparent);
+            pibling.colorBlack();
+            parent.colorBlack();
+            grandparent.colorRed();
             await this.pause(undefined);
             await this.fixDoubleRed(grandparent);
             return;
@@ -123,7 +134,7 @@ export class RedBlack extends BST implements Collection {
             grandparent.setHighlight(false);
             node = (await this.singleRotate(rotate, parent)).getChild(
                 rotate
-            ) as BinaryNode;
+            ) as RedBlackNode;
         }
 
         side = node.isLeftChild() ? "left" : "right";
@@ -142,9 +153,9 @@ export class RedBlack extends BST implements Collection {
         node.setHighlight(false);
         parent.setHighlight(false);
         grandparent.setHighlight(false);
-        this.colorBlack(parent);
-        this.colorRed(grandparent);
-        await this.singleRotate(rotate, grandparent as BinaryNode);
+        parent.colorBlack();
+        grandparent.colorRed();
+        await this.singleRotate(rotate, grandparent);
     }
 
     async deleteOne(value: string | number) {
@@ -153,18 +164,18 @@ export class RedBlack extends BST implements Collection {
             if (result.parent && result.direction) {
                 await this.fixDeleteImbalance(result.parent, result.direction);
             }
-            if (this.treeRoot && this.isRed(this.treeRoot)) {
-                this.colorBlack(this.treeRoot);
+            if (this.treeRoot && this.treeRoot.isRed()) {
+                this.treeRoot.colorBlack();
                 await this.pause("color.rootBlack");
             }
         }
         return result;
     }
 
-    async fixDeleteImbalance(parent: BinaryNode, dir: BinaryDir) {
+    async fixDeleteImbalance(parent: RedBlackNode, dir: BinaryDir) {
         const child = parent.getChild(dir);
-        if (child && this.isRed(child)) {
-            this.colorBlack(child);
+        if (child && child.isRed()) {
+            child.colorBlack();
             child.setHighlight(true);
             await this.pause("color.nodeBlack", child);
             child.setHighlight(false);
@@ -173,7 +184,7 @@ export class RedBlack extends BST implements Collection {
         }
     }
 
-    async fixDoubleBlack(parent: BinaryNode, left: BinaryDir) {
+    async fixDoubleBlack(parent: RedBlackNode, left: BinaryDir) {
         // TODO: Fix variable names
         const right = left === "left" ? "right" : "left";
         const rightChild = parent.getChild(right);
@@ -190,7 +201,7 @@ export class RedBlack extends BST implements Collection {
         await this.pause("balancing.parentImbalanced", parent);
 
         // Sibling is red
-        if (this.isRed(rightChild)) {
+        if (rightChild.isRed()) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
             await this.pause(
@@ -203,15 +214,15 @@ export class RedBlack extends BST implements Collection {
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
-            this.colorBlack(rightChild);
-            this.colorRed(parent);
+            rightChild.colorBlack();
+            parent.colorRed();
             await this.singleRotate(left, parent);
             await this.fixDoubleBlack(parent, left);
             return;
         }
 
         // Sibling's distant child is red
-        if (this.isRed(rightGrandchild)) {
+        if (rightGrandchild.isRed()) {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(right, true);
             rightGrandchild.setHighlight(true);
@@ -220,19 +231,19 @@ export class RedBlack extends BST implements Collection {
             rightChild.setChildHighlight(right, false);
             rightGrandchild.setHighlight(false);
 
-            if (this.isBlack(parent)) {
-                this.colorBlack(rightChild);
+            if (parent.isBlack()) {
+                rightChild.colorBlack();
             } else {
-                this.colorRed(rightChild);
+                rightChild.colorRed();
             }
-            this.colorBlack(parent);
-            this.colorBlack(rightGrandchild);
+            parent.colorBlack();
+            rightGrandchild.colorBlack();
             await this.singleRotate(left, parent);
             return;
         }
 
         // Sibling's close child is red
-        if (this.isRed(leftGrandchild)) {
+        if (leftGrandchild.isRed()) {
             parent.setChildHighlight(right, true);
             rightChild.setChildHighlight(left, true);
             leftGrandchild.setHighlight(true);
@@ -241,23 +252,23 @@ export class RedBlack extends BST implements Collection {
             rightChild.setChildHighlight(left, false);
             leftGrandchild.setHighlight(false);
 
-            this.colorRed(rightChild);
-            this.colorBlack(leftGrandchild);
+            rightChild.colorRed();
+            leftGrandchild.colorBlack();
             await this.singleRotate(right, rightChild);
             await this.fixDoubleBlack(parent, left);
             return;
         }
 
         // Parent is red
-        if (this.isRed(parent)) {
+        if (parent.isRed()) {
             parent.setChildHighlight(right, true);
             rightChild.setHighlight(true);
             await this.pause("color.switch", parent, right, rightChild);
             parent.setChildHighlight(right, false);
             rightChild.setHighlight(false);
 
-            this.colorBlack(parent);
-            this.colorRed(rightChild);
+            parent.colorBlack();
+            rightChild.colorRed();
             return;
         }
 
@@ -268,31 +279,12 @@ export class RedBlack extends BST implements Collection {
         parent.setChildHighlight(right, false);
         rightChild.setHighlight(false);
 
-        this.colorRed(rightChild);
+        rightChild.colorRed();
         const grandparent = parent.getParent();
         if (grandparent) {
             const direction =
                 parent === grandparent.getLeft() ? "left" : "right";
             await this.fixDoubleBlack(grandparent, direction);
         }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // Red/black level
-
-    isBlack(node: BinaryNode) {
-        return !node || node.hasClass("black");
-    }
-
-    isRed(node: BinaryNode) {
-        return !this.isBlack(node);
-    }
-
-    colorBlack(node: BinaryNode) {
-        node.addClass("black");
-    }
-
-    colorRed(node: BinaryNode) {
-        node.removeClass("black");
     }
 }
