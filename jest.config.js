@@ -5,4 +5,7 @@ export default {
     transform: {
       "^.+\\.ts$": "ts-jest", // Use ts-jest to transform TypeScript files
     },
-  };
+    moduleNameMapper: {
+        "^~/(.*)$": "<rootDir>/src/$1"
+    }
+};
