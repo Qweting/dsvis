@@ -1,4 +1,3 @@
-import { PrioQueueAlgorithmControl } from "~/algorithm-controls/prioqueue-algorithm-controls";
 import { Engine, MessagesObject } from "~/engine";
 import { compare } from "~/helpers";
 import { BinaryDir, BinaryNode } from "~/objects/binary-node";
@@ -45,15 +44,9 @@ export class BinaryHeap extends Engine implements Prioqueue {
     treeNodes: Array<BinaryNode> | null = null;
     heapArray: DSArray | null = null;
     heapSize: number | null = null;
-    algorithmControls: PrioQueueAlgorithmControl;
 
     constructor(containerSelector: string) {
         super(containerSelector);
-
-        this.algorithmControls = new PrioQueueAlgorithmControl(
-            this.container,
-            this
-        );
     }
 
     initialise(initialValues: Array<string> | null = null) {
