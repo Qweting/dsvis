@@ -8,10 +8,6 @@ import { State } from "~/state";
 import { EngineAlgorithmControl } from "./algorithm-controls/engine-algorithm-controls";
 import { EngineGeneralControls } from "./general-controls/engine-general-controls";
 
-export type Resolve = (value: unknown) => void;
-export type Reject = (props: RejectReason) => void;
-export type RejectReason = { until: number; running?: boolean };
-
 export type SubmitFunction = (...args: (string | number)[]) => Promise<void>;
 
 export interface MessagesObject {
@@ -64,11 +60,11 @@ export class Engine {
     info: Info;
 
     getAnimationSpeed(): number {
-        return parseInt(this.generalControls.animationSpeed.value);
+        return parseInt(this.generalControls.animationSpeedSelect.value);
     }
 
     getObjectSize(): number {
-        return parseInt(this.generalControls.objectSize.value);
+        return parseInt(this.generalControls.objectSizeSelect.value);
     }
 
     getNodeSpacing(): number {
@@ -107,8 +103,8 @@ export class Engine {
 
         this.cookies = new Cookies(
             {
-                objectSize: this.generalControls.objectSize,
-                animationSpeed: this.generalControls.animationSpeed,
+                objectSize: this.generalControls.objectSizeSelect,
+                animationSpeed: this.generalControls.animationSpeedSelect,
             },
             this.debugger
         );
@@ -411,7 +407,7 @@ export class Engine {
 
             // Check if step has been executed previously (action.stepCount = 0 if first time and has a value otherwise)
             if (this.currentStep < action.stepCount) {
-                this.fastForward(resolve, reject);
+                this.generalControls.fastForward(resolve, reject);
                 return;
             }
 
@@ -427,7 +423,7 @@ export class Engine {
             if (this.generalControls.isRunning()) {
                 this.info.setStatus("running");
                 runnerTimer = setTimeout(
-                    () => this.stepForward(resolve, reject),
+                    () => this.generalControls.stepForward(resolve, reject),
                     this.getAnimationSpeed() * 1.1
                 );
             }
@@ -470,27 +466,6 @@ export class Engine {
         }
 
         return title;
-    }
-
-    stepForward(resolve: Resolve, reject: Reject): void {
-        this.currentStep++;
-        this.state.setAnimating(true);
-        resolve(undefined);
-    }
-
-    fastForward(resolve: Resolve, reject: Reject): void {
-        const action = this.actions[this.currentAction];
-        if (this.currentStep >= action.stepCount) {
-            action.stepCount = this.currentStep;
-        }
-        this.currentStep++;
-        this.state.setAnimating(false);
-        // If debugging is enabled then add a small delay
-        if (this.debugger.isEnabled()) {
-            setTimeout(resolve, 10);
-        } else {
-            resolve(undefined);
-        }
     }
 
     animate(elem: Element, animate = true) {

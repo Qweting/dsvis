@@ -10,14 +10,9 @@ import { BST } from "~/trees/BST";
 export class AVLQuiz extends BST<AVLNode> {
     mark: AVLNode | null = null;
     current: AVLNode | null = null;
-    algorithmControls: AVLQuizAlgorithmControl;
 
     constructor(containerSelector: string) {
         super(containerSelector);
-        this.algorithmControls = new AVLQuizAlgorithmControl(
-            this.container,
-            this
-        );
     }
 
     async resetAlgorithm() {
@@ -32,10 +27,7 @@ export class AVLQuiz extends BST<AVLNode> {
 
     isBST() {
         try {
-            this._validateBST(
-                this.treeRoot,
-                "" //Number.MIN_SAFE_INTEGER
-            );
+            this._validateBST(this.treeRoot, Number.MIN_SAFE_INTEGER);
         } catch (error) {
             if (error instanceof Error) {
                 console.warn(error.toString());
@@ -47,7 +39,7 @@ export class AVLQuiz extends BST<AVLNode> {
         return true;
     }
 
-    _validateBST(node: AVLNode | null, min: string) {
+    _validateBST(node: AVLNode | null, min: string | number): string | number {
         if (!node) {
             return min;
         }
@@ -194,7 +186,6 @@ export class AVLQuiz extends BST<AVLNode> {
         value = String(value); //TODO: Check if this can be handled better
         if (!this.current) {
             throw new Error("There is no current node");
-            return;
         }
         if (this.current.getChild(direction)) {
             await this.pause(`There is already a ${direction} child!`);
@@ -210,7 +201,7 @@ export class AVLQuiz extends BST<AVLNode> {
         this.resizeTree();
         await this.pause(undefined);
         child.setHighlight(false);
-        await this.setCurrent(child, false);
+        await this.setCurrent(child, true);
         await this.pause("Updating heights");
         this.updateHeights();
     }
@@ -240,7 +231,7 @@ export class AVLQuiz extends BST<AVLNode> {
             throw new Error("Can not rotate a node that is null");
         }
         const right = direction === "left" ? "right" : "left";
-        const child = this.current?.getChild(right);
+        const child = this.current.getChild(right);
         if (!child) {
             await this.pause(
                 `Cannot rotate ${direction}\nNode doesn't have a ${right} child!`
@@ -248,7 +239,7 @@ export class AVLQuiz extends BST<AVLNode> {
             return;
         }
         const node = await this.singleRotate(direction, this.current);
-        await this.setCurrent(node, false);
+        await this.setCurrent(node, true);
         await this.pause("Updating heights");
         this.updateHeights();
     }
@@ -263,7 +254,6 @@ export class AVLQuiz extends BST<AVLNode> {
         }
         const leftHeight = this.updateHeightsHelper(node.getLeft());
         const rightHeight = this.updateHeightsHelper(node.getRight());
-
         const height = 1 + Math.max(leftHeight, rightHeight);
         node.setHeight(height);
         const unbalanced = Math.abs(leftHeight - rightHeight) > 1;
@@ -275,6 +265,10 @@ export class AVLQuiz extends BST<AVLNode> {
 function initialiseAVLQuiz(containerID: string) {
     const AVLEngine = new AVLQuiz(containerID);
     AVLEngine.initialise(["K"]);
+    AVLEngine.algorithmControls = new AVLQuizAlgorithmControl(
+        AVLEngine.container,
+        AVLEngine
+    );
 }
 
 initialiseAVLQuiz("#avlquizContainer");

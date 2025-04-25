@@ -157,14 +157,7 @@ export class MergeSort extends Sort implements Sorter {
                     arr.getValue(1)
                 );
                 if (arr.getValue(0) > arr.getValue(1)) {
-                    await this.swap(
-                        arr,
-                        0,
-                        1,
-                        "sort.swap",
-                        arr.getValue(0),
-                        arr.getValue(1)
-                    );
+                    await this.swap(arr, 0, 1);
                     arr.setIndexHighlight(0, false);
                     arr.setIndexHighlight(1, false);
                 }

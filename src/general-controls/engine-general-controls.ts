@@ -1,6 +1,10 @@
 import { Debugger } from "~/debugger";
-import { Engine, Reject, Resolve } from "~/engine";
+import { Engine } from "~/engine";
 import { querySelector } from "~/helpers";
+
+export type Resolve = (value: unknown) => void;
+export type Reject = (props: RejectReason) => void;
+export type RejectReason = { until: number; running?: boolean };
 
 type ListenerType = "click" | "change";
 type AllowedElements =
@@ -27,13 +31,13 @@ type EventListenersMap = Map<
 
 export class EngineGeneralControls {
     generalControls: HTMLFieldSetElement;
-    fastBackward: HTMLButtonElement;
-    stepBackward: HTMLButtonElement;
+    fastBackwardButton: HTMLButtonElement;
+    stepBackwardButton: HTMLButtonElement;
     toggleRunnerButton: HTMLButtonElement;
-    stepForward: HTMLButtonElement;
-    fastForward: HTMLButtonElement;
-    animationSpeed: HTMLSelectElement;
-    objectSize: HTMLSelectElement;
+    stepForwardButton: HTMLButtonElement;
+    fastForwardButton: HTMLButtonElement;
+    animationSpeedSelect: HTMLSelectElement;
+    objectSizeSelect: HTMLSelectElement;
 
     engine: Engine;
     debugger: Debugger;
@@ -51,11 +55,11 @@ export class EngineGeneralControls {
             container
         );
 
-        this.fastBackward = querySelector<HTMLButtonElement>(
+        this.fastBackwardButton = querySelector<HTMLButtonElement>(
             "button.fastBackward",
             container
         );
-        this.stepBackward = querySelector<HTMLButtonElement>(
+        this.stepBackwardButton = querySelector<HTMLButtonElement>(
             "button.stepBackward",
             container
         );
@@ -63,26 +67,26 @@ export class EngineGeneralControls {
             "button.toggleRunner",
             container
         );
-        this.stepForward = querySelector<HTMLButtonElement>(
+        this.stepForwardButton = querySelector<HTMLButtonElement>(
             "button.stepForward",
             container
         );
-        this.fastForward = querySelector<HTMLButtonElement>(
+        this.fastForwardButton = querySelector<HTMLButtonElement>(
             "button.fastForward",
             container
         );
-        this.objectSize = querySelector<HTMLSelectElement>(
+        this.objectSizeSelect = querySelector<HTMLSelectElement>(
             "select.objectSize",
             container
         );
-        this.animationSpeed = querySelector<HTMLSelectElement>(
+        this.animationSpeedSelect = querySelector<HTMLSelectElement>(
             "select.animationSpeed",
             container
         );
 
         this.idleListeners.push(
             {
-                element: this.stepBackward,
+                element: this.stepBackwardButton,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -96,7 +100,7 @@ export class EngineGeneralControls {
                 },
             },
             {
-                element: this.fastBackward,
+                element: this.fastBackwardButton,
                 type: "click",
                 condition: () => this.engine.actions.length > 0,
                 handler: () => {
@@ -114,7 +118,7 @@ export class EngineGeneralControls {
                 },
             },
             {
-                element: this.objectSize,
+                element: this.objectSizeSelect,
                 type: "change",
                 condition: () => true,
                 handler: () => {
@@ -134,20 +138,20 @@ export class EngineGeneralControls {
 
         this.asyncListeners.push(
             {
-                element: this.stepForward,
+                element: this.stepForwardButton,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.setRunning(false);
-                    this.engine.stepForward(resolve, reject);
+                    this.stepForward(resolve, reject);
                 },
             },
             {
-                element: this.fastForward,
+                element: this.fastForwardButton,
                 type: "click",
                 handler: (resolve, reject) => {
                     this.engine.actions[this.engine.currentAction].stepCount =
                         Number.MAX_SAFE_INTEGER;
-                    this.engine.fastForward(resolve, reject);
+                    this.fastForward(resolve, reject);
                 },
             },
             {
@@ -156,7 +160,7 @@ export class EngineGeneralControls {
                 handler: (resolve, reject) => {
                     this.toggleRunner();
                     if (this.isRunning()) {
-                        this.engine.stepForward(resolve, reject);
+                        this.stepForward(resolve, reject);
                     } else {
                         this.engine.currentStep++;
                         resolve(undefined);
@@ -164,7 +168,7 @@ export class EngineGeneralControls {
                 },
             },
             {
-                element: this.stepBackward,
+                element: this.stepBackwardButton,
                 type: "click",
                 handler: (resolve, reject) =>
                     reject({
@@ -173,12 +177,12 @@ export class EngineGeneralControls {
                     }),
             },
             {
-                element: this.fastBackward,
+                element: this.fastBackwardButton,
                 type: "click",
                 handler: (resolve, reject) => reject({ until: 0 }),
             },
             {
-                element: this.objectSize,
+                element: this.objectSizeSelect,
                 type: "change",
                 handler: (resolve, reject) =>
                     reject({ until: this.engine.currentStep }),
@@ -265,5 +269,26 @@ export class EngineGeneralControls {
         this.addListener(this.toggleRunnerButton, "click", () =>
             this.toggleRunner()
         );
+    }
+
+    stepForward(resolve: Resolve, reject: Reject): void {
+        this.engine.currentStep++;
+        this.engine.state.setAnimating(true);
+        resolve(undefined);
+    }
+
+    fastForward(resolve: Resolve, reject: Reject): void {
+        const action = this.engine.actions[this.engine.currentAction];
+        if (this.engine.currentStep >= action.stepCount) {
+            action.stepCount = this.engine.currentStep;
+        }
+        this.engine.currentStep++;
+        this.engine.state.setAnimating(false);
+        // If debugging is enabled then add a small delay
+        if (this.debugger.isEnabled()) {
+            setTimeout(resolve, 10);
+        } else {
+            resolve(undefined);
+        }
     }
 }

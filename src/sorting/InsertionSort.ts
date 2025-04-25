@@ -68,14 +68,7 @@ export class InsertionSort extends Sort implements Sorter {
                 }
 
                 //If the current element is smaller then swap it with the left neighbour
-                await this.swap(
-                    this.sortArray,
-                    j,
-                    j - 1,
-                    "sort.swap",
-                    this.sortArray.getValue(j),
-                    this.sortArray.getValue(j - 1)
-                );
+                await this.swap(this.sortArray, j, j - 1);
 
                 this.sortArray.setIndexHighlight(j, false);
                 this.sortArray.setIndexHighlight(j - 1, false);

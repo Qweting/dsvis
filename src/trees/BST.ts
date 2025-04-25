@@ -1,5 +1,4 @@
 import { Text } from "@svgdotjs/svg.js";
-import { CollectionAlgorithmControl } from "~/algorithm-controls/collection-algorithm-controls";
 import { Collection } from "~/collections";
 import { Engine, MessagesObject } from "~/engine";
 import { BSTGeneralControls } from "~/general-controls/BST-general-controls";
@@ -64,15 +63,12 @@ export class BST<Node extends BinaryNode = BinaryNode>
     messages: MessagesObject = BSTMessages;
     initialValues: (string | number)[] = [];
     treeRoot: Node | null = null;
+    generalControls: BSTGeneralControls;
 
     constructor(containerSelector: string) {
         super(containerSelector);
 
         this.generalControls = new BSTGeneralControls(this.container, this);
-        this.algorithmControls = new CollectionAlgorithmControl(
-            this.container,
-            this
-        );
     }
 
     initialise(initialValues: string[] | null = null): this {

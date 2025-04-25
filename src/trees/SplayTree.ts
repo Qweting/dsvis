@@ -32,7 +32,7 @@ export class SplayTree extends BST implements Collection {
 
     async insertOne(value: string) {
         const result = await super.insertOne(value);
-        if (result?.node) {
+        if (result.node) {
             if (!result.success) {
                 await this.pause("insert.exists", result.node);
             }
@@ -52,43 +52,50 @@ export class SplayTree extends BST implements Collection {
         }
 
         await this.findOne(value);
-        if (compare(value, this.treeRoot?.getText()) !== 0) {
+        if (compare(value, this.treeRoot.getText()) !== 0) {
             await this.pause("delete.notexists", value);
             return { success: false, parent: null, direction: null };
         }
 
+        const rightNode = this.treeRoot.getRight();
+        const leftNode = this.treeRoot.getLeft();
+
         this.treeRoot.setHighlight(true);
         await this.pause("delete.root");
-        if (!(this.treeRoot.getLeft() && this.treeRoot.getRight())) {
+        if (!(leftNode && rightNode)) {
+            const newRoot = leftNode || rightNode;
             // TODO: Fix variable names
-            const left = this.treeRoot.getLeft() ? "left" : "right";
+            const left = newRoot
+                ? this.treeRoot.getLeft()
+                    ? "left"
+                    : "right"
+                : null;
             const right = left === "left" ? "right" : "left";
-            const child = (this.treeRoot.getLeft() ||
-                this.treeRoot.getRight()) as BinaryNode;
-            const newRoot = child.setHighlight(true);
-            await this.pause("delete.singleChild", right, left);
+
             this.treeRoot.remove();
+
+            if (newRoot) {
+                newRoot.setHighlight(true);
+                await this.pause("delete.singleChild", right, left);
+            }
             this.treeRoot = newRoot;
             this.resizeTree();
+
             await this.pause(undefined);
             return { success: true, parent: this.treeRoot, direction: left };
         }
 
-        const right = this.treeRoot.getRight();
-        const left = this.treeRoot.getLeft();
         this.treeRoot.remove();
         await this.pause("delete.splayLargest");
 
-        let largestLeft = left as BinaryNode; // TODO: Check if i can do this
+        let largestLeft = leftNode;
         largestLeft.setHighlight(true);
         await this.pause(undefined);
-        if (largestLeft.getRight()) {
-            while (largestLeft.getRight()) {
-                largestLeft.setHighlight(false);
-                largestLeft = largestLeft.getRight()!;
-                largestLeft.setHighlight(true);
-                await this.pause(undefined);
-            }
+        while (largestLeft.getRight()) {
+            largestLeft.setHighlight(false);
+            largestLeft = largestLeft.getRight()!;
+            largestLeft.setHighlight(true);
+            await this.pause(undefined);
         }
         largestLeft.setHighlight(false);
         await this.splayUp(largestLeft);
@@ -96,7 +103,7 @@ export class SplayTree extends BST implements Collection {
         largestLeft.setHighlight(true);
         await this.pause(undefined);
         largestLeft.setHighlight(false);
-        largestLeft.setRight(right as BinaryNode, this.getStrokeWidth());
+        largestLeft.setRight(rightNode, this.getStrokeWidth());
         this.treeRoot = largestLeft;
         this.resizeTree();
         await this.pause(undefined);
@@ -117,14 +124,15 @@ export class SplayTree extends BST implements Collection {
             const parent = node.getParent()!;
             const left = node.isLeftChild() ? "left" : "right";
             const right = left === "left" ? "right" : "left";
-            if (!parent.getParent()) {
+            const grandparent = parent.getParent();
+            if (!grandparent) {
                 node = await this.singleRotate(right, parent);
             } else if (parent.isChild(right)) {
-                node = await this.doubleRotate(left, parent.getParent()!);
+                node = await this.doubleRotate(left, grandparent);
                 // this.splayHelper(node);
             } else {
                 // node = await this.singleRotate(right, parent);
-                node = await this.zigZig(right, parent.getParent()!);
+                node = await this.zigZig(right, grandparent);
                 // this.splayHelper(node);
             }
         }
@@ -138,13 +146,14 @@ export class SplayTree extends BST implements Collection {
 
         const left = node.isLeftChild() ? "left" : "right";
         const right = left === "left" ? "right" : "left";
-        if (!parent?.getParent()) {
+        const grandparent = parent.getParent();
+        if (!grandparent) {
             this.singleRotate(left, parent);
         } else if (parent.isChild(right)) {
-            this.doubleRotate(left, parent.getParent()!);
+            this.doubleRotate(left, grandparent);
             this.splayHelper(node);
         } else {
-            this.zigZig(right, parent.getParent()!);
+            this.zigZig(right, grandparent);
             this.splayHelper(node);
         }
     }
