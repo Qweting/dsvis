@@ -115,7 +115,7 @@ export class MergeSort extends Sort implements Sorter {
                 this.mergeArrayList.push(mergeArray2);
 
                 //Compensation to keep the array within the viewbox
-                if (mergeArray1.getCX(0) < 0) {
+                if (mergeArray1.getCX(0) < this.$Svg.margin) {
                     this.compensate =
                         mergeArray1.getCX(0) * -1 + this.$Svg.margin;
 
