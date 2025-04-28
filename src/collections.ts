@@ -6,6 +6,7 @@ import { RedBlack } from "~/trees/RedBlack";
 import { SplayTree } from "~/trees/SplayTree";
 import { BTreeAlgorithmControl } from "./algorithm-controls/BTree-algorithm-controls";
 import { CollectionAlgorithmControl } from "./algorithm-controls/collection-algorithm-controls";
+import { LinkedListAnim } from "~/basic/LinkedListAnim";
 import { initialiseEngine, RecordOfEngines } from "./helpers";
 
 export interface Collection extends Engine {
@@ -15,12 +16,14 @@ export interface Collection extends Engine {
     print: SubmitFunction;
 }
 
+
 const COLLECTIONS_CLASSES = {
     BST: BST,
     AVL: AVL,
     RedBlack: RedBlack,
     SplayTree: SplayTree,
     BTree: BTree,
+    LinkedListAnim: LinkedListAnim,
 } as const satisfies RecordOfEngines<Collection>;
 
 const { engine, isBaseEngine } = initialiseEngine<Collection>(
