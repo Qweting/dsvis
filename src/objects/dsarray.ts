@@ -137,24 +137,6 @@ export class DSArray extends G {
         return this;
     }
 
-    setBlueHighlight(i: number, high: boolean) {
-        for (const obj of [this.$backgrounds[i], this.$values[i]]) {
-            if (high == null) {
-                obj.toggleClass("highlightblue");
-            } else if (high) {
-                obj.addClass("highlightblue");
-            } else {
-                obj.removeClass("highlightblue");
-            }
-        }
-        for (const bg of Object.values(this.$backgrounds)) {
-            if (!bg.hasClass("highlightblue")) {
-                bg.back();
-            }
-        }
-        return this;
-    }
-
     setIndexHighlight(i: number, high: boolean, color: string = "#C00") {
         if (this.$backgrounds[i]) {
             if (high) {

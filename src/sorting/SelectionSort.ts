@@ -37,8 +37,8 @@ export class SelectionSort extends Sort implements Sorter {
             // Find the index of the minimum element in the unsorted part of the array
             for (let j = i + 1; j < sortSize; j++) {
                 // Highlight the current element and the minimum element
-                this.sortArray.setBlueHighlight(j, true);
-                this.sortArray.setBlueHighlight(minIndex, true);
+                this.sortArray.setIndexHighlight(j, true);
+                this.sortArray.setIndexHighlight(minIndex, true, "Blue");
 
                 // Message: Compare the current element with the minimum element
                 await this.pause(
@@ -54,7 +54,8 @@ export class SelectionSort extends Sort implements Sorter {
                     ) < 0
                 ) {
                     // Unhighlight the previous minimum element
-                    this.sortArray.setBlueHighlight(minIndex, false);
+                    this.sortArray.setIndexHighlight(minIndex, false);
+                    this.sortArray.setIndexHighlight(j, true, "Blue");
 
                     minIndex = j;
 
@@ -65,20 +66,20 @@ export class SelectionSort extends Sort implements Sorter {
                     );
                 } else {
                     // Unhighlight the current element
-                    this.sortArray.setBlueHighlight(j, false);
+                    this.sortArray.setIndexHighlight(j, false);
                 }
                 // Unhighlight the minimum element and the current element
-                this.sortArray.setBlueHighlight(j, false);
-                this.sortArray.setBlueHighlight(minIndex, false);
+                this.sortArray.setIndexHighlight(j, false);
+                this.sortArray.setIndexHighlight(minIndex, false);
             }
             // If we found a new minimum, swap it with the current element
             if (minIndex !== i) {
                 await this.swap(this.sortArray, i, minIndex);
             }
             // Highlight the sorted part of the array
-            this.sortArray.setIndexHighlight(i, true);
+            this.sortArray.setIndexHighlight(i, true, "Green");
         }
-        this.sortArray.setIndexHighlight(sortSize - 1, true);
+        this.sortArray.setIndexHighlight(sortSize - 1, true, "Green");
         await this.pause("general.finished");
 
         // Reset the highlights
