@@ -59,18 +59,8 @@ export class LinkedListAnim extends Engine implements Collection {
     }
 
     initialise(initialValues: string[] | null = null): void {
-        /* this.initialValues = ["T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T",
-                              "T", "E", "S", "T"]; */
-        this.initialValues = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-        //this.initialValues = ["A", "B", "C"];
-        //this.initialValues = initialValues;
         super.initialise(); // super also calls resetAlgorithm
+        this.initialValues = initialValues;
     }
 
     // Reset the algorithm to its initial state
