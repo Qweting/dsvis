@@ -26,7 +26,9 @@ export default class LinkedList<T> {
         const node = new Node(element);
 
         // if the list is empty, then the new element should become the head
-        if (!this.head) {this.head = node;}
+        if (!this.head) {
+            this.head = node;
+        }
         // otherwise, traverse the list to find the last node and add the new element
         else {
             // to store current node
@@ -89,8 +91,7 @@ export default class LinkedList<T> {
         if (index < 0 || index >= this.size) {
             console.log("Invalid index.");
             return false;
-        }
-        else {
+        } else {
             // if the index is 0, then the head is updated to the next element
             if (index === 0) {
                 this.head = this.head!.next;
@@ -147,7 +148,9 @@ export default class LinkedList<T> {
 
             // iterate over the list to find the index
             while (current != null) {
-                if (counter === index) {return current.element;}
+                if (counter === index) {
+                    return current.element;
+                }
                 counter++;
                 current = current.next;
             }
@@ -163,7 +166,9 @@ export default class LinkedList<T> {
         // find the element
         while (current != null) {
             // compare the given element with current element, if they match then return the index
-            if (current.element === element) {return counter;}
+            if (current.element === element) {
+                return counter;
+            }
             counter++;
             current = current.next;
         }
@@ -191,7 +196,7 @@ export default class LinkedList<T> {
         let curr = this.head;
         let str = "";
         while (curr) {
-            str += curr.element + " ";
+            str += `${curr.element} `;
             curr = curr.next;
         }
         console.log(str);
