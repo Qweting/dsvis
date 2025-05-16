@@ -1,4 +1,3 @@
-import { CollectionAlgorithmControl } from "~/algorithm-controls/collection-algorithm-controls";
 import { Collection } from "~/collections";
 import { Engine, MessagesObject } from "~/engine";
 import LinkedList from "./LinkedList";
@@ -50,11 +49,6 @@ export class LinkedListAnim extends Engine implements Collection {
 
     constructor(containerSelector: string) {
         super(containerSelector);
-
-        this.algorithmControls = new CollectionAlgorithmControl(
-            this.container,
-            this
-        );
     }
 
     initialise(initialValues: string[] | null = null): void {
