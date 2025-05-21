@@ -1,14 +1,18 @@
-import tseslint from 'typescript-eslint';
+import {} from "eslint";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
+    { ignores: ["public/**/*"] },
     tseslint.configs.recommended,
     {
         rules: {
-            "eqeqeq": ["error", "smart"],
-
-            "no-constant-condition": ["error", {
-                checkLoops: false,
-            }],
+            eqeqeq: ["error", "smart"],
+            "no-constant-condition": [
+                "error",
+                {
+                    checkLoops: false,
+                },
+            ],
 
             "no-var": ["error"],
             "no-bitwise": ["error"],
@@ -24,10 +28,13 @@ export default tseslint.config(
             "no-unreachable-loop": ["error"],
 
             "no-use-before-define": "off",
-            "@typescript-eslint/no-use-before-define":["error", {
-                classes: false,
-                functions: false,
-            }],
+            "@typescript-eslint/no-use-before-define": [
+                "error",
+                {
+                    classes: false,
+                    functions: false,
+                },
+            ],
 
             "block-scoped-var": ["error"],
             "consistent-return": ["error"],
@@ -37,18 +44,21 @@ export default tseslint.config(
             "no-unused-vars": ["off"],
             "@typescript-eslint/no-unused-vars": ["off"],
 
-            "camelcase": ["warn"],
+            camelcase: ["warn"],
 
-            "prefer-const": ["warn", {
-                destructuring: "all",
-            }],
+            "prefer-const": [
+                "warn",
+                {
+                    destructuring: "all",
+                },
+            ],
 
             "default-param-last": ["warn"],
             "no-shadow": "off",
             "@typescript-eslint/no-shadow": "warn",
             "prefer-template": ["warn"],
 
-            "curly": ["error", "all"],
+            curly: ["error", "all"],
         },
-    },
+    }
 );
