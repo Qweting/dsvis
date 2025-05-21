@@ -1,4 +1,4 @@
-import { Engine, MessagesObject, NBSP } from "~/engine";
+import { Engine, MessagesObject } from "~/engine";
 import { DSArray } from "~/objects/dsarray";
 import { TextCircle } from "~/objects/text-circle";
 import { Sorter } from "~/sorting";
@@ -27,11 +27,7 @@ export class Sort extends Engine implements Sorter {
 
     constructor(containerSelector: string) {
         super(containerSelector);
-
-        const [xRoot, yRoot] = this.getTreeRoot();
-        this.sortArray = this.Svg.put(
-            new DSArray(1, this.getObjectSize())
-        ).init(1, xRoot, yRoot + this.$Svg.margin * 4);
+        this.sortArray = new DSArray(0, this.getObjectSize()); // Only added to make sure that sortArray never is null
     }
 
     initialise(initialValues = []) {
@@ -42,9 +38,11 @@ export class Sort extends Engine implements Sorter {
     async resetAlgorithm() {
         await super.resetAlgorithm();
         this.indexLength = 0;
+        const [xRoot, yRoot] = this.getTreeRoot();
+        this.sortArray = this.Svg.put(
+            new DSArray(1, this.getObjectSize())
+        ).init(1, xRoot, yRoot + this.$Svg.margin * 4);
         this.Svg.put(this.sortArray);
-        this.sortArray.setSize(1);
-        this.sortArray.setValue(0, NBSP);
         this.sortArray.setDisabled(0, false);
         if (this.initialValues) {
             this.state.runWhileResetting(
