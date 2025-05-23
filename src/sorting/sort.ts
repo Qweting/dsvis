@@ -23,6 +23,7 @@ export class Sort extends Engine implements Sorter {
     compensate: number = 0;
     sortArray: DSArray;
     indexLength: number = 0;
+    baseSize: number = 28;
     messages: MessagesObject = SortMessages;
 
     constructor(containerSelector: string) {

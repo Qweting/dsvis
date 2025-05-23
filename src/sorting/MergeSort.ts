@@ -79,7 +79,7 @@ export class MergeSort extends Sort implements Sorter {
                     .cx(CX - (arr.engine().getObjectSize() * 2) / iteration)
                     .cy(
                         yCenter +
-                            (baseY * iteration * this.getObjectSize()) / 28 +
+                            (baseY * iteration * this.getObjectSize()) / this.baseSize +
                             baseY
                     );
                 await this.pause(
@@ -101,7 +101,7 @@ export class MergeSort extends Sort implements Sorter {
                     )
                     .cy(
                         yCenter +
-                            (baseY * iteration * this.getObjectSize()) / 28 +
+                            (baseY * iteration * this.getObjectSize()) / this.baseSize +
                             baseY
                     );
                 await this.pause(
