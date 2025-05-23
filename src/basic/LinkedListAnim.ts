@@ -257,12 +257,9 @@ export class LinkedListAnim extends Engine implements Collection {
 
         for (const nodeCon of right) {
             const node = nodeCon[0];
-            const connection = nodeCon[1] as LinkedConnection;
+            const connection = nodeCon[1];
 
             const coords = this.newNodeCoords();
-            if (node.value === "J") {
-                console.log("coords: ", coords[0], coords[1], coords[2]);
-            }
             node.mirror(coords[2]);
 
             // Move the node and link to the correct position with animation
